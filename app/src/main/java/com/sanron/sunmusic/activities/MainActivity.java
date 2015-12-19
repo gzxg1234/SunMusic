@@ -1,19 +1,15 @@
 package com.sanron.sunmusic.activities;
 
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.Toast;
 
 import com.sanron.sunmusic.R;
-import com.sanron.sunmusic.fragment.BaseFragment;
-import com.sanron.sunmusic.fragment.MySongFrag;
+import com.sanron.sunmusic.fragments.MySongFrag.MySongFrag;
 
 public class MainActivity extends BaseActivity {
 
@@ -21,7 +17,8 @@ public class MainActivity extends BaseActivity {
     DrawerLayout drawerLayout;
     FragmentManager fm;
 
-    public static final String TAG_MYSONG = "MySong";
+    public static final String TAG_MYSONG = "MyMusic";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +50,7 @@ public class MainActivity extends BaseActivity {
 
     private void setCurrentFragment(String tag){
         Fragment baseFragment = null;
+
         if(TAG_MYSONG.equals(tag)){
             baseFragment = MySongFrag.newInstance();
             toolbar.setTitle("我的音乐");

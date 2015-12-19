@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    xmlns:tool="http://schemas.android.com/tools">
+
+
+    <ImageButton
+        android:id="@+id/btn_song_action"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@android:color/transparent"
+        android:src="@mipmap/ic_more_vert_black_24dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true" />
+    <TextView
+        android:id="@+id/tv_display_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/btn_song_action"
+        android:textSize="16sp"
+        tool:text="What do you mean"/>
+</RelativeLayout>

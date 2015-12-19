@@ -1,4 +1,4 @@
-package com.sanron.sunmusic.fragment;
+package com.sanron.sunmusic.fragments;
 
 import android.support.v4.app.Fragment;
 import android.view.View;
