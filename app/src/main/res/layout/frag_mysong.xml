@@ -17,7 +17,8 @@
         app:tabGravity="center"
         app:tabTextColor="@color/textColorSecondary"
         app:tabSelectedTextColor="@color/textColorPrimary"
-        app:tabIndicatorColor="@color/colorAccent">
+        app:tabIndicatorColor="@color/colorAccent"
+        app:tabBackground="@color/colorPrimary">
     </android.support.design.widget.TabLayout>
 
     <android.support.v4.view.ViewPager

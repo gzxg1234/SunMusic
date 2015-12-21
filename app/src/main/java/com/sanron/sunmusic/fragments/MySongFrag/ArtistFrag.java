@@ -24,4 +24,5 @@ public class ArtistFrag extends BaseFragment {
     public static ArtistFrag newInstance(){
         return new ArtistFrag();
     }
+
 }

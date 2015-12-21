@@ -1,6 +1,5 @@
 package com.sanron.sunmusic.fragments.MySongFrag;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -20,19 +19,20 @@ import com.sanron.sunmusic.fragments.BaseFragment;
  */
 public class MySongFrag extends BaseFragment {
 
-    TabLayout tabLayout;
-    ViewPager viewPager;
-    SongPagerAdapter pagerAdapter;
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
+    private SongPagerAdapter pagerAdapter;
 
-    public static MySongFrag newInstance(){
+    public static final String TAG = "MySongFrag";
+
+    public static MySongFrag newInstance() {
         return new MySongFrag();
     }
-
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        contentView = LayoutInflater.from(getContext()).inflate(R.layout.frag_mysong,null);
+        contentView = inflater.inflate(R.layout.frag_mysong, null);
 
         viewPager = $(R.id.viewpager);
         pagerAdapter = new SongPagerAdapter(getChildFragmentManager());
@@ -44,11 +44,11 @@ public class MySongFrag extends BaseFragment {
     }
 
 
-    public static class SongPagerAdapter extends FragmentPagerAdapter{
+    public static class SongPagerAdapter extends FragmentPagerAdapter {
 
-        public static final String[] TITLES = new String[]{"播放列表","最近播放","本地音乐","艺术家","专辑"};
+        public static final String[] TITLES = new String[]{"播放列表", "最近播放", "本地音乐", "艺术家", "专辑"};
 
-        public SongPagerAdapter(FragmentManager fragmentManager){
+        public SongPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
         }
 
@@ -65,12 +65,22 @@ public class MySongFrag extends BaseFragment {
         @Override
         public Fragment getItem(int position) {
             Fragment fragment = null;
-            switch (position){
-                case 0:fragment = PlayListFrag.newInstance();break;
-                case 1:fragment = RecentPlayFrag.newInstance();break;
-                case 2:fragment = LocalSongFrag.newInstance();break;
-                case 3:fragment = ArtistFrag.newInstance();break;
-                case 4:fragment = AlbumFrag.newInstance();break;
+            switch (position) {
+                case 0:
+                    fragment = PlayListFrag.newInstance();
+                    break;
+                case 1:
+                    fragment = RecentPlayFrag.newInstance();
+                    break;
+                case 2:
+                    fragment = LocalSongFrag.newInstance();
+                    break;
+                case 3:
+                    fragment = ArtistFrag.newInstance();
+                    break;
+                case 4:
+                    fragment = AlbumFrag.newInstance();
+                    break;
             }
             return fragment;
         }

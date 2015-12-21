@@ -1,62 +1,121 @@
 package com.sanron.sunmusic.activities;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.content.WakefulBroadcastReceiver;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.fragments.MySongFrag.MySongFrag;
+import com.sanron.sunmusic.fragments.MySongFrag.PlayListFrag;
+import com.sanron.sunmusic.fragments.MySongFrag.PlayListSongsFrag;
+import com.sanron.sunmusic.model.PlayList;
+import com.sanron.sunmusic.utils.MyLog;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 public class MainActivity extends BaseActivity {
 
-    Toolbar toolbar;
-    DrawerLayout drawerLayout;
-    FragmentManager fm;
+    private Toolbar toolbar;
+    private DrawerLayout drawerLayout;
+    private FragmentManager fm;
+    private MaterialMenuDrawable materialMenu;
+    private String curFragTag;
 
-    public static final String TAG_MYSONG = "MyMusic";
+    public static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
         setContentView(R.layout.activity_main);
         initView();
     }
 
-    private void initView(){
-
+    private void initView() {
         drawerLayout = $(R.id.drawerlayout);
-
         toolbar = $(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(drawerLayout.isDrawerOpen(GravityCompat.START)){
-                    drawerLayout.closeDrawer(GravityCompat.START);
-                }else{
-                    drawerLayout.openDrawer(GravityCompat.START);
+                if(MySongFrag.TAG.equals(curFragTag)) {
+                    if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                        drawerLayout.closeDrawer(GravityCompat.START);
+                    } else {
+                        drawerLayout.openDrawer(GravityCompat.START);
+                    }
+                }else if(PlayListSongsFrag.TAG.endsWith(curFragTag)){
+                    fm.popBackStackImmediate();
+                    curFragTag = MySongFrag.TAG;
+                    toolbar.setTitle("我的音乐");
+                    materialMenu.animateIconState(MaterialMenuDrawable.IconState.BURGER);
                 }
             }
         });
+        materialMenu = new MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN);
+        toolbar.setNavigationIcon(materialMenu);
 
         fm = getSupportFragmentManager();
-        setCurrentFragment(TAG_MYSONG);
+        setCurrentFragment(MySongFrag.TAG);
+
     }
 
+    public void onEventMainThread(PlayListFrag.ClickListEvent clickListEvent){
+        PlayList playList = clickListEvent.getPlayList();
+        fm.beginTransaction()
+                .setCustomAnimations(R.anim.frag_slide_in,
+                        R.anim.frag_slide_out,
+                        R.anim.frag_slide_in,
+                        R.anim.frag_slide_out)
+                .add(R.id.fragment_container, PlayListSongsFrag.newInstance(playList),PlayListSongsFrag.TAG)
+                .addToBackStack("showlistsongs")
+                .commit();
+        curFragTag = PlayListSongsFrag.TAG;
+        toolbar.setTitle(playList.getName());
+        materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
+    }
 
-    private void setCurrentFragment(String tag){
-        Fragment baseFragment = null;
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if(PlayListSongsFrag.TAG.equals(curFragTag)){
+            curFragTag = MySongFrag.TAG;
+            toolbar.setTitle("我的音乐");
+            materialMenu.animateIconState(MaterialMenuDrawable.IconState.BURGER);
+        }
+    }
 
-        if(TAG_MYSONG.equals(tag)){
-            baseFragment = MySongFrag.newInstance();
+    private void setCurrentFragment(String tag) {
+        Fragment fragment = null;
+        if (MySongFrag.TAG.equals(tag)) {
+            fragment = MySongFrag.newInstance();
             toolbar.setTitle("我的音乐");
         }
         fm.beginTransaction()
-                .replace(R.id.fragment_container,baseFragment,tag)
+                .replace(R.id.fragment_container, fragment,tag)
                 .commit();
+        curFragTag = tag;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 }

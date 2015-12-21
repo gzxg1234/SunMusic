@@ -3,7 +3,8 @@ package com.sanron.sunmusic.db;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.StringBuilderPrinter;
+
+import com.sanron.sunmusic.model.PlayList;
 
 /**
  * Created by Administrator on 2015/12/20.
@@ -11,7 +12,7 @@ import android.util.StringBuilderPrinter;
 public class DBHelper extends SQLiteOpenHelper {
 
 
-    public static final String DBNAME = "SunMusicDB";
+    public static final String DBNAME = "SunMusicDB.db";
     public static final int DBVERSION = 1;
 
 
@@ -19,7 +20,7 @@ public class DBHelper extends SQLiteOpenHelper {
     /**
      * 音乐
      */
-    public static final String SONG_TABLE = "songinfo";
+    public static final String TABLE_SONG = "songinfo";
     public static final String SONG_TYPE = "type";
     public static final String SONG_DISPLAYNAME = "display_name";
     public static final String SONG_TITLE = "title";
@@ -28,23 +29,29 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String SONG_DURATION = "duration";
     public static final String SONG_PATH = "path";
     public static final String SONG_SONGID = "songid";
-    public static final String SONG_PINYIN = "pinyin";
+    public static final String SONG_LETTER = "title_letter";
 
+    /**
+     * 歌词
+     */
+    public static final String TABLE_LYRIC = "lyric";
+    public static final String LYRIC_TITLE = "title";
+    public static final String LYRIC_ARTIST = "artist";
+    public static final String LYRIC_PATH = "path";
 
     /**
      * 播放列表
      */
-    public static final String PLAYLIST_TABLE = "playlist";
+    public static final String TABLE_PLAYLIST = "playlist";
     public static final String PLAYLIST_NAME = "name";
     public static final String PLAYLIST_TYPE = "type";
-    public static final String PLAYLIST_COUNT = "song_num";
-    public static final String PLAYLIST_CREATE_TIME = "create_time";
+    public static final String PLAYLIST_NUM = "song_num";
 
 
     /**
      * 播放列表和音乐关系表
      */
-    public static final String LISTSONGS_TABLE = "playlist_songs";
+    public static final String TABLE_LISTSONGS = "playlist_songs";
     public static final String LISTSONGS_SONGID = "song_id";
     public static final String LISTSONGS_LISTID = "list_id";
     public static final String LISTSONGS_ADDTIME = "add_time";
@@ -57,14 +64,14 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        createTableSongInfo(db);
+        createTablePlayList(db);
+        createTableLyric(db);
+        createTableListSongs(db);
+    }
 
-        String songInfoSql;
-        String playListSql;
-        String listSongsSql;
-
-        String[] columns;
-        String[] columnTypes;
-        columns = new String[]{
+    public void createTableSongInfo(SQLiteDatabase db){
+        String[] columns = new String[]{
                 SONG_TYPE,
                 SONG_DISPLAYNAME,
                 SONG_TITLE,
@@ -73,35 +80,64 @@ public class DBHelper extends SQLiteOpenHelper {
                 SONG_DURATION,
                 SONG_PATH,
                 SONG_SONGID,
-                SONG_PINYIN
+                SONG_LETTER
         };
-        columnTypes = new String[]{"INTEGER", "TEXT", "TEXT", "TEXT", "TEXT", "INTEGER",
-                "TEXT", "INTEGER", "TEXT"};
-        songInfoSql = buildCreateSql(SONG_TABLE, columns, columnTypes);
+        String[] columnTypes = new String[]{"integer", "text", "text", "text", "text", "integer",
+                "text", "text", "text"};
+        String sql = buildCreateSql(TABLE_SONG, columns, columnTypes);
+        db.execSQL(sql);
+    }
 
-
-        columns = new String[]{
+    public void createTablePlayList(SQLiteDatabase db){
+        String[] columns =  new String[]{
                 PLAYLIST_TYPE,
                 PLAYLIST_NAME,
-                PLAYLIST_COUNT,
-                PLAYLIST_CREATE_TIME,
+                PLAYLIST_NUM,
         };
-        columnTypes = new String[]{"INTEGER", "TEXT", "INTEGER", "INTEGER"};
-        playListSql = buildCreateSql(PLAYLIST_TABLE, columns, columnTypes);
+        String[] columnTypes = new String[]{"integer", "text", "integer default 0"};
+        String sql = buildCreateSql(TABLE_PLAYLIST, columns, columnTypes);
+        db.execSQL(sql);
 
+        //创建默认列表，本地音乐，最近播放三个列表
+        sql = "insert into "+TABLE_PLAYLIST+"("+PLAYLIST_TYPE+","+PLAYLIST_NAME+") " +
+                "values("+PlayList.TYPE_DEFAULT+",'默认列表')";
+        db.execSQL(sql);
+        sql = "insert into "+TABLE_PLAYLIST+"("+PLAYLIST_TYPE+","+PLAYLIST_NAME+") " +
+                "values("+PlayList.TYPE_RECENT+",'最近播放')";
+        db.execSQL(sql);
+    }
 
-        columns = new String[]{
+    public void createTableListSongs(SQLiteDatabase db){
+        String[] columns =  new String[]{
                 LISTSONGS_ADDTIME,
                 LISTSONGS_LISTID,
                 LISTSONGS_SONGID,
         };
-        columnTypes = new String[]{"INTEGER", "INTEGER", "INTEGER", "INTEGER"};
-        listSongsSql = buildCreateSql(LISTSONGS_TABLE, columns, columnTypes);
+        String[] columnTypes = new String[]{"integer", "integer", "integer"};
+        String sql = buildCreateSql(TABLE_LISTSONGS, columns, columnTypes);
+        db.execSQL(sql);
 
+    }
 
-        db.execSQL(songInfoSql);
-        db.execSQL(playListSql);
-        db.execSQL(listSongsSql);
+    public void createTableLyric(SQLiteDatabase db){
+        String[] columns =  new String[]{
+                LYRIC_ARTIST,
+                LYRIC_TITLE,
+                LYRIC_PATH,
+        };
+        String[] columnTypes = new String[]{"text", "text", "text", "text"};
+        String sql = buildCreateSql(TABLE_LYRIC, columns, columnTypes);
+        db.execSQL(sql);
+    }
+
+    private String buildCreateSql(String table, String[] columnNames, String[] type) {
+        StringBuilder sb = new StringBuilder("create table if not exists ").append(table).append("(");
+        sb.append(ID).append(" integer primary key autoincrement,");
+        for (int i = 0; i < columnNames.length; i++) {
+            sb.append(columnNames[i]).append(" ").append(type[i]).append(",");
+        }
+        sb.replace(sb.length() - 1, sb.length(), ")");
+        return sb.toString();
     }
 
     @Override
@@ -109,13 +145,5 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public String buildCreateSql(String table, String[] columnNames, String[] type) {
-        StringBuilder sb = new StringBuilder("create table if not exists ").append(table).append("(");
-        sb.append("_id integer primary key autoincrement,");
-        for (int i = 0; i < columnNames.length; i++) {
-            sb.append(columnNames[i]).append(" ").append(type[i]).append(",");
-        }
-        sb.replace(sb.length() - 1, sb.length(), ")");
-        return sb.toString();
-    }
+
 }

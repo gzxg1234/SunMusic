@@ -8,7 +8,7 @@ public class SongInfo {
     public static final int TYPE_LOCAL = 1; //本地
     public static final int TYPE_WEB = 2;   //网络
 
-    private int id = 0;
+    private long id = 0;
 
     /**
      * 类型
@@ -46,9 +46,9 @@ public class SongInfo {
     private int duration = 0;
 
     /**
-     * 拼音
+     * 首字母
      */
-    private String pinyin;
+    private String letter;
 
     /**
      * 歌曲id(网络歌曲)
@@ -56,11 +56,11 @@ public class SongInfo {
     private String songId;
 
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -120,12 +120,12 @@ public class SongInfo {
         this.duration = duration;
     }
 
-    public String getPinyin() {
-        return pinyin;
+    public String getLetter() {
+        return letter;
     }
 
-    public void setPinyin(String pinyin) {
-        this.pinyin = pinyin;
+    public void setLetter(String letter) {
+        this.letter = letter;
     }
 
     public String getSongId() {

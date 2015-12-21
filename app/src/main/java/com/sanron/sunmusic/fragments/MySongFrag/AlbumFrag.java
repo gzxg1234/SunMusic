@@ -12,7 +12,7 @@ import com.sanron.sunmusic.fragments.BaseFragment;
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class AlbumFrag extends BaseFragment{
+public class AlbumFrag extends BaseFragment {
 
     @Nullable
     @Override
@@ -24,4 +24,5 @@ public class AlbumFrag extends BaseFragment{
     public static AlbumFrag newInstance(){
         return new AlbumFrag();
     }
+
 }

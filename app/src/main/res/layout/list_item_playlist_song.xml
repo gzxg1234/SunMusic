@@ -9,14 +9,15 @@
     xmlns:tool="http://schemas.android.com/tools">
 
 
-    <ImageView
+    <ImageButton
         android:id="@+id/btn_add_queue"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_alignParentLeft="true"
         android:layout_marginRight="8dp"
-        android:scaleType="fitXY"
-        android:src="@mipmap/ic_music_head_48dp"/>
+        android:scaleType="center"
+        android:background="?android:attr/selectableItemBackground"
+        android:src="@mipmap/ic_queue_black_24dp"/>
 
     <ImageButton
         android:id="@+id/btn_song_action"

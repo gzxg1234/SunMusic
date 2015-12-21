@@ -13,36 +13,43 @@ import java.util.List;
 /**
  * Created by Administrator on 2015/12/20.
  */
-public class SongInfoDao {
-
-    private DBHelper mDbHelper;
+public class SongInfoDao  extends BaseDAO{
 
     public SongInfoDao(Context context) {
-        mDbHelper = new DBHelper(context);
+        super(context);
     }
 
+    public SQLiteDatabase getDatabase(){
+        if(mDatabase==null){
+            mDatabase = mDbHelper.getWritableDatabase();
+        }
+        return mDatabase;
+    }
     /**
      * 添加
      */
     public long add(SongInfo songInfo) {
-        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        SQLiteDatabase database = getDatabase();
         ContentValues values = toContentValues(songInfo);
-        long id = database.insert(DBHelper.SONG_TABLE, null, values);
-        database.close();
+        long id = database.insert(DBHelper.TABLE_SONG, null, values);
+        if (id != -1) {
+            songInfo.setId(id);
+        }
         return id;
     }
 
     public long add(List<SongInfo> songInfos) {
-        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        SQLiteDatabase database = getDatabase();
         long num = 0;
         for (int i = 0; i < songInfos.size(); i++) {
             SongInfo songInfo = songInfos.get(i);
             ContentValues values = toContentValues(songInfo);
-            if (database.insert(DBHelper.SONG_TABLE, null, values) != -1) {
+            long id = database.insert(DBHelper.TABLE_SONG, null, values);
+            if (id != -1) {
                 num++;
+                songInfo.setId(id);
             }
         }
-        database.close();
         return num;
     }
 
@@ -50,10 +57,9 @@ public class SongInfoDao {
      * 删除本地歌曲
      */
     public long deleteLocal() {
-        SQLiteDatabase database = mDbHelper.getWritableDatabase();
-        int num = database.delete(DBHelper.SONG_TABLE, "type=?",
+        SQLiteDatabase database = getDatabase();
+        int num = database.delete(DBHelper.TABLE_SONG, "type=?",
                 new String[]{String.valueOf(SongInfo.TYPE_LOCAL)});
-        database.close();
         return num;
     }
 
@@ -61,32 +67,37 @@ public class SongInfoDao {
      * 所有歌曲
      */
     public List<SongInfo> queryAll() {
-        SQLiteDatabase database = mDbHelper.getWritableDatabase();
-        List<SongInfo> songInfos = new ArrayList<>();
-        Cursor cursor = database.query(DBHelper.SONG_TABLE, null, null, null, null, null, null);
-        while (cursor.moveToNext()) {
-            songInfos.add(toSongInfo(cursor));
-        }
-        database.close();
+        List<SongInfo> songInfos = query(null,null);
         return songInfos;
     }
 
     public List<SongInfo> queryByType(int type) {
-        SQLiteDatabase database = mDbHelper.getWritableDatabase();
-        List<SongInfo> songInfos = new ArrayList<>();
-        Cursor cursor = database.query(DBHelper.SONG_TABLE,
-                null,
-                DBHelper.SONG_TYPE + "=?",
-                new String[]{String.valueOf(SongInfo.TYPE_LOCAL)},
-                null, null, null);
-
-        while (cursor.moveToNext()) {
-            songInfos.add(toSongInfo(cursor));
-        }
-        database.close();
+        List<SongInfo> songInfos = query(DBHelper.SONG_TYPE + "=?",new String[]{String.valueOf(SongInfo.TYPE_LOCAL)});
         return songInfos;
     }
 
+    public SongInfo queryById(long id){
+        List<SongInfo> songInfos = query(DBHelper.ID + "=?",new String[]{String.valueOf(id)});
+        if(songInfos.size()>0){
+            return songInfos.get(0);
+        }
+        return null;
+    }
+
+    public List<SongInfo> query(String selection,String[] selectionArgs){
+        SQLiteDatabase database = getDatabase();
+        List<SongInfo> songInfos = new ArrayList<>();
+        Cursor cursor = database.query(DBHelper.TABLE_SONG,
+                null,
+                selection,
+                selectionArgs,
+                null, null, null);
+        while (cursor.moveToNext()) {
+            songInfos.add(toSongInfo(cursor));
+        }
+        cursor.close();
+        return songInfos;
+    }
 
     private SongInfo toSongInfo(Cursor cursor) {
         SongInfo songInfo = new SongInfo();
@@ -98,22 +109,24 @@ public class SongInfoDao {
         songInfo.setAlbum(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_ALBUM)));
         songInfo.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_ARTIST)));
         songInfo.setSongId(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_SONGID)));
-        songInfo.setPinyin(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_PINYIN)));
+        songInfo.setLetter(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_LETTER)));
         songInfo.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_DISPLAYNAME)));
         return songInfo;
     }
 
     private ContentValues toContentValues(SongInfo songInfo) {
         ContentValues values = new ContentValues();
-        values.put("type", songInfo.getType());
-        values.put("display_name", songInfo.getDisplayName());
-        values.put("title", songInfo.getTitle());
-        values.put("album", songInfo.getAlbum());
-        values.put("artist", songInfo.getArtist());
-        values.put("duration", songInfo.getDuration());
-        values.put("path", songInfo.getPath());
-        values.put("pinyin", songInfo.getPinyin());
-        values.put("songid", songInfo.getSongId());
+        values.put(DBHelper.SONG_TYPE, songInfo.getType());
+        values.put(DBHelper.SONG_DISPLAYNAME, songInfo.getDisplayName());
+        values.put(DBHelper.SONG_TITLE, songInfo.getTitle());
+        values.put(DBHelper.SONG_ALBUM, songInfo.getAlbum());
+        values.put(DBHelper.SONG_ARTIST, songInfo.getArtist());
+        values.put(DBHelper.SONG_DURATION, songInfo.getDuration());
+        values.put(DBHelper.SONG_PATH, songInfo.getPath());
+        values.put(DBHelper.SONG_LETTER, songInfo.getLetter());
+        values.put(DBHelper.SONG_SONGID, songInfo.getSongId());
         return values;
     }
+
+
 }

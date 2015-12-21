@@ -6,8 +6,9 @@
     android:padding="8dp">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/list_localsong"
+        android:id="@+id/list_playlist"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:overScrollMode="never">
     </android.support.v7.widget.RecyclerView>
 </LinearLayout>

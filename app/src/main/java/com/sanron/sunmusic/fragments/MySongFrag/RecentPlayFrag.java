@@ -24,4 +24,5 @@ public class RecentPlayFrag extends BaseFragment {
     public static RecentPlayFrag newInstance(){
         return new RecentPlayFrag();
     }
+
 }

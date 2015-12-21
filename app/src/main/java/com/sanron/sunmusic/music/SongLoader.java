@@ -17,40 +17,10 @@ import java.util.List;
  */
 public class SongLoader {
 
-   /* public static List<File> load() {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            File externalDir = Environment.getExternalStorageDirectory();
-            return load(externalDir);
-        }
-        return null;
-    }
-
-    public static List<File> load(File dir){
-        List<File> files = new ArrayList<>();
-        searchMusic(files, dir);
-        return files;
-    }
-
-    private static void searchMusic(final List<File> data, File dir) {
-        File[] files = dir.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            File file = files[i];
-            if (file.isDirectory() && file.getPath().indexOf("/.") == -1) {
-                searchMusic(data, file);
-            } else {
-                String path = file.getAbsolutePath();
-                if (path.endsWith(".mp3")
-                        || path.endsWith(".aac")
-                        || path.endsWith(".flac")) {
-                    data.add(file);
-                }
-            }
-        }
-    }*/
-
     public static final Uri URI = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
 
     public static final String[] PROJECTION = new String[]{
+            MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.DISPLAY_NAME,
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ALBUM,
@@ -72,7 +42,7 @@ public class SongLoader {
             SongInfo songInfo = toSongInfo(cursor);
             songInfos.add(songInfo);
         }
-
+        cursor.close();
         return songInfos;
     }
 
@@ -80,14 +50,24 @@ public class SongLoader {
     private static SongInfo toSongInfo(Cursor cursor) {
         SongInfo songInfo = new SongInfo();
 
+        String id = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
         String displayName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
+        int index = displayName.lastIndexOf(".");
+        if (index != -1) {
+            displayName = displayName.substring(0, index);
+        }
         String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
         String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
         String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
         String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
         int duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
-        String pinyin = PinyinHelper.convertToPinyinString(displayName, "", PinyinFormat.WITHOUT_TONE);
+        String letter = "";
+        if (displayName.length() > 0) {
+            letter = PinyinHelper.convertToPinyinString(displayName.substring(0, 1), "", PinyinFormat.WITHOUT_TONE);
+            letter = letter.substring(0,1);
+        }
 
+        songInfo.setSongId(id);
         songInfo.setAlbum(album);
         songInfo.setArtist(artist);
         songInfo.setDisplayName(displayName);
@@ -95,7 +75,7 @@ public class SongLoader {
         songInfo.setPath(path);
         songInfo.setTitle(title);
         songInfo.setType(SongInfo.TYPE_LOCAL);
-        songInfo.setPinyin(pinyin);
+        songInfo.setLetter(letter);
         return songInfo;
     }
 }
