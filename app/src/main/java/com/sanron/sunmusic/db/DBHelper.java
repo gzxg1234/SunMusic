@@ -59,7 +59,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public DBHelper(Context context) {
         super(context, DBNAME, null, DBVERSION);
-
     }
 
     @Override
@@ -98,9 +97,9 @@ public class DBHelper extends SQLiteOpenHelper {
         String sql = buildCreateSql(TABLE_PLAYLIST, columns, columnTypes);
         db.execSQL(sql);
 
-        //创建默认列表，本地音乐，最近播放三个列表
+        //创建我喜欢，最近播放两个列表
         sql = "insert into "+TABLE_PLAYLIST+"("+PLAYLIST_TYPE+","+PLAYLIST_NAME+") " +
-                "values("+PlayList.TYPE_DEFAULT+",'默认列表')";
+                "values("+PlayList.TYPE_FAVORITE+",'我喜欢')";
         db.execSQL(sql);
         sql = "insert into "+TABLE_PLAYLIST+"("+PLAYLIST_TYPE+","+PLAYLIST_NAME+") " +
                 "values("+PlayList.TYPE_RECENT+",'最近播放')";
@@ -109,11 +108,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public void createTableListSongs(SQLiteDatabase db){
         String[] columns =  new String[]{
-                LISTSONGS_ADDTIME,
                 LISTSONGS_LISTID,
                 LISTSONGS_SONGID,
         };
-        String[] columnTypes = new String[]{"integer", "integer", "integer"};
+        String[] columnTypes = new String[]{"integer", "integer"};
         String sql = buildCreateSql(TABLE_LISTSONGS, columns, columnTypes);
         db.execSQL(sql);
 

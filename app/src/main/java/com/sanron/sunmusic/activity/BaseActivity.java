@@ -1,11 +1,9 @@
-package com.sanron.sunmusic.activities;
+package com.sanron.sunmusic.activity;
 
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Created by Sanron on 2015/12/15.

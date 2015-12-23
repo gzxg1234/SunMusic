@@ -2,24 +2,27 @@ package com.sanron.sunmusic.task;
 
 import android.content.Context;
 
-import com.sanron.sunmusic.db.PlayListDao;
+import com.sanron.sunmusic.db.PlayListProvider;
 import com.sanron.sunmusic.model.PlayList;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 获取播放列表
+ */
 public abstract class GetPlayListsTask extends DBAccessTask<Void, Void, List<PlayList>> {
 
-    public GetPlayListsTask(Context context) {
-        super(context);
-    }
 
     @Override
     protected List<PlayList> doInBackground(Void... params) {
-        PlayListDao playListDao = new PlayListDao(mContextRef.get());
+        PlayListProvider playListProvider = PlayListProvider.instance();
         List<PlayList> playLists = new ArrayList<>();
-        playLists.addAll(playListDao.queryByType(PlayList.TYPE_DEFAULT));
-        playLists.addAll(playListDao.queryByType(PlayList.TYPE_USER));
+        PlayList query = new PlayList();
+        query.setType(PlayList.TYPE_FAVORITE);
+        playLists.addAll(playListProvider.query(query));
+        query.setType(PlayList.TYPE_USER);
+        playLists.addAll(playListProvider.query(query));
         return playLists;
     }
 }

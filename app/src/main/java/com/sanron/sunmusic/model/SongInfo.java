@@ -8,12 +8,12 @@ public class SongInfo {
     public static final int TYPE_LOCAL = 1; //本地
     public static final int TYPE_WEB = 2;   //网络
 
-    private long id = 0;
+    private long id = -1;
 
     /**
      * 类型
      */
-    private int type = 0;
+    private int type = -1;
 
     /**
      * 文件路径
@@ -43,7 +43,7 @@ public class SongInfo {
     /**
      * 时长
      */
-    private int duration = 0;
+    private int duration = -1;
 
     /**
      * 首字母

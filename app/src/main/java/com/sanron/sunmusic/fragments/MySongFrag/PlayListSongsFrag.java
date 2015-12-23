@@ -1,21 +1,28 @@
 package com.sanron.sunmusic.fragments.MySongFrag;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sanron.sunmusic.R;
+import com.sanron.sunmusic.adapter.SongItemAdapter;
 import com.sanron.sunmusic.fragments.BaseFragment;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.model.SongInfo;
 import com.sanron.sunmusic.task.GetPlayListSongsTask;
+import com.sanron.sunmusic.task.RemoveListSongTask;
+import com.sanron.sunmusic.utils.MyLog;
+import com.sanron.sunmusic.utils.T;
 
 import java.util.List;
 
@@ -26,8 +33,7 @@ public class PlayListSongsFrag extends BaseFragment {
 
     private PlayList mPlayList;
     private RecyclerView mListPlaySongs;
-    private ListSongsAdapter mPlaySongsAdapter;
-    private List<SongInfo> mPlaySongs;
+    private SongItemAdapter mSongItemAdapter;
 
     public static final String TAG = "PlayListSonsFrag";
 
@@ -43,15 +49,62 @@ public class PlayListSongsFrag extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        new GetPlayListSongsTask(getContext()) {
+        setHasOptionsMenu(true);
+        mSongItemAdapter = new SongItemAdapter(getContext(), null);
+
+        mSongItemAdapter.setOnItemClickListener(new SongItemAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+
+            }
+        });
+
+        mSongItemAdapter.setOnActionClickListener(new SongItemAdapter.OnActionClickListener() {
+            @Override
+            public void onActionClick(View view, int actionPosition) {
+                showActionMenu(view, actionPosition);
+            }
+        });
+
+        new GetPlayListSongsTask() {
             @Override
             protected void onPostData(List<SongInfo> data) {
-                mPlaySongs = data;
-                if (mPlaySongsAdapter != null) {
-                    mPlaySongsAdapter.setmData(mPlaySongs);
-                }
+                mSongItemAdapter.setData(data);
             }
         }.execute(mPlayList.getId());
+    }
+
+    public void showActionMenu(final View anchor, final int position) {
+        final SongInfo songInfo = mSongItemAdapter.getData(position);
+        PopupMenu popupMenu = new PopupMenu(getContext(), anchor);
+        popupMenu.inflate(R.menu.playlistsong_action);
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_remove: {
+                        new RemoveListSongTask(mPlayList, songInfo) {
+                            @Override
+                            protected void onPostData(Integer num) {
+                                if (num <= 0) {
+                                    T.show(getContext(), "移除失败");
+                                } else {
+                                    mSongItemAdapter.removeData(position);
+                                }
+                            }
+                        }.execute();
+                    }
+                    break;
+
+                    case R.id.menu_add_to_quque: {
+
+                    }
+                    break;
+                }
+                return true;
+            }
+        });
+        popupMenu.show();
     }
 
     @Nullable
@@ -59,64 +112,36 @@ public class PlayListSongsFrag extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         contentView = inflater.inflate(R.layout.frag_playlist_songs, null);
         mListPlaySongs = $(R.id.list_playlist_songs);
-        mPlaySongsAdapter = new ListSongsAdapter(getContext(), mPlaySongs);
-        mListPlaySongs.setAdapter(mPlaySongsAdapter);
+        mListPlaySongs.setAdapter(mSongItemAdapter);
+        mListPlaySongs.setItemAnimator(new DefaultItemAnimator());
         mListPlaySongs.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         return contentView;
     }
 
-    public static class ListSongsAdapter extends RecyclerView.Adapter<ListSongsAdapter.ListSongsHolder> {
 
-        private Context mContext;
-        private List<SongInfo> mData;
-
-        public ListSongsAdapter(Context context, List<SongInfo> data) {
-            super();
-            this.mContext = context;
-            this.mData = data;
-        }
-
-        @Override
-        public ListSongsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(mContext).inflate(R.layout.list_item_playlist_song, parent, false);
-            return new ListSongsHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(ListSongsHolder holder, int position) {
-            SongInfo songInfo = mData.get(position);
-            holder.tvName.setText(songInfo.getDisplayName());
-            holder.tvTitle.setText(songInfo.getTitle());
-        }
-
-        @Override
-        public int getItemCount() {
-            return mData == null ? 0 : mData.size();
-        }
-
-        public void setmData(List<SongInfo> mData) {
-            this.mData = mData;
-            notifyDataSetChanged();
-        }
-
-        public List<SongInfo> getmData() {
-            return mData;
-        }
-
-        public static class ListSongsHolder extends RecyclerView.ViewHolder {
-            ImageButton btnAddQueue;
-            ImageButton btnAction;
-            TextView tvName;
-            TextView tvTitle;
-
-            public ListSongsHolder(View itemView) {
-                super(itemView);
-                btnAddQueue = (ImageButton) itemView.findViewById(R.id.btn_add_queue);
-                btnAction = (ImageButton) itemView.findViewById(R.id.btn_song_action);
-                tvName = (TextView) itemView.findViewById(R.id.tv_song_name);
-                tvTitle = (TextView) itemView.findViewById(R.id.tv_song_title);
-            }
-        }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.playlistsongsfrag_option_menu, menu);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.option_clear_list_songs: {
+                if(mSongItemAdapter.getItemCount()>0) {
+                    new RemoveListSongTask(mPlayList, mSongItemAdapter.getData()) {
+                        @Override
+                        protected void onPostData(Integer integer) {
+                            if(integer>0) {
+                                mSongItemAdapter.clearData();
+                            }
+                        }
+                    }.execute();
+                }
+            }
+            break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

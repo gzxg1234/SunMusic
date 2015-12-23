@@ -9,11 +9,11 @@ import java.util.List;
 public class PlayList implements Serializable{
 
 
-    public static final int TYPE_DEFAULT = 1;//默认列表
-    public static final int TYPE_USER = 2;//用户添加
-    public static final int TYPE_RECENT = 3;//最近播放
+    public static final int TYPE_FAVORITE = 1;//我喜欢
+    public static final int TYPE_RECENT = 2;//最近播放
+    public static final int TYPE_USER = 3;//用户添加
 
-    private long id;
+    private long id = -1;
 
     /**
      * 表名
@@ -23,12 +23,12 @@ public class PlayList implements Serializable{
     /**
      * 表类型
      */
-    private int type;
+    private int type = -1;
 
     /**
      * 音乐数量
      */
-    private int songNum;
+    private int songNum = -1;
 
     /**
      * 歌曲

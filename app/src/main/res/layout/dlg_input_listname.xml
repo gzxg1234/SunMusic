@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:paddingTop="24dp"
+    android:paddingLeft="24dp"
+    android:paddingRight="24dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:id="@+id/tv_dlg_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="新建列表"
+        android:textSize="20sp"
+        android:textColor="@color/textColorPrimaryInverse"
+        android:textStyle="bold"
+        />
+    
+    <EditText
+        android:id="@+id/et_input"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_below="@+id/tv_dlg_title"
+        android:layout_marginBottom="16dp"
+        android:singleLine="true"/>
+
+    <Button
+        android:id="@+id/btn_ok"
+        android:layout_width="80dp"
+        android:layout_height="36dp"
+        android:layout_below="@+id/et_input"
+        android:layout_alignParentRight="true"
+        android:text="确定"
+        android:background="@android:color/transparent"
+        android:textSize="16sp"/>
+
+    <Button
+        android:id="@+id/btn_cancel"
+        android:layout_width="80dp"
+        android:layout_height="36dp"
+        android:layout_below="@+id/et_input"
+        android:layout_toLeftOf="@+id/btn_ok"
+        android:text="取消"
+        android:background="@android:color/transparent"
+        android:textSize="16sp"/>
+</RelativeLayout>

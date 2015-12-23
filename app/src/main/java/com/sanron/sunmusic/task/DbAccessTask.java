@@ -10,12 +10,6 @@ import java.lang.ref.WeakReference;
  */
 public abstract class DBAccessTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> {
 
-    protected WeakReference<Context> mContextRef;
-
-    public DBAccessTask(Context context) {
-        this.mContextRef = new WeakReference<Context>(context);
-    }
-
     @Override
     protected void onPostExecute(Result result) {
         super.onPostExecute(result);
