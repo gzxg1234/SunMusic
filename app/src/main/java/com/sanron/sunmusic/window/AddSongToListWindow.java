@@ -56,7 +56,7 @@ public class AddSongToListWindow extends PopupWindow {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 new AddSongToListTask(playLists.get(position), songInfo) {
                     @Override
-                    protected void onPostData(Integer num) {
+                    protected void onPostExecute(Integer num) {
                         AddSongToListWindow.this.dismiss();
                         if (num == 0) {
                             Toast.makeText(mActivity, "添加失败", Toast.LENGTH_SHORT).show();
@@ -76,7 +76,6 @@ public class AddSongToListWindow extends PopupWindow {
                 dismiss();
             }
         });
-
         setFocusable(true);
         setTouchable(true);
         setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -84,10 +83,6 @@ public class AddSongToListWindow extends PopupWindow {
         setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
         setAnimationStyle(R.style.MyWindow);
         setContentView(mContentView);
-    }
-
-    public void setActivity(Activity activity){
-        mActivity = activity;
     }
 
     public void show() {

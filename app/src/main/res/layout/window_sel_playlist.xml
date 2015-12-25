@@ -14,9 +14,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="@android:color/white"
-        android:paddingLeft="24dp"
-        android:paddingRight="24dp"
-        android:paddingTop="24dp"
+        android:padding="24dp"
         android:orientation="vertical">
         <TextView
             android:layout_width="match_parent"
@@ -25,6 +23,7 @@
             android:gravity="center_vertical"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:textColor="@color/textColorPrimaryInverse"
             />
         <ListView
             android:id="@+id/list_playlist"
@@ -42,8 +41,8 @@
             android:layout_gravity="right"
             android:layout_marginTop="16dp"
             android:text="取消"
-            android:textSize="20sp"
-            android:background="@android:color/transparent" />
+            android:textSize="16sp"
+            android:background="?attr/selectableItemBackground" />
     </LinearLayout>
 
 </LinearLayout>

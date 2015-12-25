@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.sanron.sunmusic.model.SongInfo;
 import com.sanron.sunmusic.utils.MyLog;
@@ -70,7 +71,6 @@ public abstract class DataProvider extends Observable {
         }
         if (num != 0) {
             setChanged();
-            notifyObservers();
         }
         database.close();
         return num;
@@ -81,7 +81,6 @@ public abstract class DataProvider extends Observable {
         int num = database.delete(mTableName, where, whereArgs);
         if (num > 0) {
             setChanged();
-            notifyObservers();
         }
         database.close();
         return num;
@@ -105,7 +104,6 @@ public abstract class DataProvider extends Observable {
         int num = database.update(mTableName, contentValues, where, whereArgs);
         if (num > 0) {
             setChanged();
-            notifyObservers();
         }
         database.close();
         return num;

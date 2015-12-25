@@ -2,6 +2,8 @@ package com.sanron.sunmusic.window;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.support.v7.app.AlertDialog;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -28,7 +30,7 @@ public class ListNameInputDialog extends Dialog {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dismiss();
+                cancel();
             }
         });
     }

@@ -48,7 +48,6 @@ public class SongInfoProvider extends DataProvider {
         return insert(valuesList);
     }
 
-
     public int delete(SongInfo songInfo){
         ContentValues values = toContentValues(songInfo);
         return delete(values);
@@ -76,6 +75,7 @@ public class SongInfoProvider extends DataProvider {
         songInfo.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_ARTIST)));
         songInfo.setSongId(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_SONGID)));
         songInfo.setLetter(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_LETTER)));
+        songInfo.setBitrate(cursor.getInt(cursor.getColumnIndex(DBHelper.SONG_BITRATE)));
         songInfo.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_DISPLAYNAME)));
         return songInfo;
     }
@@ -111,6 +111,9 @@ public class SongInfoProvider extends DataProvider {
         }
         if(songInfo.getSongId()!=null) {
             values.put(DBHelper.SONG_SONGID, songInfo.getSongId());
+        }
+        if(songInfo.getBitrate()!=-1) {
+            values.put(DBHelper.SONG_BITRATE, songInfo.getBitrate());
         }
         return values;
     }

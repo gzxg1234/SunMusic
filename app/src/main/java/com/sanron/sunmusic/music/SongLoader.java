@@ -36,7 +36,7 @@ public class SongLoader {
                 PROJECTION,
                 MediaStore.Audio.Media.IS_MUSIC + "=?",
                 new String[]{"1"},
-                MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+                MediaStore.Audio.Media._ID);
 
         while (cursor.moveToNext()) {
             SongInfo songInfo = toSongInfo(cursor);

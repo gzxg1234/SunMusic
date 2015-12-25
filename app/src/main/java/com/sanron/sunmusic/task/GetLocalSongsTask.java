@@ -1,6 +1,7 @@
 package com.sanron.sunmusic.task;
 
 import android.content.Context;
+import android.os.AsyncTask;
 
 import com.sanron.sunmusic.db.SongInfoProvider;
 import com.sanron.sunmusic.model.SongInfo;
@@ -11,7 +12,7 @@ import java.util.List;
  * 获取本地歌曲
  * Created by Administrator on 2015/12/21.
  */
-public abstract class GetLocalSongsTask extends DBAccessTask<Void, Void, List<SongInfo>> {
+public abstract class GetLocalSongsTask extends AsyncTask<Void, Void, List<SongInfo>> {
 
 
     @Override

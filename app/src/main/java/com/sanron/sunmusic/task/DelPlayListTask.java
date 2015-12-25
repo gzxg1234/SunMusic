@@ -1,13 +1,17 @@
 package com.sanron.sunmusic.task;
 
 import android.content.Context;
+import android.os.AsyncTask;
 
 import com.sanron.sunmusic.db.ListSongsProvider;
 import com.sanron.sunmusic.db.PlayListProvider;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.model.SongInfo;
 
-public abstract class DeletePlayListTask extends DBAccessTask<Long, Void, Integer> {
+/**
+ * 删除播放列表
+ */
+public abstract class DelPlayListTask extends AsyncTask<Long, Void, Integer> {
 
 
     @Override
@@ -23,6 +27,8 @@ public abstract class DeletePlayListTask extends DBAccessTask<Long, Void, Intege
         if(num > 0){
             listSongsProvider.delete(listid);
         }
+        playListProvider.notifyObservers();
+        listSongsProvider.notifyObservers();
         return num;
     }
 

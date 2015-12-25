@@ -31,7 +31,8 @@ public class MySongFrag extends BaseFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         contentView = inflater.inflate(R.layout.frag_mysong, null);
 
         viewPager = $(R.id.viewpager);

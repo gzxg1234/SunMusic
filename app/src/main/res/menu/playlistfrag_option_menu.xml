@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/option_new_playlist"
-        android:title="新建"
+        android:title="新建列表"
         app:showAsAction="never"
         />
 </menu>

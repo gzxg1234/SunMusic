@@ -1,7 +1,9 @@
 package com.sanron.sunmusic.fragments.MySongFrag;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -18,11 +20,14 @@ import com.sanron.sunmusic.db.SongInfoProvider;
 import com.sanron.sunmusic.fragments.BaseFragment;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.model.SongInfo;
+import com.sanron.sunmusic.task.DelLocalSongTask;
 import com.sanron.sunmusic.task.GetLocalSongsTask;
 import com.sanron.sunmusic.task.GetPlayListsTask;
-import com.sanron.sunmusic.task.UpdateLocalSongsTask;
+import com.sanron.sunmusic.task.RefreshLocalSongsTask;
+import com.sanron.sunmusic.utils.T;
 import com.sanron.sunmusic.window.AddSongToListWindow;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -58,9 +63,16 @@ public class LocalSongFrag extends BaseFragment implements Observer {
         update(null, null);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        SongInfoProvider.instance().deleteObserver(this);
+    }
+
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         contentView = LayoutInflater.from(getContext()).inflate(R.layout.frag_localsong, null);
         mListLocalSongs = $(R.id.list_localsong);
         mListLocalSongs.setAdapter(mSongItemAdapter);
@@ -78,8 +90,9 @@ public class LocalSongFrag extends BaseFragment implements Observer {
                     case R.id.menu_add_to_list: {
                         new GetPlayListsTask() {
                             @Override
-                            protected void onPostData(List<PlayList> playLists) {
-                                AddSongToListWindow window = new AddSongToListWindow(getActivity(), playLists, songInfo);
+                            protected void onPostExecute(List<PlayList> playLists) {
+                                AddSongToListWindow window = new AddSongToListWindow(getActivity(),
+                                        playLists, songInfo);
                                 window.show();
                             }
                         }.execute();
@@ -88,6 +101,13 @@ public class LocalSongFrag extends BaseFragment implements Observer {
 
                     case R.id.menu_add_to_quque: {
 
+                    }
+                    break;
+
+                    case R.id.menu_delete_local: {
+                        List<SongInfo> deleteSongs = new ArrayList<>();
+                        deleteSongs.add(songInfo);
+                        showConfirmDeleteDlg("删除歌曲", deleteSongs);
                     }
                     break;
                 }
@@ -101,7 +121,7 @@ public class LocalSongFrag extends BaseFragment implements Observer {
     public void update(Observable observable, Object data) {
         new GetLocalSongsTask() {
             @Override
-            protected void onPostData(List<SongInfo> data) {
+            protected void onPostExecute(List<SongInfo> data) {
                 mSongItemAdapter.setData(data);
             }
         }.execute();
@@ -116,24 +136,58 @@ public class LocalSongFrag extends BaseFragment implements Observer {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.option_refresh_localsong: {
-                new UpdateLocalSongsTask(getContext()) {
-                    @Override
-                    protected void onPostData(List<SongInfo> data) {
-                        mSongItemAdapter.setData(data);
-                    }
-                }.execute();
+                new RefreshLocalSongsTask(getContext()).execute();
             }
             break;
 
             case R.id.option_delete_alllocal: {
-
+                showConfirmDeleteDlg("删除所有歌曲", mSongItemAdapter.getData());
             }
             break;
         }
         return true;
     }
 
+    /**
+     * 显示删除确定对话框
+     */
+    private void showConfirmDeleteDlg(String title, final List<SongInfo> deleteSongs) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(title);
+        builder.setCancelable(false);
+        final boolean[] deleteFile = new boolean[]{false};
+        builder.setMultiChoiceItems(new String[]{"同时删除音乐文件"},
+                deleteFile,
+                new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                        deleteFile[0] = isChecked;
+                    }
+                });
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialog, int which) {
+                new DelLocalSongTask(getContext(), deleteSongs, deleteFile[0]) {
 
+                    @Override
+                    protected void onPostExecute(Integer num) {
+                        if (num > 0) {
+                            T.show(getContext(), "删除" + num + "首歌曲");
+                        } else {
+                            T.show(getContext(), "删除失败");
+                        }
+                    }
+                }.execute();
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.create().show();
+    }
 }
 
 

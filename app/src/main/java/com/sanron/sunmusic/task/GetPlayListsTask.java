@@ -1,6 +1,7 @@
 package com.sanron.sunmusic.task;
 
 import android.content.Context;
+import android.os.AsyncTask;
 
 import com.sanron.sunmusic.db.PlayListProvider;
 import com.sanron.sunmusic.model.PlayList;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * 获取播放列表
  */
-public abstract class GetPlayListsTask extends DBAccessTask<Void, Void, List<PlayList>> {
+public abstract class GetPlayListsTask extends AsyncTask<Void, Void, List<PlayList>> {
 
 
     @Override

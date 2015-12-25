@@ -46,6 +46,12 @@ public class SongInfo {
     private int duration = -1;
 
     /**
+     * 比特率
+     */
+    private int bitrate = -1;
+
+
+    /**
      * 首字母
      */
     private String letter;
@@ -134,5 +140,13 @@ public class SongInfo {
 
     public void setSongId(String songId) {
         this.songId = songId;
+    }
+
+    public int getBitrate() {
+        return bitrate;
+    }
+
+    public void setBitrate(int bitrate) {
+        this.bitrate = bitrate;
     }
 }

@@ -58,6 +58,8 @@ public class ListSongsProvider extends DataProvider {
         return delete(where.toString(), whereArgs);
     }
 
+
+
     public Long[] query(long listid, long songid) {
         ContentValues values = new ContentValues();
         if (listid != -1) {

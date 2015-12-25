@@ -1,8 +1,10 @@
 package com.sanron.sunmusic.fragments.MySongFrag;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -12,7 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.adapter.PlayListAdapter;
@@ -20,7 +21,7 @@ import com.sanron.sunmusic.db.PlayListProvider;
 import com.sanron.sunmusic.fragments.BaseFragment;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.task.AddPlayListTask;
-import com.sanron.sunmusic.task.DeletePlayListTask;
+import com.sanron.sunmusic.task.DelPlayListTask;
 import com.sanron.sunmusic.task.GetPlayListsTask;
 import com.sanron.sunmusic.task.UpdatePlayListNameTask;
 import com.sanron.sunmusic.utils.T;
@@ -39,7 +40,6 @@ public class PlayListFrag extends BaseFragment implements Observer {
 
     private RecyclerView mListPlayLists;
     private PlayListAdapter mPlayListsAdapter;
-    private List<PlayList> mPlayLists;
 
     public static final String TAG = "PlayListFrag";
 
@@ -67,7 +67,7 @@ public class PlayListFrag extends BaseFragment implements Observer {
             @Override
             public void onActionClick(View view, int actionPosition) {
                 PlayList playList = mPlayListsAdapter.getData(actionPosition);
-                new PlayListMenu(getContext(),view,playList).show();
+                new PlayListMenu(getContext(), view, playList).show();
             }
         });
         update(null, null);
@@ -81,7 +81,8 @@ public class PlayListFrag extends BaseFragment implements Observer {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         contentView = inflater.inflate(R.layout.frag_playlist, null);
         mListPlayLists = $(R.id.list_playlist);
         mListPlayLists.setAdapter(mPlayListsAdapter);
@@ -93,7 +94,7 @@ public class PlayListFrag extends BaseFragment implements Observer {
     public void update(Observable observable, Object data) {
         new GetPlayListsTask() {
             @Override
-            protected void onPostData(List<PlayList> playLists) {
+            protected void onPostExecute(List<PlayList> playLists) {
                 mPlayListsAdapter.setData(playLists);
             }
         }.execute();
@@ -114,7 +115,8 @@ public class PlayListFrag extends BaseFragment implements Observer {
     public static class PlayListMenu extends PopupMenu implements PopupMenu.OnMenuItemClickListener {
         private PlayList mPlayList;
         private Context mContext;
-        public PlayListMenu(Context context, View anchor,PlayList playList) {
+
+        public PlayListMenu(Context context, View anchor, PlayList playList) {
             super(context, anchor);
             this.mPlayList = playList;
             this.mContext = context;
@@ -130,17 +132,36 @@ public class PlayListFrag extends BaseFragment implements Observer {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             switch (item.getItemId()) {
+
                 case R.id.menu_delete_list: {
-                    new DeletePlayListTask() {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    builder.setTitle("删除列表");
+                    builder.setMessage("确定删除列表？");
+                    builder.setCancelable(false);
+                    builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         @Override
-                        protected void onPostData(Integer integer) {
-                            if (integer <= 0) {
-                                T.show(mContext,"删除失败");
-                            }
+                        public void onClick(final DialogInterface dialog, int which) {
+                            new DelPlayListTask() {
+                                @Override
+                                protected void onPostExecute(Integer integer) {
+                                    if (integer <= 0) {
+                                        T.show(mContext, "删除失败");
+                                    }
+                                    dialog.dismiss();
+                                }
+                            }.execute(mPlayList.getId());
                         }
-                    }.execute(mPlayList.getId());
+                    });
+                    builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.create().show();
                 }
                 break;
+
                 case R.id.menu_rename_list: {
                     final ListNameInputDialog dlg = new ListNameInputDialog(mContext);
                     dlg.setTitle("重命名");
@@ -149,7 +170,7 @@ public class PlayListFrag extends BaseFragment implements Observer {
                         @Override
                         public void onClick(View v) {
                             String input = dlg.getInput();
-                            if(dlg.getInput().trim().equals("")){
+                            if (dlg.getInput().trim().equals("")) {
                                 dlg.setInputError("输入为空");
                                 return;
                             }
@@ -157,25 +178,26 @@ public class PlayListFrag extends BaseFragment implements Observer {
                             PlayList update = new PlayList();
                             update.setName(input);
                             update.setId(mPlayList.getId());
-                            new UpdatePlayListNameTask() {
+                            new UpdatePlayListNameTask(update) {
                                 @Override
-                                protected void onPostData(Integer num) {
-                                    if(num == -1){
+                                protected void onPostExecute(Integer num) {
+                                    if (num > 0) {
+                                        T.show(mContext, "修改成功");
+                                        dlg.dismiss();
+                                    } else if (num == 0) {
+                                        T.show(mContext, "修改失败");
+                                        dlg.dismiss();
+                                    } else if (num == -1) {
                                         dlg.setInputError("列表名已存在");
-                                    }else if(num == 0){
-                                        T.show(mContext,"修改失败");
-                                        dlg.dismiss();
-                                    }else{
-                                        T.show(mContext,"修改成功");
-                                        dlg.dismiss();
                                     }
                                 }
-                            }.execute(update);
+                            }.execute();
                         }
                     });
                     dlg.show();
                 }
                 break;
+
                 case R.id.menu_play_list: {
 
                 }
@@ -201,22 +223,25 @@ public class PlayListFrag extends BaseFragment implements Observer {
                     @Override
                     public void onClick(View v) {
                         dlg.setTitle("新建播放列表");
-                        if(dlg.getInput().trim().equals("")){
+                        if (dlg.getInput().trim().equals("")) {
                             dlg.setInputError("输入为空");
                             return;
                         }
 
                         new AddPlayListTask() {
                             @Override
-                            protected void onPostData(Integer num) {
-                                if(num == 0){
-                                    Toast.makeText(getContext(),"添加失败",Toast.LENGTH_SHORT).show();
-                                }else if(num == -1){
-                                    Toast.makeText(getContext(),"列表名已存在",Toast.LENGTH_SHORT).show();
+                            protected void onPostExecute(Integer num) {
+                                if (num > 0) {
+                                    T.show(getContext(), "新建列表成功");
+                                    dlg.cancel();
+                                } else if (num == 0) {
+                                    T.show(getContext(), "新建列表失败");
+                                    dlg.cancel();
+                                } else if (num == -1) {
+                                    dlg.setInputError("列表名已存在");
                                 }
                             }
                         }.execute(dlg.getInput());
-                        dlg.dismiss();
                     }
                 });
                 dlg.show();

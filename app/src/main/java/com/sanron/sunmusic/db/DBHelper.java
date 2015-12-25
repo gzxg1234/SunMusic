@@ -30,6 +30,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String SONG_PATH = "path";
     public static final String SONG_SONGID = "songid";
     public static final String SONG_LETTER = "title_letter";
+    public static final String SONG_BITRATE = "bitrate";
 
     /**
      * 歌词
@@ -79,10 +80,11 @@ public class DBHelper extends SQLiteOpenHelper {
                 SONG_DURATION,
                 SONG_PATH,
                 SONG_SONGID,
-                SONG_LETTER
+                SONG_LETTER,
+                SONG_BITRATE
         };
         String[] columnTypes = new String[]{"integer", "text", "text", "text", "text", "integer",
-                "text", "text", "text"};
+                "text", "text", "text","integer"};
         String sql = buildCreateSql(TABLE_SONG, columns, columnTypes);
         db.execSQL(sql);
     }
