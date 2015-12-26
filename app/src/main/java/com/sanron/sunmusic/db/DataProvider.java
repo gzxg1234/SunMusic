@@ -55,7 +55,7 @@ public abstract class DataProvider extends Observable {
         return cursor;
     }
 
-    public int insert(ContentValues... contentValues) {
+    public int blukInsert(ContentValues... contentValues) {
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
         int num = 0;
         for (int i = 0; i < contentValues.length; i++) {
@@ -68,6 +68,16 @@ public abstract class DataProvider extends Observable {
         }
         database.close();
         return num;
+    }
+
+    public long insert(ContentValues contentValues){
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        long id = database.insert(mTableName,null,contentValues);
+        if (id != -1) {
+            setChanged();
+        }
+        database.close();
+        return id;
     }
 
     public int delete(String where, String... whereArgs) {

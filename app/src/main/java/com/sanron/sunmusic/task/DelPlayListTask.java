@@ -25,6 +25,7 @@ public abstract class DelPlayListTask extends AsyncTask<Long, Void, Integer> {
         ContentValues values = new ContentValues();
         values.put(DBHelper.ID,listid);
         int num = playListProvider.delete(values);
+
         playListProvider.notifyObservers();
         listSongsProvider.notifyObservers();
         return num;

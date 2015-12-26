@@ -2,6 +2,8 @@ package com.sanron.sunmusic.activity;
 
 import android.app.Application;
 
+import com.sanron.sunmusic.db.AlbumProvider;
+import com.sanron.sunmusic.db.ArtistProvider;
 import com.sanron.sunmusic.db.ListSongsProvider;
 import com.sanron.sunmusic.db.PlayListProvider;
 import com.sanron.sunmusic.db.SongInfoProvider;
@@ -18,5 +20,7 @@ public class SunApp extends Application {
         ListSongsProvider.instance().init(this);
         PlayListProvider.instance().init(this);
         SongInfoProvider.instance().init(this);
+        AlbumProvider.instance().init(this);
+        ArtistProvider.instance().init(this);
     }
 }

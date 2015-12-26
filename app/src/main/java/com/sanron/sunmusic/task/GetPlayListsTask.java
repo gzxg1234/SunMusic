@@ -33,7 +33,7 @@ public abstract class GetPlayListsTask extends AsyncTask<Void, Void, List<PlayLi
         }
         cursor.close();
 
-        //用户添加列表
+        //用户列表
         values.put(DBHelper.PLAYLIST_TYPE,PlayList.TYPE_USER);
         cursor = playListProvider.query(values);
         while(cursor.moveToNext()){

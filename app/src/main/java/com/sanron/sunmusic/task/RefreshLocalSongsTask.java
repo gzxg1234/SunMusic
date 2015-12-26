@@ -9,6 +9,8 @@ import android.provider.MediaStore;
 
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
+import com.sanron.sunmusic.db.AlbumProvider;
+import com.sanron.sunmusic.db.ArtistProvider;
 import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.db.PlayListProvider;
 import com.sanron.sunmusic.db.SongInfoProvider;
@@ -48,7 +50,6 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... params) {
-
         SongInfoProvider songInfoProvider = SongInfoProvider.instance();
         Cursor cursor = mContext.getContentResolver().query(URI,
                 PROJECTION,
@@ -69,8 +70,22 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
                 values.put(DBHelper.SONG_SONGID, songid);
                 Cursor c2 = songInfoProvider.query(values);
                 if (!c2.moveToFirst()) {
-                    songInfoProvider.insert(toContentValues(cursor));
+
+                    ContentValues songValues = toContentValues(cursor);
+
+                    //歌手信息
+                    String artistName = songValues.getAsString(DBHelper.SONG_ARTISTNAME);
+                    long artistId = getArtistID(artistName);
+                    songValues.put(DBHelper.SONG_ARTISTID,artistId);
+
+                    //专辑信息
+                    String albumName = songValues.getAsString(DBHelper.SONG_ALBUMNAME);
+                    long albumId = getAlbumID(artistName,albumName);
+                    songValues.put(DBHelper.SONG_ALBUMID,albumId);
+
+                    songInfoProvider.insert(songValues);
                 }
+
                 c2.close();
             }while (cursor.moveToNext());
             delSql.replace(delSql.length() - 5, delSql.length(), ")");
@@ -80,9 +95,43 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
         cursor.close();
         songInfoProvider.execSQL(delSql.toString());
 
+
         songInfoProvider.notifyDataChanged();
         PlayListProvider.instance().notifyDataChanged();
         return null;
+    }
+
+    public long getArtistID(String artistName){
+        ContentValues artistValues = new ContentValues();
+        artistValues.put(DBHelper.ARTIST_NAME,artistName);
+        Cursor cursor = ArtistProvider.instance().query(artistValues);
+        long artistId = -1;
+        if(cursor.moveToFirst()){
+            //如果数据库中已有此歌手
+            artistId = cursor.getLong(cursor.getColumnIndex(DBHelper.ID));
+        }else{
+            //没有则插入新歌手信息
+            artistId = ArtistProvider.instance().insert(artistValues);
+        }
+        cursor.close();
+        return artistId;
+    }
+
+    public long getAlbumID(String artistName,String albumName){
+        ContentValues albumValues = new ContentValues();
+        albumValues.put(DBHelper.ALBUM_NAME,albumName);
+        albumValues.put(DBHelper.ALBUM_ARTIST,artistName);
+        Cursor cursor = AlbumProvider.instance().query(albumValues);
+        long albumId = -1;
+        if(cursor.moveToFirst()){
+            //如果数据库中已有此专辑
+            albumId = cursor.getLong(cursor.getColumnIndex(DBHelper.ID));
+        }else{
+            //没有则插入新专辑信息
+            albumId = AlbumProvider.instance().insert(albumValues);
+        }
+        cursor.close();
+        return albumId;
     }
 
     //读比特率
@@ -113,10 +162,6 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
     private ContentValues toContentValues(Cursor cursor) {
         String id = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
         String displayName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
-        int index = displayName.lastIndexOf(".");
-        if (index != -1) {
-            displayName = displayName.substring(0, index);
-        }
         String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
         String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
         String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
@@ -124,8 +169,8 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
         int bitrate = readBitrate(path);
         int duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
         String letter = "";
-        if (displayName.length() > 0) {
-            letter = PinyinHelper.convertToPinyinString(displayName.substring(0, 1), "", PinyinFormat.WITHOUT_TONE);
+        if (title.length() > 0) {
+            letter = PinyinHelper.convertToPinyinString(title.substring(0, 1), "", PinyinFormat.WITHOUT_TONE);
             letter = letter.substring(0, 1);
         }
 
@@ -135,10 +180,10 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
         values.put(DBHelper.SONG_SONGID, id);
         values.put(DBHelper.SONG_LETTER, letter);
         values.put(DBHelper.SONG_PATH, path);
-        values.put(DBHelper.SONG_ALBUM, album);
+        values.put(DBHelper.SONG_ALBUMNAME, album);
         values.put(DBHelper.SONG_DURATION, duration);
         values.put(DBHelper.SONG_DISPLAYNAME, displayName);
-        values.put(DBHelper.SONG_ARTIST, artist);
+        values.put(DBHelper.SONG_ARTISTNAME, artist);
         values.put(DBHelper.SONG_BITRATE, bitrate);
         return values;
     }

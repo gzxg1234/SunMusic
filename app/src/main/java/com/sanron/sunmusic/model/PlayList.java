@@ -84,7 +84,7 @@ public class PlayList implements Serializable {
     public static PlayList fromCursor(Cursor cursor) {
         PlayList playList = new PlayList();
         playList.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
-        playList.setSongNum(cursor.getInt(cursor.getColumnIndex(DBHelper.PLAYLIST_NUM)));
+        playList.setSongNum(cursor.getInt(cursor.getColumnIndex(DBHelper.PLAYLIST_SONGNUM)));
         playList.setName(cursor.getString(cursor.getColumnIndex(DBHelper.PLAYLIST_NAME)));
         playList.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.PLAYLIST_TYPE)));
         return playList;
@@ -99,7 +99,7 @@ public class PlayList implements Serializable {
             values.put(DBHelper.PLAYLIST_NAME, name);
         }
         if (songNum != -1) {
-            values.put(DBHelper.PLAYLIST_NUM, songNum);
+            values.put(DBHelper.PLAYLIST_SONGNUM, songNum);
         }
         if (id != -1) {
             values.put(DBHelper.ID, id);

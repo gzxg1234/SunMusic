@@ -40,7 +40,7 @@ public abstract class DelLocalSongTask extends AsyncTask<Void, Void, Integer> {
         for (int i = 0; i < mDeleteSongs.size(); i++) {
             SongInfo deleteSong = mDeleteSongs.get(i);
             if (mDeleteFile) {
-                //同步MediaProvider数据
+                //同步删除MediaProvider数据
                 int num = mContext.getContentResolver().delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                         MediaStore.Audio.Media._ID + "=?",
                         new String[]{deleteSong.getSongId()});

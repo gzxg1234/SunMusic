@@ -20,12 +20,6 @@ public abstract class DelListSongTask extends AsyncTask<Void, Void, Integer> {
     private PlayList playList;
     private List<SongInfo> deleteSongs;
 
-    public DelListSongTask(PlayList playList, SongInfo songInfo) {
-        this.playList = playList;
-        this.deleteSongs = new ArrayList<>();
-        deleteSongs.add(songInfo);
-    }
-
     public DelListSongTask(PlayList playList, List<SongInfo> deleteSongs) {
         this.playList = playList;
         this.deleteSongs = deleteSongs;

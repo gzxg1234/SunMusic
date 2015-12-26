@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -73,8 +72,8 @@ public class SongItemAdapter extends RecyclerView.Adapter<SongItemAdapter.LocalS
     @Override
     public void onBindViewHolder(final LocalSongHolder holder, int position) {
         final SongInfo songInfo = mData.get(position);
-        holder.tvSongName.setText(songInfo.getDisplayName());
-        holder.tvSongTitle.setText(songInfo.getTitle());
+        holder.tvSongName.setText(songInfo.getTitle());
+        holder.tvSongTitle.setText(songInfo.getArtist());
         holder.btnAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -99,9 +98,9 @@ public class SongItemAdapter extends RecyclerView.Adapter<SongItemAdapter.LocalS
         public LocalSongHolder(View itemView) {
             super(itemView);
             ivIcon = (ImageView) itemView.findViewById(R.id.song_icon);
-            tvSongName = (TextView) itemView.findViewById(R.id.tv_song_name);
+            tvSongName = (TextView) itemView.findViewById(R.id.tv_song_title);
             btnAction = (ImageButton) itemView.findViewById(R.id.btn_song_action);
-            tvSongTitle = (TextView) itemView.findViewById(R.id.tv_song_title);
+            tvSongTitle = (TextView) itemView.findViewById(R.id.tv_song_artist);
             itemView.setOnClickListener(this);
         }
 

@@ -24,21 +24,35 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String SONG_TYPE = "type";
     public static final String SONG_DISPLAYNAME = "display_name";
     public static final String SONG_TITLE = "title";
-    public static final String SONG_ALBUM = "album";
-    public static final String SONG_ARTIST = "artist";
+    public static final String SONG_ALBUMNAME = "album_name";
+    public static final String SONG_ALBUMID = "album_id";
+    public static final String SONG_ARTISTNAME = "artist_name";
+    public static final String SONG_ARTISTID = "artist_id";
     public static final String SONG_DURATION = "duration";
     public static final String SONG_PATH = "path";
     public static final String SONG_SONGID = "songid";
     public static final String SONG_LETTER = "title_letter";
     public static final String SONG_BITRATE = "bitrate";
+    public static final String SONG_PIC = "picture";
+    public static final String SONG_LYRIC = "lyric";
 
     /**
-     * 歌词
+     * 专辑
      */
-    public static final String TABLE_LYRIC = "lyric";
-    public static final String LYRIC_TITLE = "title";
-    public static final String LYRIC_ARTIST = "artist";
-    public static final String LYRIC_PATH = "path";
+    public static final String TABLE_ALBUM = "album";
+    public static final String ALBUM_NAME = "name";
+    public static final String ALBUM_ARTIST = "artist";
+    public static final String ALBUM_SONGNUM = "song_num";
+    public static final String ALBUM_PIC = "picture";
+
+    /**
+     * 歌手
+     */
+    public static final String TABLE_ARTIST = "artist";
+    public static final String ARTIST_NAME = "name";
+    public static final String ARTIST_ALBUMNUM = "album_num";
+    public static final String ARTIST_PIC = "picture";
+
 
     /**
      * 播放列表
@@ -46,7 +60,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String TABLE_PLAYLIST = "playlist";
     public static final String PLAYLIST_NAME = "name";
     public static final String PLAYLIST_TYPE = "type";
-    public static final String PLAYLIST_NUM = "song_num";
+    public static final String PLAYLIST_SONGNUM = "song_num";
 
 
     /**
@@ -55,7 +69,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String TABLE_LISTSONGS = "playlist_songs";
     public static final String LISTSONGS_SONGID = "song_id";
     public static final String LISTSONGS_LISTID = "list_id";
-    public static final String LISTSONGS_ADDTIME = "add_time";
 
 
     public DBHelper(Context context) {
@@ -66,8 +79,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         createTableSongInfo(db);
         createTablePlayList(db);
-        createTableLyric(db);
         createTableListSongs(db);
+        createTableArtist(db);
+        createTableAlbum(db);
         createTrigger(db);
     }
 
@@ -76,16 +90,20 @@ public class DBHelper extends SQLiteOpenHelper {
                 SONG_TYPE,
                 SONG_DISPLAYNAME,
                 SONG_TITLE,
-                SONG_ALBUM,
-                SONG_ARTIST,
+                SONG_ALBUMNAME,
+                SONG_ALBUMID,
+                SONG_ARTISTNAME,
+                SONG_ARTISTID,
                 SONG_DURATION,
                 SONG_PATH,
                 SONG_SONGID,
                 SONG_LETTER,
-                SONG_BITRATE
+                SONG_BITRATE,
+                SONG_LYRIC,
+                SONG_PIC
         };
-        String[] columnTypes = new String[]{"integer", "text", "text", "text", "text", "integer",
-                "text", "text", "text","integer"};
+        String[] columnTypes = new String[]{"interger","text","text","text","integer","text","integer",
+                "integer","text","text","text","integer","text","text"};
         String sql = buildCreateSql(TABLE_SONG, columns, columnTypes);
         db.execSQL(sql);
     }
@@ -94,7 +112,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String[] columns =  new String[]{
                 PLAYLIST_TYPE,
                 PLAYLIST_NAME,
-                PLAYLIST_NUM,
+                PLAYLIST_SONGNUM,
         };
         String[] columnTypes = new String[]{"integer", "text", "integer default 0"};
         String sql = buildCreateSql(TABLE_PLAYLIST, columns, columnTypes);
@@ -120,38 +138,68 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public void createTableLyric(SQLiteDatabase db){
+    public void createTableArtist(SQLiteDatabase db){
         String[] columns =  new String[]{
-                LYRIC_ARTIST,
-                LYRIC_TITLE,
-                LYRIC_PATH,
+                ARTIST_NAME,
+                ARTIST_ALBUMNUM,
+                ARTIST_PIC
         };
-        String[] columnTypes = new String[]{"text", "text", "text", "text"};
-        String sql = buildCreateSql(TABLE_LYRIC, columns, columnTypes);
+        String[] columnTypes = new String[]{"text", "integer default 0","text"};
+        String sql = buildCreateSql(TABLE_ARTIST, columns, columnTypes);
         db.execSQL(sql);
     }
 
+    public void createTableAlbum(SQLiteDatabase db){
+        String[] columns =  new String[]{
+                ALBUM_NAME,
+                ALBUM_ARTIST,
+                ALBUM_SONGNUM,
+                ALBUM_PIC
+        };
+        String[] columnTypes = new String[]{"text", "text","integer default 0","text"};
+        String sql = buildCreateSql(TABLE_ALBUM, columns, columnTypes);
+        db.execSQL(sql);
+    }
+
+    //创建触发器
     private void createTrigger(SQLiteDatabase db){
         String trig1 = "create trigger listsongsInsert after insert on "+DBHelper.TABLE_LISTSONGS
                 +" begin"
-                +" update "+DBHelper.TABLE_PLAYLIST+" set "+DBHelper.PLAYLIST_NUM+"="+DBHelper.PLAYLIST_NUM+"+1 where "+DBHelper.ID+"=new."+DBHelper.LISTSONGS_LISTID+";"
+                +" update "+DBHelper.TABLE_PLAYLIST+" set "+DBHelper.PLAYLIST_SONGNUM +"="+DBHelper.PLAYLIST_SONGNUM +"+1 where "+DBHelper.ID+"=new."+DBHelper.LISTSONGS_LISTID+";"
                 +" end;";
         String trig2 = "create trigger listsongsDelete after delete on "+DBHelper.TABLE_LISTSONGS
                 +" begin"
-                +" update "+DBHelper.TABLE_PLAYLIST+" set "+DBHelper.PLAYLIST_NUM+"="+DBHelper.PLAYLIST_NUM+"-1 where "+DBHelper.ID+"=old."+DBHelper.LISTSONGS_LISTID+";"
+                +" update "+DBHelper.TABLE_PLAYLIST+" set "+DBHelper.PLAYLIST_SONGNUM +"="+DBHelper.PLAYLIST_SONGNUM +"-1 where "+DBHelper.ID+"=old."+DBHelper.LISTSONGS_LISTID+";"
                 +" end;";
-        String trig3 = "create trigger songinfoDelete after delete on "+DBHelper.TABLE_SONG
+        String trig3 = "create trigger songinfoInsert after insert on "+DBHelper.TABLE_SONG
+                +" begin"
+                +" update "+DBHelper.TABLE_ALBUM+" set "+DBHelper.ALBUM_SONGNUM+"="+DBHelper.ALBUM_SONGNUM+"+1 where "+DBHelper.ID+"=new."+DBHelper.SONG_ALBUMID+";"
+                +" end;";
+        String trig4 = "create trigger songinfoDelete after delete on "+DBHelper.TABLE_SONG
                 +" begin"
                 +" delete from "+DBHelper.TABLE_LISTSONGS+" where "+DBHelper.LISTSONGS_SONGID+"=old."+DBHelper.ID+";"
+                +" update "+DBHelper.TABLE_ALBUM+" set "+DBHelper.ALBUM_SONGNUM+"="+DBHelper.ALBUM_SONGNUM+"-1 where "+DBHelper.ID+"=old."+DBHelper.SONG_ALBUMID+";"
                 +" end;";
-        String trig4 = "create trigger playlistDelete after delete on "+DBHelper.TABLE_PLAYLIST
+        String trig5 = "create trigger playlistDelete after delete on "+DBHelper.TABLE_PLAYLIST
                 +" begin"
                 +" delete from "+DBHelper.TABLE_LISTSONGS+" where "+DBHelper.LISTSONGS_LISTID+"=old."+DBHelper.ID+";"
+                +" end;";
+        String trig6 = "create trigger albumInsert after insert on "+DBHelper.TABLE_ALBUM
+                +" begin"
+                +" update "+DBHelper.TABLE_ARTIST+" set "+DBHelper.ARTIST_ALBUMNUM+"="+DBHelper.ARTIST_ALBUMNUM+"+1 where "+DBHelper.ARTIST_NAME+"=new."+DBHelper.ALBUM_ARTIST+";"
+                +" end;";
+        String trig7 = "create trigger albumDelete after delete on "+DBHelper.TABLE_ALBUM
+                +" begin"
+                +" update "+DBHelper.TABLE_ARTIST+" set "+DBHelper.ARTIST_ALBUMNUM+"="+DBHelper.ARTIST_ALBUMNUM+"-1 where "+DBHelper.ARTIST_NAME+"=new."+DBHelper.ALBUM_ARTIST+";"
+                +" delete from "+DBHelper.TABLE_SONG+" where "+DBHelper.SONG_ALBUMID+"=old."+DBHelper.ID+";"
                 +" end;";
         db.execSQL(trig1);
         db.execSQL(trig2);
         db.execSQL(trig3);
         db.execSQL(trig4);
+        db.execSQL(trig5);
+        db.execSQL(trig6);
+        db.execSQL(trig7);
     }
 
     private String buildCreateSql(String table, String[] columnNames, String[] type) {

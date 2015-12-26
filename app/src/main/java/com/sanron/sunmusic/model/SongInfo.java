@@ -161,9 +161,9 @@ public class SongInfo {
         songInfo.setSongId(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_SONGID)));
         songInfo.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.SONG_TYPE)));
         songInfo.setBitrate(cursor.getInt(cursor.getColumnIndex(DBHelper.SONG_BITRATE)));
-        songInfo.setAlbum(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_ALBUM)));
+        songInfo.setAlbum(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_ALBUMNAME)));
         songInfo.setLetter(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_LETTER)));
-        songInfo.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_ARTIST)));
+        songInfo.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_ARTISTNAME)));
         songInfo.setPath(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_PATH)));
         songInfo.setDuration(cursor.getInt(cursor.getColumnIndex(DBHelper.SONG_DURATION)));
         songInfo.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_DISPLAYNAME)));
@@ -186,10 +186,10 @@ public class SongInfo {
             values.put(DBHelper.SONG_TITLE, title);
         }
         if (album != null) {
-            values.put(DBHelper.SONG_ALBUM, album);
+            values.put(DBHelper.SONG_ALBUMNAME, album);
         }
         if (artist != null) {
-            values.put(DBHelper.SONG_ARTIST, artist);
+            values.put(DBHelper.SONG_ARTISTNAME, artist);
         }
         if (duration != -1) {
             values.put(DBHelper.SONG_DURATION, duration);

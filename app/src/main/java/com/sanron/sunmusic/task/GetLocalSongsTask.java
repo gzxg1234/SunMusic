@@ -30,6 +30,7 @@ public abstract class GetLocalSongsTask extends AsyncTask<Void, Void, List<SongI
         while(cursor.moveToNext()){
             songInfos.add(SongInfo.fromCursor(cursor));
         }
+        cursor.close();
         return songInfos;
     }
 

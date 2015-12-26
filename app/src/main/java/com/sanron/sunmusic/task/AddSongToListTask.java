@@ -2,6 +2,7 @@ package com.sanron.sunmusic.task;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.os.AsyncTask;
 
 import com.sanron.sunmusic.db.DBHelper;
@@ -35,9 +36,12 @@ public abstract class AddSongToListTask extends AsyncTask<Void, Void, Integer> {
         values.put(DBHelper.LISTSONGS_LISTID,playList.getId());
         values.put(DBHelper.LISTSONGS_SONGID,songInfo.getId());
         if(songInfo.getType() == SongInfo.TYPE_LOCAL) {
-            //添加本地歌曲至列表
-            //是否已经存在于列表中
-            if (listSongsProvider.query(values).moveToFirst()) {
+            //添加本地歌曲
+            //检查是否已经存在于列表中
+            Cursor cursor = listSongsProvider.query(values);
+            boolean isExists = cursor.moveToFirst();
+            cursor.close();
+            if (isExists) {
                 return -1;
             }
         }else if(songInfo.getType() == SongInfo.TYPE_WEB){
@@ -45,10 +49,11 @@ public abstract class AddSongToListTask extends AsyncTask<Void, Void, Integer> {
         }
 
         //插入
-        int num = listSongsProvider.insert(values);
+        int num = listSongsProvider.blukInsert(values);
         if(num > 0) {
             playListProvider.notifyDataChanged();
         }
+
         listSongsProvider.notifyObservers();
         return num;
     }
