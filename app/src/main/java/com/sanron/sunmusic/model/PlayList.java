@@ -1,12 +1,18 @@
 package com.sanron.sunmusic.model;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+
+import com.sanron.sunmusic.db.DBHelper;
+
 import java.io.Serializable;
 import java.util.List;
 
-/**播放列表
+/**
+ * 播放列表
  * Created by Administrator on 2015/12/21.
  */
-public class PlayList implements Serializable{
+public class PlayList implements Serializable {
 
 
     public static final int TYPE_FAVORITE = 1;//我喜欢
@@ -74,4 +80,31 @@ public class PlayList implements Serializable{
     public void setSongNum(int songNum) {
         this.songNum = songNum;
     }
+
+    public static PlayList fromCursor(Cursor cursor) {
+        PlayList playList = new PlayList();
+        playList.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
+        playList.setSongNum(cursor.getInt(cursor.getColumnIndex(DBHelper.PLAYLIST_NUM)));
+        playList.setName(cursor.getString(cursor.getColumnIndex(DBHelper.PLAYLIST_NAME)));
+        playList.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.PLAYLIST_TYPE)));
+        return playList;
+    }
+
+    public ContentValues toContentValues() {
+        ContentValues values = new ContentValues();
+        if (type != -1) {
+            values.put(DBHelper.PLAYLIST_TYPE, type);
+        }
+        if (name != null) {
+            values.put(DBHelper.PLAYLIST_NAME, name);
+        }
+        if (songNum != -1) {
+            values.put(DBHelper.PLAYLIST_NUM, songNum);
+        }
+        if (id != -1) {
+            values.put(DBHelper.ID, id);
+        }
+        return values;
+    }
 }
+

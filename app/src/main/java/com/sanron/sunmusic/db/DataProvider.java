@@ -4,13 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
-import com.sanron.sunmusic.model.SongInfo;
-import com.sanron.sunmusic.utils.MyLog;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
@@ -26,7 +20,7 @@ public abstract class DataProvider extends Observable {
         mTableName = tableName;
     }
 
-    public void init(Context context){
+    public void init(Context context) {
         mDbHelper = new DBHelper(context);
     }
 
@@ -34,21 +28,21 @@ public abstract class DataProvider extends Observable {
         return query(null, selection, selectionArgs);
     }
 
-    public Cursor query(String[] columns,ContentValues values){
+    public Cursor query(String[] columns, ContentValues values) {
         StringBuffer selection = new StringBuffer();
         String[] selectionArgs = new String[values.size()];
-        Set<Map.Entry<String,Object>> set = values.valueSet();
+        Set<Map.Entry<String, Object>> set = values.valueSet();
         int i = 0;
-        for(Map.Entry<String,Object> entry:set){
+        for (Map.Entry<String, Object> entry : set) {
             selection.append(entry.getKey()).append("=? and ");
             selectionArgs[i++] = String.valueOf(entry.getValue());
         }
-        selection.replace(selection.length()-5,selection.length(),"");
-        return query(columns,selection.toString(),selectionArgs);
+        selection.replace(selection.length() - 5, selection.length(), "");
+        return query(columns, selection.toString(), selectionArgs);
     }
 
-    public Cursor query(ContentValues values){
-        return query(null,values);
+    public Cursor query(ContentValues values) {
+        return query(null, values);
     }
 
     public Cursor query(String[] colunms, String selection, String... selectionArgs) {
@@ -86,17 +80,17 @@ public abstract class DataProvider extends Observable {
         return num;
     }
 
-    public int delete(ContentValues values){
+    public int delete(ContentValues values) {
         StringBuffer where = new StringBuffer();
         String[] whereArgs = new String[values.size()];
-        Set<Map.Entry<String,Object>> set = values.valueSet();
+        Set<Map.Entry<String, Object>> set = values.valueSet();
         int i = 0;
-        for(Map.Entry<String,Object> entry:set){
+        for (Map.Entry<String, Object> entry : set) {
             where.append(entry.getKey()).append("=? and ");
             whereArgs[i++] = String.valueOf(entry.getValue());
         }
-        where.replace(where.length()-5,where.length(),"");
-        return delete(where.toString(),whereArgs);
+        where.replace(where.length() - 5, where.length(), "");
+        return delete(where.toString(), whereArgs);
     }
 
     public int update(ContentValues contentValues, String where, String... whereArgs) {
@@ -107,5 +101,16 @@ public abstract class DataProvider extends Observable {
         }
         database.close();
         return num;
+    }
+
+    public void execSQL(String sql, String... args) {
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        database.execSQL(sql, args);
+        database.close();
+    }
+
+    public void notifyDataChanged(){
+        setChanged();
+        notifyObservers();
     }
 }

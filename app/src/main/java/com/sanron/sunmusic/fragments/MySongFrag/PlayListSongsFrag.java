@@ -175,7 +175,7 @@ public class PlayListSongsFrag extends BaseFragment implements Observer {
 
     @Override
     public void update(Observable observable, Object data) {
-        new GetPlayListSongsTask() {
+        new GetPlayListSongsTask(mPlayList) {
             @Override
             protected void onPostExecute(List<SongInfo> data) {
                 mSongItemAdapter.setData(data);

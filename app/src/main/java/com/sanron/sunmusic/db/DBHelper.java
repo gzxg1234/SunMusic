@@ -68,6 +68,7 @@ public class DBHelper extends SQLiteOpenHelper {
         createTablePlayList(db);
         createTableLyric(db);
         createTableListSongs(db);
+        createTrigger(db);
     }
 
     public void createTableSongInfo(SQLiteDatabase db){
@@ -130,6 +131,29 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(sql);
     }
 
+    private void createTrigger(SQLiteDatabase db){
+        String trig1 = "create trigger listsongsInsert after insert on "+DBHelper.TABLE_LISTSONGS
+                +" begin"
+                +" update "+DBHelper.TABLE_PLAYLIST+" set "+DBHelper.PLAYLIST_NUM+"="+DBHelper.PLAYLIST_NUM+"+1 where "+DBHelper.ID+"=new."+DBHelper.LISTSONGS_LISTID+";"
+                +" end;";
+        String trig2 = "create trigger listsongsDelete after delete on "+DBHelper.TABLE_LISTSONGS
+                +" begin"
+                +" update "+DBHelper.TABLE_PLAYLIST+" set "+DBHelper.PLAYLIST_NUM+"="+DBHelper.PLAYLIST_NUM+"-1 where "+DBHelper.ID+"=old."+DBHelper.LISTSONGS_LISTID+";"
+                +" end;";
+        String trig3 = "create trigger songinfoDelete after delete on "+DBHelper.TABLE_SONG
+                +" begin"
+                +" delete from "+DBHelper.TABLE_LISTSONGS+" where "+DBHelper.LISTSONGS_SONGID+"=old."+DBHelper.ID+";"
+                +" end;";
+        String trig4 = "create trigger playlistDelete after delete on "+DBHelper.TABLE_PLAYLIST
+                +" begin"
+                +" delete from "+DBHelper.TABLE_LISTSONGS+" where "+DBHelper.LISTSONGS_LISTID+"=old."+DBHelper.ID+";"
+                +" end;";
+        db.execSQL(trig1);
+        db.execSQL(trig2);
+        db.execSQL(trig3);
+        db.execSQL(trig4);
+    }
+
     private String buildCreateSql(String table, String[] columnNames, String[] type) {
         StringBuilder sb = new StringBuilder("create table if not exists ").append(table).append("(");
         sb.append(ID).append(" integer primary key autoincrement,");
@@ -139,6 +163,7 @@ public class DBHelper extends SQLiteOpenHelper {
         sb.replace(sb.length() - 1, sb.length(), ")");
         return sb.toString();
     }
+
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

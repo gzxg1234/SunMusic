@@ -1,7 +1,9 @@
 package com.sanron.sunmusic.task;
 
+import android.content.ContentValues;
 import android.os.AsyncTask;
 
+import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.db.PlayListProvider;
 import com.sanron.sunmusic.model.PlayList;
 
@@ -15,14 +17,14 @@ public abstract class AddPlayListTask extends AsyncTask<String,Void,Integer> {
     protected Integer doInBackground(String... params) {
         String listName = params[0];
         PlayListProvider listProvider = PlayListProvider.instance();
-        PlayList playList = new PlayList();
-        playList.setName(listName);
+        ContentValues values = new ContentValues(2);
+        values.put(DBHelper.PLAYLIST_NAME,listName);
         //检查是否重名
-        if(listProvider.query(playList).size()>0){
+        if(listProvider.query(values).moveToFirst()){
             return -1;
         }
-        playList.setType(PlayList.TYPE_USER);
-        int num = listProvider.insert(playList);
+        values.put(DBHelper.PLAYLIST_TYPE,PlayList.TYPE_USER);
+        int num = listProvider.insert(values);
         listProvider.notifyObservers();
         return num;
     }

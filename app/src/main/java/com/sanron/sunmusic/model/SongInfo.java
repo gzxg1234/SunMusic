@@ -1,5 +1,10 @@
 package com.sanron.sunmusic.model;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+
+import com.sanron.sunmusic.db.DBHelper;
+
 /**
  * Created by Administrator on 2015/12/19.
  */
@@ -148,5 +153,56 @@ public class SongInfo {
 
     public void setBitrate(int bitrate) {
         this.bitrate = bitrate;
+    }
+
+    public static SongInfo fromCursor(Cursor cursor) {
+        SongInfo songInfo = new SongInfo();
+        songInfo.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
+        songInfo.setSongId(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_SONGID)));
+        songInfo.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.SONG_TYPE)));
+        songInfo.setBitrate(cursor.getInt(cursor.getColumnIndex(DBHelper.SONG_BITRATE)));
+        songInfo.setAlbum(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_ALBUM)));
+        songInfo.setLetter(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_LETTER)));
+        songInfo.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_ARTIST)));
+        songInfo.setPath(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_PATH)));
+        songInfo.setDuration(cursor.getInt(cursor.getColumnIndex(DBHelper.SONG_DURATION)));
+        songInfo.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_DISPLAYNAME)));
+        songInfo.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_TITLE)));
+        return songInfo;
+    }
+
+    public ContentValues toContentValues() {
+        ContentValues values = new ContentValues();
+        if (id != -1) {
+            values.put(DBHelper.ID, id);
+        }
+        if (type != -1) {
+            values.put(DBHelper.SONG_TYPE, type);
+        }
+        if (displayName != null) {
+            values.put(DBHelper.SONG_DISPLAYNAME, displayName);
+        }
+        if (title != null) {
+            values.put(DBHelper.SONG_TITLE, title);
+        }
+        if (album != null) {
+            values.put(DBHelper.SONG_ALBUM, album);
+        }
+        if (artist != null) {
+            values.put(DBHelper.SONG_ARTIST, artist);
+        }
+        if (duration != -1) {
+            values.put(DBHelper.SONG_DURATION, duration);
+        }
+        if (path != null) {
+            values.put(DBHelper.SONG_PATH, path);
+        }
+        if (letter != null) {
+            values.put(DBHelper.SONG_LETTER, letter);
+        }
+        if (songId != null) {
+            values.put(DBHelper.SONG_SONGID, songId);
+        }
+        return values;
     }
 }

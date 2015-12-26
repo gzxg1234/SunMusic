@@ -1,10 +1,14 @@
 package com.sanron.sunmusic.task;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.os.AsyncTask;
 
+import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.db.PlayListProvider;
 import com.sanron.sunmusic.model.PlayList;
+import com.sanron.sunmusic.model.SongInfo;
 
 import java.util.List;
 
@@ -24,15 +28,17 @@ public abstract class UpdatePlayListNameTask extends AsyncTask<Void,Void,Integer
         PlayListProvider listProvider = PlayListProvider.instance();
         int num = 0;
         //检查列表名是否已存在
-        PlayList query = new PlayList();
-        query.setName(mPlayList.getName());
-        List<PlayList> result = listProvider.query(query);
-        if(result.size()>0 && result.get(0).getId() != mPlayList.getId()){
+        ContentValues values = new ContentValues(1);
+        values.put(DBHelper.PLAYLIST_NAME,mPlayList.getName());
+        Cursor cursor = listProvider.query(values);
+        if(cursor.moveToFirst()
+                && PlayList.fromCursor(cursor).getId()!= mPlayList.getId()){
             //列表名已存在
             num = -1;
         }else{
-            num = listProvider.update(mPlayList);
+            num = listProvider.update(values,DBHelper.ID+"=?",mPlayList.getId()+"");
         }
+        cursor.close();
         listProvider.notifyObservers();
         return num;
     }

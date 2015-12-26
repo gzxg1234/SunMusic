@@ -1,8 +1,10 @@
 package com.sanron.sunmusic.task;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.db.ListSongsProvider;
 import com.sanron.sunmusic.db.PlayListProvider;
 import com.sanron.sunmusic.db.SongInfoProvider;
@@ -29,11 +31,13 @@ public abstract class AddSongToListTask extends AsyncTask<Void, Void, Integer> {
         PlayListProvider playListProvider = PlayListProvider.instance();
         SongInfoProvider songInfoProvider = SongInfoProvider.instance();
 
+        ContentValues values = new ContentValues(2);
+        values.put(DBHelper.LISTSONGS_LISTID,playList.getId());
+        values.put(DBHelper.LISTSONGS_SONGID,songInfo.getId());
         if(songInfo.getType() == SongInfo.TYPE_LOCAL) {
             //添加本地歌曲至列表
             //是否已经存在于列表中
-            Long[] songids = listSongsProvider.query(playList.getId(), songInfo.getId());
-            if (songids.length > 0) {
+            if (listSongsProvider.query(values).moveToFirst()) {
                 return -1;
             }
         }else if(songInfo.getType() == SongInfo.TYPE_WEB){
@@ -41,13 +45,10 @@ public abstract class AddSongToListTask extends AsyncTask<Void, Void, Integer> {
         }
 
         //插入
-        int num = listSongsProvider.insert(playList.getId(), songInfo.getId());
-        if (num > 0) {
-            //成功，更新playlist表songnum字段
-            playList.setSongNum(playList.getSongNum() + num);
-            playListProvider.update(playList);
+        int num = listSongsProvider.insert(values);
+        if(num > 0) {
+            playListProvider.notifyDataChanged();
         }
-        playListProvider.notifyObservers();
         listSongsProvider.notifyObservers();
         return num;
     }

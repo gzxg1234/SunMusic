@@ -1,8 +1,10 @@
 package com.sanron.sunmusic.task;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.db.ListSongsProvider;
 import com.sanron.sunmusic.db.PlayListProvider;
 import com.sanron.sunmusic.model.PlayList;
@@ -20,13 +22,9 @@ public abstract class DelPlayListTask extends AsyncTask<Long, Void, Integer> {
         ListSongsProvider listSongsProvider = ListSongsProvider.instance();
         PlayListProvider playListProvider = PlayListProvider.instance();
 
-        PlayList delete = new PlayList();
-        delete.setId(listid);
-        int num = playListProvider.delete(delete);
-        //删除播放列表成功，同时删除ListSongs表的相关列
-        if(num > 0){
-            listSongsProvider.delete(listid);
-        }
+        ContentValues values = new ContentValues();
+        values.put(DBHelper.ID,listid);
+        int num = playListProvider.delete(values);
         playListProvider.notifyObservers();
         listSongsProvider.notifyObservers();
         return num;

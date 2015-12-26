@@ -1,5 +1,6 @@
 package com.sanron.sunmusic.task;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
@@ -35,6 +36,7 @@ public abstract class DelLocalSongTask extends AsyncTask<Void, Void, Integer> {
         SongInfoProvider songInfoProvider = SongInfoProvider.instance();
 
         int delNum = 0;
+        ContentValues values = new ContentValues(1);
         for (int i = 0; i < mDeleteSongs.size(); i++) {
             SongInfo deleteSong = mDeleteSongs.get(i);
             if (mDeleteFile) {
@@ -50,13 +52,12 @@ public abstract class DelLocalSongTask extends AsyncTask<Void, Void, Integer> {
                     }
                 }
             }
-            SongInfo deleteObj = new SongInfo();
-            deleteObj.setId(deleteSong.getId());
-            int num =  songInfoProvider.delete(deleteObj);
-            if(num > 0){
-                //删除成功,更新添加了此歌曲的列表
+            values.put(DBHelper.ID,deleteSong.getId());
+            delNum += songInfoProvider.delete(values);
+        }
 
-            }
+        if(delNum > 0) {
+            PlayListProvider.instance().notifyDataChanged();
         }
         songInfoProvider.notifyObservers();
         return delNum;
