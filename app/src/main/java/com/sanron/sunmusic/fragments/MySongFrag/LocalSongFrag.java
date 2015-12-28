@@ -1,5 +1,6 @@
 package com.sanron.sunmusic.fragments.MySongFrag;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -40,7 +41,7 @@ public class LocalSongFrag extends BaseFragment implements Observer {
 
     private RecyclerView mListLocalSongs;
     private SongItemAdapter mSongItemAdapter;
-
+    private ProgressDialog mProgressDialog;
     public static final String TAG = "LocalSongFrag";
 
     public static LocalSongFrag newInstance() {
@@ -77,6 +78,11 @@ public class LocalSongFrag extends BaseFragment implements Observer {
         mListLocalSongs = $(R.id.list_localsong);
         mListLocalSongs.setAdapter(mSongItemAdapter);
         mListLocalSongs.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        mProgressDialog = new ProgressDialog(getContext());
+        mProgressDialog.setOwnerActivity(getActivity());
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setMessage("正在扫描本地歌曲");
         return contentView;
     }
 
@@ -136,7 +142,17 @@ public class LocalSongFrag extends BaseFragment implements Observer {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.option_refresh_localsong: {
-                new RefreshLocalSongsTask(getContext()).execute();
+                new RefreshLocalSongsTask(getContext()){
+                    @Override
+                    protected void onPreExecute() {
+                        mProgressDialog.show();
+                    }
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        super.onPostExecute(aVoid);
+                        mProgressDialog.cancel();
+                    }
+                }.execute();
             }
             break;
 

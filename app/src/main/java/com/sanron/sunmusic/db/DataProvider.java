@@ -45,7 +45,7 @@ public abstract class DataProvider extends Observable {
         return query(null, values);
     }
 
-    public Cursor query(String[] colunms, String selection, String... selectionArgs) {
+    public Cursor query(String[] colunms, String selection, String[] selectionArgs) {
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
         Cursor cursor = database.query(mTableName,
                 colunms,

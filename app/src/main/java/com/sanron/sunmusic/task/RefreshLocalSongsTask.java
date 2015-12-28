@@ -14,6 +14,7 @@ import com.sanron.sunmusic.db.ArtistProvider;
 import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.db.PlayListProvider;
 import com.sanron.sunmusic.db.SongInfoProvider;
+import com.sanron.sunmusic.model.Artist;
 import com.sanron.sunmusic.model.SongInfo;
 
 import org.jaudiotagger.audio.AudioFile;
@@ -95,9 +96,10 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
         cursor.close();
         songInfoProvider.execSQL(delSql.toString());
 
-
         songInfoProvider.notifyDataChanged();
         PlayListProvider.instance().notifyDataChanged();
+        ArtistProvider.instance().notifyDataChanged();
+        AlbumProvider.instance().notifyDataChanged();
         return null;
     }
 

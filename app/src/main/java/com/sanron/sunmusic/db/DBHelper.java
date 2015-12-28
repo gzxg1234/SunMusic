@@ -190,8 +190,16 @@ public class DBHelper extends SQLiteOpenHelper {
                 +" end;";
         String trig7 = "create trigger albumDelete after delete on "+DBHelper.TABLE_ALBUM
                 +" begin"
-                +" update "+DBHelper.TABLE_ARTIST+" set "+DBHelper.ARTIST_ALBUMNUM+"="+DBHelper.ARTIST_ALBUMNUM+"-1 where "+DBHelper.ARTIST_NAME+"=new."+DBHelper.ALBUM_ARTIST+";"
+                +" update "+DBHelper.TABLE_ARTIST+" set "+DBHelper.ARTIST_ALBUMNUM+"="+DBHelper.ARTIST_ALBUMNUM+"-1 where "+DBHelper.ARTIST_NAME+"=old."+DBHelper.ALBUM_ARTIST+";"
                 +" delete from "+DBHelper.TABLE_SONG+" where "+DBHelper.SONG_ALBUMID+"=old."+DBHelper.ID+";"
+                +" end;";
+        String trig8 = "create trigger albumUpdate after update of "+DBHelper.ALBUM_SONGNUM+" on "+DBHelper.TABLE_ALBUM+" when new."+DBHelper.ALBUM_SONGNUM+"=0"
+                +" begin"
+                +" delete from "+DBHelper.TABLE_ALBUM+" where "+DBHelper.ID+"=new."+DBHelper.ID+";"
+                +" end;";
+        String trig9 = "create trigger artistUpdate after update of "+DBHelper.ARTIST_ALBUMNUM+" on "+DBHelper.TABLE_ARTIST+" when new."+DBHelper.ARTIST_ALBUMNUM+"=0"
+                +" begin"
+                +" delete from "+DBHelper.TABLE_ARTIST+" where "+DBHelper.ID+"=new."+DBHelper.ID+";"
                 +" end;";
         db.execSQL(trig1);
         db.execSQL(trig2);
@@ -200,6 +208,8 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(trig5);
         db.execSQL(trig6);
         db.execSQL(trig7);
+        db.execSQL(trig8);
+        db.execSQL(trig9);
     }
 
     private String buildCreateSql(String table, String[] columnNames, String[] type) {
