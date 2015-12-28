@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 
 import com.sanron.sunmusic.db.DBHelper;
-import com.sanron.sunmusic.db.PlayListProvider;
+import com.sanron.sunmusic.db.DataProvider;
 import com.sanron.sunmusic.model.PlayList;
 
 /**
@@ -17,12 +17,12 @@ public abstract class AddPlayListTask extends AsyncTask<String,Void,Integer> {
     @Override
     protected Integer doInBackground(String... params) {
         String listName = params[0];
-        PlayListProvider listProvider = PlayListProvider.instance();
+        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_PLAYLIST);
         ContentValues values = new ContentValues(2);
         values.put(DBHelper.PLAYLIST_NAME,listName);
 
         //检查是否重名
-        Cursor cursor = listProvider.query(values);
+        Cursor cursor = access.query(values);
         boolean isExists = cursor.moveToFirst();
         cursor.close();
         if(isExists){
@@ -31,8 +31,8 @@ public abstract class AddPlayListTask extends AsyncTask<String,Void,Integer> {
 
         //插入
         values.put(DBHelper.PLAYLIST_TYPE,PlayList.TYPE_USER);
-        int num = listProvider.blukInsert(values);
-        listProvider.notifyObservers();
+        int num = access.blukInsert(values);
+        access.close();
         return num;
     }
 

@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.fragments.BaseFragment;
 
+import java.util.Observable;
+
 /**
  * Created by Administrator on 2015/12/21.
  */
@@ -17,7 +19,7 @@ public class RecentPlayFrag extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        contentView = LayoutInflater.from(getContext()).inflate(R.layout.frag_recentplay,null);
+        contentView = LayoutInflater.from(getContext()).inflate(R.layout.frag_recycler_layout,null);
         return contentView;
     }
 
@@ -25,4 +27,8 @@ public class RecentPlayFrag extends BaseFragment {
         return new RecentPlayFrag();
     }
 
+    @Override
+    public void update(Observable observable, Object data) {
+
+    }
 }

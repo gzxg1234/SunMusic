@@ -1,177 +1,101 @@
 package com.sanron.sunmusic.fragments.MySongFrag;
 
-import android.content.Context;
-import android.graphics.Rect;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.sanron.sunmusic.R;
-import com.sanron.sunmusic.db.ArtistProvider;
+import com.sanron.sunmusic.adapter.GridAdapter;
+import com.sanron.sunmusic.db.DBHelper;
+import com.sanron.sunmusic.db.DataProvider;
 import com.sanron.sunmusic.fragments.BaseFragment;
 import com.sanron.sunmusic.model.Artist;
-import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.task.GetArtistsTask;
 import com.sanron.sunmusic.utils.DensityUtil;
-import com.sanron.sunmusic.utils.T;
 
+import java.io.File;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Random;
 
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class ArtistFrag extends BaseFragment implements Observer {
+public class ArtistFrag extends BaseFragment {
 
     private RecyclerView rvArtists;
-    private ArtistItemAdapter mArtistAdapter;
+    private GridAdapter mArtistAdapter;
 
+    public static ArtistFrag newInstance() {
+        return new ArtistFrag();
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ArtistProvider.instance().addObserver(this);
-        mArtistAdapter = new ArtistItemAdapter(getContext(), null);
-        update(null, null);
+        mArtistAdapter = new GridAdapter<Artist>(getContext(), null) {
+            @Override
+            public void onBindViewHolder(GridItemHolder holder, int position) {
+                Artist artist = mData.get(position);
+                holder.tvText1.setText(artist.getName());
+                holder.tvText2.setText(artist.getAlbumNum()+"张专辑");
+                String picPath = artist.getPicPath();
+                if(TextUtils.isEmpty(picPath)){
+                    holder.ivPicture.setImageResource(R.mipmap.default_pic);
+                }else{
+                    File file = new File(picPath);
+                    if(!file.exists()){
+                        holder.ivPicture.setImageResource(R.mipmap.default_pic);
+                    }
+                }
+            }
+        };
+        update(null, DBHelper.TABLE_ARTIST);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        contentView = LayoutInflater.from(getContext()).inflate(R.layout.frag_artist, null);
-        rvArtists = $(R.id.rv_artists);
+        contentView = LayoutInflater.from(getContext()).inflate(R.layout.frag_recycler_layout, null);
+        int padding = DensityUtil.dip2px(getContext(),4);
+        contentView.setPadding(padding,padding,padding,padding);
+        rvArtists = $(R.id.recycler_view);
         rvArtists.setAdapter(mArtistAdapter);
         rvArtists.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
-        rvArtists.addItemDecoration(new MyItemDecoration());
         return contentView;
-    }
-
-    public static class MyItemDecoration extends RecyclerView.ItemDecoration {
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            super.getItemOffsets(outRect, view, parent, state);
-            RecyclerView.LayoutParams lp = (RecyclerView.LayoutParams) view.getLayoutParams();
-            int right = 0;
-            int bottom = 0;
-            int padding = (int) parent.getContext().getResources().getDimension(R.dimen.recycle_item_padding);
-            int position = lp.getViewLayoutPosition();
-            int s = parent.getChildAdapterPosition(view);
-            System.out.println(position);
-            System.out.println(s);
-            int itemCount = parent.getAdapter().getItemCount();
-            //总列数
-            int colCount = getSpanCount(parent.getLayoutManager());
-            //总行数
-            int rowCount = itemCount / colCount + (itemCount % colCount == 0 ? 0 : 1);
-            //当前item对应行
-            int curRow = (position + 1) / colCount + (position % colCount == 0 ? 0 : 1);
-            if ((position + 1) % colCount != 0) {
-                //非最后一列才需要右边距
-                right = padding;
-            }
-            if (curRow != rowCount) {
-                bottom = padding;
-            }
-            System.out.println(right);
-            outRect.set(0, 0, right, bottom);
-        }
-
-        private int getSpanCount(RecyclerView.LayoutManager lm) {
-            if (lm instanceof GridLayoutManager) {
-                return ((GridLayoutManager) lm).getSpanCount();
-            } else if (lm instanceof StaggeredGridLayoutManager) {
-                return ((StaggeredGridLayoutManager) lm).getSpanCount();
-            }
-            return -1;
-        }
-    }
-
-    public static class ArtistItemAdapter extends RecyclerView.Adapter<ArtistItemAdapter.ArtistHolder> {
-
-        private List<Artist> mData;
-        private Context mContext;
-
-        public ArtistItemAdapter(Context context, List<Artist> data) {
-            super();
-            mContext = context;
-            mData = data;
-        }
-
-        public void setData(List<Artist> data) {
-            mData = data;
-            notifyDataSetChanged();
-        }
-
-
-        @Override
-        public ArtistHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(mContext).inflate(R.layout.grid_item_artist, parent, false);
-            return new ArtistHolder(view);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mData == null ? 0 : mData.size();
-        }
-
-        private int[] ids = new int[]{R.mipmap.d1, R.mipmap.d2, R.mipmap.d3, R.mipmap.d4};
-
-        @Override
-        public void onBindViewHolder(final ArtistHolder holder, final int position) {
-            Artist artist = mData.get(position);
-            holder.tvText1.setText(artist.getName());
-            holder.tvText2.setText(artist.getAlbumNum() + "张专辑");
-            int n = new Random().nextInt(4);
-            holder.ivPicture.setImageResource(ids[n]);
-        }
-
-        public class ArtistHolder extends RecyclerView.ViewHolder {
-            ImageView ivPicture;
-            TextView tvText1;
-            TextView tvText2;
-            ImageButton btnAction;
-
-            public ArtistHolder(View itemView) {
-                super(itemView);
-                itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        T.show(mContext,""+getLayoutPosition());
-                    }
-                });
-                ivPicture = (ImageView) itemView.findViewById(R.id.iv_picture);
-                tvText1 = (TextView) itemView.findViewById(R.id.tv_text1);
-                tvText2 = (TextView) itemView.findViewById(R.id.tv_text2);
-                btnAction = (ImageButton) itemView.findViewById(R.id.btn_action);
-            }
-
-        }
-
-    }
-
-
-    public static ArtistFrag newInstance() {
-        return new ArtistFrag();
     }
 
     @Override
     public void update(Observable observable, Object data) {
-        new GetArtistsTask() {
-            @Override
-            protected void onPostExecute(List<Artist> artists) {
-                mArtistAdapter.setData(artists);
-            }
-        }.execute();
+        if(DBHelper.TABLE_ARTIST.equals(data)) {
+            new GetArtistsTask() {
+                @Override
+                protected void onPostExecute(List<Artist> artists) {
+                    mArtistAdapter.setData(artists);
+                }
+            }.execute();
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.artistfrag_option_menu,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.option_match_pic:{
+
+            }break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

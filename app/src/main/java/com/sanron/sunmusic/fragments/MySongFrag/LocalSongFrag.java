@@ -17,7 +17,7 @@ import android.view.ViewGroup;
 
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.adapter.SongItemAdapter;
-import com.sanron.sunmusic.db.SongInfoProvider;
+import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.fragments.BaseFragment;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.model.SongInfo;
@@ -36,7 +36,7 @@ import java.util.Observer;
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class LocalSongFrag extends BaseFragment implements Observer {
+public class LocalSongFrag extends BaseFragment{
 
 
     private RecyclerView mListLocalSongs;
@@ -51,8 +51,6 @@ public class LocalSongFrag extends BaseFragment implements Observer {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-        SongInfoProvider.instance().addObserver(this);
         mSongItemAdapter = new SongItemAdapter(getContext(), null);
         mSongItemAdapter.setOnActionClickListener(new SongItemAdapter.OnActionClickListener() {
             @Override
@@ -61,28 +59,26 @@ public class LocalSongFrag extends BaseFragment implements Observer {
                 showActionMenu(view, songInfo);
             }
         });
-        update(null, null);
+        update(null, DBHelper.TABLE_SONG);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        SongInfoProvider.instance().deleteObserver(this);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        contentView = LayoutInflater.from(getContext()).inflate(R.layout.frag_localsong, null);
-        mListLocalSongs = $(R.id.list_localsong);
+        contentView = LayoutInflater.from(getContext()).inflate(R.layout.frag_recycler_layout, null);
+        mListLocalSongs = $(R.id.recycler_view);
         mListLocalSongs.setAdapter(mSongItemAdapter);
         mListLocalSongs.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         mProgressDialog = new ProgressDialog(getContext());
         mProgressDialog.setOwnerActivity(getActivity());
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         mProgressDialog.setCancelable(false);
-        mProgressDialog.setMessage("正在扫描本地歌曲");
         return contentView;
     }
 
@@ -125,12 +121,14 @@ public class LocalSongFrag extends BaseFragment implements Observer {
 
     @Override
     public void update(Observable observable, Object data) {
-        new GetLocalSongsTask() {
-            @Override
-            protected void onPostExecute(List<SongInfo> data) {
-                mSongItemAdapter.setData(data);
-            }
-        }.execute();
+        if(DBHelper.TABLE_SONG.equals(data)) {
+            new GetLocalSongsTask() {
+                @Override
+                protected void onPostExecute(List<SongInfo> data) {
+                    mSongItemAdapter.setData(data);
+                }
+            }.execute();
+        }
     }
 
     @Override
@@ -145,11 +143,11 @@ public class LocalSongFrag extends BaseFragment implements Observer {
                 new RefreshLocalSongsTask(getContext()){
                     @Override
                     protected void onPreExecute() {
+                        mProgressDialog.setMessage("正在扫描本地歌曲");
                         mProgressDialog.show();
                     }
                     @Override
                     protected void onPostExecute(Void aVoid) {
-                        super.onPostExecute(aVoid);
                         mProgressDialog.cancel();
                     }
                 }.execute();
@@ -184,9 +182,15 @@ public class LocalSongFrag extends BaseFragment implements Observer {
             @Override
             public void onClick(final DialogInterface dialog, int which) {
                 new DelLocalSongTask(getContext(), deleteSongs, deleteFile[0]) {
+                    @Override
+                    protected void onPreExecute() {
+                        mProgressDialog.setMessage("删除中");
+                        mProgressDialog.show();
+                    }
 
                     @Override
                     protected void onPostExecute(Integer num) {
+                        mProgressDialog.cancel();
                         if (num > 0) {
                             T.show(getContext(), "删除" + num + "首歌曲");
                         } else {

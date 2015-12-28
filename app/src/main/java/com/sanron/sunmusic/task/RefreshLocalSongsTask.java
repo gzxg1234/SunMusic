@@ -9,13 +9,10 @@ import android.provider.MediaStore;
 
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
-import com.sanron.sunmusic.db.AlbumProvider;
-import com.sanron.sunmusic.db.ArtistProvider;
 import com.sanron.sunmusic.db.DBHelper;
-import com.sanron.sunmusic.db.PlayListProvider;
-import com.sanron.sunmusic.db.SongInfoProvider;
-import com.sanron.sunmusic.model.Artist;
+import com.sanron.sunmusic.db.DataProvider;
 import com.sanron.sunmusic.model.SongInfo;
+import com.sanron.sunmusic.utils.AudioTool;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -34,6 +31,9 @@ import java.io.IOException;
 public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
 
     private Context mContext;
+    private DataProvider.Access songInfoAccess;
+    private DataProvider.Access artistAccess;
+    private DataProvider.Access albumAccess;
     public static final Uri URI = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
     public static final String[] PROJECTION = new String[]{
             MediaStore.Audio.Media._ID,
@@ -46,12 +46,14 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
     };
 
     public RefreshLocalSongsTask(Context context) {
+        songInfoAccess = DataProvider.instance().getAccess(DBHelper.TABLE_SONG);
+        artistAccess = DataProvider.instance().getAccess(DBHelper.TABLE_ARTIST);
+        albumAccess = DataProvider.instance().getAccess(DBHelper.TABLE_ALBUM);
         this.mContext = context;
     }
 
     @Override
     protected Void doInBackground(Void... params) {
-        SongInfoProvider songInfoProvider = SongInfoProvider.instance();
         Cursor cursor = mContext.getContentResolver().query(URI,
                 PROJECTION,
                 MediaStore.Audio.Media.IS_MUSIC + "=?",
@@ -62,14 +64,14 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
         values.put(DBHelper.SONG_TYPE, SongInfo.TYPE_LOCAL);
         //删除数据库和MediaProvider不同的数据
         StringBuffer delSql = new StringBuffer("delete from " + DBHelper.TABLE_SONG
-                + " where " + DBHelper.SONG_TYPE + "=" + SongInfo.TYPE_LOCAL+" and (");
+                + " where " + DBHelper.SONG_TYPE + "=" + SongInfo.TYPE_LOCAL + " and (");
 
-        if(cursor.moveToFirst()){
-            do{
+        if (cursor.moveToFirst()) {
+            do {
                 String songid = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
                 delSql.append(DBHelper.SONG_SONGID).append("!=").append(songid).append(" and ");
                 values.put(DBHelper.SONG_SONGID, songid);
-                Cursor c2 = songInfoProvider.query(values);
+                Cursor c2 = songInfoAccess.query(values);
                 if (!c2.moveToFirst()) {
 
                     ContentValues songValues = toContentValues(cursor);
@@ -77,88 +79,62 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
                     //歌手信息
                     String artistName = songValues.getAsString(DBHelper.SONG_ARTISTNAME);
                     long artistId = getArtistID(artistName);
-                    songValues.put(DBHelper.SONG_ARTISTID,artistId);
+                    songValues.put(DBHelper.SONG_ARTISTID, artistId);
 
                     //专辑信息
                     String albumName = songValues.getAsString(DBHelper.SONG_ALBUMNAME);
-                    long albumId = getAlbumID(artistName,albumName);
-                    songValues.put(DBHelper.SONG_ALBUMID,albumId);
+                    long albumId = getAlbumID(artistName, albumName);
+                    songValues.put(DBHelper.SONG_ALBUMID, albumId);
 
-                    songInfoProvider.insert(songValues);
+                    songInfoAccess.insert(songValues);
                 }
-
-                c2.close();
-            }while (cursor.moveToNext());
+            } while (cursor.moveToNext());
             delSql.replace(delSql.length() - 5, delSql.length(), ")");
-        }else{
+        } else {
             delSql.replace(delSql.length() - 6, delSql.length(), "");
         }
-        cursor.close();
-        songInfoProvider.execSQL(delSql.toString());
+        songInfoAccess.execSQL(delSql.toString());
 
-        songInfoProvider.notifyDataChanged();
-        PlayListProvider.instance().notifyDataChanged();
-        ArtistProvider.instance().notifyDataChanged();
-        AlbumProvider.instance().notifyDataChanged();
+        songInfoAccess.close();
+        albumAccess.close();
+        artistAccess.close();
+        DataProvider.instance().notifyDataChanged(DBHelper.TABLE_PLAYLIST);
+        DataProvider.instance().notifyDataChanged(DBHelper.TABLE_ARTIST);
+        DataProvider.instance().notifyDataChanged(DBHelper.TABLE_ALBUM);
         return null;
     }
 
-    public long getArtistID(String artistName){
+    public long getArtistID(String artistName) {
         ContentValues artistValues = new ContentValues();
-        artistValues.put(DBHelper.ARTIST_NAME,artistName);
-        Cursor cursor = ArtistProvider.instance().query(artistValues);
+        artistValues.put(DBHelper.ARTIST_NAME, artistName);
+        Cursor cursor = artistAccess.query(artistValues);
         long artistId = -1;
-        if(cursor.moveToFirst()){
+        if (cursor.moveToFirst()) {
             //如果数据库中已有此歌手
             artistId = cursor.getLong(cursor.getColumnIndex(DBHelper.ID));
-        }else{
+        } else {
             //没有则插入新歌手信息
-            artistId = ArtistProvider.instance().insert(artistValues);
+            artistId = artistAccess.insert(artistValues);
         }
-        cursor.close();
         return artistId;
     }
 
-    public long getAlbumID(String artistName,String albumName){
+    public long getAlbumID(String artistName, String albumName) {
         ContentValues albumValues = new ContentValues();
-        albumValues.put(DBHelper.ALBUM_NAME,albumName);
-        albumValues.put(DBHelper.ALBUM_ARTIST,artistName);
-        Cursor cursor = AlbumProvider.instance().query(albumValues);
-        long albumId = -1;
-        if(cursor.moveToFirst()){
+        albumValues.put(DBHelper.ALBUM_NAME, albumName);
+        albumValues.put(DBHelper.ALBUM_ARTIST, artistName);
+        Cursor cursor = albumAccess.query(albumValues);
+        long albumId;
+        if (cursor.moveToFirst()) {
             //如果数据库中已有此专辑
             albumId = cursor.getLong(cursor.getColumnIndex(DBHelper.ID));
-        }else{
+        } else {
             //没有则插入新专辑信息
-            albumId = AlbumProvider.instance().insert(albumValues);
+            albumId = albumAccess.insert(albumValues);
         }
-        cursor.close();
         return albumId;
     }
 
-    //读比特率
-    private int readBitrate(String path) {
-        File file = new File(path);
-        if (file.exists()) {
-            try {
-                AudioFile audioFile = AudioFileIO.read(file);
-                int bitrate = (int) audioFile.getAudioHeader().getBitRateAsNumber();
-                return bitrate;
-            } catch (CannotReadException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (TagException e) {
-                e.printStackTrace();
-            } catch (ReadOnlyFileException e) {
-                e.printStackTrace();
-            } catch (InvalidAudioFrameException e) {
-                e.printStackTrace();
-            }
-
-        }
-        return 0;
-    }
 
     //转换MediaProvider数据
     private ContentValues toContentValues(Cursor cursor) {
@@ -168,7 +144,7 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
         String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
         String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
         String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-        int bitrate = readBitrate(path);
+        int bitrate = AudioTool.readBitrate(path);
         int duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
         String letter = "";
         if (title.length() > 0) {

@@ -6,11 +6,7 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 
 import com.sanron.sunmusic.db.DBHelper;
-import com.sanron.sunmusic.db.ListSongsProvider;
-import com.sanron.sunmusic.db.PlayListProvider;
-import com.sanron.sunmusic.db.SongInfoProvider;
-import com.sanron.sunmusic.fragments.MySongFrag.PlayListSongsFrag;
-import com.sanron.sunmusic.model.PlayList;
+import com.sanron.sunmusic.db.DataProvider;
 import com.sanron.sunmusic.model.SongInfo;
 
 import java.io.File;
@@ -33,8 +29,7 @@ public abstract class DelLocalSongTask extends AsyncTask<Void, Void, Integer> {
 
     @Override
     protected Integer doInBackground(Void... params) {
-        SongInfoProvider songInfoProvider = SongInfoProvider.instance();
-
+        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_SONG);
         int delNum = 0;
         ContentValues values = new ContentValues(1);
         for (int i = 0; i < mDeleteSongs.size(); i++) {
@@ -53,13 +48,16 @@ public abstract class DelLocalSongTask extends AsyncTask<Void, Void, Integer> {
                 }
             }
             values.put(DBHelper.ID,deleteSong.getId());
-            delNum += songInfoProvider.delete(values);
+            delNum += access.delete(values);
         }
 
         if(delNum > 0) {
-            PlayListProvider.instance().notifyDataChanged();
+            DataProvider.instance().notifyDataChanged(DBHelper.TABLE_PLAYLIST);
         }
-        songInfoProvider.notifyObservers();
+
+        access.close();
+        DataProvider.instance().notifyDataChanged(DBHelper.TABLE_ARTIST);
+        DataProvider.instance().notifyDataChanged(DBHelper.TABLE_ALBUM);
         return delNum;
     }
 }

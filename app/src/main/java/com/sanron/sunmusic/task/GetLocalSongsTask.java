@@ -1,13 +1,11 @@
 package com.sanron.sunmusic.task;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
 
 import com.sanron.sunmusic.db.DBHelper;
-import com.sanron.sunmusic.db.SongInfoProvider;
-import com.sanron.sunmusic.model.PlayList;
+import com.sanron.sunmusic.db.DataProvider;
 import com.sanron.sunmusic.model.SongInfo;
 
 import java.util.ArrayList;
@@ -22,15 +20,15 @@ public abstract class GetLocalSongsTask extends AsyncTask<Void, Void, List<SongI
 
     @Override
     protected List<SongInfo> doInBackground(Void... params) {
-        SongInfoProvider songProvider = SongInfoProvider.instance();
+        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_SONG);
         List<SongInfo> songInfos = new ArrayList<>();
         ContentValues values = new ContentValues(1);
         values.put(DBHelper.SONG_TYPE, SongInfo.TYPE_LOCAL);
-        Cursor cursor = songProvider.query(values);
+        Cursor cursor = access.query(values);
         while(cursor.moveToNext()){
             songInfos.add(SongInfo.fromCursor(cursor));
         }
-        cursor.close();
+        access.close();
         return songInfos;
     }
 

@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.fragments.BaseFragment;
 
+import java.util.Observable;
+
 /**
  * Created by Administrator on 2015/12/15.
  */
@@ -34,7 +36,6 @@ public class MySongFrag extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         contentView = inflater.inflate(R.layout.frag_mysong, null);
-
         viewPager = $(R.id.viewpager);
         pagerAdapter = new SongPagerAdapter(getChildFragmentManager());
         viewPager.setAdapter(pagerAdapter);
@@ -44,6 +45,9 @@ public class MySongFrag extends BaseFragment {
         return contentView;
     }
 
+    @Override
+    public void update(Observable observable, Object data) {
+    }
 
     public static class SongPagerAdapter extends FragmentPagerAdapter {
 

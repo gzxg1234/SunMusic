@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 
 import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.db.DataProvider;
+import com.sanron.sunmusic.model.Album;
 import com.sanron.sunmusic.model.Artist;
 
 import java.util.ArrayList;
@@ -14,19 +15,19 @@ import java.util.List;
  * 获取本地歌曲
  * Created by Administrator on 2015/12/21.
  */
-public abstract class GetArtistsTask extends AsyncTask<Void, Void, List<Artist>> {
+public abstract class GetAlbumsTask extends AsyncTask<Void, Void, List<Album>> {
 
 
     @Override
-    protected List<Artist> doInBackground(Void... params) {
-        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_ARTIST);
-        List<Artist> artists = new ArrayList<>();
+    protected List<Album> doInBackground(Void... params) {
+        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_ALBUM);
+        List<Album> albums = new ArrayList<>();
         Cursor cursor = access.query(null,null,null);
         while(cursor.moveToNext()){
-            artists.add(Artist.fromCursor(cursor));
+            albums.add(Album.fromCursor(cursor));
         }
         access.close();
-        return artists;
+        return albums;
     }
 
 }

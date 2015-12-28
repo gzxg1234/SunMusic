@@ -1,6 +1,7 @@
 package com.sanron.sunmusic.fragments.MySongFrag;
 
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -17,7 +18,7 @@ import android.view.ViewGroup;
 
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.adapter.SongItemAdapter;
-import com.sanron.sunmusic.db.ListSongsProvider;
+import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.fragments.BaseFragment;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.model.SongInfo;
@@ -33,7 +34,7 @@ import java.util.Observer;
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class PlayListSongsFrag extends BaseFragment implements Observer {
+public class PlayListSongsFrag extends BaseFragment{
 
     private PlayList mPlayList;
     private RecyclerView mListPlaySongs;
@@ -53,8 +54,6 @@ public class PlayListSongsFrag extends BaseFragment implements Observer {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-        ListSongsProvider.instance().addObserver(this);
         mSongItemAdapter = new SongItemAdapter(getContext(), null);
 
         mSongItemAdapter.setOnItemClickListener(new SongItemAdapter.OnItemClickListener() {
@@ -70,13 +69,7 @@ public class PlayListSongsFrag extends BaseFragment implements Observer {
                 showActionMenu(view, actionPosition);
             }
         });
-        update(null,null);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        ListSongsProvider.instance().deleteObserver(this);
+        update(null,DBHelper.TABLE_LISTSONGS);
     }
 
     public void showActionMenu(final View anchor, final int position) {
@@ -111,8 +104,9 @@ public class PlayListSongsFrag extends BaseFragment implements Observer {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        contentView = inflater.inflate(R.layout.frag_playlist_songs, null);
-        mListPlaySongs = $(R.id.list_playlist_songs);
+        contentView = inflater.inflate(R.layout.frag_recycler_layout, null);
+        contentView.setBackgroundColor(Color.WHITE);
+        mListPlaySongs = $(R.id.recycler_view);
         mListPlaySongs.setAdapter(mSongItemAdapter);
         mListPlaySongs.setItemAnimator(new DefaultItemAnimator());
         mListPlaySongs.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
@@ -175,11 +169,13 @@ public class PlayListSongsFrag extends BaseFragment implements Observer {
 
     @Override
     public void update(Observable observable, Object data) {
-        new GetPlayListSongsTask(mPlayList) {
-            @Override
-            protected void onPostExecute(List<SongInfo> data) {
-                mSongItemAdapter.setData(data);
-            }
-        }.execute();
+        if(DBHelper.TABLE_LISTSONGS.equals(data)) {
+            new GetPlayListSongsTask(mPlayList) {
+                @Override
+                protected void onPostExecute(List<SongInfo> data) {
+                    mSongItemAdapter.setData(data);
+                }
+            }.execute();
+        }
     }
 }
