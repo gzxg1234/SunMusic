@@ -21,7 +21,7 @@ public abstract class GetPlayListsTask extends AsyncTask<Void, Void, List<PlayLi
         DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_PLAYLIST);
         List<PlayList> playLists = new ArrayList<>();
         Cursor cursor = access.query(DBHelper.PLAYLIST_TYPE+"=? or "+DBHelper.PLAYLIST_TYPE+"=?",
-                PlayList.TYPE_FAVORITE+"",PlayList.TYPE_FAVORITE+"");
+                PlayList.TYPE_FAVORITE+"",PlayList.TYPE_USER+"");
         while(cursor.moveToNext()){
             playLists.add(PlayList.fromCursor(cursor));
         }

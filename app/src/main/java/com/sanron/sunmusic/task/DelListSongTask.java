@@ -33,10 +33,6 @@ public abstract class DelListSongTask extends AsyncTask<Void, Void, Integer> {
             values.put(DBHelper.LISTSONGS_SONGID,deleteSongs.get(i).getId());
             delNum += access.delete(values);
         }
-
-        if(delNum>0){
-            DataProvider.instance().notifyDataChanged(DBHelper.TABLE_PLAYLIST);
-        }
         access.close();
         return delNum;
     }

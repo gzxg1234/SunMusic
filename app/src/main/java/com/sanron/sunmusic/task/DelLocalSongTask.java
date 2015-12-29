@@ -51,13 +51,7 @@ public abstract class DelLocalSongTask extends AsyncTask<Void, Void, Integer> {
             delNum += access.delete(values);
         }
 
-        if(delNum > 0) {
-            DataProvider.instance().notifyDataChanged(DBHelper.TABLE_PLAYLIST);
-        }
-
         access.close();
-        DataProvider.instance().notifyDataChanged(DBHelper.TABLE_ARTIST);
-        DataProvider.instance().notifyDataChanged(DBHelper.TABLE_ALBUM);
         return delNum;
     }
 }

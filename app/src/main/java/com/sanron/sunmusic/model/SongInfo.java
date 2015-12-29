@@ -66,6 +66,20 @@ public class SongInfo {
      */
     private String songId;
 
+    /**
+     * 歌曲图片
+     *
+     * @return
+     */
+    private String picPath;
+
+    public String getPicPath() {
+        return picPath;
+    }
+
+    public void setPicPath(String picPath) {
+        this.picPath = picPath;
+    }
 
     public long getId() {
         return id;
@@ -168,6 +182,7 @@ public class SongInfo {
         songInfo.setDuration(cursor.getInt(cursor.getColumnIndex(DBHelper.SONG_DURATION)));
         songInfo.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_DISPLAYNAME)));
         songInfo.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_TITLE)));
+        songInfo.setPicPath(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_PIC)));
         return songInfo;
     }
 
@@ -202,6 +217,9 @@ public class SongInfo {
         }
         if (songId != null) {
             values.put(DBHelper.SONG_SONGID, songId);
+        }
+        if (picPath != null) {
+            values.put(DBHelper.SONG_PIC, picPath);
         }
         return values;
     }

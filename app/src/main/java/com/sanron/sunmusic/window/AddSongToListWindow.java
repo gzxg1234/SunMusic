@@ -2,27 +2,24 @@ package com.sanron.sunmusic.window;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.Toast;
 
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.model.SongInfo;
-import com.sanron.sunmusic.task.AddSongToListTask;
+import com.sanron.sunmusic.task.AddSongsToListTask;
+import com.sanron.sunmusic.utils.T;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +35,7 @@ public class AddSongToListWindow extends PopupWindow {
     private Activity mActivity;
     private float mOldAlpha;
 
-    public AddSongToListWindow(final Activity activity, final List<PlayList> playLists, final SongInfo songInfo) {
+    public AddSongToListWindow(final Activity activity, final List<PlayList> playLists, final List<SongInfo> songInfos) {
         super(activity);
         this.mActivity = activity;
         this.mPlayLists = playLists;
@@ -54,17 +51,13 @@ public class AddSongToListWindow extends PopupWindow {
         mListPlayList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                new AddSongToListTask(playLists.get(position), songInfo) {
+                new AddSongsToListTask(playLists.get(position), songInfos) {
                     @Override
-                    protected void onPostExecute(Integer num) {
+                    protected void onPostExecute(Integer[] num) {
                         AddSongToListWindow.this.dismiss();
-                        if (num == 0) {
-                            Toast.makeText(mActivity, "添加失败", Toast.LENGTH_SHORT).show();
-                        } else if (num == -1) {
-                            Toast.makeText(mActivity, "此歌曲已存在列表中", Toast.LENGTH_SHORT).show();
-                        } else if(num > 0){
-                            Toast.makeText(mActivity, "添加成功", Toast.LENGTH_SHORT).show();
-                        }
+                        String msg = num[0] + "首歌曲添加成功,";
+                        msg += num[1] == 0 ? "" : num[1] + "首歌曲已存在";
+                        T.show(mActivity, msg);
                     }
                 }.execute();
             }
@@ -91,9 +84,9 @@ public class AddSongToListWindow extends PopupWindow {
     }
 
     //activity背景恢复动画
-    private void animateDismiss(){
+    private void animateDismiss() {
         final WindowManager.LayoutParams attr = mActivity.getWindow().getAttributes();
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0.7f,mOldAlpha);
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0.7f, mOldAlpha);
         valueAnimator.setDuration(400);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -106,10 +99,10 @@ public class AddSongToListWindow extends PopupWindow {
     }
 
     //activity背景变暗动画
-    private void animateShow(){
+    private void animateShow() {
         final WindowManager.LayoutParams attr = mActivity.getWindow().getAttributes();
         mOldAlpha = attr.alpha;
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(attr.alpha,0.7f);
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(attr.alpha, 0.7f);
         valueAnimator.setDuration(400);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override

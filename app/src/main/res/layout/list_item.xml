@@ -1,63 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:id="@+id/item_view"
     android:layout_width="match_parent"
     android:layout_height="64dp"
-    android:padding="8dp"
+    android:layout_marginBottom="1dp"
     android:clipToPadding="false"
-    android:background="?android:attr/selectableItemBackground"
     android:gravity="center_vertical"
-    xmlns:tool="http://schemas.android.com/tools">
-
+    android:padding="8dp">
 
     <ImageView
-        android:id="@+id/song_icon"
+        android:id="@+id/iv_picture"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_alignParentLeft="true"
         android:layout_marginRight="8dp"
         android:scaleType="fitXY"
-        android:src="@mipmap/ic_music_head_48dp"/>
+        android:src="@mipmap/ic_music_head_48dp" />
 
     <ImageButton
-        android:id="@+id/btn_song_action"
+        android:id="@+id/btn_item_action"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_alignParentRight="true"
         android:background="@android:color/transparent"
-        android:src="@mipmap/ic_more_vert_black_24dp"
-        android:layout_alignParentRight="true" />
+        android:src="@mipmap/ic_more_vert_black_24dp" />
 
     <TextView
-        android:id="@+id/tv_song_title"
+        android:id="@+id/tv_text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/btn_song_action"
-        android:layout_toRightOf="@+id/song_icon"
-        android:singleLine="true"
+        android:layout_toLeftOf="@+id/btn_item_action"
+        android:layout_toRightOf="@+id/iv_picture"
         android:ellipsize="end"
-        android:textSize="16sp"
+        android:singleLine="true"
         android:textColor="@color/textColorPrimaryInverse"
-        tool:text="Suger"/>
+        android:textSize="16sp"
+        tool:text="Suger" />
 
     <TextView
-        android:id="@+id/tv_song_artist"
-        android:layout_width="wrap_content"
+        android:id="@+id/tv_text2"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/btn_song_action"
-        android:layout_toRightOf="@+id/song_icon"
         android:layout_alignParentBottom="true"
-        android:singleLine="true"
+        android:layout_toLeftOf="@+id/btn_item_action"
+        android:layout_toRightOf="@+id/iv_picture"
         android:ellipsize="end"
-        android:textSize="14sp"
+        android:singleLine="true"
         android:textColor="@color/textColorSecondaryInverse"
-        tool:text="Maroon5"
-        />
+        android:textSize="14sp"
+        tool:text="Maroon5" />
 
     <ImageView
-        android:src="@color/colorListDivider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_toRightOf="@+id/song_icon"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="-8dp"
-        />
+        android:layout_toRightOf="@+id/iv_picture"
+        android:src="@color/colorListDivider" />
 </RelativeLayout>

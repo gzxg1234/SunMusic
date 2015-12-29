@@ -98,9 +98,6 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
         songInfoAccess.close();
         albumAccess.close();
         artistAccess.close();
-        DataProvider.instance().notifyDataChanged(DBHelper.TABLE_PLAYLIST);
-        DataProvider.instance().notifyDataChanged(DBHelper.TABLE_ARTIST);
-        DataProvider.instance().notifyDataChanged(DBHelper.TABLE_ALBUM);
         return null;
     }
 

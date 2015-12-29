@@ -12,15 +12,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.sanron.sunmusic.R;
-import com.sanron.sunmusic.fragments.BaseFragment;
 
 import java.util.Observable;
 
 /**
  * Created by Administrator on 2015/12/15.
  */
-public class MySongFrag extends BaseFragment {
+public class MySongFrag extends Fragment {
 
+    protected View contentView;
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private SongPagerAdapter pagerAdapter;
@@ -29,6 +29,10 @@ public class MySongFrag extends BaseFragment {
 
     public static MySongFrag newInstance() {
         return new MySongFrag();
+    }
+
+    public <T extends View> T $(int id) {
+        return (T) contentView.findViewById(id);
     }
 
     @Nullable
@@ -43,10 +47,6 @@ public class MySongFrag extends BaseFragment {
         tabLayout = $(R.id.tablayout);
         tabLayout.setupWithViewPager(viewPager);
         return contentView;
-    }
-
-    @Override
-    public void update(Observable observable, Object data) {
     }
 
     public static class SongPagerAdapter extends FragmentPagerAdapter {

@@ -1,212 +1,146 @@
 package com.sanron.sunmusic.fragments.MySongFrag;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PopupMenu;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.sanron.sunmusic.R;
-import com.sanron.sunmusic.adapter.SongItemAdapter;
+import com.sanron.sunmusic.adapter.DataListAdapter;
 import com.sanron.sunmusic.db.DBHelper;
-import com.sanron.sunmusic.fragments.BaseFragment;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.model.SongInfo;
-import com.sanron.sunmusic.task.DelLocalSongTask;
+import com.sanron.sunmusic.service.MusicService;
+import com.sanron.sunmusic.service.PlayerUtils;
 import com.sanron.sunmusic.task.GetLocalSongsTask;
 import com.sanron.sunmusic.task.GetPlayListsTask;
 import com.sanron.sunmusic.task.RefreshLocalSongsTask;
-import com.sanron.sunmusic.utils.T;
 import com.sanron.sunmusic.window.AddSongToListWindow;
+import com.sanron.sunmusic.window.DeleteSongDialogBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class LocalSongFrag extends BaseFragment{
+public class LocalSongFrag extends BaseListFrag<SongInfo> {
 
-
-    private RecyclerView mListLocalSongs;
-    private SongItemAdapter mSongItemAdapter;
-    private ProgressDialog mProgressDialog;
-    public static final String TAG = "LocalSongFrag";
+    private MusicService.MusicPlayer player = PlayerUtils.getService();
+    public LocalSongFrag(int layout) {
+        super(layout,new String[]{DBHelper.TABLE_SONG,DBHelper.TABLE_ALBUM});
+    }
 
     public static LocalSongFrag newInstance() {
-        return new LocalSongFrag();
+        return new LocalSongFrag(LAYOUT_LINEAR);
+    }
+
+
+    @Override
+    protected void bindViewHolder(DataListAdapter.ItemHolder holder, int position) {
+        SongInfo songInfo = mAdapter.getItem(position);
+        holder.tvText1.setText(songInfo.getTitle());
+        holder.tvText2.setText(songInfo.getArtist());
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mSongItemAdapter = new SongItemAdapter(getContext(), null);
-        mSongItemAdapter.setOnActionClickListener(new SongItemAdapter.OnActionClickListener() {
+    public void refreshData() {
+        new GetLocalSongsTask() {
             @Override
-            public void onActionClick(View view, int actionPosition) {
-                SongInfo songInfo = mSongItemAdapter.getData().get(actionPosition);
-                showActionMenu(view, songInfo);
+            protected void onPostExecute(List<SongInfo> data) {
+                mAdapter.setData(data);
             }
-        });
-        update(null, DBHelper.TABLE_SONG);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        contentView = LayoutInflater.from(getContext()).inflate(R.layout.frag_recycler_layout, null);
-        mListLocalSongs = $(R.id.recycler_view);
-        mListLocalSongs.setAdapter(mSongItemAdapter);
-        mListLocalSongs.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        mProgressDialog = new ProgressDialog(getContext());
-        mProgressDialog.setOwnerActivity(getActivity());
-        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgressDialog.setCancelable(false);
-        return contentView;
-    }
-
-    public void showActionMenu(final View anchor, final SongInfo songInfo) {
-        PopupMenu popupMenu = new PopupMenu(getContext(), anchor);
-        popupMenu.inflate(R.menu.localsong_action);
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.menu_add_to_list: {
-                        new GetPlayListsTask() {
-                            @Override
-                            protected void onPostExecute(List<PlayList> playLists) {
-                                AddSongToListWindow window = new AddSongToListWindow(getActivity(),
-                                        playLists, songInfo);
-                                window.show();
-                            }
-                        }.execute();
-                    }
-                    break;
-
-                    case R.id.menu_add_to_quque: {
-
-                    }
-                    break;
-
-                    case R.id.menu_delete_local: {
-                        List<SongInfo> deleteSongs = new ArrayList<>();
-                        deleteSongs.add(songInfo);
-                        showConfirmDeleteDlg("删除歌曲", deleteSongs);
-                    }
-                    break;
-                }
-                return true;
-            }
-        });
-        popupMenu.show();
-    }
-
-    @Override
-    public void update(Observable observable, Object data) {
-        if(DBHelper.TABLE_SONG.equals(data)) {
-            new GetLocalSongsTask() {
-                @Override
-                protected void onPostExecute(List<SongInfo> data) {
-                    mSongItemAdapter.setData(data);
-                }
-            }.execute();
-        }
+        }.execute();
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.localsongfrag_option_menu, menu);
+        inflater.inflate(R.menu.option_menu_localsongfrag, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.option_refresh_localsong: {
-                new RefreshLocalSongsTask(getContext()){
+                final ProgressDialog mProgressDlg = new ProgressDialog(getContext());
+                new RefreshLocalSongsTask(getContext()) {
                     @Override
                     protected void onPreExecute() {
-                        mProgressDialog.setMessage("正在扫描本地歌曲");
-                        mProgressDialog.show();
+                        mProgressDlg.setMessage("正在扫描本地歌曲");
+                        mProgressDlg.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                        mProgressDlg.setCancelable(false);
+                        mProgressDlg.show();
                     }
                     @Override
                     protected void onPostExecute(Void aVoid) {
-                        mProgressDialog.cancel();
+                        mProgressDlg.cancel();
                     }
                 }.execute();
-            }
-            break;
-
-            case R.id.option_delete_alllocal: {
-                showConfirmDeleteDlg("删除所有歌曲", mSongItemAdapter.getData());
             }
             break;
         }
         return true;
     }
 
-    /**
-     * 显示删除确定对话框
-     */
-    private void showConfirmDeleteDlg(String title, final List<SongInfo> deleteSongs) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle(title);
-        builder.setCancelable(false);
-        final boolean[] deleteFile = new boolean[]{false};
-        builder.setMultiChoiceItems(new String[]{"同时删除音乐文件"},
-                deleteFile,
-                new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                        deleteFile[0] = isChecked;
-                    }
-                });
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, int which) {
-                new DelLocalSongTask(getContext(), deleteSongs, deleteFile[0]) {
-                    @Override
-                    protected void onPreExecute() {
-                        mProgressDialog.setMessage("删除中");
-                        mProgressDialog.show();
-                    }
+    @Override
+    public boolean onCreateActionMenu(ActionMode mode, Menu menu) {
+        mode.getMenuInflater().inflate(R.menu.song_menu,menu);
+        menu.removeItem(R.id.menu_remove_from_list);
+        return true;
+    }
 
+    @Override
+    public void onActionItemSelected(MenuItem item, final List<SongInfo> songInfos){
+        resolveMenuItemClick(item,songInfos);
+    }
+
+    @Override
+    public void onCreatePopupMenu(Menu menu, MenuInflater inflater,int position) {
+        inflater.inflate(R.menu.song_menu,menu);
+        menu.removeItem(R.id.menu_remove_from_list);
+    }
+
+    @Override
+    public void onPopupItemSelected(MenuItem item, int position) {
+        final List<SongInfo> songInfos = mAdapter.getData().subList(position, position + 1);
+        resolveMenuItemClick(item,songInfos);
+    }
+
+    public boolean resolveMenuItemClick(MenuItem item, final List<SongInfo> songInfos){
+        switch(item.getItemId()){
+            case R.id.menu_add_to_list: {
+                //添加到播放列表
+                new GetPlayListsTask() {
                     @Override
-                    protected void onPostExecute(Integer num) {
-                        mProgressDialog.cancel();
-                        if (num > 0) {
-                            T.show(getContext(), "删除" + num + "首歌曲");
-                        } else {
-                            T.show(getContext(), "删除失败");
-                        }
+                    protected void onPostExecute(List<PlayList> playLists) {
+                        AddSongToListWindow window = new AddSongToListWindow(getActivity(),
+                                playLists, songInfos);
+                        window.show();
                     }
                 }.execute();
             }
-        });
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
+            break;
+
+            case R.id.menu_add_to_quque: {
+                //添加到播放队列
+
             }
-        });
-        builder.create().show();
+            break;
+
+            case R.id.menu_delete_song: {
+                //删除
+                new DeleteSongDialogBuilder(getContext(), songInfos).create().show();
+            }
+            break;
+        }
+        return true;
+    }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        player.play(mAdapter.getData(),position);
+        super.onItemClick(view, position);
     }
 }
 

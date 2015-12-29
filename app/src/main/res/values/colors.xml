@@ -9,4 +9,5 @@
     <color name="textColorPrimaryInverse">#DD000000</color>
     <color name="textColorSecondaryInverse">#90000000</color>
     <color name="colorListDivider">#10000000</color>
+    <color name="selectedBackground">#89000000</color>
 </resources>
