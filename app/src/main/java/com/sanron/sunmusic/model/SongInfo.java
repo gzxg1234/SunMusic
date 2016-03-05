@@ -5,10 +5,12 @@ import android.database.Cursor;
 
 import com.sanron.sunmusic.db.DBHelper;
 
+import java.io.Serializable;
+
 /**
  * Created by Administrator on 2015/12/19.
  */
-public class SongInfo {
+public class SongInfo implements Serializable {
 
     public static final int TYPE_LOCAL = 1; //本地
     public static final int TYPE_WEB = 2;   //网络

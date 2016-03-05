@@ -3,6 +3,8 @@ package com.sanron.sunmusic.fragments.MySongFrag;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,7 +27,6 @@ import com.sanron.sunmusic.utils.T;
 
 import java.util.List;
 
-import de.greenrobot.event.EventBus;
 
 /**
  * Created by Administrator on 2015/12/21.
@@ -61,26 +62,12 @@ public class PlayListFrag extends BaseListFrag<PlayList> {
         }.execute();
     }
 
-    public static class ClickListEvent {
-        private PlayList playList;
-
-        public PlayList getPlayList() {
-            return playList;
-        }
-
-        public void setPlayList(PlayList playList) {
-            this.playList = playList;
-        }
-    }
-
-
-
     @Override
     public void onItemClick(View view, int position) {
-        List<PlayList> playLists = mAdapter.getData();
-        ClickListEvent event = new ClickListEvent();
-        event.setPlayList(playLists.get(position));
-        EventBus.getDefault().post(event);
+        PlayList playList = mAdapter.getData().get(position);
+        Intent intent = new Intent("com.sanron.music.playlistfrag");
+        intent.putExtra("playlist",playList);
+        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
     }
 
 

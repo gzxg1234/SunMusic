@@ -5,35 +5,41 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.util.Log;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2016/3/3.
  */
 public class PlayerUtils {
 
-    public static MusicService.MusicPlayer musicPlayer;
-
-    public static void bindToService(Context context) {
+    public static IMusicPlayer musicPlayer;
+    public static void bindToService(Context context, final ServiceConnection callback) {
         Intent intent = new Intent(context, MusicService.class);
-        context.bindService(intent, new PlayerBinder(), Context.BIND_AUTO_CREATE);
+        context.startService(intent);
+        context.bindService(intent, new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                if (musicPlayer == null) {
+                    musicPlayer = (MusicService.MusicPlayer) service;
+                }
+                if(callback != null){
+                    callback.onServiceConnected(name,service);
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                musicPlayer = null;
+                if(callback != null){
+                    callback.onServiceDisconnected(name);
+                }
+            }
+        }, Context.BIND_AUTO_CREATE);
     }
 
-    public static class PlayerBinder implements ServiceConnection {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            musicPlayer = (MusicService.MusicPlayer) service;
-            Log.i("MusicService", "service connected");
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            musicPlayer = null;
-        }
-    }
-
-    public static MusicService.MusicPlayer getService() {
+    public static IMusicPlayer getService() {
         return musicPlayer;
     }
 }

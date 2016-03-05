@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.sanron.sunmusic.R;
+import com.sanron.sunmusic.activity.MainActivity;
+import com.sanron.sunmusic.model.PlayList;
 
 import java.util.Observable;
 

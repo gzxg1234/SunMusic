@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.adapter.DataListAdapter;
 import com.sanron.sunmusic.db.DataProvider;
+import com.sanron.sunmusic.fragments.BaseFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +29,8 @@ import java.util.Observer;
 /**
  * Created by Administrator on 2016/3/3.
  */
-public abstract class BaseListFrag<T> extends Fragment implements DataListAdapter.OnItemClickListener, DataListAdapter.OnItemActionClickListener, DataListAdapter.OnItemLongLickListener, Observer {
+public abstract class BaseListFrag<T> extends BaseFragment implements DataListAdapter.OnItemClickListener, DataListAdapter.OnItemActionClickListener, DataListAdapter.OnItemLongLickListener, Observer {
 
-
-    protected View contentView;
     public static final int LAYOUT_LINEAR = 1;
     public static final int LAYOUT_STAGGERED = 2;
 
@@ -74,10 +73,6 @@ public abstract class BaseListFrag<T> extends Fragment implements DataListAdapte
     public void onDestroy() {
         super.onDestroy();
         DataProvider.instance().deleteObserver(this);
-    }
-
-    public <T extends View> T $(int id) {
-        return (T) contentView.findViewById(id);
     }
 
     @Override

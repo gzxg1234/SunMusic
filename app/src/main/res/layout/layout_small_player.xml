@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:background="@android:color/white"
+    >
+
+    <ImageView
+        android:id="@+id/s_iv_song_pic"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_alignParentLeft="true"
+        tools:src="@mipmap/test_head"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toRightOf="@+id/s_iv_song_pic"
+        android:layout_toLeftOf="@+id/s_ibtn_play_pause"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/s_tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/textColorPrimaryInverse"
+            android:layout_alignParentLeft="true"
+            android:textSize="15dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            tools:text="Love Yourself"/>
+        <TextView
+            android:id="@+id/s_tv_artist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/s_tv_title"
+            android:layout_marginTop="2dp"
+            android:textSize="15dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            tools:text="Justin Bieber"/>
+    </RelativeLayout>
+
+    <ImageButton
+        android:id="@+id/s_ibtn_play_pause"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@android:color/transparent"
+        android:layout_toLeftOf="@+id/s_ibtn_next"
+        android:src="@mipmap/ic_play_arrow_black_36dp"/>
+
+    <ImageButton
+        android:id="@+id/s_ibtn_next"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@android:color/transparent"
+        android:layout_alignParentRight="true"
+        android:src="@mipmap/ic_skip_next_black_36dp"/>
+
+</RelativeLayout>

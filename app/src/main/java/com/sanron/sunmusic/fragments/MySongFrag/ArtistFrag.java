@@ -34,11 +34,11 @@ public class ArtistFrag extends BaseListFrag<Artist> {
         holder.tvText2.setText(artist.getAlbumNum()+"张专辑");
         String picPath = artist.getPicPath();
         if(TextUtils.isEmpty(picPath)){
-            holder.ivPicture.setImageResource(R.mipmap.default_pic);
+            holder.ivPicture.setImageResource(R.mipmap.default_artist_album_pic);
         }else{
             File file = new File(picPath);
             if(!file.exists()){
-                holder.ivPicture.setImageResource(R.mipmap.default_pic);
+                holder.ivPicture.setImageResource(R.mipmap.default_artist_album_pic);
             }
         }
     }

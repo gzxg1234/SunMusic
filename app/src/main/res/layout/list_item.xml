@@ -16,7 +16,7 @@
         android:layout_alignParentLeft="true"
         android:layout_marginRight="8dp"
         android:scaleType="fitXY"
-        android:src="@mipmap/ic_music_head_48dp" />
+        android:src="@mipmap/default_song_pic" />
 
     <ImageButton
         android:id="@+id/btn_item_action"

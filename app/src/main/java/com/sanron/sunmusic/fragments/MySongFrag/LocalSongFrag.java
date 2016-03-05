@@ -12,6 +12,7 @@ import com.sanron.sunmusic.adapter.DataListAdapter;
 import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.model.SongInfo;
+import com.sanron.sunmusic.service.IMusicPlayer;
 import com.sanron.sunmusic.service.MusicService;
 import com.sanron.sunmusic.service.PlayerUtils;
 import com.sanron.sunmusic.task.GetLocalSongsTask;
@@ -27,7 +28,7 @@ import java.util.List;
  */
 public class LocalSongFrag extends BaseListFrag<SongInfo> {
 
-    private MusicService.MusicPlayer player = PlayerUtils.getService();
+    private IMusicPlayer player = PlayerUtils.getService();
     public LocalSongFrag(int layout) {
         super(layout,new String[]{DBHelper.TABLE_SONG,DBHelper.TABLE_ALBUM});
     }
