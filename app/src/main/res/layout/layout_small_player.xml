@@ -1,63 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
+    android:layout_height="58dp"
+    android:orientation="horizontal"
     android:background="@android:color/white"
     >
 
+
+
     <ImageView
         android:id="@+id/s_iv_song_pic"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_alignParentLeft="true"
+        android:layout_width="58dp"
+        android:layout_height="58dp"
         tools:src="@mipmap/test_head"/>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toRightOf="@+id/s_iv_song_pic"
-        android:layout_toLeftOf="@+id/s_ibtn_play_pause"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:gravity="center_vertical">
+        android:orientation="vertical">
+        <ProgressBar
+            android:id="@+id/s_play_progress"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:progressDrawable="@drawable/seekbar_play_progress"
+            tools:max="100"
+            tools:progress="20"
+            />
 
-        <TextView
-            android:id="@+id/s_tv_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/textColorPrimaryInverse"
-            android:layout_alignParentLeft="true"
-            android:textSize="15dp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            tools:text="Love Yourself"/>
-        <TextView
-            android:id="@+id/s_tv_artist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/s_tv_title"
-            android:layout_marginTop="2dp"
-            android:textSize="15dp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            tools:text="Justin Bieber"/>
-    </RelativeLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:gravity="center_vertical">
 
-    <ImageButton
-        android:id="@+id/s_ibtn_play_pause"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:background="@android:color/transparent"
-        android:layout_toLeftOf="@+id/s_ibtn_next"
-        android:src="@mipmap/ic_play_arrow_black_36dp"/>
+                <TextView
+                    android:id="@+id/s_tv_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/textColorPrimaryInverse"
+                    android:layout_alignParentLeft="true"
+                    android:textSize="15dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    tools:text="Love Yourself"/>
+                <TextView
+                    android:id="@+id/s_tv_artist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/s_tv_title"
+                    android:layout_marginTop="2dp"
+                    android:textSize="15dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    tools:text="Justin Bieber"/>
+            </RelativeLayout>
 
-    <ImageButton
-        android:id="@+id/s_ibtn_next"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:background="@android:color/transparent"
-        android:layout_alignParentRight="true"
-        android:src="@mipmap/ic_skip_next_black_36dp"/>
+            <ImageButton
+                style="@style/PlayerButton"
+                android:id="@+id/s_ibtn_play_pause"
+                android:src="@mipmap/ic_play_arrow_black_48dp"/>
 
-</RelativeLayout>
+            <ImageButton
+                style="@style/PlayerButton"
+                android:id="@+id/s_ibtn_next"
+                android:src="@mipmap/ic_skip_next_black_48dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
+</LinearLayout>

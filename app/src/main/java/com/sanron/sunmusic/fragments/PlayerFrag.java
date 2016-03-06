@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -27,6 +28,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
 
 
     private ViewGroup smallPlayer;
+    private ProgressBar splayProgress;
     private ImageView sivSongPicture;
     private TextView stvTitle;
     private TextView stvArtist;
@@ -44,8 +46,6 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
     private ImageButton ibtnPlayPause;
     private ImageButton ibtnNext;
     private ImageButton ibtnPlayQuque;
-
-    private boolean isTouchingTracking = false;//是否在滑动进度条
 
     private IMusicPlayer player = PlayerUtils.getService();
 
@@ -77,7 +77,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
         }
 
         public void running() {
-            if(pause) {
+            if (pause) {
                 synchronized (lock) {
                     lock.notify();
                     pause = false;
@@ -102,8 +102,9 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
                     }
                 }
                 int position = player.getCurrentPosition();
-                playProgress.setProgress(position == -1 ? 0 : position);
-                SystemClock.sleep(1000);
+                position = (position == -1 ? 0 : position);
+                setPlayProgress(position);
+                SystemClock.sleep(100);
             }
         }
     }
@@ -112,48 +113,59 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
         @Override
         public void onStateChange(int state) {
             switch (state) {
-                case IMusicPlayer.STATE_STOP:
-                case IMusicPlayer.STATE_PAUSE: {
-                    setStateIcon(R.mipmap.ic_play_arrow_black_36dp);
+                case IMusicPlayer.STATE_IDEL: {
                     updateProgressThread.pause();
+                    ivSongPicture.setImageResource(R.mipmap.default_big_song_pic);
+                    sivSongPicture.setImageResource(R.mipmap.default_song_pic);
+                    setTitleText("Sun Music");
+                    setArtistText("");
+                    setSeekbarMax(player.getDuration());
+                    setPlayProgress(0);
+                    setStateIcon(R.mipmap.ic_play_arrow_black_48dp);
+                }
+                break;
+
+                case IMusicPlayer.STATE_PAUSE: {
+                    updateProgressThread.pause();
+                    setStateIcon(R.mipmap.ic_play_arrow_black_48dp);
                 }
                 break;
 
                 case IMusicPlayer.STATE_PLAYING: {
-                    setStateIcon(R.mipmap.ic_pause_black_36dp);
                     updateProgressThread.running();
+                    setStateIcon(R.mipmap.ic_pause_black_48dp);
                 }
                 break;
             }
         }
 
         @Override
-        public void onStartPlay(int position) {
-            if (position > 0) {
-                SongInfo curSong = player.getQuque().get(position);
-                setTitleText(curSong.getTitle());
-                setArtistText(curSong.getArtist());
+        public void onPrepared() {
+            SongInfo curSong = player.getQuque().get(player.getCurrentIndex());
+            setTitleText(curSong.getTitle());
+            setArtistText(curSong.getArtist());
 
-                String picPath = curSong.getPicPath();
-                if (TextUtils.isEmpty(picPath)) {
-                    ivSongPicture.setImageResource(R.mipmap.default_big_song_pic);
-                    sivSongPicture.setImageResource(R.mipmap.default_song_pic);
-                } else {
-                    File file = new File(picPath);
-                    if (!file.exists()) {
-                        ivSongPicture.setImageResource(R.mipmap.default_big_song_pic);
-                        sivSongPicture.setImageResource(R.mipmap.default_song_pic);
-                    }
-                }
-                int duration = player.getDuration();
-                playProgress.setMax(duration == -1 ? 0 : duration);
-                playProgress.setProgress(0);
-            } else {
+            String picPath = curSong.getPicPath();
+            if (TextUtils.isEmpty(picPath)) {
                 ivSongPicture.setImageResource(R.mipmap.default_big_song_pic);
                 sivSongPicture.setImageResource(R.mipmap.default_song_pic);
-                setTitleText("Sun Music");
-                setArtistText("");
+            } else {
+                File file = new File(picPath);
+                if (!file.exists()) {
+                    ivSongPicture.setImageResource(R.mipmap.default_big_song_pic);
+                    sivSongPicture.setImageResource(R.mipmap.default_song_pic);
+                }
             }
+
+            setStateIcon(R.mipmap.ic_pause_black_48dp);
+            setSeekbarMax(player.getDuration());
+            setPlayProgress(0);
+            if (curSong.getType() == SongInfo.TYPE_LOCAL) {
+                playProgress.setSecondaryProgress(player.getDuration());
+            } else {
+                playProgress.setSecondaryProgress(0);
+            }
+            updateProgressThread.running();
         }
 
         @Override
@@ -161,16 +173,23 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
             int iconId = 0;
             switch (newMode) {
                 case IMusicPlayer.MODE_IN_TURN:
-                    iconId = R.mipmap.ic_repeat_black_24dp;
+                    iconId = R.mipmap.ic_repeat_black_48dp;
                     break;
                 case IMusicPlayer.MODE_LOOP:
-                    iconId = R.mipmap.ic_repeat_one_black_24dp;
+                    iconId = R.mipmap.ic_repeat_one_black_48dp;
                     break;
                 case IMusicPlayer.MODE_RANDOM:
-                    iconId = R.mipmap.ic_shuffle_black_24dp;
+                    iconId = R.mipmap.ic_shuffle_black_48dp;
                     break;
             }
             ibtnChangeMode.setImageResource(iconId);
+        }
+
+        @Override
+        public void onBufferingUpdate(int bufferedPosition) {
+            if (bufferedPosition > playProgress.getSecondaryProgress()) {
+                playProgress.setSecondaryProgress(bufferedPosition);
+            }
         }
     };
 
@@ -187,6 +206,16 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
     public void setStateIcon(int resid) {
         sibtnPlayPause.setImageResource(resid);
         ibtnPlayPause.setImageResource(resid);
+    }
+
+    public void setPlayProgress(int position) {
+        playProgress.setProgress(position);
+        splayProgress.setProgress(position);
+    }
+
+    public void setSeekbarMax(int max) {
+        playProgress.setMax(max);
+        splayProgress.setMax(max);
     }
 
     @Override
@@ -206,6 +235,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         smallPlayer = $(R.id.small_player);
+        splayProgress = $(R.id.s_play_progress);
         sivSongPicture = $(R.id.s_iv_song_pic);
         stvTitle = $(R.id.s_tv_title);
         stvArtist = $(R.id.s_tv_artist);
@@ -236,7 +266,8 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
         int mode = player.getPlayMode();
         callback.onModeChange(mode);
         callback.onStateChange(state);
-        callback.onStartPlay(player.getCurrentIndex());
+        if (player.getCurrentPosition() != -1)
+            callback.onPrepared();
 
         updateProgressThread.start();
     }
@@ -272,7 +303,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
             case R.id.ibtn_play_pause: {
                 int state = player.getState();
                 if (state == IMusicPlayer.STATE_PAUSE
-                        || state == IMusicPlayer.STATE_STOP) {
+                        || state == IMusicPlayer.STATE_IDEL) {
                     if (player.getQuque().size() == 0) {
                         T.show(getContext(), "播放列表为空");
                         return;

@@ -12,7 +12,6 @@
         android:id="@+id/menu_remove_from_list"
         android:title="从列表删除"
         android:showAsAction="never"/>
-
     <item
         android:id="@+id/menu_delete_song"
         android:title="删除"

@@ -19,7 +19,7 @@
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
     <style name="TabText" parent="TextAppearance.Design.Tab">
-            <item name="android:textSize">16sp</item>
+            <item name="android:textSize">18dp</item>
             <item name="android:textStyle">bold</item>
     </style>
     
@@ -29,6 +29,8 @@
     </style>
 
     <style name="PlayerButton">
+        <item name="android:padding">10dp</item>
+        <item name="android:scaleType">fitXY</item>
         <item name="android:layout_width">56dp</item>
         <item name="android:layout_height">56dp</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>

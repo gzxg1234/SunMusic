@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.adapter.DataListAdapter;
 import com.sanron.sunmusic.db.DBHelper;
+import com.sanron.sunmusic.fragments.BaseListFrag;
 import com.sanron.sunmusic.model.Artist;
 import com.sanron.sunmusic.task.GetArtistsTask;
 

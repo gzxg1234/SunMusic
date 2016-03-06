@@ -1,8 +1,7 @@
-package com.sanron.sunmusic.fragments.MySongFrag;
+package com.sanron.sunmusic.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -19,7 +18,6 @@ import android.view.ViewGroup;
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.adapter.DataListAdapter;
 import com.sanron.sunmusic.db.DataProvider;
-import com.sanron.sunmusic.fragments.BaseFragment;
 
 import java.util.ArrayList;
 import java.util.List;

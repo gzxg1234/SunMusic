@@ -14,8 +14,6 @@
     <include
         layout="@layout/layout_small_player"
         android:id="@+id/small_player"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
         />
 
 </FrameLayout>

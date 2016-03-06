@@ -47,7 +47,7 @@ public class MusicService extends Service {
         private List<IMusicPlayer.Callback> callbacks;
         private int mode = MODE_IN_TURN;//模式
         private int currentIndex;//当前位置
-        private int state = STATE_STOP;//播放状态
+        private int state = STATE_IDEL;//播放状态
         private MediaPlayer mediaPlayer;
 
         public MusicPlayer() {
@@ -55,6 +55,11 @@ public class MusicService extends Service {
             quque = new ArrayList<>();
             callbacks = new ArrayList<>();
             currentIndex = -1;
+
+            mediaPlayer.setOnPreparedListener(this);
+            mediaPlayer.setOnCompletionListener(this);
+            mediaPlayer.setOnErrorListener(this);
+            mediaPlayer.setOnBufferingUpdateListener(this);
         }
 
 
@@ -79,7 +84,8 @@ public class MusicService extends Service {
          */
         @Override
         public void play(List<SongInfo> songInfos, int position) {
-            quque = songInfos;
+            quque.clear();
+            quque.addAll(songInfos);
             play(position);
         }
 
@@ -89,15 +95,15 @@ public class MusicService extends Service {
          */
         @Override
         public void play(int position) {
-            if (state == STATE_PREPARE) {
+            if (state == STATE_PREPAREING) {
                 //mediaplayer执行了prepareAsync方法,正在异步准备资源中，
                 //不能重置mediaplayer，否则会出错
                 return;
             }
 
             synchronized (this) {
-                mediaPlayer.reset();
                 currentIndex = position;
+                mediaPlayer.reset();
                 SongInfo curSong = quque.get(currentIndex);
                 try {
                     mediaPlayer.setDataSource(MusicService.this, Uri.parse(curSong.getPath()));
@@ -105,13 +111,9 @@ public class MusicService extends Service {
                     e.printStackTrace();
                 }
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mediaPlayer.setOnPreparedListener(this);
-                mediaPlayer.setOnCompletionListener(this);
-                mediaPlayer.setOnErrorListener(this);
-                mediaPlayer.setOnBufferingUpdateListener(this);
                 mediaPlayer.prepareAsync();
+                changeState(STATE_PREPAREING);
             }
-            changeState(STATE_PREPARE);
         }
 
         @Override
@@ -152,7 +154,7 @@ public class MusicService extends Service {
             if (quque.size() == 0) {
                 return;
             }
-            play(++currentIndex % quque.size());
+            play((currentIndex + 1) % quque.size());
         }
 
         @Override
@@ -199,29 +201,30 @@ public class MusicService extends Service {
         @Override
         public int getCurrentPosition() {
             synchronized (this) {
-                if (state == STATE_PREPARE
-                        || state == STATE_STOP) {
-                    return -1;
+                if (isPrepared()) {
+                    return mediaPlayer.getCurrentPosition();
                 }
-                return mediaPlayer.getCurrentPosition();
+                return -1;
             }
+        }
+
+        private boolean isPrepared() {
+            return state == STATE_PLAYING || state == STATE_PAUSE;
         }
 
         @Override
         public int getDuration() {
             synchronized (this) {
-                if (state == STATE_PREPARE
-                        || state == STATE_STOP) {
-                    return -1;
+                if (isPrepared()) {
+                    return mediaPlayer.getDuration();
                 }
-                return mediaPlayer.getDuration();
+                return -1;
             }
         }
 
         @Override
         public void seekTo(int msec) {
-            if(state == STATE_PLAYING
-                    || state == STATE_PAUSE){
+            if (isPrepared()) {
                 mediaPlayer.seekTo(msec);
             }
         }
@@ -251,11 +254,11 @@ public class MusicService extends Service {
         public boolean onError(MediaPlayer mp, int what, int extra) {
             T.show(MusicService.this, "播放出错，2s后跳到下一首");
             final int errorPosition = getCurrentPosition();
-            new Thread(){
+            new Thread() {
                 @Override
                 public void run() {
                     SystemClock.sleep(2000);
-                    if(getCurrentPosition() == errorPosition){
+                    if (getCurrentPosition() == errorPosition) {
                         next();
                     }
                 }
@@ -267,17 +270,26 @@ public class MusicService extends Service {
         public void onPrepared(MediaPlayer mp) {
             mp.start();
             changeState(STATE_PLAYING);
-            for (Callback callback : callbacks) {
-                callback.onStartPlay(currentIndex);
+            for(Callback callback:callbacks){
+                callback.onPrepared();
             }
             MyLog.i(TAG, "start : " + quque.get(currentIndex).getDisplayName());
         }
 
         @Override
         public void onBufferingUpdate(MediaPlayer mp, int percent) {
+            //percent是已缓冲的时间减去已播放的时间 占  未播放的时间 的百分百
+            //比如歌曲时长300s,已播放20s,已缓冲50s,则percent=(50-20)/(300-50);
+            int duration = mp.getDuration();
+            int currentPosition = mp.getCurrentPosition();
+            int remain = duration - currentPosition;
+            int buffedPosition = (int) (currentPosition + (remain * percent / 100f));
 
+            MyLog.i(TAG, "buffered position " + buffedPosition);
+            for (Callback callback : callbacks) {
+                callback.onBufferingUpdate(buffedPosition);
+            }
         }
-
     }
 
 }

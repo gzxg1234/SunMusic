@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.adapter.DataListAdapter;
 import com.sanron.sunmusic.db.DBHelper;
+import com.sanron.sunmusic.fragments.BaseListFrag;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.task.AddPlayListTask;
 import com.sanron.sunmusic.task.DelPlayListTask;

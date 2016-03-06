@@ -135,7 +135,8 @@
             <ImageButton
                 style="@style/PlayerButton"
                 android:id="@+id/ibtn_play_mode"
-                android:src="@mipmap/ic_repeat_black_24dp"
+                android:src="@mipmap/ic_repeat_black_48dp"
+                android:padding="15dp"
                 />
             <android.support.v4.widget.Space
                 android:layout_width="0dp"
@@ -144,7 +145,7 @@
             <ImageButton
                 style="@style/PlayerButton"
                 android:id="@+id/ibtn_last"
-                android:src="@mipmap/ic_skip_previous_black_36dp"
+                android:src="@mipmap/ic_skip_previous_black_48dp"
                 />
             <android.support.v4.widget.Space
                 android:layout_width="0dp"
@@ -153,7 +154,7 @@
             <ImageButton
                 style="@style/PlayerButton"
                 android:id="@+id/ibtn_play_pause"
-                android:src="@mipmap/ic_play_arrow_black_36dp"
+                android:src="@mipmap/ic_play_arrow_black_48dp"
                 />
             <android.support.v4.widget.Space
                 android:layout_width="0dp"
@@ -162,7 +163,7 @@
             <ImageButton
                 style="@style/PlayerButton"
                 android:id="@+id/ibtn_next"
-                android:src="@mipmap/ic_skip_next_black_36dp"
+                android:src="@mipmap/ic_skip_next_black_48dp"
                 />
             <android.support.v4.widget.Space
                 android:layout_width="0dp"
@@ -171,7 +172,8 @@
             <ImageButton
                 style="@style/PlayerButton"
                 android:id="@+id/ibtn_play_quque"
-                android:src="@mipmap/ic_queue_music_black_24dp"
+                android:src="@mipmap/ic_queue_music_black_48dp"
+                android:padding="15dp"
                 />
 
             <android.support.v4.widget.Space

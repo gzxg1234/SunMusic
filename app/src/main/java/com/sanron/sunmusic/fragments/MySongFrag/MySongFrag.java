@@ -12,10 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.sanron.sunmusic.R;
-import com.sanron.sunmusic.activity.MainActivity;
-import com.sanron.sunmusic.model.PlayList;
-
-import java.util.Observable;
 
 /**
  * Created by Administrator on 2015/12/15.
@@ -80,7 +76,7 @@ public class MySongFrag extends Fragment {
                     fragment = RecentPlayFrag.newInstance();
                     break;
                 case 2:
-                    fragment = LocalSongFrag.newInstance();
+                    fragment = LocalSongsFrag.newInstance();
                     break;
                 case 3:
                     fragment = ArtistFrag.newInstance();

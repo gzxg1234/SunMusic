@@ -115,6 +115,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onPanelHidden(View panel) {}
         });
+
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter("com.sanron.music.playlistfrag"));
     }
 

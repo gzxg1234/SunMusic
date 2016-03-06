@@ -13,10 +13,10 @@ public interface IMusicPlayer {
     int MODE_RANDOM = 1;//随机播放
     int MODE_LOOP = 2;//循环播放
 
-    int STATE_STOP = 0;//停止
+    int STATE_IDEL = 0;//空闲状态
     int STATE_PLAYING = 1;//播放中
-    int STATE_PAUSE = 2;//暂停
-    int STATE_PREPARE = 3;//准备资源中
+    int STATE_PREPAREING = 2;//准备资源中
+    int STATE_PAUSE = 3;//暂停
 
     List<SongInfo> getQuque();
 
@@ -54,7 +54,8 @@ public interface IMusicPlayer {
 
     interface Callback {
         void onStateChange(int state);
-        void onStartPlay(int position);
+        void onPrepared();
         void onModeChange(int newMode);
+        void onBufferingUpdate(int bufferedPosition);
     }
 }

@@ -26,30 +26,35 @@
         android:background="@android:color/transparent"
         android:src="@mipmap/ic_more_vert_black_24dp" />
 
-    <TextView
-        android:id="@+id/tv_text1"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
         android:layout_toLeftOf="@+id/btn_item_action"
-        android:layout_toRightOf="@+id/iv_picture"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:textColor="@color/textColorPrimaryInverse"
-        android:textSize="16sp"
-        tool:text="Suger" />
+        android:layout_toRightOf="@+id/iv_picture">
+        <TextView
+            android:id="@+id/tv_text1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@color/textColorPrimaryInverse"
+            android:textSize="15dp"
+            tool:text="Suger" />
 
-    <TextView
-        android:id="@+id/tv_text2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/btn_item_action"
-        android:layout_toRightOf="@+id/iv_picture"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:textColor="@color/textColorSecondaryInverse"
-        android:textSize="14sp"
-        tool:text="Maroon5" />
+        <TextView
+            android:id="@+id/tv_text2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@color/textColorSecondaryInverse"
+            android:textSize="15dp"
+            android:layout_marginTop="4dp"
+            android:layout_below="@+id/tv_text1"
+            tool:text="Maroon5" />
+    </RelativeLayout>
+
 
     <ImageView
         android:layout_width="match_parent"
