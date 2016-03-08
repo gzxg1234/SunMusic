@@ -1,8 +1,10 @@
 package com.sanron.sunmusic.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,14 +16,15 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.sanron.sunmusic.R;
-import com.sanron.sunmusic.model.SongInfo;
+import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.service.IMusicPlayer;
-import com.sanron.sunmusic.service.PlayerUtils;
 import com.sanron.sunmusic.utils.T;
+import com.sanron.sunmusic.window.ShowQueueMusicWindow;
 
 import java.io.File;
 
 /**
+ * 播放界面
  * Created by Administrator on 2016/3/5.
  */
 public class PlayerFrag extends BaseFragment implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
@@ -35,21 +38,25 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
     private ImageButton sibtnPlayPause;
     private ImageButton sibtnNext;
 
-
     private ViewGroup bigPlayer;
     private SeekBar playProgress;
     private ImageView ivSongPicture;
     private TextView tvTitle;
     private TextView tvArtist;
+    private ImageButton ibtnBack;
     private ImageButton ibtnChangeMode;
     private ImageButton ibtnLast;
     private ImageButton ibtnPlayPause;
     private ImageButton ibtnNext;
     private ImageButton ibtnPlayQuque;
 
-    private IMusicPlayer player = PlayerUtils.getService();
 
+    //刷新播放进度进程
     private UpdateProgressThread updateProgressThread;
+
+    //点击左上角回退键事件
+    public static final int EVENT_CLICK_BACK = 1;
+
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -141,7 +148,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
 
         @Override
         public void onPrepared() {
-            SongInfo curSong = player.getQuque().get(player.getCurrentIndex());
+            Music curSong = player.getQueue().get(player.getCurrentIndex());
             setTitleText(curSong.getTitle());
             setArtistText(curSong.getArtist());
 
@@ -160,7 +167,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
             setStateIcon(R.mipmap.ic_pause_black_48dp);
             setSeekbarMax(player.getDuration());
             setPlayProgress(0);
-            if (curSong.getType() == SongInfo.TYPE_LOCAL) {
+            if (curSong.getType() == Music.TYPE_LOCAL) {
                 playProgress.setSecondaryProgress(player.getDuration());
             } else {
                 playProgress.setSecondaryProgress(0);
@@ -248,6 +255,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
         ivSongPicture = $(R.id.iv_song_picture);
         tvTitle = $(R.id.tv_title);
         tvArtist = $(R.id.tv_artist);
+        ibtnBack = $(R.id.ibtn_back);
         ibtnChangeMode = $(R.id.ibtn_play_mode);
         ibtnLast = $(R.id.ibtn_last);
         ibtnPlayPause = $(R.id.ibtn_play_pause);
@@ -260,6 +268,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
         ibtnPlayPause.setOnClickListener(this);
         ibtnNext.setOnClickListener(this);
         ibtnPlayQuque.setOnClickListener(this);
+        ibtnBack.setOnClickListener(this);
         playProgress.setOnSeekBarChangeListener(this);
 
         int state = player.getState();
@@ -304,7 +313,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
                 int state = player.getState();
                 if (state == IMusicPlayer.STATE_PAUSE
                         || state == IMusicPlayer.STATE_IDEL) {
-                    if (player.getQuque().size() == 0) {
+                    if (player.getQueue().size() == 0) {
                         T.show(getContext(), "播放列表为空");
                         return;
                     }
@@ -322,13 +331,20 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
             break;
 
             case R.id.ibtn_play_quque: {
+                new ShowQueueMusicWindow(getActivity(),player).show();
+            }
+            break;
 
+            case R.id.ibtn_back: {
+                Intent intent = new Intent(PlayerFrag.class.getName());
+                intent.putExtra("event", EVENT_CLICK_BACK);
+                LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
             }
             break;
         }
     }
 
-
+    //主界面底部的小控制面板可见性
     public void setSmallControllerVisibility(int visibility) {
         smallPlayer.setVisibility(visibility);
     }

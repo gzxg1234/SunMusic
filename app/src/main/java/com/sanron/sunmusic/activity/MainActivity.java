@@ -7,43 +7,71 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.sanron.sunmusic.R;
-import com.sanron.sunmusic.fragments.MySongFrag.MySongFrag;
-import com.sanron.sunmusic.fragments.MySongFrag.PlayListSongsFrag;
+import com.sanron.sunmusic.fragments.MyMusic.AlbumFrag;
+import com.sanron.sunmusic.fragments.MyMusic.ArtistFrag;
+import com.sanron.sunmusic.fragments.MyMusic.ListMusicFrag;
+import com.sanron.sunmusic.fragments.MyMusic.LocalMusicFrag;
+import com.sanron.sunmusic.fragments.MyMusic.PlayListFrag;
+import com.sanron.sunmusic.fragments.MyMusic.RecentPlayFrag;
+import com.sanron.sunmusic.fragments.PagerFragment;
 import com.sanron.sunmusic.fragments.PlayerFrag;
 import com.sanron.sunmusic.model.PlayList;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, SlidingUpPanelLayout.PanelSlideListener {
 
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private FragmentManager fm;
     private MaterialMenuDrawable materialMenu;
     private SlidingUpPanelLayout slidingUpPanelLayout;
+    private NavigationView navigationView;
     private PlayerFrag playerFrag;
-    private String curFragTag;
+
     private boolean isShowingPlayListSongsFrag = false;//是否在显示列表歌曲fragment
 
-    public static final String TAG = "MainActivity";
+    public static final String TAG = MainActivity.class.getName();
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            PlayList playList = (PlayList) intent.getSerializableExtra("playlist");
-            showPlayListSongs(playList);
+            String action = intent.getAction();
+            int event = intent.getIntExtra("event", -1);
+            if (PlayListFrag.class.getName().equals(action)) {
+                //
+                switch (event) {
+                    case PlayListFrag.EVENT_CLICK_LIST: {
+                        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                        PlayList playList = (PlayList) intent.getSerializableExtra(PlayListFrag.EXTRA_PLAYLIST);
+                        showPlayListSongs(playList);
+                    }
+                    break;
+                }
+
+            } else if (PlayerFrag.class.getName().equals(action)) {
+                //
+                switch (event) {
+                    case PlayerFrag.EVENT_CLICK_BACK: {
+                        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                    }
+                    break;
+                }
+
+            }
         }
     };
 
@@ -67,8 +95,12 @@ public class MainActivity extends BaseActivity {
 
 
     private void initView() {
+        fm = getSupportFragmentManager();
 
-        slidingUpPanelLayout = $(R.id.sliding_panel);
+        navigationView = $(R.id.navigation_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setCheckedItem(R.id.menu_my_music);
+
         drawerLayout = $(R.id.drawerlayout);
         materialMenu = new MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN);
 
@@ -90,33 +122,18 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        fm = getSupportFragmentManager();
+        slidingUpPanelLayout = $(R.id.sliding_panel);
+        slidingUpPanelLayout.addPanelSlideListener(this);
+
         playerFrag = new PlayerFrag();
         fm.beginTransaction()
-                .add(R.id.player_contanier, playerFrag)
+                .add(R.id.player_contanier, playerFrag,PlayerFrag.class.getName())
                 .commit();
-        setCurrentFragment(MySongFrag.TAG);
 
-        slidingUpPanelLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
-            @Override
-            public void onPanelSlide(View panel, float slideOffset) {
-                if(slideOffset == 0){
-                    playerFrag.setSmallControllerVisibility(View.VISIBLE);
-                }else{
-                    playerFrag.setSmallControllerVisibility(View.INVISIBLE);
-                }
-            }
-            @Override
-            public void onPanelCollapsed(View panel) {}
-            @Override
-            public void onPanelExpanded(View panel) {}
-            @Override
-            public void onPanelAnchored(View panel) {}
-            @Override
-            public void onPanelHidden(View panel) {}
-        });
+        toMyMusic();
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter("com.sanron.music.playlistfrag"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(PlayerFrag.class.getName()));
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(PlayListFrag.class.getName()));
     }
 
     /**
@@ -128,18 +145,20 @@ public class MainActivity extends BaseActivity {
                         R.anim.frag_slide_out,
                         R.anim.frag_slide_in,
                         R.anim.frag_slide_out)
-                .add(R.id.fragment_container, PlayListSongsFrag.newInstance(playList), PlayListSongsFrag.TAG)
-                .addToBackStack(PlayListSongsFrag.class.getSimpleName())
+                .add(R.id.fragment_container, ListMusicFrag.newInstance(playList), ListMusicFrag.TAG)
+                .addToBackStack(ListMusicFrag.class.getSimpleName())
                 .commit();
         toolbar.setTitle(playList.getName());
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
         isShowingPlayListSongsFrag = true;
     }
 
     public void dismissPlayListSongs() {
-        if (fm.popBackStackImmediate(PlayListSongsFrag.class.getSimpleName(),
+        if (fm.popBackStackImmediate(ListMusicFrag.class.getSimpleName(),
                 FragmentManager.POP_BACK_STACK_INCLUSIVE)) {
             toolbar.setTitle("我的音乐");
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             materialMenu.animateIconState(MaterialMenuDrawable.IconState.BURGER);
             isShowingPlayListSongsFrag = false;
         }
@@ -159,22 +178,67 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private void setCurrentFragment(String tag) {
-        Fragment fragment = null;
-        if (MySongFrag.TAG.equals(tag)) {
-            fragment = MySongFrag.newInstance();
-            toolbar.setTitle("我的音乐");
-        }
+    private void toMyMusic(){
+        toolbar.setTitle("我的音乐");
+        String[] titles = new String[]{"播放列表","最近播放","本地音乐","艺术家","专辑"};
+        Class[] fragments = new Class[]{PlayListFrag.class, RecentPlayFrag.class,
+                LocalMusicFrag.class, ArtistFrag.class, AlbumFrag.class};
         fm.beginTransaction()
-                .replace(R.id.fragment_container, fragment, tag)
+                .replace(R.id.fragment_container, new PagerFragment(fragments,titles),"MyMusic")
                 .commit();
-        curFragTag = tag;
     }
+
+    private void toWebMusic(){
+//        toolbar.setTitle("音乐库");
+//        fm.beginTransaction()
+//                .replace(R.id.fragment_container, new PagerFragment(fragments,titles),"MyMusic")
+//                .commit();
+    }
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+    }
 
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_my_music:{
+                toMyMusic();
+                navigationView.setCheckedItem(R.id.menu_my_music);
+            }break;
+
+            case R.id.menu_web_music:{
+
+            }break;
+
+            case R.id.menu_setting:{
+
+            }break;
+
+        }
+        return false;
+    }
+
+    @Override
+    public void onPanelSlide(View panel, float slideOffset) {
+        if (slideOffset == 0) {
+            playerFrag.setSmallControllerVisibility(View.VISIBLE);
+        } else {
+            playerFrag.setSmallControllerVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
+    public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+        if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+            slidingUpPanelLayout.setTouchEnabled(true);
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        } else if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            slidingUpPanelLayout.setTouchEnabled(false);
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        }
     }
 }

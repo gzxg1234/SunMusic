@@ -3,4 +3,9 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="240dp"
+        android:src="@mipmap/default_big_song_pic"
+        android:scaleType="center"/>
 </LinearLayout>

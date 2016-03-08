@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:paddingRight="4dp">
+
+    <View
+        android:id="@+id/playing_sign"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimary"
+        android:layout_marginRight="4dp"/>
+
+    <ImageView
+        android:id="@+id/iv_picture"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        tools:src="@mipmap/default_song_pic"/>
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textColor="@color/textColorPrimaryInverse"
+            android:textSize="15dp"
+            tools:text="Love Yourself"/>
+        <TextView
+            android:id="@+id/tv_artist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textSize="12dp"
+            android:textColor="@color/textColorSecondaryInverse"
+            android:layout_below="@+id/tv_title"
+            android:layout_marginTop="4dp"
+            tools:text="Justin"/>
+    </RelativeLayout>
+
+    <ImageButton
+        android:id="@+id/ibtn_remove"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="fitXY"
+        android:padding="8dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:src="@mipmap/ic_delete_black_48dp"/>
+
+</LinearLayout>

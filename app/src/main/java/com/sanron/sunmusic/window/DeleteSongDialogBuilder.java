@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 
-import com.sanron.sunmusic.model.SongInfo;
-import com.sanron.sunmusic.task.DelLocalSongTask;
+import com.sanron.sunmusic.model.Music;
+import com.sanron.sunmusic.task.DelLocalMusicTask;
 import com.sanron.sunmusic.utils.T;
 
 import java.util.List;
@@ -15,11 +15,11 @@ import java.util.List;
  * 删除歌曲对话框
  */
 public class DeleteSongDialogBuilder extends AlertDialog.Builder {
-    private List<SongInfo> mDeleteSongs;
+    private List<Music> mDeleteSongs;
     private boolean mIsDeleteFile;
     private ProgressDialog mProgressDlg;
 
-    public DeleteSongDialogBuilder(Context context, List<SongInfo> deleteSongs) {
+    public DeleteSongDialogBuilder(Context context, List<Music> deleteSongs) {
         super(context);
         this.mDeleteSongs = deleteSongs;
         this.mProgressDlg = new ProgressDialog(context);
@@ -43,7 +43,7 @@ public class DeleteSongDialogBuilder extends AlertDialog.Builder {
         setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, int which) {
-                new DelLocalSongTask(getContext(), mDeleteSongs, mIsDeleteFile) {
+                new DelLocalMusicTask(getContext(), mDeleteSongs, mIsDeleteFile) {
                     @Override
                     protected void onPreExecute() {
                         mProgressDlg.show();
