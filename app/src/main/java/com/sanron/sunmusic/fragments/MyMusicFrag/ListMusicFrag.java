@@ -1,4 +1,4 @@
-package com.sanron.sunmusic.fragments.MySongFrag;
+package com.sanron.sunmusic.fragments.MyMusicFrag;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -11,8 +11,8 @@ import android.view.View;
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.model.PlayList;
-import com.sanron.sunmusic.model.SongInfo;
-import com.sanron.sunmusic.task.GetPlayListSongsTask;
+import com.sanron.sunmusic.model.Music;
+import com.sanron.sunmusic.task.GetListMusicTask;
 import com.sanron.sunmusic.utils.T;
 import com.sanron.sunmusic.window.RemoveListSongDialogBuilder;
 
@@ -21,18 +21,18 @@ import java.util.List;
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class PlayListSongsFrag extends BaseSongsFrag {
+public class ListMusicFrag extends BaseMusicFrag {
 
     private PlayList mPlayList;
 
     public static final String TAG = "PlayListSonsFrag";
 
-    public static PlayListSongsFrag newInstance(PlayList playList) {
-        return new PlayListSongsFrag(playList);
+    public static ListMusicFrag newInstance(PlayList playList) {
+        return new ListMusicFrag(playList);
     }
 
-    private PlayListSongsFrag(PlayList mPlayList) {
-        super(LAYOUT_LINEAR,new String[]{DBHelper.TABLE_LISTSONGS,DBHelper.TABLE_SONG});
+    private ListMusicFrag(PlayList mPlayList) {
+        super(LAYOUT_LINEAR,new String[]{DBHelper.TABLE_LISTMUSIC,DBHelper.TABLE_MUSIC});
         this.mPlayList = mPlayList;
     }
 
@@ -50,8 +50,8 @@ public class PlayListSongsFrag extends BaseSongsFrag {
 
     @Override
     public void onPopupItemSelected(MenuItem item, int position) {
-        final List<SongInfo> songInfos = mAdapter.getData().subList(position, position + 1);
-        resolveMenuItemClick(item,songInfos);
+        final List<Music> musics = mAdapter.getData().subList(position, position + 1);
+        resolveMenuItemClick(item, musics);
     }
 
     @Override
@@ -73,24 +73,24 @@ public class PlayListSongsFrag extends BaseSongsFrag {
         return super.onOptionsItemSelected(item);
     }
 
-    protected boolean resolveMenuItemClick(MenuItem item, final List<SongInfo> songInfos){
+    protected boolean resolveMenuItemClick(MenuItem item, final List<Music> musics){
         switch (item.getItemId()) {
             case R.id.menu_remove_from_list:{
-                new RemoveListSongDialogBuilder(getContext(), mPlayList, songInfos)
+                new RemoveListSongDialogBuilder(getContext(), mPlayList, musics)
                         .create().show();
             }break;
 
             default:
-                super.resolveMenuItemClick(item,songInfos);
+                super.resolveMenuItemClick(item, musics);
         }
         return true;
     }
 
     @Override
     public void refreshData() {
-        new GetPlayListSongsTask(mPlayList) {
+        new GetListMusicTask(mPlayList) {
             @Override
-            protected void onPostExecute(List<SongInfo> data) {
+            protected void onPostExecute(List<Music> data) {
                 mAdapter.setData(data);
             }
         }.execute();

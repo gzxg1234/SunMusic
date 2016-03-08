@@ -1,4 +1,4 @@
-package com.sanron.sunmusic.fragments.MySongFrag;
+package com.sanron.sunmusic.fragments.MyMusicFrag;
 
 import android.view.ActionMode;
 import android.view.Menu;
@@ -10,31 +10,34 @@ import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.adapter.DataListAdapter;
 import com.sanron.sunmusic.fragments.BaseListFrag;
 import com.sanron.sunmusic.model.PlayList;
-import com.sanron.sunmusic.model.SongInfo;
+import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.service.IMusicPlayer;
 import com.sanron.sunmusic.service.PlayerUtils;
-import com.sanron.sunmusic.task.GetPlayListsTask;
+import com.sanron.sunmusic.task.GetPlayListTask;
+import com.sanron.sunmusic.utils.T;
 import com.sanron.sunmusic.window.AddSongToListWindow;
 import com.sanron.sunmusic.window.DeleteSongDialogBuilder;
 
 import java.util.List;
 
 /**
+ *
+ * 可播放音乐基础fragment
  * Created by Administrator on 2016/3/6.
  */
-public abstract class BaseSongsFrag extends BaseListFrag<SongInfo> {
+public abstract class BaseMusicFrag extends BaseListFrag<Music> {
 
-    protected IMusicPlayer player = PlayerUtils.getService();
 
-    public BaseSongsFrag(int layout, String[] subscribes) {
+
+    public BaseMusicFrag(int layout, String[] subscribes) {
         super(layout, subscribes);
     }
 
     @Override
     protected void bindViewHolder(DataListAdapter.ItemHolder holder, int position) {
-        SongInfo songInfo = mAdapter.getItem(position);
-        holder.tvText1.setText(songInfo.getTitle());
-        holder.tvText2.setText(songInfo.getArtist());
+        Music music = mAdapter.getItem(position);
+        holder.tvText1.setText(music.getTitle());
+        holder.tvText2.setText(music.getArtist());
     }
 
     @Override
@@ -44,8 +47,8 @@ public abstract class BaseSongsFrag extends BaseListFrag<SongInfo> {
     }
 
     @Override
-    public void onActionItemSelected(MenuItem item, final List<SongInfo> songInfos) {
-        resolveMenuItemClick(item, songInfos);
+    public void onActionItemSelected(MenuItem item, final List<Music> musics) {
+        resolveMenuItemClick(item, musics);
     }
 
     @Override
@@ -55,19 +58,19 @@ public abstract class BaseSongsFrag extends BaseListFrag<SongInfo> {
 
     @Override
     public void onPopupItemSelected(MenuItem item, int position) {
-        final List<SongInfo> songInfos = mAdapter.getData().subList(position, position + 1);
-        resolveMenuItemClick(item, songInfos);
+        final List<Music> musics = mAdapter.getData().subList(position, position + 1);
+        resolveMenuItemClick(item, musics);
     }
 
-    protected boolean resolveMenuItemClick(MenuItem item, final List<SongInfo> songInfos) {
+    protected boolean resolveMenuItemClick(MenuItem item, final List<Music> musics) {
         switch (item.getItemId()) {
             case R.id.menu_add_to_list: {
                 //添加到播放列表
-                new GetPlayListsTask() {
+                new GetPlayListTask() {
                     @Override
                     protected void onPostExecute(List<PlayList> playLists) {
                         AddSongToListWindow window = new AddSongToListWindow(getActivity(),
-                                playLists, songInfos);
+                                playLists, musics);
                         window.show();
                     }
                 }.execute();
@@ -76,13 +79,14 @@ public abstract class BaseSongsFrag extends BaseListFrag<SongInfo> {
 
             case R.id.menu_add_to_quque: {
                 //添加到播放队列
-                player.enqueue(songInfos);
+                player.enqueue(musics);
+                T.show(getContext(),musics.size()+"首歌曲添加到队列");
             }
             break;
 
             case R.id.menu_delete_song: {
                 //删除
-                new DeleteSongDialogBuilder(getContext(), songInfos).create().show();
+                new DeleteSongDialogBuilder(getContext(), musics).create().show();
             }
             break;
         }

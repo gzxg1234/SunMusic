@@ -16,8 +16,7 @@ public class StartActivity extends BaseActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
-        PlayerUtils.bindToService(StartActivity.this.getApplicationContext(), new ServiceConnection() {
+        PlayerUtils.bindService(getApplicationContext(), new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 StartActivity.this.finish();

@@ -1,14 +1,14 @@
-package com.sanron.sunmusic.fragments.MySongFrag;
+package com.sanron.sunmusic.fragments.MyMusicFrag;
 
 import com.sanron.sunmusic.adapter.DataListAdapter;
 import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.fragments.BaseListFrag;
-import com.sanron.sunmusic.model.SongInfo;
+import com.sanron.sunmusic.model.Music;
 
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class RecentPlayFrag extends BaseListFrag<SongInfo> {
+public class RecentPlayFrag extends BaseListFrag<Music> {
 
 
     public RecentPlayFrag(int layout, String[] subscribes) {
@@ -21,7 +21,7 @@ public class RecentPlayFrag extends BaseListFrag<SongInfo> {
     }
 
     public static RecentPlayFrag newInstance(){
-        return new RecentPlayFrag(LAYOUT_LINEAR,new String[]{DBHelper.TABLE_SONG,DBHelper.TABLE_LISTSONGS});
+        return new RecentPlayFrag(LAYOUT_LINEAR,new String[]{DBHelper.TABLE_MUSIC,DBHelper.TABLE_LISTMUSIC});
     }
 
     @Override

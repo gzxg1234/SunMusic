@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 
 import com.sanron.sunmusic.model.PlayList;
-import com.sanron.sunmusic.model.SongInfo;
-import com.sanron.sunmusic.task.DelListSongTask;
+import com.sanron.sunmusic.model.Music;
+import com.sanron.sunmusic.task.DelListMusicTask;
 import com.sanron.sunmusic.utils.T;
 
 import java.util.List;
@@ -17,10 +17,10 @@ import java.util.List;
  */
 public class RemoveListSongDialogBuilder extends AlertDialog.Builder {
     private PlayList mPlayList;
-    private List<SongInfo> mRemoveSongs;
+    private List<Music> mRemoveSongs;
     private ProgressDialog mProgressDlg;
 
-    public RemoveListSongDialogBuilder(Context context, PlayList playList, List<SongInfo> removeSongs) {
+    public RemoveListSongDialogBuilder(Context context, PlayList playList, List<Music> removeSongs) {
         super(context);
         this.mPlayList = playList;
         this.mRemoveSongs = removeSongs;
@@ -38,7 +38,7 @@ public class RemoveListSongDialogBuilder extends AlertDialog.Builder {
         setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, int which) {
-                new DelListSongTask(mPlayList, mRemoveSongs) {
+                new DelListMusicTask(mPlayList, mRemoveSongs) {
                     @Override
                     protected void onPostExecute(Integer num) {
                         if (num > 0) {

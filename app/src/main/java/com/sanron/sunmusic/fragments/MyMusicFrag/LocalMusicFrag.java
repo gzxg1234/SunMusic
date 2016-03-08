@@ -1,6 +1,7 @@
-package com.sanron.sunmusic.fragments.MySongFrag;
+package com.sanron.sunmusic.fragments.MyMusicFrag;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -8,33 +9,32 @@ import android.view.MenuItem;
 
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.db.DBHelper;
-import com.sanron.sunmusic.model.SongInfo;
-import com.sanron.sunmusic.service.IMusicPlayer;
-import com.sanron.sunmusic.service.PlayerUtils;
-import com.sanron.sunmusic.task.GetLocalSongsTask;
-import com.sanron.sunmusic.task.RefreshLocalSongsTask;
+import com.sanron.sunmusic.model.Music;
+import com.sanron.sunmusic.task.QueryMusicTask;
+import com.sanron.sunmusic.task.RefreshLocalMusicTask;
 
 import java.util.List;
 
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class LocalSongsFrag extends BaseSongsFrag {
+public class LocalMusicFrag extends BaseMusicFrag {
 
-    private IMusicPlayer player = PlayerUtils.getService();
-    public LocalSongsFrag(int layout) {
-        super(layout,new String[]{DBHelper.TABLE_SONG,DBHelper.TABLE_ALBUM});
+    public LocalMusicFrag(int layout) {
+        super(layout,new String[]{DBHelper.TABLE_MUSIC,DBHelper.TABLE_ALBUM});
     }
 
-    public static LocalSongsFrag newInstance() {
-        return new LocalSongsFrag(LAYOUT_LINEAR);
+    public static LocalMusicFrag newInstance() {
+        return new LocalMusicFrag(LAYOUT_LINEAR);
     }
 
     @Override
     public void refreshData() {
-        new GetLocalSongsTask() {
+        ContentValues query = new ContentValues(1);
+        query.put(DBHelper.MUSIC_TYPE, Music.TYPE_LOCAL);
+        new QueryMusicTask(query) {
             @Override
-            protected void onPostExecute(List<SongInfo> data) {
+            protected void onPostExecute(List<Music> data) {
                 mAdapter.setData(data);
             }
         }.execute();
@@ -50,10 +50,10 @@ public class LocalSongsFrag extends BaseSongsFrag {
         switch (item.getItemId()) {
             case R.id.option_refresh_localsong: {
                 final ProgressDialog mProgressDlg = new ProgressDialog(getContext());
-                new RefreshLocalSongsTask(getContext()) {
+                new RefreshLocalMusicTask(getContext()) {
                     @Override
                     protected void onPreExecute() {
-                        mProgressDlg.setMessage("正在扫描本地歌曲");
+                        mProgressDlg.setMessage("正在与媒体库同步");
                         mProgressDlg.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                         mProgressDlg.setCancelable(false);
                         mProgressDlg.show();

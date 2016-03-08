@@ -7,7 +7,7 @@ import android.provider.MediaStore;
 
 import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.db.DataProvider;
-import com.sanron.sunmusic.model.SongInfo;
+import com.sanron.sunmusic.model.Music;
 
 import java.io.File;
 import java.util.List;
@@ -16,24 +16,24 @@ import java.util.List;
  * 删除本地歌曲
  * Created by Administrator on 2015/12/24.
  */
-public abstract class DelLocalSongTask extends AsyncTask<Void, Void, Integer> {
+public abstract class DelLocalMusicTask extends AsyncTask<Void, Void, Integer> {
     private Context mContext;
-    private List<SongInfo> mDeleteSongs;
+    private List<Music> mDeleteSongs;
     private boolean mDeleteFile;
 
-    public DelLocalSongTask(Context context, List<SongInfo> songInfo, boolean deleteFile) {
+    public DelLocalMusicTask(Context context, List<Music> music, boolean deleteFile) {
         this.mContext = context;
-        this.mDeleteSongs = songInfo;
+        this.mDeleteSongs = music;
         this.mDeleteFile = deleteFile;
     }
 
     @Override
     protected Integer doInBackground(Void... params) {
-        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_SONG);
+        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_MUSIC);
         int delNum = 0;
         ContentValues values = new ContentValues(1);
         for (int i = 0; i < mDeleteSongs.size(); i++) {
-            SongInfo deleteSong = mDeleteSongs.get(i);
+            Music deleteSong = mDeleteSongs.get(i);
             if (mDeleteFile) {
                 //同步删除MediaProvider数据
                 int num = mContext.getContentResolver().delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,

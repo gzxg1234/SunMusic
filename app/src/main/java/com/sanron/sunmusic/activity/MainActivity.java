@@ -19,8 +19,9 @@ import android.view.WindowManager;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.sanron.sunmusic.R;
-import com.sanron.sunmusic.fragments.MySongFrag.MySongFrag;
-import com.sanron.sunmusic.fragments.MySongFrag.PlayListSongsFrag;
+import com.sanron.sunmusic.fragments.MyMusicFrag.ListMusicFrag;
+import com.sanron.sunmusic.fragments.MyMusicFrag.MyMusicFrag;
+import com.sanron.sunmusic.fragments.MyMusicFrag.PlayListFrag;
 import com.sanron.sunmusic.fragments.PlayerFrag;
 import com.sanron.sunmusic.model.PlayList;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -37,13 +38,34 @@ public class MainActivity extends BaseActivity {
     private String curFragTag;
     private boolean isShowingPlayListSongsFrag = false;//是否在显示列表歌曲fragment
 
-    public static final String TAG = "MainActivity";
+    public static final String TAG = MainActivity.class.getName();
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            PlayList playList = (PlayList) intent.getSerializableExtra("playlist");
-            showPlayListSongs(playList);
+            String action = intent.getAction();
+            int event = intent.getIntExtra("event", -1);
+            if (PlayListFrag.class.getName().equals(action)) {
+                //
+                switch (event) {
+                    case PlayListFrag.EVENT_CLICK_LIST: {
+                        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                        PlayList playList = (PlayList) intent.getSerializableExtra(PlayListFrag.EXTRA_PLAYLIST);
+                        showPlayListSongs(playList);
+                    }
+                    break;
+                }
+
+            } else if (PlayerFrag.class.getName().equals(action)) {
+                //
+                switch (event) {
+                    case PlayerFrag.EVENT_CLICK_BACK: {
+                        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                    }
+                    break;
+                }
+
+            }
         }
     };
 
@@ -95,28 +117,32 @@ public class MainActivity extends BaseActivity {
         fm.beginTransaction()
                 .add(R.id.player_contanier, playerFrag)
                 .commit();
-        setCurrentFragment(MySongFrag.TAG);
+        setCurrentFragment(MyMusicFrag.TAG);
 
-        slidingUpPanelLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+        slidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
-                if(slideOffset == 0){
+                if (slideOffset == 0) {
                     playerFrag.setSmallControllerVisibility(View.VISIBLE);
-                }else{
+                } else {
                     playerFrag.setSmallControllerVisibility(View.INVISIBLE);
                 }
             }
+
             @Override
-            public void onPanelCollapsed(View panel) {}
-            @Override
-            public void onPanelExpanded(View panel) {}
-            @Override
-            public void onPanelAnchored(View panel) {}
-            @Override
-            public void onPanelHidden(View panel) {}
+            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                    slidingUpPanelLayout.setTouchEnabled(true);
+                    drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                } else if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                    slidingUpPanelLayout.setTouchEnabled(false);
+                    drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                }
+            }
         });
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter("com.sanron.music.playlistfrag"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(PlayerFrag.class.getName()));
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(PlayListFrag.class.getName()));
     }
 
     /**
@@ -128,8 +154,8 @@ public class MainActivity extends BaseActivity {
                         R.anim.frag_slide_out,
                         R.anim.frag_slide_in,
                         R.anim.frag_slide_out)
-                .add(R.id.fragment_container, PlayListSongsFrag.newInstance(playList), PlayListSongsFrag.TAG)
-                .addToBackStack(PlayListSongsFrag.class.getSimpleName())
+                .add(R.id.fragment_container, ListMusicFrag.newInstance(playList), ListMusicFrag.TAG)
+                .addToBackStack(ListMusicFrag.class.getSimpleName())
                 .commit();
         toolbar.setTitle(playList.getName());
         materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
@@ -137,7 +163,7 @@ public class MainActivity extends BaseActivity {
     }
 
     public void dismissPlayListSongs() {
-        if (fm.popBackStackImmediate(PlayListSongsFrag.class.getSimpleName(),
+        if (fm.popBackStackImmediate(ListMusicFrag.class.getSimpleName(),
                 FragmentManager.POP_BACK_STACK_INCLUSIVE)) {
             toolbar.setTitle("我的音乐");
             materialMenu.animateIconState(MaterialMenuDrawable.IconState.BURGER);
@@ -161,8 +187,8 @@ public class MainActivity extends BaseActivity {
 
     private void setCurrentFragment(String tag) {
         Fragment fragment = null;
-        if (MySongFrag.TAG.equals(tag)) {
-            fragment = MySongFrag.newInstance();
+        if (MyMusicFrag.TAG.equals(tag)) {
+            fragment = MyMusicFrag.newInstance();
             toolbar.setTitle("我的音乐");
         }
         fm.beginTransaction()
@@ -175,6 +201,5 @@ public class MainActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
-
     }
 }

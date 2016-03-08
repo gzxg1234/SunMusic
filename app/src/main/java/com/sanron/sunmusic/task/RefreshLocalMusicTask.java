@@ -11,26 +11,14 @@ import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
 import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.db.DataProvider;
-import com.sanron.sunmusic.model.SongInfo;
+import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.utils.AudioTool;
 
-import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.audio.exceptions.CannotReadException;
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
-import org.jaudiotagger.tag.FieldKey;
-import org.jaudiotagger.tag.Tag;
-import org.jaudiotagger.tag.TagException;
-
-import java.io.File;
-import java.io.IOException;
-
 /**
- * 刷新本地歌曲(同步MediaProvider数据)
+ * 同步媒体库(同步MediaProvider数据)
  * Created by Administrator on 2015/12/21.
  */
-public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
+public class RefreshLocalMusicTask extends AsyncTask<Void, Void, Void> {
 
     private Context mContext;
     private DataProvider.Access songInfoAccess;
@@ -47,8 +35,8 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
             MediaStore.Audio.Media.DURATION
     };
 
-    public RefreshLocalSongsTask(Context context) {
-        songInfoAccess = DataProvider.instance().getAccess(DBHelper.TABLE_SONG);
+    public RefreshLocalMusicTask(Context context) {
+        songInfoAccess = DataProvider.instance().getAccess(DBHelper.TABLE_MUSIC);
         artistAccess = DataProvider.instance().getAccess(DBHelper.TABLE_ARTIST);
         albumAccess = DataProvider.instance().getAccess(DBHelper.TABLE_ALBUM);
         this.mContext = context;
@@ -63,30 +51,30 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
                 MediaStore.Audio.Media._ID);
 
         ContentValues values = new ContentValues(2);
-        values.put(DBHelper.SONG_TYPE, SongInfo.TYPE_LOCAL);
+        values.put(DBHelper.MUSIC_TYPE, Music.TYPE_LOCAL);
         //删除数据库和MediaProvider不同的数据
-        StringBuffer delSql = new StringBuffer("delete from " + DBHelper.TABLE_SONG
-                + " where " + DBHelper.SONG_TYPE + "=" + SongInfo.TYPE_LOCAL + " and (");
+        StringBuffer delSql = new StringBuffer("delete from " + DBHelper.TABLE_MUSIC
+                + " where " + DBHelper.MUSIC_TYPE + "=" + Music.TYPE_LOCAL + " and (");
 
         if (cursor.moveToFirst()) {
             do {
                 String songid = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
-                delSql.append(DBHelper.SONG_SONGID).append("!=").append(songid).append(" and ");
-                values.put(DBHelper.SONG_SONGID, songid);
+                delSql.append(DBHelper.MUSIC_MUSICID).append("!=").append(songid).append(" and ");
+                values.put(DBHelper.MUSIC_MUSICID, songid);
                 Cursor c2 = songInfoAccess.query(values);
                 if (!c2.moveToFirst()) {
 
                     ContentValues songValues = toContentValues(cursor);
 
                     //歌手信息
-                    String artistName = songValues.getAsString(DBHelper.SONG_ARTISTNAME);
+                    String artistName = songValues.getAsString(DBHelper.MUSIC_ARTISTNAME);
                     long artistId = getArtistID(artistName);
-                    songValues.put(DBHelper.SONG_ARTISTID, artistId);
+                    songValues.put(DBHelper.MUSIC_ARTISTID, artistId);
 
                     //专辑信息
-                    String albumName = songValues.getAsString(DBHelper.SONG_ALBUMNAME);
+                    String albumName = songValues.getAsString(DBHelper.MUSIC_ALBUMNAME);
                     long albumId = getAlbumID(artistName, albumName);
-                    songValues.put(DBHelper.SONG_ALBUMID, albumId);
+                    songValues.put(DBHelper.MUSIC_ALBUMID, albumId);
 
                     songInfoAccess.insert(songValues);
                 }
@@ -152,16 +140,16 @@ public class RefreshLocalSongsTask extends AsyncTask<Void, Void, Void> {
         }
 
         ContentValues values = new ContentValues();
-        values.put(DBHelper.SONG_TYPE, SongInfo.TYPE_LOCAL);
-        values.put(DBHelper.SONG_TITLE, title);
-        values.put(DBHelper.SONG_SONGID, id);
-        values.put(DBHelper.SONG_LETTER, letter);
-        values.put(DBHelper.SONG_PATH, path);
-        values.put(DBHelper.SONG_ALBUMNAME, album);
-        values.put(DBHelper.SONG_DURATION, duration);
-        values.put(DBHelper.SONG_DISPLAYNAME, displayName);
-        values.put(DBHelper.SONG_ARTISTNAME, artist);
-        values.put(DBHelper.SONG_BITRATE, bitrate);
+        values.put(DBHelper.MUSIC_TYPE, Music.TYPE_LOCAL);
+        values.put(DBHelper.MUSIC_TITLE, title);
+        values.put(DBHelper.MUSIC_MUSICID, id);
+        values.put(DBHelper.MUSIC_LETTER, letter);
+        values.put(DBHelper.MUSIC_PATH, path);
+        values.put(DBHelper.MUSIC_ALBUMNAME, album);
+        values.put(DBHelper.MUSIC_DURATION, duration);
+        values.put(DBHelper.MUSIC_DISPLAYNAME, displayName);
+        values.put(DBHelper.MUSIC_ARTISTNAME, artist);
+        values.put(DBHelper.MUSIC_BITRATE, bitrate);
         return values;
     }
 

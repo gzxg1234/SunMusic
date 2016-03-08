@@ -1,4 +1,4 @@
-package com.sanron.sunmusic.fragments.MySongFrag;
+package com.sanron.sunmusic.fragments.MyMusicFrag;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -16,17 +16,17 @@ import com.sanron.sunmusic.R;
 /**
  * Created by Administrator on 2015/12/15.
  */
-public class MySongFrag extends Fragment {
+public class MyMusicFrag extends Fragment {
 
     protected View contentView;
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private SongPagerAdapter pagerAdapter;
 
-    public static final String TAG = "MySongFrag";
+    public static final String TAG = MyMusicFrag.class.getSimpleName();
 
-    public static MySongFrag newInstance() {
-        return new MySongFrag();
+    public static MyMusicFrag newInstance() {
+        return new MyMusicFrag();
     }
 
     public <T extends View> T $(int id) {
@@ -76,7 +76,7 @@ public class MySongFrag extends Fragment {
                     fragment = RecentPlayFrag.newInstance();
                     break;
                 case 2:
-                    fragment = LocalSongsFrag.newInstance();
+                    fragment = LocalMusicFrag.newInstance();
                     break;
                 case 3:
                     fragment = ArtistFrag.newInstance();

@@ -1,6 +1,6 @@
 package com.sanron.sunmusic.service;
 
-import com.sanron.sunmusic.model.SongInfo;
+import com.sanron.sunmusic.model.Music;
 
 import java.util.List;
 
@@ -18,11 +18,13 @@ public interface IMusicPlayer {
     int STATE_PREPAREING = 2;//准备资源中
     int STATE_PAUSE = 3;//暂停
 
-    List<SongInfo> getQuque();
+    List<Music> getQuque();
 
-    void enqueue(List<SongInfo> songInfos);
+    void enqueue(List<Music> musics);
 
-    void play(List<SongInfo> songInfos, int position);
+    void dequeue(int position);
+
+    void play(List<Music> musics, int position);
 
     void play(int position);
 

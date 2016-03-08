@@ -17,8 +17,8 @@ import android.widget.PopupWindow;
 
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.model.PlayList;
-import com.sanron.sunmusic.model.SongInfo;
-import com.sanron.sunmusic.task.AddSongsToListTask;
+import com.sanron.sunmusic.model.Music;
+import com.sanron.sunmusic.task.AddMusicToListTask;
 import com.sanron.sunmusic.utils.T;
 
 import java.util.ArrayList;
@@ -35,13 +35,21 @@ public class AddSongToListWindow extends PopupWindow {
     private Activity mActivity;
     private float mOldAlpha;
 
-    public AddSongToListWindow(final Activity activity, final List<PlayList> playLists, final List<SongInfo> songInfos) {
+    public AddSongToListWindow(final Activity activity, final List<PlayList> playLists, final List<Music> musics) {
         super(activity);
         this.mActivity = activity;
         this.mPlayLists = playLists;
-        this.mContentView = LayoutInflater.from(activity).inflate(R.layout.window_sel_playlist, null);
+        this.mContentView = LayoutInflater.from(activity).inflate(R.layout.window_select_playlist, null);
         this.mListPlayList = (ListView) mContentView.findViewById(R.id.list_playlist);
         this.mBtnCancel = (Button) mContentView.findViewById(R.id.btn_cancel);
+
+        setFocusable(true);
+        setTouchable(true);
+        setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
+        setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
+        setAnimationStyle(R.style.MyWindow);
+        setContentView(mContentView);
 
         List<String> playListNames = new ArrayList<>();
         for (PlayList playList : playLists) {
@@ -51,13 +59,13 @@ public class AddSongToListWindow extends PopupWindow {
         mListPlayList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                new AddSongsToListTask(playLists.get(position), songInfos) {
+                new AddMusicToListTask(playLists.get(position), musics) {
                     @Override
                     protected void onPostExecute(Integer[] num) {
-                        AddSongToListWindow.this.dismiss();
                         String msg = num[0] + "首歌曲添加成功,";
                         msg += num[1] == 0 ? "" : num[1] + "首歌曲已存在";
                         T.show(mActivity, msg);
+                        AddSongToListWindow.this.dismiss();
                     }
                 }.execute();
             }
@@ -69,13 +77,6 @@ public class AddSongToListWindow extends PopupWindow {
                 dismiss();
             }
         });
-        setFocusable(true);
-        setTouchable(true);
-        setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
-        setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
-        setAnimationStyle(R.style.MyWindow);
-        setContentView(mContentView);
     }
 
     public void show() {

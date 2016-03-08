@@ -1,4 +1,4 @@
-package com.sanron.sunmusic.fragments.MySongFrag;
+package com.sanron.sunmusic.fragments.MyMusicFrag;
 
 import android.text.TextUtils;
 import android.view.Menu;
@@ -21,7 +21,7 @@ import java.util.List;
 public class ArtistFrag extends BaseListFrag<Artist> {
 
     public ArtistFrag(int layout) {
-        super(layout,new String[]{DBHelper.TABLE_ARTIST, DBHelper.TABLE_SONG,DBHelper.TABLE_ALBUM});
+        super(layout,new String[]{DBHelper.TABLE_ARTIST, DBHelper.TABLE_MUSIC,DBHelper.TABLE_ALBUM});
     }
 
     public static ArtistFrag newInstance() {

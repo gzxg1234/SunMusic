@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
 /**
@@ -18,6 +19,7 @@ import java.util.Set;
  */
 public class DataProvider extends Observable {
     private DBHelper mDbHelper;
+    private Set<String> changedTable;
     private static DataProvider mInstance;
 
     public static DataProvider instance(){
@@ -33,6 +35,7 @@ public class DataProvider extends Observable {
 
     public void init(Context context) {
         mDbHelper = new DBHelper(context);
+        changedTable = new HashSet<>();
     }
 
     public class Access{
@@ -84,7 +87,7 @@ public class DataProvider extends Observable {
                 }
             }
             if (num != 0) {
-                setChanged();
+                changedTable.add(mTableName);
             }
             return num;
         }
@@ -92,7 +95,7 @@ public class DataProvider extends Observable {
         public long insert(ContentValues contentValues){
             long id = mDatabase.insert(mTableName,null,contentValues);
             if (id != -1) {
-                setChanged();
+                changedTable.add(mTableName);
             }
             return id;
         }
@@ -100,7 +103,7 @@ public class DataProvider extends Observable {
         public int delete(String where, String... whereArgs) {
             int num = mDatabase.delete(mTableName, where, whereArgs);
             if (num > 0) {
-                setChanged();
+                changedTable.add(mTableName);
             }
             return num;
         }
@@ -121,7 +124,7 @@ public class DataProvider extends Observable {
         public int update(ContentValues contentValues, String where, String... whereArgs) {
             int num = mDatabase.update(mTableName, contentValues, where, whereArgs);
             if (num > 0) {
-                setChanged();
+                changedTable.add(mTableName);
             }
             return num;
         }
@@ -137,7 +140,11 @@ public class DataProvider extends Observable {
             for(int i=0;i<mCursors.size(); i++){
                 mCursors.get(i).close();
             }
-            notifyObservers(mTableName);
+            if(changedTable.size() > 0){
+                setChanged();
+                notifyObservers(mTableName);
+                changedTable.remove(mTableName);
+            }
         }
     }
 
@@ -145,8 +152,4 @@ public class DataProvider extends Observable {
         return new Access(table);
     }
 
-    public void notifyDataChanged(String table){
-        setChanged();
-        notifyObservers(table);
-    }
 }

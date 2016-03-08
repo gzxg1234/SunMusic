@@ -11,7 +11,7 @@ import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.sanron.sunmusic.model.SongInfo;
+import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.utils.MyLog;
 import com.sanron.sunmusic.utils.T;
 
@@ -43,7 +43,7 @@ public class MusicService extends Service {
 
     public class MusicPlayer extends Binder implements IMusicPlayer, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnBufferingUpdateListener {
 
-        private List<SongInfo> quque;//播放队列;
+        private List<Music> quque;//播放队列;
         private List<IMusicPlayer.Callback> callbacks;
         private int mode = MODE_IN_TURN;//模式
         private int currentIndex;//当前位置
@@ -64,28 +64,59 @@ public class MusicService extends Service {
 
 
         @Override
-        public List<SongInfo> getQuque() {
+        public List<Music> getQuque() {
             return quque;
         }
 
         /**
          * 加入播放队列
-         *
-         * @param songInfos
          */
         @Override
-        public void enqueue(List<SongInfo> songInfos) {
-            quque.addAll(songInfos);
-            Log.i(TAG, songInfos.size() + "首歌加入队列");
+        public void enqueue(List<Music> musics) {
+            quque.addAll(musics);
+            Log.i(TAG, musics.size() + "首歌加入队列");
+        }
+
+        /**
+         * 移出队列
+         */
+        public void dequeue(int position){
+            quque.remove(position);
+            if(quque.size() == 0){
+                //移除后，队列空了
+                play(null,0);
+            }else if(position < currentIndex){
+                //更正currentindex
+                currentIndex --;
+            }else if(position == currentIndex){
+                //当移除的歌曲正在播放时
+                if(currentIndex == quque.size()){
+                    //刚好播放最后一首歌，又需要移除他,将播放第一首歌曲
+                    currentIndex = 0;
+                }
+                play(currentIndex);
+            }
         }
 
         /**
          * 替换队列，并播放position位置歌曲
          */
         @Override
-        public void play(List<SongInfo> songInfos, int position) {
+        public void play(List<Music> musics, int position) {
+
+            if(musics == null
+                    || musics.size() == 0){
+                //替换为空队列，即清空了队列，停止播放
+                synchronized (this) {
+                    quque.clear();
+                    mediaPlayer.reset();
+                    changeState(STATE_IDEL);
+                    return;
+                }
+            }
+
             quque.clear();
-            quque.addAll(songInfos);
+            quque.addAll(musics);
             play(position);
         }
 
@@ -95,6 +126,7 @@ public class MusicService extends Service {
          */
         @Override
         public void play(int position) {
+
             if (state == STATE_PREPAREING) {
                 //mediaplayer执行了prepareAsync方法,正在异步准备资源中，
                 //不能重置mediaplayer，否则会出错
@@ -104,7 +136,7 @@ public class MusicService extends Service {
             synchronized (this) {
                 currentIndex = position;
                 mediaPlayer.reset();
-                SongInfo curSong = quque.get(currentIndex);
+                Music curSong = quque.get(currentIndex);
                 try {
                     mediaPlayer.setDataSource(MusicService.this, Uri.parse(curSong.getPath()));
                 } catch (IOException e) {

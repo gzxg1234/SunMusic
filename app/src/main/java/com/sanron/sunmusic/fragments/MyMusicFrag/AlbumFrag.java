@@ -1,5 +1,7 @@
-package com.sanron.sunmusic.fragments.MySongFrag;
+package com.sanron.sunmusic.fragments.MyMusicFrag;
 
+import android.content.ContentValues;
+import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -10,7 +12,10 @@ import com.sanron.sunmusic.adapter.DataListAdapter;
 import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.fragments.BaseListFrag;
 import com.sanron.sunmusic.model.Album;
+import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.task.GetAlbumsTask;
+import com.sanron.sunmusic.task.QueryMusicTask;
+import com.sanron.sunmusic.utils.T;
 
 import java.io.File;
 import java.util.List;
@@ -21,7 +26,7 @@ import java.util.List;
 public class AlbumFrag extends BaseListFrag<Album> {
 
     public AlbumFrag(int layout) {
-        super(layout,new String[]{DBHelper.TABLE_ALBUM,DBHelper.TABLE_SONG,DBHelper.TABLE_PLAYLIST});
+        super(layout,new String[]{DBHelper.TABLE_ALBUM,DBHelper.TABLE_MUSIC,DBHelper.TABLE_PLAYLIST});
     }
 
     public static AlbumFrag newInstance() {
@@ -51,10 +56,17 @@ public class AlbumFrag extends BaseListFrag<Album> {
 
     @Override
     public void onPopupItemSelected(MenuItem item, int position) {
-        List<Album> selectedAlbums = mAdapter.getData().subList(position,position+1);
         switch (item.getItemId()){
             case R.id.menu_add_to_quque:{
-
+                ContentValues query = new ContentValues();
+                query.put(DBHelper.MUSIC_ALBUMID,mAdapter.getItem(position).getId());
+                new QueryMusicTask(query){
+                    @Override
+                    protected void onPostExecute(List<Music> musics) {
+                        player.enqueue(musics);
+                        T.show(getContext(),musics.size()+"首歌曲添加到队列");
+                    }
+                }.execute();
             }break;
 
             case R.id.menu_match_pic:{
@@ -62,6 +74,7 @@ public class AlbumFrag extends BaseListFrag<Album> {
             }break;
         }
     }
+
 
     @Override
     public void refreshData() {

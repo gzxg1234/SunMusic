@@ -7,34 +7,34 @@ import android.os.AsyncTask;
 import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.db.DataProvider;
 import com.sanron.sunmusic.model.PlayList;
-import com.sanron.sunmusic.model.SongInfo;
+import com.sanron.sunmusic.model.Music;
 
 import java.util.List;
 
 /**
  * 添加歌曲至列表
  */
-public abstract class AddSongsToListTask extends AsyncTask<Void, Void, Integer[]> {
+public abstract class AddMusicToListTask extends AsyncTask<Void, Void, Integer[]> {
     private PlayList mPlaylist;
-    private List<SongInfo> mAddSongs;
+    private List<Music> mAddSongs;
 
-    public AddSongsToListTask(PlayList playList,List<SongInfo> songInfos) {
+    public AddMusicToListTask(PlayList playList, List<Music> musics) {
         this.mPlaylist = playList;
-        this.mAddSongs = songInfos;
+        this.mAddSongs = musics;
     }
 
     @Override
     protected Integer[] doInBackground(Void... params) {
-        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_LISTSONGS);
+        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_LISTMUSIC);
 
         int addNum = 0;//添加成功数量
         int existsNum = 0;//已存在数量
         ContentValues values = new ContentValues(2);
         for(int i=0; i<mAddSongs.size(); i++){
-            SongInfo songInfo = mAddSongs.get(i);
-            values.put(DBHelper.LISTSONGS_LISTID,mPlaylist.getId());
-            values.put(DBHelper.LISTSONGS_SONGID,songInfo.getId());
-            if(songInfo.getType() == SongInfo.TYPE_LOCAL) {
+            Music music = mAddSongs.get(i);
+            values.put(DBHelper.LISTMUSIC_LISTID,mPlaylist.getId());
+            values.put(DBHelper.LISTMUSIC_MUSICID, music.getId());
+            if(music.getType() == Music.TYPE_LOCAL) {
                 //添加本地歌曲
                 //检查是否已经存在于列表中
                 Cursor cursor = access.query(values);

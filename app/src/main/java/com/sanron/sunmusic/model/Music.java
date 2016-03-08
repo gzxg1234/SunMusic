@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * Created by Administrator on 2015/12/19.
  */
-public class SongInfo implements Serializable {
+public class Music implements Serializable {
 
     public static final int TYPE_LOCAL = 1; //本地
     public static final int TYPE_WEB = 2;   //网络
@@ -171,21 +171,21 @@ public class SongInfo implements Serializable {
         this.bitrate = bitrate;
     }
 
-    public static SongInfo fromCursor(Cursor cursor) {
-        SongInfo songInfo = new SongInfo();
-        songInfo.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
-        songInfo.setSongId(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_SONGID)));
-        songInfo.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.SONG_TYPE)));
-        songInfo.setBitrate(cursor.getInt(cursor.getColumnIndex(DBHelper.SONG_BITRATE)));
-        songInfo.setAlbum(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_ALBUMNAME)));
-        songInfo.setLetter(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_LETTER)));
-        songInfo.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_ARTISTNAME)));
-        songInfo.setPath(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_PATH)));
-        songInfo.setDuration(cursor.getInt(cursor.getColumnIndex(DBHelper.SONG_DURATION)));
-        songInfo.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_DISPLAYNAME)));
-        songInfo.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_TITLE)));
-        songInfo.setPicPath(cursor.getString(cursor.getColumnIndex(DBHelper.SONG_PIC)));
-        return songInfo;
+    public static Music fromCursor(Cursor cursor) {
+        Music music = new Music();
+        music.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
+        music.setSongId(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_MUSICID)));
+        music.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.MUSIC_TYPE)));
+        music.setBitrate(cursor.getInt(cursor.getColumnIndex(DBHelper.MUSIC_BITRATE)));
+        music.setAlbum(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ALBUMNAME)));
+        music.setLetter(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_LETTER)));
+        music.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ARTISTNAME)));
+        music.setPath(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_PATH)));
+        music.setDuration(cursor.getInt(cursor.getColumnIndex(DBHelper.MUSIC_DURATION)));
+        music.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_DISPLAYNAME)));
+        music.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_TITLE)));
+        music.setPicPath(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_PIC)));
+        return music;
     }
 
     public ContentValues toContentValues() {
@@ -194,34 +194,34 @@ public class SongInfo implements Serializable {
             values.put(DBHelper.ID, id);
         }
         if (type != -1) {
-            values.put(DBHelper.SONG_TYPE, type);
+            values.put(DBHelper.MUSIC_TYPE, type);
         }
         if (displayName != null) {
-            values.put(DBHelper.SONG_DISPLAYNAME, displayName);
+            values.put(DBHelper.MUSIC_DISPLAYNAME, displayName);
         }
         if (title != null) {
-            values.put(DBHelper.SONG_TITLE, title);
+            values.put(DBHelper.MUSIC_TITLE, title);
         }
         if (album != null) {
-            values.put(DBHelper.SONG_ALBUMNAME, album);
+            values.put(DBHelper.MUSIC_ALBUMNAME, album);
         }
         if (artist != null) {
-            values.put(DBHelper.SONG_ARTISTNAME, artist);
+            values.put(DBHelper.MUSIC_ARTISTNAME, artist);
         }
         if (duration != -1) {
-            values.put(DBHelper.SONG_DURATION, duration);
+            values.put(DBHelper.MUSIC_DURATION, duration);
         }
         if (path != null) {
-            values.put(DBHelper.SONG_PATH, path);
+            values.put(DBHelper.MUSIC_PATH, path);
         }
         if (letter != null) {
-            values.put(DBHelper.SONG_LETTER, letter);
+            values.put(DBHelper.MUSIC_LETTER, letter);
         }
         if (songId != null) {
-            values.put(DBHelper.SONG_SONGID, songId);
+            values.put(DBHelper.MUSIC_MUSICID, songId);
         }
         if (picPath != null) {
-            values.put(DBHelper.SONG_PIC, picPath);
+            values.put(DBHelper.MUSIC_PIC, picPath);
         }
         return values;
     }

@@ -5,9 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-
-import java.util.HashMap;
-import java.util.Map;
+import android.os.Looper;
 
 /**
  * Created by Administrator on 2016/3/3.
@@ -15,10 +13,11 @@ import java.util.Map;
 public class PlayerUtils {
 
     public static IMusicPlayer musicPlayer;
-    public static void bindToService(Context context, final ServiceConnection callback) {
+
+    public static boolean bindService(Context context,final ServiceConnection callback ){
         Intent intent = new Intent(context, MusicService.class);
         context.startService(intent);
-        context.bindService(intent, new ServiceConnection() {
+        return context.bindService(intent, new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 if (musicPlayer == null) {
@@ -32,9 +31,6 @@ public class PlayerUtils {
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 musicPlayer = null;
-                if(callback != null){
-                    callback.onServiceDisconnected(name);
-                }
             }
         }, Context.BIND_AUTO_CREATE);
     }

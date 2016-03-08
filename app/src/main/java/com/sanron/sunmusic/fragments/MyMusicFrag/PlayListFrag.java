@@ -1,4 +1,4 @@
-package com.sanron.sunmusic.fragments.MySongFrag;
+package com.sanron.sunmusic.fragments.MyMusicFrag;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -22,7 +22,7 @@ import com.sanron.sunmusic.fragments.BaseListFrag;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.task.AddPlayListTask;
 import com.sanron.sunmusic.task.DelPlayListTask;
-import com.sanron.sunmusic.task.GetPlayListsTask;
+import com.sanron.sunmusic.task.GetPlayListTask;
 import com.sanron.sunmusic.task.UpdatePlayListNameTask;
 import com.sanron.sunmusic.utils.T;
 
@@ -36,9 +36,11 @@ public class PlayListFrag extends BaseListFrag<PlayList> {
 
 
     public static final String TAG = "PlayListFrag";
+    public static final int EVENT_CLICK_LIST = 1;
+    public static final String EXTRA_PLAYLIST = "playlist";
 
     public PlayListFrag(int layout) {
-        super(layout,new String[]{DBHelper.TABLE_PLAYLIST,DBHelper.TABLE_LISTSONGS,DBHelper.TABLE_SONG});
+        super(layout,new String[]{DBHelper.TABLE_PLAYLIST,DBHelper.TABLE_LISTMUSIC,DBHelper.TABLE_MUSIC});
     }
 
     public static PlayListFrag newInstance() {
@@ -55,7 +57,7 @@ public class PlayListFrag extends BaseListFrag<PlayList> {
 
     @Override
     public void refreshData() {
-        new GetPlayListsTask() {
+        new GetPlayListTask() {
             @Override
             protected void onPostExecute(List<PlayList> playLists) {
                 mAdapter.setData(playLists);
@@ -66,8 +68,9 @@ public class PlayListFrag extends BaseListFrag<PlayList> {
     @Override
     public void onItemClick(View view, int position) {
         PlayList playList = mAdapter.getData().get(position);
-        Intent intent = new Intent("com.sanron.music.playlistfrag");
-        intent.putExtra("playlist",playList);
+        Intent intent = new Intent(PlayListFrag.class.getName());
+        intent.putExtra("event",EVENT_CLICK_LIST);
+        intent.putExtra(EXTRA_PLAYLIST,playList);
         LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
     }
 

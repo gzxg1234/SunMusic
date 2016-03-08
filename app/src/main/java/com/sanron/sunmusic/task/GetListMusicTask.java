@@ -7,7 +7,7 @@ import android.os.AsyncTask;
 import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.db.DataProvider;
 import com.sanron.sunmusic.model.PlayList;
-import com.sanron.sunmusic.model.SongInfo;
+import com.sanron.sunmusic.model.Music;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,32 +15,32 @@ import java.util.List;
 /**获取播放列表歌曲
  * Created by Administrator on 2015/12/22.
  */
-public abstract class GetPlayListSongsTask extends AsyncTask<Void, Void, List<SongInfo>> {
+public abstract class GetListMusicTask extends AsyncTask<Void, Void, List<Music>> {
 
     private PlayList mPlayList;
-    public GetPlayListSongsTask(PlayList playList){
+    public GetListMusicTask(PlayList playList){
         this.mPlayList = playList;
     }
 
     @Override
-    protected List<SongInfo> doInBackground(Void... params) {
+    protected List<Music> doInBackground(Void... params) {
         long listid = mPlayList.getId();
-        List<SongInfo> listSongs = new ArrayList<>();
-        DataProvider.Access songAccess = DataProvider.instance().getAccess(DBHelper.TABLE_SONG);
-        DataProvider.Access listSongsAccess = DataProvider.instance().getAccess(DBHelper.TABLE_LISTSONGS);
+        List<Music> listSongs = new ArrayList<>();
+        DataProvider.Access songAccess = DataProvider.instance().getAccess(DBHelper.TABLE_MUSIC);
+        DataProvider.Access listSongsAccess = DataProvider.instance().getAccess(DBHelper.TABLE_LISTMUSIC);
 
         ContentValues values = new ContentValues(1);
-        values.put(DBHelper.LISTSONGS_LISTID,listid);
+        values.put(DBHelper.LISTMUSIC_LISTID,listid);
         Cursor cursor = listSongsAccess.query(values);
         values.clear();
         while(cursor.moveToNext()){
-            long songid = cursor.getLong(cursor.getColumnIndex(DBHelper.LISTSONGS_SONGID));
+            long songid = cursor.getLong(cursor.getColumnIndex(DBHelper.LISTMUSIC_MUSICID));
             values.put(DBHelper.ID,songid);
 
             //查歌曲信息
             Cursor c2 = songAccess.query(values);
             if(c2.moveToFirst()){
-                listSongs.add(SongInfo.fromCursor(c2));
+                listSongs.add(Music.fromCursor(c2));
             }
         }
         songAccess.close();

@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * 获取播放列表
  */
-public abstract class GetPlayListsTask extends AsyncTask<Void, Void, List<PlayList>> {
+public abstract class GetPlayListTask extends AsyncTask<Void, Void, List<PlayList>> {
 
 
     @Override
