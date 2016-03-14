@@ -57,6 +57,11 @@ public abstract class BaseMusicFrag extends BaseListFrag<Music> {
         resolveMenuItemClick(item, musics);
     }
 
+    @Override
+    public String onGetPicturePath(Music data) {
+        return data.getPicPath();
+    }
+
     protected boolean resolveMenuItemClick(MenuItem item, final List<Music> musics) {
         switch (item.getItemId()) {
             case R.id.menu_add_to_list: {

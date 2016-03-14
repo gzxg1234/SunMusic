@@ -1,9 +1,11 @@
 package com.sanron.sunmusic.fragments.MyMusic;
 
-import android.text.TextUtils;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.adapter.DataListAdapter;
@@ -11,7 +13,6 @@ import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.model.Artist;
 import com.sanron.sunmusic.task.GetArtistsTask;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -19,28 +20,21 @@ import java.util.List;
  */
 public class ArtistFrag extends BaseListFrag<Artist> {
 
-    public ArtistFrag(int layout) {
-        super(layout,new String[]{DBHelper.TABLE_ARTIST, DBHelper.TABLE_MUSIC,DBHelper.TABLE_ALBUM});
-    }
-
-    public static ArtistFrag newInstance() {
-        return new ArtistFrag(LAYOUT_STAGGERED);
+    public ArtistFrag() {
+        super(LAYOUT_STAGGERED,
+                new String[]{DBHelper.TABLE_ARTIST, DBHelper.TABLE_MUSIC, DBHelper.TABLE_ALBUM});
     }
 
     @Override
     protected void bindViewHolder(DataListAdapter.ItemHolder holder, int position) {
         Artist artist = mAdapter.getItem(position);
         holder.tvText1.setText(artist.getName());
-        holder.tvText2.setText(artist.getAlbumNum()+"张专辑");
-        String picPath = artist.getPicPath();
-        if(TextUtils.isEmpty(picPath)){
-            holder.ivPicture.setImageResource(R.mipmap.default_artist_album_pic);
-        }else{
-            File file = new File(picPath);
-            if(!file.exists()){
-                holder.ivPicture.setImageResource(R.mipmap.default_artist_album_pic);
-            }
-        }
+        holder.tvText2.setText(artist.getAlbumNum() + "张专辑");
+    }
+
+    @Override
+    public String onGetPicturePath(Artist data) {
+        return data.getPicPath();
     }
 
     @Override
@@ -55,15 +49,16 @@ public class ArtistFrag extends BaseListFrag<Artist> {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.option_menu_artist_frag,menu);
+        inflater.inflate(R.menu.option_menu_artist_frag, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()){
-            case R.id.option_match_pic:{
+        switch (item.getItemId()) {
+            case R.id.option_match_pic: {
 
-            }break;
+            }
+            break;
         }
         return super.onOptionsItemSelected(item);
     }

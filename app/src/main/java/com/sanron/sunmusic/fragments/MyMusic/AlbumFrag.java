@@ -23,12 +23,9 @@ import java.util.List;
  */
 public class AlbumFrag extends BaseListFrag<Album> {
 
-    public AlbumFrag(int layout) {
-        super(layout,new String[]{DBHelper.TABLE_ALBUM,DBHelper.TABLE_MUSIC,DBHelper.TABLE_PLAYLIST});
-    }
-
-    public static AlbumFrag newInstance() {
-        return new AlbumFrag(LAYOUT_STAGGERED);
+    public AlbumFrag() {
+        super(LAYOUT_STAGGERED,
+                new String[]{DBHelper.TABLE_ALBUM,DBHelper.TABLE_MUSIC,DBHelper.TABLE_PLAYLIST});
     }
 
     @Override
@@ -36,15 +33,11 @@ public class AlbumFrag extends BaseListFrag<Album> {
         Album album = mAdapter.getItem(position);
         holder.tvText1.setText(album.getName());
         holder.tvText2.setText(album.getSongNum()+"首音乐");
-        String picPath = album.getPicPath();
-        if(TextUtils.isEmpty(picPath)){
-            holder.ivPicture.setImageResource(R.mipmap.default_artist_album_pic);
-        }else{
-            File file = new File(picPath);
-            if(!file.exists()){
-                holder.ivPicture.setImageResource(R.mipmap.default_artist_album_pic);
-            }
-        }
+    }
+
+    @Override
+    public String onGetPicturePath(Album data) {
+        return data.getPicPath();
     }
 
     @Override

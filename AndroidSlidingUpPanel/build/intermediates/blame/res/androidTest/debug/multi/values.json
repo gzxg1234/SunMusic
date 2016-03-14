@@ -1,6 +1,6 @@
 [
     {
-        "outputFile": "E:\\UserData\\AndroidProjects\\SunMusic\\AndroidSlidingUpPanel\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
+        "outputFile": "/home/sanron/AndroidStudioProjects/SunMusic/AndroidSlidingUpPanel/build/intermediates/res/merged/androidTest/debug/values/values.xml",
         "map": [
             {
                 "to": {
@@ -11,7 +11,7 @@
                     "endOffset": 1193
                 },
                 "from": {
-                    "file": "E:\\UserData\\AndroidProjects\\SunMusic\\AndroidSlidingUpPanel\\build\\intermediates\\exploded-aar\\com.android.support\\recyclerview-v7\\23.1.1\\res\\values\\values.xml",
+                    "file": "/home/sanron/AndroidStudioProjects/SunMusic/AndroidSlidingUpPanel/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/23.1.1/res/values/values.xml",
                     "position": {
                         "startLine": 5,
                         "startColumn": 4,
@@ -30,7 +30,7 @@
                     "endOffset": 1259
                 },
                 "from": {
-                    "file": "E:\\UserData\\AndroidProjects\\SunMusic\\AndroidSlidingUpPanel\\build\\intermediates\\exploded-aar\\com.android.support\\recyclerview-v7\\23.1.1\\res\\values\\values.xml",
+                    "file": "/home/sanron/AndroidStudioProjects/SunMusic/AndroidSlidingUpPanel/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/23.1.1/res/values/values.xml",
                     "position": {
                         "startLine": 8,
                         "startColumn": 4,

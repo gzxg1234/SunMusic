@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/iv_picture"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/default_song_pic" />
+
+    <TextView
+        android:id="@+id/tv_music_info"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:padding="8dp"
+        android:textSize="16dp"
+        android:singleLine="true"
+        android:textColor="@color/textColorSecondaryInverse"
+        tools:text="Love Yourself-Justin" />
+
+
+    <ImageButton
+        style="@style/NotificationButton.Small"
+        android:id="@+id/ibtn_play_pause"
+        android:src="@mipmap/ic_play_arrow_black_36dp" />
+
+    <ImageButton
+        style="@style/NotificationButton.Small"
+        android:id="@+id/ibtn_next"
+        android:src="@mipmap/ic_skip_next_black_36dp" />
+
+    <ImageButton
+        style="@style/NotificationButton.Small"
+        android:id="@+id/ibtn_lrc"
+        android:src="@mipmap/ic_lyric_open_36dp" />
+
+    <ImageButton
+        style="@style/NotificationButton.Small"
+        android:padding="6dp"
+        android:id="@+id/ibtn_close"
+        android:src="@mipmap/ic_close_black_24dp" />
+</LinearLayout>

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.util.TimeUtils;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,9 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.service.IMusicPlayer;
@@ -22,6 +26,8 @@ import com.sanron.sunmusic.utils.T;
 import com.sanron.sunmusic.window.ShowQueueMusicWindow;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * 播放界面
@@ -43,12 +49,16 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
     private ImageView ivSongPicture;
     private TextView tvTitle;
     private TextView tvArtist;
+    private TextView tvPlayPostion;
+    private TextView tvDuration;
     private ImageButton ibtnBack;
     private ImageButton ibtnChangeMode;
     private ImageButton ibtnLast;
     private ImageButton ibtnPlayPause;
     private ImageButton ibtnNext;
     private ImageButton ibtnPlayQuque;
+
+    private ImageLoader imageLoader = ImageLoader.getInstance();
 
 
     //刷新播放进度进程
@@ -108,9 +118,15 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
                         e.printStackTrace();
                     }
                 }
+
                 int position = player.getCurrentPosition();
-                position = (position == -1 ? 0 : position);
-                setPlayProgress(position);
+                final int pos = (position == -1 ? 0 : position);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setPlayProgress(pos);
+                    }
+                });
                 SystemClock.sleep(100);
             }
         }
@@ -122,25 +138,27 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
             switch (state) {
                 case IMusicPlayer.STATE_IDEL: {
                     updateProgressThread.pause();
-                    ivSongPicture.setImageResource(R.mipmap.default_big_song_pic);
-                    sivSongPicture.setImageResource(R.mipmap.default_song_pic);
+                    setSongPic("");
                     setTitleText("Sun Music");
                     setArtistText("");
-                    setSeekbarMax(player.getDuration());
+                    setSongDuration(0);
                     setPlayProgress(0);
-                    setStateIcon(R.mipmap.ic_play_arrow_black_48dp);
+                    sibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_black_36dp);
+                    ibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_black_48dp);
                 }
                 break;
 
                 case IMusicPlayer.STATE_PAUSE: {
                     updateProgressThread.pause();
-                    setStateIcon(R.mipmap.ic_play_arrow_black_48dp);
+                    sibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_black_36dp);
+                    ibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_black_48dp);
                 }
                 break;
 
                 case IMusicPlayer.STATE_PLAYING: {
                     updateProgressThread.running();
-                    setStateIcon(R.mipmap.ic_pause_black_48dp);
+                    sibtnPlayPause.setImageResource(R.mipmap.ic_pause_black_36dp);
+                    ibtnPlayPause.setImageResource(R.mipmap.ic_pause_black_48dp);
                 }
                 break;
             }
@@ -151,21 +169,9 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
             Music curSong = player.getQueue().get(player.getCurrentIndex());
             setTitleText(curSong.getTitle());
             setArtistText(curSong.getArtist());
+            setSongPic(curSong.getPicPath());
 
-            String picPath = curSong.getPicPath();
-            if (TextUtils.isEmpty(picPath)) {
-                ivSongPicture.setImageResource(R.mipmap.default_big_song_pic);
-                sivSongPicture.setImageResource(R.mipmap.default_song_pic);
-            } else {
-                File file = new File(picPath);
-                if (!file.exists()) {
-                    ivSongPicture.setImageResource(R.mipmap.default_big_song_pic);
-                    sivSongPicture.setImageResource(R.mipmap.default_song_pic);
-                }
-            }
-
-            setStateIcon(R.mipmap.ic_pause_black_48dp);
-            setSeekbarMax(player.getDuration());
+            setSongDuration(player.getDuration());
             setPlayProgress(0);
             if (curSong.getType() == Music.TYPE_LOCAL) {
                 playProgress.setSecondaryProgress(player.getDuration());
@@ -180,13 +186,13 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
             int iconId = 0;
             switch (newMode) {
                 case IMusicPlayer.MODE_IN_TURN:
-                    iconId = R.mipmap.ic_repeat_black_48dp;
+                    iconId = R.mipmap.ic_repeat_black_24dp;
                     break;
                 case IMusicPlayer.MODE_LOOP:
-                    iconId = R.mipmap.ic_repeat_one_black_48dp;
+                    iconId = R.mipmap.ic_repeat_one_black_24dp;
                     break;
                 case IMusicPlayer.MODE_RANDOM:
-                    iconId = R.mipmap.ic_shuffle_black_48dp;
+                    iconId = R.mipmap.ic_shuffle_black_24dp;
                     break;
             }
             ibtnChangeMode.setImageResource(iconId);
@@ -200,36 +206,48 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
         }
     };
 
-    public void setTitleText(String title) {
+    public void setSongPic(String picPath){
+        DisplayImageOptions options = new DisplayImageOptions.Builder().imageScaleType(ImageScaleType.EXACTLY).build();
+        if(!TextUtils.isEmpty(picPath)){
+            File file = new File(picPath);
+            if(file.exists()){
+                imageLoader.displayImage("file://" + picPath, ivSongPicture, options);
+                imageLoader.displayImage("file://" + picPath, sivSongPicture, options);
+                return;
+            }
+        }
+
+        ivSongPicture.setImageResource(R.mipmap.default_big_song_pic);
+        sivSongPicture.setImageResource(R.mipmap.default_song_pic);
+        //尝试从网络获取
+
+    }
+
+    private void setTitleText(String title) {
         stvTitle.setText(title);
         tvTitle.setText(title);
     }
 
-    public void setArtistText(String artist) {
+    private void setArtistText(String artist) {
         stvArtist.setText(artist);
         tvArtist.setText(artist);
     }
 
-    public void setStateIcon(int resid) {
-        sibtnPlayPause.setImageResource(resid);
-        ibtnPlayPause.setImageResource(resid);
-    }
-
-    public void setPlayProgress(int position) {
+    private void setPlayProgress(int position) {
         playProgress.setProgress(position);
         splayProgress.setProgress(position);
+        tvPlayPostion.setText(formatTime(position));
     }
 
-    public void setSeekbarMax(int max) {
-        playProgress.setMax(max);
-        splayProgress.setMax(max);
+    private void setSongDuration(int duration) {
+        playProgress.setMax(duration);
+        splayProgress.setMax(duration);
+        tvDuration.setText(formatTime(duration));
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        player.addCallback(callback);
-        updateProgressThread = new UpdateProgressThread();
+    private String formatTime(int millis){
+        SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+        return sdf.format(new Date(millis));
     }
 
     @Nullable
@@ -255,6 +273,8 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
         ivSongPicture = $(R.id.iv_song_picture);
         tvTitle = $(R.id.tv_title);
         tvArtist = $(R.id.tv_artist);
+        tvDuration = $(R.id.tv_song_duration);
+        tvPlayPostion = $(R.id.tv_play_position);
         ibtnBack = $(R.id.ibtn_back);
         ibtnChangeMode = $(R.id.ibtn_play_mode);
         ibtnLast = $(R.id.ibtn_last);
@@ -271,14 +291,21 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
         ibtnBack.setOnClickListener(this);
         playProgress.setOnSeekBarChangeListener(this);
 
-        int state = player.getState();
-        int mode = player.getPlayMode();
-        callback.onModeChange(mode);
-        callback.onStateChange(state);
+        if(savedInstanceState != null){
+            int smallVisibility = savedInstanceState.getInt("smallPlayerVisibility",View.VISIBLE);
+            smallPlayer.setVisibility(smallVisibility);
+        }
+
+        updateProgressThread = new UpdateProgressThread();
+        updateProgressThread.start();
+
+        player.addCallback(callback);
+
+        callback.onModeChange(player.getState());
+        callback.onStateChange(player.getPlayMode());
         if (player.getCurrentPosition() != -1)
             callback.onPrepared();
 
-        updateProgressThread.start();
     }
 
     @Override
@@ -286,12 +313,6 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
         super.onDestroyView();
         player.removeCallback(callback);
         updateProgressThread.end();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        player.removeCallback(callback);
     }
 
     @Override
@@ -311,14 +332,15 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
             case R.id.s_ibtn_play_pause:
             case R.id.ibtn_play_pause: {
                 int state = player.getState();
-                if (state == IMusicPlayer.STATE_PAUSE
-                        || state == IMusicPlayer.STATE_IDEL) {
-                    if (player.getQueue().size() == 0) {
-                        T.show(getContext(), "播放列表为空");
-                        return;
-                    }
+                if (state == IMusicPlayer.STATE_PAUSE) {
                     player.play();
-                } else if (state == IMusicPlayer.STATE_PLAYING) {
+                }else if(state == IMusicPlayer.STATE_IDEL){
+                    if(player.getQueue().size() > 0){
+                        player.play(0);
+                    }else{
+                        T.show(getContext(), "播放列表为空");
+                    }
+                }else if (state == IMusicPlayer.STATE_PLAYING) {
                     player.pause();
                 }
             }
@@ -348,4 +370,11 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
     public void setSmallControllerVisibility(int visibility) {
         smallPlayer.setVisibility(visibility);
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("smallPlayerVisibility",smallPlayer.getVisibility());
+    }
+
 }

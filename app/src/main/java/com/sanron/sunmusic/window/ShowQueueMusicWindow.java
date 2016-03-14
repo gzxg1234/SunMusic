@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * 播放队列窗口
  */
-public class ShowQueueMusicWindow extends PopupWindow {
+public class ShowQueueMusicWindow extends PopupWindow implements IMusicPlayer.Callback {
 
     private Activity mActivity;
     private float mOldAlpha;
@@ -44,6 +44,7 @@ public class ShowQueueMusicWindow extends PopupWindow {
         this.mActivity = activity;
         this.mContentView = LayoutInflater.from(activity).inflate(R.layout.window_queue_music, null);
         this.queue = player.getQueue();
+        player.addCallback(this);
         int screenHeight = activity.getResources().getDisplayMetrics().heightPixels;
         setFocusable(true);
         setTouchable(true);
@@ -116,6 +117,25 @@ public class ShowQueueMusicWindow extends PopupWindow {
     public void dismiss() {
         animateDismiss();
         super.dismiss();
+        player.removeCallback(this);
+    }
+
+    @Override
+    public void onStateChange(int state) {
+    }
+
+    @Override
+    public void onPrepared() {
+        adapter.notifyDataSetChanged();
+        lvQueue.setSelection(player.getCurrentIndex());
+    }
+
+    @Override
+    public void onModeChange(int newMode) {
+    }
+
+    @Override
+    public void onBufferingUpdate(int bufferedPosition) {
     }
 
     public class MusicAdapter extends BaseAdapter{

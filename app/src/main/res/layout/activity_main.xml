@@ -7,17 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".activity.MainActivity">
 
-    <android.support.design.widget.NavigationView
-        android:id="@+id/navigation_view"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:itemBackground="@android:color/transparent"
-        app:menu="@menu/left_drawer_menu"
-        app:headerLayout="@layout/navigation_header">
-    </android.support.design.widget.NavigationView>
-
-
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
         android:id="@+id/sliding_panel"
         android:layout_width="match_parent"
@@ -68,4 +57,16 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/navigation_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:itemBackground="@android:color/transparent"
+        app:menu="@menu/left_drawer_menu"
+        app:headerLayout="@layout/navigation_header">
+    </android.support.design.widget.NavigationView>
+
+
 </android.support.v4.widget.DrawerLayout>

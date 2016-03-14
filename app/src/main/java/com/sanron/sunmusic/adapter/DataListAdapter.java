@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sanron.sunmusic.R;
@@ -66,12 +67,10 @@ public abstract class DataListAdapter<Data> extends RecyclerView.Adapter<DataLis
     public void setItemSelected(int position,boolean value){
         if(value) {
             mSelectedState.put(position, value);
-            notifyItemChanged(position);
         }else {
             mSelectedState.delete(position);
-            notifyItemChanged(position);
         }
-
+        notifyDataSetChanged();
         if (mOnItemCheckedListener != null) {
             mOnItemCheckedListener.onItemSelectedChange(position, value);
         }
@@ -132,6 +131,8 @@ public abstract class DataListAdapter<Data> extends RecyclerView.Adapter<DataLis
             this.itemView.setOnLongClickListener(this);
             btnAction.setOnClickListener(this);
         }
+
+
 
         @Override
         public void onClick(View v) {

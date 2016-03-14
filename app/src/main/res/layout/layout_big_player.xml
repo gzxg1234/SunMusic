@@ -9,7 +9,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="5">
+        android:layout_weight="7">
         <ImageView
             android:id="@+id/iv_song_picture"
             android:layout_width="match_parent"
@@ -55,13 +55,13 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
+        android:layout_weight="3"
         android:background="@color/colorPrimary">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:paddingLeft="16dp"
             android:gravity="center_vertical">
 
@@ -88,31 +88,35 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            >
 
             <TextView
-                android:id="@+id/tv_cur_position"
+                android:id="@+id/tv_play_position"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
                 android:layout_alignParentLeft="true"
                 tools:text="00:24"
-                android:textSize="10dp"/>
+                android:textSize="12dp"/>
 
             <TextView
                 android:id="@+id/tv_song_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="16dp"
                 android:layout_alignParentRight="true"
                 tools:text="3:28"
-                android:textSize="10dp"/>
+                android:textSize="12dp"/>
 
             <SeekBar
                 android:id="@+id/play_progress"
                 android:layout_width="match_parent"
                 android:layout_height="4dp"
+                android:layout_below="@+id/tv_play_position"
+                android:layout_marginTop="2dp"
                 android:thumb="@null"
                 android:progressDrawable="@drawable/seekbar_play_progress"
-                android:layout_below="@+id/tv_cur_position"
                 tools:max="100"
                 tools:progress="20"
                 tools:secondaryProgress="50"
@@ -123,7 +127,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="3"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:layout_alignParentBottom="true">
@@ -135,8 +139,8 @@
             <ImageButton
                 style="@style/PlayerButton"
                 android:id="@+id/ibtn_play_mode"
-                android:src="@mipmap/ic_repeat_black_48dp"
-                android:padding="15dp"
+                android:src="@mipmap/ic_repeat_black_24dp"
+                android:padding="16dp"
                 />
             <android.support.v4.widget.Space
                 android:layout_width="0dp"
@@ -145,7 +149,8 @@
             <ImageButton
                 style="@style/PlayerButton"
                 android:id="@+id/ibtn_last"
-                android:src="@mipmap/ic_skip_previous_black_48dp"
+                android:padding="10dp"
+                android:src="@mipmap/ic_skip_previous_black_36dp"
                 />
             <android.support.v4.widget.Space
                 android:layout_width="0dp"
@@ -154,6 +159,7 @@
             <ImageButton
                 style="@style/PlayerButton"
                 android:id="@+id/ibtn_play_pause"
+                android:padding="4dp"
                 android:src="@mipmap/ic_play_arrow_black_48dp"
                 />
             <android.support.v4.widget.Space
@@ -163,7 +169,8 @@
             <ImageButton
                 style="@style/PlayerButton"
                 android:id="@+id/ibtn_next"
-                android:src="@mipmap/ic_skip_next_black_48dp"
+                android:padding="10dp"
+                android:src="@mipmap/ic_skip_next_black_36dp"
                 />
             <android.support.v4.widget.Space
                 android:layout_width="0dp"
@@ -172,8 +179,8 @@
             <ImageButton
                 style="@style/PlayerButton"
                 android:id="@+id/ibtn_play_quque"
-                android:src="@mipmap/ic_queue_music_black_48dp"
-                android:padding="15dp"
+                android:src="@mipmap/ic_queue_music_black_24dp"
+                android:padding="16dp"
                 />
 
             <android.support.v4.widget.Space

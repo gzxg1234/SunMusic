@@ -22,11 +22,17 @@ public class PagerFragment extends BaseFragment {
     private ViewPager viewPager;
     private LocalPagerAdapter adapter;
     private String[] titles;
-    private Class[] fragments;
+    private String[] fragments;
 
-    public PagerFragment(Class[] fragments, String[] titles){
-        this.fragments = fragments;
-        this.titles = titles;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Bundle arguments = getArguments();
+        if(arguments != null) {
+            titles = arguments.getStringArray("titles");
+            fragments = arguments.getStringArray("fragments");
+        }
     }
 
     @Nullable
@@ -60,7 +66,8 @@ public class PagerFragment extends BaseFragment {
 
         @Override
         public Fragment getItem(int position) {
-            return Fragment.instantiate(getContext(),fragments[position].getName());
+            return Fragment.instantiate(getContext(),fragments[position]);
         }
     }
+
 }

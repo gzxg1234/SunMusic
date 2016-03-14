@@ -13,7 +13,8 @@
         android:id="@+id/s_iv_song_pic"
         android:layout_width="58dp"
         android:layout_height="58dp"
-        tools:src="@mipmap/test_head"/>
+        android:scaleType="centerCrop"
+        tools:src="@mipmap/default_song_pic"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -66,12 +67,14 @@
             <ImageButton
                 style="@style/PlayerButton"
                 android:id="@+id/s_ibtn_play_pause"
-                android:src="@mipmap/ic_play_arrow_black_48dp"/>
+                android:padding="10dp"
+                android:src="@mipmap/ic_play_arrow_black_36dp"/>
 
             <ImageButton
                 style="@style/PlayerButton"
                 android:id="@+id/s_ibtn_next"
-                android:src="@mipmap/ic_skip_next_black_48dp"/>
+                android:padding="10dp"
+                android:src="@mipmap/ic_skip_next_black_36dp"/>
         </LinearLayout>
     </LinearLayout>
 

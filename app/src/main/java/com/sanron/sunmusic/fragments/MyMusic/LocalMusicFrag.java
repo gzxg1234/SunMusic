@@ -20,12 +20,8 @@ import java.util.List;
  */
 public class LocalMusicFrag extends BaseMusicFrag {
 
-    public LocalMusicFrag(int layout) {
-        super(layout,new String[]{DBHelper.TABLE_MUSIC,DBHelper.TABLE_ALBUM});
-    }
-
-    public static LocalMusicFrag newInstance() {
-        return new LocalMusicFrag(LAYOUT_LINEAR);
+    public LocalMusicFrag() {
+        super(LAYOUT_LINEAR,new String[]{DBHelper.TABLE_MUSIC,DBHelper.TABLE_ALBUM});
     }
 
     @Override
@@ -44,6 +40,7 @@ public class LocalMusicFrag extends BaseMusicFrag {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.option_menu_localsongfrag, menu);
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

@@ -1,1 +1,1 @@
-include ':app', ':AndroidSlidingUpPanel'
+include ':app', ':AndroidSlidingUpPanel', ':Android-Universal-Image-Loader'

@@ -1,11 +1,14 @@
 package com.sanron.sunmusic.fragments.MyMusic;
 
+import android.graphics.Bitmap;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.TextUtils;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -14,7 +17,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
+import com.nostra13.universalimageloader.cache.memory.MemoryCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.assist.ImageSize;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.adapter.DataListAdapter;
 import com.sanron.sunmusic.db.DataProvider;
@@ -39,9 +51,21 @@ public abstract class BaseListFrag<T> extends BaseFragment implements DataListAd
     protected RecyclerView recyclerView;
     protected DataListAdapter<T> mAdapter;
 
+    private boolean isShowItemPicture = true;//是否加载图片
+    private ImageLoader imageLoader;
+    private MemoryCache memoryCache;
+    private DisplayImageOptions imageOptions;
+    private boolean isRecyclerViewInit = false;
+
     public BaseListFrag(int layout, String[] subscribes) {
         this.layout = layout;
         this.subscribes = subscribes;
+        imageLoader = ImageLoader.getInstance();
+        memoryCache = imageLoader.getMemoryCache();
+        imageOptions = new DisplayImageOptions.Builder()
+                .imageScaleType(ImageScaleType.EXACTLY)
+                .cacheInMemory(true)
+                .build();
     }
 
     @Override
@@ -49,23 +73,118 @@ public abstract class BaseListFrag<T> extends BaseFragment implements DataListAd
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         DataProvider.instance().addObserver(this);
+
         int layoutid = LAYOUT_LINEAR;
         if (layout == LAYOUT_LINEAR) {
             layoutid = R.layout.list_item;
         } else if (layout == LAYOUT_STAGGERED) {
             layoutid = R.layout.grid_item;
         }
+
         mAdapter = new DataListAdapter<T>(getContext(), layoutid) {
             @Override
             public void onBindViewHolder(ItemHolder holder, int position) {
                 super.onBindViewHolder(holder, position);
                 BaseListFrag.this.bindViewHolder(holder, position);
+                if (isShowItemPicture) {
+                    String picPath = onGetPicturePath(mAdapter.getItem(position));
+                    if (!TextUtils.isEmpty(picPath)){
+
+                        if(!isRecyclerViewInit){
+                            //recyclerview初次绑定item时加载图片
+                            imageLoader.displayImage("file://"+picPath.toString(),
+                                    holder.ivPicture,
+                                    imageOptions);
+                            return;
+                        }
+
+                        if(displayFromMemoryCache(picPath,holder.ivPicture)){
+                            //尝试从内存获取
+                            return;
+                        }
+                    }
+                    holder.ivPicture.setImageResource(R.mipmap.default_song_pic);
+                }
+            }
+
+            @Override
+            public ItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                ItemHolder holder = super.onCreateViewHolder(parent, viewType);
+                if(!isShowItemPicture){
+                    holder.ivPicture.setVisibility(View.GONE);
+                }
+                return holder;
             }
         };
+
         mAdapter.setOnItemLongLickListener(this);
         mAdapter.setOnItemClickListener(this);
         mAdapter.setOnItemActionClickListener(this);
+
         refreshData();
+
+    }
+
+    private boolean displayFromMemoryCache(String path,ImageView imageView){
+        List<Bitmap> bitmaps = MemoryCacheUtils.findCachedBitmapsForImageUri("file://"+path,memoryCache);
+        if(bitmaps.size() > 0){
+            imageView.setImageBitmap(bitmaps.get(0));
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        isRecyclerViewInit = false;
+        if (isShowItemPicture) {
+            //停止滑动时加载图片
+            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    isRecyclerViewInit = true;
+                    switch (newState){
+                        case RecyclerView.SCROLL_STATE_IDLE:{
+                            loadItemPicture();
+                        }break;
+
+                        case RecyclerView.SCROLL_STATE_SETTLING:
+                        case RecyclerView.SCROLL_STATE_DRAGGING:{
+                            imageLoader.stop();
+                        }break;
+                    }
+                }
+            });
+        }
+    }
+
+    public void setShowItemPicture(boolean showItemPicture) {
+        isShowItemPicture = showItemPicture;
+    }
+
+    /**
+     * 加载item图片
+     */
+    public void loadItemPicture() {
+        int childCount = recyclerView.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = recyclerView.getChildAt(i);
+            int position = recyclerView.getChildAdapterPosition(child);
+            DataListAdapter.ItemHolder holder =
+                    (DataListAdapter.ItemHolder) recyclerView.getChildViewHolder(child);
+            String picPath = onGetPicturePath(mAdapter.getItem(position));
+            if (!TextUtils.isEmpty(picPath)) {
+                imageLoader.displayImage("file://"+picPath.toString(), holder.ivPicture, imageOptions);
+            }
+        }
+    }
+
+
+    /**
+     * 获取图片路径
+     */
+    public String onGetPicturePath(T data) {
+        return null;
     }
 
     @Override
@@ -73,6 +192,7 @@ public abstract class BaseListFrag<T> extends BaseFragment implements DataListAd
         super.onDestroy();
         DataProvider.instance().deleteObserver(this);
     }
+
 
     @Override
     public void update(Observable observable, Object data) {
@@ -106,7 +226,7 @@ public abstract class BaseListFrag<T> extends BaseFragment implements DataListAd
 
     protected abstract void bindViewHolder(DataListAdapter.ItemHolder holder, int position);
 
-    public boolean onCreateActionMenu(ActionMode mode,Menu menu){
+    public boolean onCreateActionMenu(ActionMode mode, Menu menu) {
         return false;
     }
 
@@ -117,7 +237,7 @@ public abstract class BaseListFrag<T> extends BaseFragment implements DataListAd
             @Override
             public boolean onCreateActionMode(final ActionMode mode, Menu menu) {
                 mode.getMenuInflater().inflate(R.menu.menu_selected_all, menu);
-                if(!onCreateActionMenu(mode,menu)){
+                if (!onCreateActionMenu(mode, menu)) {
                     return false;
                 }
 
@@ -183,22 +303,22 @@ public abstract class BaseListFrag<T> extends BaseFragment implements DataListAd
     @Override
     public void onItemActionClick(View view, final int potisiton) {
         PopupMenu popupMenu = new PopupMenu(getContext(), view);
-        onCreatePopupMenu(popupMenu.getMenu(),popupMenu.getMenuInflater(),potisiton);
+        onCreatePopupMenu(popupMenu.getMenu(), popupMenu.getMenuInflater(), potisiton);
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                onPopupItemSelected(item,potisiton);
+                onPopupItemSelected(item, potisiton);
                 return true;
             }
         });
         popupMenu.show();
     }
 
-    public void onCreatePopupMenu(Menu menu, MenuInflater inflater,int position){
+    public void onCreatePopupMenu(Menu menu, MenuInflater inflater, int position) {
 
     }
 
-    public void onPopupItemSelected(MenuItem item,int position){
+    public void onPopupItemSelected(MenuItem item, int position) {
 
     }
 

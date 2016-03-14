@@ -42,7 +42,7 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:padding="8dp"
                 android:scaleType="fitXY"
-                android:src="@mipmap/ic_delete_black_48dp" />
+                android:src="@mipmap/ic_delete_black_24dp" />
         </RelativeLayout>
 
         <View

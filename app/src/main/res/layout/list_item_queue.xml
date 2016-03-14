@@ -58,6 +58,6 @@
         android:scaleType="fitXY"
         android:padding="8dp"
         android:background="?android:attr/selectableItemBackground"
-        android:src="@mipmap/ic_delete_black_48dp"/>
+        android:src="@mipmap/ic_delete_black_24dp"/>
 
 </LinearLayout>

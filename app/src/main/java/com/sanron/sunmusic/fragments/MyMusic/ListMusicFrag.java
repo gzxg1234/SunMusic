@@ -10,8 +10,8 @@ import android.view.View;
 
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.db.DBHelper;
-import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.model.Music;
+import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.task.GetListMusicTask;
 import com.sanron.sunmusic.utils.T;
 import com.sanron.sunmusic.window.RemoveListSongDialogBuilder;
@@ -27,18 +27,24 @@ public class ListMusicFrag extends BaseMusicFrag {
 
     public static final String TAG = "PlayListSonsFrag";
 
-    public static ListMusicFrag newInstance(PlayList playList) {
-        return new ListMusicFrag(playList);
+
+    public ListMusicFrag() {
+        super(LAYOUT_LINEAR, new String[]{DBHelper.TABLE_LISTMUSIC, DBHelper.TABLE_MUSIC});
+
     }
 
-    private ListMusicFrag(PlayList mPlayList) {
-        super(LAYOUT_LINEAR,new String[]{DBHelper.TABLE_LISTMUSIC,DBHelper.TABLE_MUSIC});
-        this.mPlayList = mPlayList;
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mPlayList = (PlayList) getArguments().get("playList");
+        }
+        super.onCreate(savedInstanceState);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view,savedInstanceState);
+        super.onViewCreated(view, savedInstanceState);
         contentView.setBackgroundColor(Color.WHITE);
     }
 
@@ -73,12 +79,13 @@ public class ListMusicFrag extends BaseMusicFrag {
         return super.onOptionsItemSelected(item);
     }
 
-    protected boolean resolveMenuItemClick(MenuItem item, final List<Music> musics){
+    protected boolean resolveMenuItemClick(MenuItem item, final List<Music> musics) {
         switch (item.getItemId()) {
-            case R.id.menu_remove_from_list:{
+            case R.id.menu_remove_from_list: {
                 new RemoveListSongDialogBuilder(getContext(), mPlayList, musics)
                         .create().show();
-            }break;
+            }
+            break;
 
             default:
                 super.resolveMenuItemClick(item, musics);
@@ -94,5 +101,11 @@ public class ListMusicFrag extends BaseMusicFrag {
                 mAdapter.setData(data);
             }
         }.execute();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("playList", mPlayList);
     }
 }

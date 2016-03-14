@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
@@ -25,6 +26,7 @@ import com.sanron.sunmusic.task.GetPlayListTask;
 import com.sanron.sunmusic.task.UpdatePlayListNameTask;
 import com.sanron.sunmusic.utils.T;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -38,12 +40,9 @@ public class PlayListFrag extends BaseListFrag<PlayList> {
     public static final int EVENT_CLICK_LIST = 1;
     public static final String EXTRA_PLAYLIST = "playlist";
 
-    public PlayListFrag(int layout) {
-        super(layout,new String[]{DBHelper.TABLE_PLAYLIST,DBHelper.TABLE_LISTMUSIC,DBHelper.TABLE_MUSIC});
-    }
-
-    public static PlayListFrag newInstance() {
-        return new PlayListFrag(LAYOUT_LINEAR);
+    public PlayListFrag() {
+        super(LAYOUT_LINEAR,new String[]{DBHelper.TABLE_PLAYLIST,DBHelper.TABLE_LISTMUSIC,DBHelper.TABLE_MUSIC});
+        setShowItemPicture(false);
     }
 
     @Override
@@ -51,7 +50,6 @@ public class PlayListFrag extends BaseListFrag<PlayList> {
         PlayList playList = mAdapter.getItem(position);
         holder.tvText1.setText(playList.getName());
         holder.tvText2.setText(playList.getSongNum() + "首歌曲");
-        holder.ivPicture.setVisibility(View.GONE);
     }
 
     @Override
