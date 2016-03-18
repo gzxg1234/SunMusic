@@ -1,11 +1,8 @@
 package com.sanron.sunmusic.fragments.MyMusic;
 
-import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.adapter.DataListAdapter;
@@ -21,7 +18,7 @@ import java.util.List;
 public class ArtistFrag extends BaseListFrag<Artist> {
 
     public ArtistFrag() {
-        super(LAYOUT_STAGGERED,
+        super(LAYOUT_GRID,
                 new String[]{DBHelper.TABLE_ARTIST, DBHelper.TABLE_MUSIC, DBHelper.TABLE_ALBUM});
     }
 

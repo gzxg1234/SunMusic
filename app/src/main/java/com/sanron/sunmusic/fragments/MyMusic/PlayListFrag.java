@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
@@ -24,9 +23,8 @@ import com.sanron.sunmusic.task.AddPlayListTask;
 import com.sanron.sunmusic.task.DelPlayListTask;
 import com.sanron.sunmusic.task.GetPlayListTask;
 import com.sanron.sunmusic.task.UpdatePlayListNameTask;
-import com.sanron.sunmusic.utils.T;
+import com.sanron.sunmusic.utils.TUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -100,7 +98,7 @@ public class PlayListFrag extends BaseListFrag<PlayList> {
                             @Override
                             protected void onPostExecute(Integer integer) {
                                 if (integer <= 0) {
-                                    T.show(getContext(), "删除失败");
+                                    TUtils.show(getContext(), "删除失败");
                                 }
                                 dialog.dismiss();
                             }
@@ -137,10 +135,10 @@ public class PlayListFrag extends BaseListFrag<PlayList> {
                             @Override
                             protected void onPostExecute(Integer num) {
                                 if (num > 0) {
-                                    T.show(getContext(), "修改成功");
+                                    TUtils.show(getContext(), "修改成功");
                                     dlg.dismiss();
                                 } else if (num == 0) {
-                                    T.show(getContext(), "修改失败");
+                                    TUtils.show(getContext(), "修改失败");
                                     dlg.dismiss();
                                 } else if (num == -1) {
                                     dlg.setInputError("列表名已存在");
@@ -183,10 +181,10 @@ public class PlayListFrag extends BaseListFrag<PlayList> {
                             @Override
                             protected void onPostExecute(Integer num) {
                                 if (num > 0) {
-                                    T.show(getContext(), "新建列表成功");
+                                    TUtils.show(getContext(), "新建列表成功");
                                     dlg.cancel();
                                 } else if (num == 0) {
-                                    T.show(getContext(), "新建列表失败");
+                                    TUtils.show(getContext(), "新建列表失败");
                                     dlg.cancel();
                                 } else if (num == -1) {
                                     dlg.setInputError("列表名已存在");

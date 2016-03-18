@@ -1,12 +1,7 @@
-package com.sanron.sunmusic.activity;
+package com.sanron.sunmusic.activities;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
-
-import com.sanron.sunmusic.AppContext;
 
 /**
  * Created by Administrator on 2016/3/5.

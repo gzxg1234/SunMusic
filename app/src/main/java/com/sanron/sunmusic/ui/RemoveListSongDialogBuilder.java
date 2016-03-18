@@ -1,4 +1,4 @@
-package com.sanron.sunmusic.window;
+package com.sanron.sunmusic.ui;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -8,7 +8,7 @@ import android.content.DialogInterface;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.task.DelListMusicTask;
-import com.sanron.sunmusic.utils.T;
+import com.sanron.sunmusic.utils.TUtils;
 
 import java.util.List;
 
@@ -42,9 +42,9 @@ public class RemoveListSongDialogBuilder extends AlertDialog.Builder {
                     @Override
                     protected void onPostExecute(Integer num) {
                         if (num > 0) {
-                            T.show(getContext(), "移除" + num + "首歌曲");
+                            TUtils.show(getContext(), "移除" + num + "首歌曲");
                         } else {
-                            T.show(getContext(), "删除失败");
+                            TUtils.show(getContext(), "删除失败");
                         }
                     }
                 }.execute();

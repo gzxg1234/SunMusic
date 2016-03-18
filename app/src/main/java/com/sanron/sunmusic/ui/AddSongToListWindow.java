@@ -1,4 +1,4 @@
-package com.sanron.sunmusic.window;
+package com.sanron.sunmusic.ui;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
@@ -19,7 +19,7 @@ import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.task.AddMusicToListTask;
-import com.sanron.sunmusic.utils.T;
+import com.sanron.sunmusic.utils.TUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +64,7 @@ public class AddSongToListWindow extends PopupWindow {
                     protected void onPostExecute(Integer[] num) {
                         String msg = num[0] + "首歌曲添加成功,";
                         msg += (num[1] == 0 ? "" : num[1]) + "首歌曲已存在";
-                        T.show(mActivity, msg);
+                        TUtils.show(mActivity, msg);
                         AddSongToListWindow.this.dismiss();
                     }
                 }.execute();

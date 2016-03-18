@@ -13,8 +13,8 @@ import com.sanron.sunmusic.db.DBHelper;
 import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.task.GetListMusicTask;
-import com.sanron.sunmusic.utils.T;
-import com.sanron.sunmusic.window.RemoveListSongDialogBuilder;
+import com.sanron.sunmusic.utils.TUtils;
+import com.sanron.sunmusic.ui.RemoveListSongDialogBuilder;
 
 import java.util.List;
 
@@ -71,7 +71,7 @@ public class ListMusicFrag extends BaseMusicFrag {
                             .create()
                             .show();
                 } else {
-                    T.show(getContext(), "当前列表为空");
+                    TUtils.show(getContext(), "当前列表为空");
                 }
             }
             break;

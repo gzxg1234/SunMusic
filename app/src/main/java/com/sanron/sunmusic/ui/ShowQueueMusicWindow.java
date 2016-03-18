@@ -1,4 +1,4 @@
-package com.sanron.sunmusic.window;
+package com.sanron.sunmusic.ui;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;

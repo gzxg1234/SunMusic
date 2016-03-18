@@ -1,4 +1,4 @@
-package com.sanron.sunmusic.window;
+package com.sanron.sunmusic.ui;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -7,7 +7,7 @@ import android.support.v7.app.AlertDialog;
 
 import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.task.DelLocalMusicTask;
-import com.sanron.sunmusic.utils.T;
+import com.sanron.sunmusic.utils.TUtils;
 
 import java.util.List;
 
@@ -53,9 +53,9 @@ public class DeleteSongDialogBuilder extends AlertDialog.Builder {
                     protected void onPostExecute(Integer num) {
                         mProgressDlg.cancel();
                         if (num > 0) {
-                            T.show(getContext(), "删除" + num + "首歌曲");
+                            TUtils.show(getContext(), "删除" + num + "首歌曲");
                         } else {
-                            T.show(getContext(), "删除失败");
+                            TUtils.show(getContext(), "删除失败");
                         }
                     }
                 }.execute();

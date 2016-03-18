@@ -16,13 +16,17 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/iv_picture"
+        <com.sanron.sunmusic.ui.SquareLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:maxHeight="200dp"
-            tool:src="@mipmap/default_artist_album_pic" />
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_picture"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                tool:src="@mipmap/default_artist_album_pic" />
+        </com.sanron.sunmusic.ui.SquareLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -35,10 +39,10 @@
                 android:id="@+id/btn_item_action"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
-                android:scaleType="fitXY"
+                android:layout_centerVertical="true"
                 android:background="@android:color/transparent"
+                android:scaleType="fitXY"
                 android:src="@mipmap/ic_more_vert_black_24dp" />
 
 

@@ -16,6 +16,7 @@ import com.nostra13.universalimageloader.cache.memory.impl.FIFOLimitedMemoryCach
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.sanron.sunmusic.db.DataProvider;
+import com.sanron.sunmusic.net.ApiHttpClient;
 import com.sanron.sunmusic.service.IMusicPlayer;
 import com.sanron.sunmusic.service.MusicService;
 import com.sanron.sunmusic.utils.MyLog;
@@ -31,12 +32,14 @@ public class AppContext extends Application {
     private static IMusicPlayer musicPlayer;
     private static ServiceConnection connection;
 
+
     public static final String TAG = AppContext.class.getSimpleName();
 
     @Override
     public void onCreate() {
         super.onCreate();
         MyLog.i(TAG,"app create");
+        ApiHttpClient.init(this);
         DataProvider.instance().init(this);
         initImageLoader();
     }

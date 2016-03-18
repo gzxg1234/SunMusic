@@ -12,7 +12,7 @@ import com.sanron.sunmusic.fragments.BaseFragment;
 /**
  * Created by Administrator on 2016/3/10.
  */
-public class RecommandFrag extends BaseFragment{
+public class SingerFrag extends BaseFragment{
 
     @Nullable
     @Override

@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.util.TimeUtils;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,8 +21,8 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.service.IMusicPlayer;
-import com.sanron.sunmusic.utils.T;
-import com.sanron.sunmusic.window.ShowQueueMusicWindow;
+import com.sanron.sunmusic.utils.TUtils;
+import com.sanron.sunmusic.ui.ShowQueueMusicWindow;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -338,7 +337,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
                     if(player.getQueue().size() > 0){
                         player.play(0);
                     }else{
-                        T.show(getContext(), "播放列表为空");
+                        TUtils.show(getContext(), "播放列表为空");
                     }
                 }else if (state == IMusicPlayer.STATE_PLAYING) {
                     player.pause();

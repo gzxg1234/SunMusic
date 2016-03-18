@@ -1,13 +1,12 @@
 package com.sanron.sunmusic.fragments.MyMusic;
 
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.TextUtils;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
@@ -23,9 +22,6 @@ import com.nostra13.universalimageloader.cache.memory.MemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 import com.sanron.sunmusic.R;
 import com.sanron.sunmusic.adapter.DataListAdapter;
@@ -43,7 +39,7 @@ import java.util.Observer;
 public abstract class BaseListFrag<T> extends BaseFragment implements DataListAdapter.OnItemClickListener, DataListAdapter.OnItemActionClickListener, DataListAdapter.OnItemLongLickListener, Observer {
 
     public static final int LAYOUT_LINEAR = 1;
-    public static final int LAYOUT_STAGGERED = 2;
+    public static final int LAYOUT_GRID = 2;
 
     protected String[] subscribes;
 
@@ -77,7 +73,7 @@ public abstract class BaseListFrag<T> extends BaseFragment implements DataListAd
         int layoutid = LAYOUT_LINEAR;
         if (layout == LAYOUT_LINEAR) {
             layoutid = R.layout.list_item;
-        } else if (layout == LAYOUT_STAGGERED) {
+        } else if (layout == LAYOUT_GRID) {
             layoutid = R.layout.grid_item;
         }
 
@@ -218,8 +214,8 @@ public abstract class BaseListFrag<T> extends BaseFragment implements DataListAd
         recyclerView.setAdapter(mAdapter);
         if (layout == LAYOUT_LINEAR) {
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        } else if (layout == LAYOUT_STAGGERED) {
-            recyclerView.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
+        } else if (layout == LAYOUT_GRID) {
+            recyclerView.setLayoutManager(new GridLayoutManager(getContext(),2,GridLayoutManager.VERTICAL,false));
         }
         return contentView;
     }

@@ -21,7 +21,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.nostra13.universalimageloader.cache.disc.DiskCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
@@ -29,10 +28,10 @@ import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.sanron.sunmusic.AppContext;
 import com.sanron.sunmusic.AppManager;
 import com.sanron.sunmusic.R;
-import com.sanron.sunmusic.activity.MainActivity;
+import com.sanron.sunmusic.activities.MainActivity;
 import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.utils.MyLog;
-import com.sanron.sunmusic.utils.T;
+import com.sanron.sunmusic.utils.TUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,7 +66,7 @@ public class MusicService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             String cmd = intent.getStringExtra(EXTRA_CMD);
-            MyLog.i(TAG, "playback cmd : " + cmd);
+            MyLog.d(TAG, "playback cmd : " + cmd);
             switch (cmd) {
                 case CMD_PREVIOUS: {
                     player.last();
@@ -228,7 +227,7 @@ public class MusicService extends Service {
         contentView.setOnClickPendingIntent(R.id.ibtn_close, cmdIntent(CMD_CLOSE));
 
         Notification notification = builder.build();
-        notification.contentIntent = PendingIntent.getActivity(this, 1,
+        notification.contentIntent = PendingIntent.getActivity(this,1,
                 new Intent(this, MainActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         notification.bigContentView = bigContentView;
@@ -245,13 +244,13 @@ public class MusicService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        MyLog.i(TAG, "service onBind");
+        MyLog.d(TAG, "service onBind");
         return player;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        MyLog.i(TAG, "service onUnbind");
+        MyLog.d(TAG, "service onUnbind");
         return super.onUnbind(intent);
     }
 
@@ -288,7 +287,7 @@ public class MusicService extends Service {
         @Override
         public void enqueue(List<Music> musics) {
             quque.addAll(musics);
-            Log.i(TAG, musics.size() + "首歌加入队列");
+            Log.d(TAG, musics.size() + "首歌加入队列");
         }
 
         /**
@@ -486,7 +485,6 @@ public class MusicService extends Service {
 
         @Override
         public void onCompletion(MediaPlayer mp) {
-            MyLog.i(TAG, "play end");
             switch (mode) {
                 case MODE_IN_TURN: {
                     next();
@@ -507,7 +505,7 @@ public class MusicService extends Service {
 
         @Override
         public boolean onError(MediaPlayer mp, int what, int extra) {
-            T.show(MusicService.this, "播放出错，2s后跳到下一首");
+            TUtils.show(MusicService.this, "播放出错，2s后跳到下一首");
             updateNotification();
             final int errorPosition = getCurrentPosition();
             new Thread() {
@@ -530,7 +528,7 @@ public class MusicService extends Service {
             for (Callback callback : callbacks) {
                 callback.onPrepared();
             }
-            MyLog.i(TAG, "start : " + quque.get(currentIndex).getDisplayName());
+            MyLog.d(TAG, "start play " + quque.get(currentIndex).getDisplayName());
         }
 
         @Override
@@ -542,7 +540,7 @@ public class MusicService extends Service {
             int remain = duration - currentPosition;
             int buffedPosition = (int) (currentPosition + (remain * percent / 100f));
 
-            MyLog.i(TAG, "buffered position " + buffedPosition);
+            MyLog.d(TAG, "buffered position " + buffedPosition);
             for (Callback callback : callbacks) {
                 callback.onBufferingUpdate(buffedPosition);
             }

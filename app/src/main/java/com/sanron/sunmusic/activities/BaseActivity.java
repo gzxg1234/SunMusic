@@ -1,4 +1,4 @@
-package com.sanron.sunmusic.activity;
+package com.sanron.sunmusic.activities;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

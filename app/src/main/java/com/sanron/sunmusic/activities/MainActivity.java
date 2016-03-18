@@ -1,4 +1,4 @@
-package com.sanron.sunmusic.activity;
+package com.sanron.sunmusic.activities;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -32,6 +32,11 @@ import com.sanron.sunmusic.fragments.MyMusic.PlayListFrag;
 import com.sanron.sunmusic.fragments.MyMusic.RecentPlayFrag;
 import com.sanron.sunmusic.fragments.PagerFragment;
 import com.sanron.sunmusic.fragments.PlayerFrag;
+import com.sanron.sunmusic.fragments.WebMusic.BillboardFrag;
+import com.sanron.sunmusic.fragments.WebMusic.GedanFrag;
+import com.sanron.sunmusic.fragments.WebMusic.RadioFrag;
+import com.sanron.sunmusic.fragments.WebMusic.RecommandFrag;
+import com.sanron.sunmusic.fragments.WebMusic.SingerFrag;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.utils.MyLog;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -93,12 +98,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
+                MyLog.e(TAG, "service disconnected!");
                 finish();
             }
         };
 
-        if(!appContext.bindService(callback)){
-            MyLog.e(TAG,"can't bind service");
+        if (!appContext.bindService(callback)) {
+            MyLog.e(TAG, "can't bind service!");
             finish();
         }
     }
@@ -237,23 +243,20 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         String[] titles = new String[]{"播放列表", "最近播放", "本地音乐", "艺术家", "专辑"};
         String[] fragments = new String[]{PlayListFrag.class.getName(), RecentPlayFrag.class.getName(),
                 LocalMusicFrag.class.getName(), ArtistFrag.class.getName(), AlbumFrag.class.getName()};
-        Bundle bundle = new Bundle();
-        bundle.putStringArray("titles", titles);
-        bundle.putStringArray("fragments", fragments);
-        PagerFragment pagerFragment = new PagerFragment();
-        pagerFragment.setArguments(bundle);
         fm.beginTransaction()
-                .replace(R.id.fragment_container, pagerFragment, "MyMusic")
+                .replace(R.id.fragment_container, PagerFragment.newInstance(titles, fragments), "MyMusic")
                 .commit();
     }
 
     private void toWebMusic() {
-//        toolbar.setTitle("音乐库");
-//        fm.beginTransaction()
-//                .replace(R.id.fragment_container, new PagerFragment(fragments,titles),"MyMusic")
-//                .commit();
+        toolbar.setTitle("音乐库");
+        String[] titles = new String[]{"推荐", "排行", "歌手", "歌单", "电台"};
+        String[] fragments = new String[]{RecommandFrag.class.getName(), BillboardFrag.class.getName(),
+                SingerFrag.class.getName(), GedanFrag.class.getName(), RadioFrag.class.getName()};
+        fm.beginTransaction()
+                .replace(R.id.fragment_container, PagerFragment.newInstance(titles, fragments), "MyMusic")
+                .commit();
     }
-
 
     @Override
     protected void onDestroy() {
@@ -275,12 +278,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         switch (item.getItemId()) {
             case R.id.menu_my_music: {
                 toMyMusic();
-                navigationView.setCheckedItem(R.id.menu_my_music);
+                navigationView.setCheckedItem(item.getItemId());
             }
             break;
 
             case R.id.menu_web_music: {
-
+                toWebMusic();
+                navigationView.setCheckedItem(item.getItemId());
             }
             break;
 
@@ -289,10 +293,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
             break;
 
-            case R.id.menu_close_app:{
+            case R.id.menu_close_app: {
                 AppManager.instance().finishAllActivity();
                 appContext.tryToStopService();
-            }break;
+            }
+            break;
 
         }
         return false;

@@ -1,7 +1,6 @@
 package com.sanron.sunmusic.fragments.MyMusic;
 
 import android.content.ContentValues;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,9 +12,8 @@ import com.sanron.sunmusic.model.Album;
 import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.task.GetAlbumsTask;
 import com.sanron.sunmusic.task.QueryMusicTask;
-import com.sanron.sunmusic.utils.T;
+import com.sanron.sunmusic.utils.TUtils;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -24,7 +22,7 @@ import java.util.List;
 public class AlbumFrag extends BaseListFrag<Album> {
 
     public AlbumFrag() {
-        super(LAYOUT_STAGGERED,
+        super(LAYOUT_GRID,
                 new String[]{DBHelper.TABLE_ALBUM,DBHelper.TABLE_MUSIC,DBHelper.TABLE_PLAYLIST});
     }
 
@@ -55,7 +53,7 @@ public class AlbumFrag extends BaseListFrag<Album> {
                     @Override
                     protected void onPostExecute(List<Music> musics) {
                         player.enqueue(musics);
-                        T.show(getContext(),musics.size()+"首歌曲添加到队列");
+                        TUtils.show(getContext(),musics.size()+"首歌曲添加到队列");
                     }
                 }.execute();
             }break;

@@ -4,9 +4,10 @@ import android.content.Context;
 import android.widget.Toast;
 
 /**
+ * Toast工具类
  * Created by Administrator on 2015/12/25.
  */
-public class T {
+public class TUtils {
 
     public static final int SHORT = Toast.LENGTH_SHORT;
     public static final int LONG = Toast.LENGTH_LONG;

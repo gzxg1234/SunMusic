@@ -11,9 +11,9 @@ import com.sanron.sunmusic.adapter.DataListAdapter;
 import com.sanron.sunmusic.model.PlayList;
 import com.sanron.sunmusic.model.Music;
 import com.sanron.sunmusic.task.GetPlayListTask;
-import com.sanron.sunmusic.utils.T;
-import com.sanron.sunmusic.window.AddSongToListWindow;
-import com.sanron.sunmusic.window.DeleteSongDialogBuilder;
+import com.sanron.sunmusic.utils.TUtils;
+import com.sanron.sunmusic.ui.AddSongToListWindow;
+import com.sanron.sunmusic.ui.DeleteSongDialogBuilder;
 
 import java.util.List;
 
@@ -80,7 +80,7 @@ public abstract class BaseMusicFrag extends BaseListFrag<Music> {
             case R.id.menu_add_to_quque: {
                 //添加到播放队列
                 player.enqueue(musics);
-                T.show(getContext(),musics.size()+"首歌曲添加到队列");
+                TUtils.show(getContext(),musics.size()+"首歌曲添加到队列");
             }
             break;
 

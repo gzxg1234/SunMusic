@@ -5,7 +5,7 @@
     android:id="@+id/drawerlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.MainActivity">
+    tools:context=".activities.MainActivity">
 
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
         android:id="@+id/sliding_panel"
@@ -56,6 +56,7 @@
             android:id="@+id/player_contanier"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
+
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
     <android.support.design.widget.NavigationView

@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.sanron.sunmusic.R;
+import com.sanron.sunmusic.fragments.WebMusic.RecommandFrag;
 
 /**
  * Created by Administrator on 2015/12/15.
@@ -24,6 +25,14 @@ public class PagerFragment extends BaseFragment {
     private String[] titles;
     private String[] fragments;
 
+    public static PagerFragment newInstance(String[] titles,String[] fragments){
+        Bundle bundle = new Bundle();
+        bundle.putStringArray("titles", titles);
+        bundle.putStringArray("fragments", fragments);
+        PagerFragment pagerFragment = new PagerFragment();
+        pagerFragment.setArguments(bundle);
+        return pagerFragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
