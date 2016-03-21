@@ -1,11 +1,16 @@
 <resources>
 
-    <!-- Base application theme. -->
+    <!-- HasCodeResult application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorSecondary">@color/textColorSecondary</item>
+        <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
+        <item name="android:textColorSecondaryInverse">@color/textColorSecondaryInverse</item>
         <item name="windowActionModeOverlay">true</item>
     </style>
 
@@ -45,9 +50,17 @@
         <item name="android:layout_height">40dp</item>
         <item name="android:padding">2dp</item>
     </style>
+
     <style name="NotificationButton.Big">
         <item name="android:layout_width">56dp</item>
         <item name="android:layout_height">56dp</item>
         <item name="android:padding">10dp</item>
+    </style>
+
+    <style name="HotTagText">
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:textSize">12dp</item>
+        <item name="android:textColor">@color/textColorPrimaryInverse</item>
+        <item name="android:gravity">center</item>
     </style>
 </resources>

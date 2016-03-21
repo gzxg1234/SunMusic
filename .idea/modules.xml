@@ -5,7 +5,9 @@
       <module fileurl="file://$PROJECT_DIR$/Android-Universal-Image-Loader/Android-Universal-Image-Loader.iml" filepath="$PROJECT_DIR$/Android-Universal-Image-Loader/Android-Universal-Image-Loader.iml" />
       <module fileurl="file://$PROJECT_DIR$/AndroidSlidingUpPanel/AndroidSlidingUpPanel.iml" filepath="$PROJECT_DIR$/AndroidSlidingUpPanel/AndroidSlidingUpPanel.iml" />
       <module fileurl="file://$PROJECT_DIR$/SunMusic.iml" filepath="$PROJECT_DIR$/SunMusic.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ViewPagerIndicator/ViewPagerIndicator.iml" filepath="$PROJECT_DIR$/ViewPagerIndicator/ViewPagerIndicator.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ViewPagerIndicator/viewpagerindicator.iml" filepath="$PROJECT_DIR$/ViewPagerIndicator/viewpagerindicator.iml" />
     </modules>
   </component>
 </project>

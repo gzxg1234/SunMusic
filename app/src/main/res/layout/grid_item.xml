@@ -16,17 +16,18 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <com.sanron.sunmusic.ui.SquareLayout
+        <com.sanron.music.view.RatioLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
+            android:layout_height="0dp"
+            app:type="height"
+            app:ratio="1">
             <ImageView
                 android:id="@+id/iv_picture"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 tool:src="@mipmap/default_artist_album_pic" />
-        </com.sanron.sunmusic.ui.SquareLayout>
+        </com.sanron.music.view.RatioLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -45,7 +46,6 @@
                 android:scaleType="fitXY"
                 android:src="@mipmap/ic_more_vert_black_24dp" />
 
-
             <TextView
                 android:id="@+id/tv_text1"
                 android:layout_width="match_parent"
@@ -53,7 +53,7 @@
                 android:layout_toLeftOf="@+id/btn_item_action"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:textColor="@color/textColorPrimaryInverse"
+                android:textColor="@color/textColorPrimary"
                 android:textSize="12sp"
                 tool:text="周杰伦" />
 
@@ -65,7 +65,7 @@
                 android:layout_toLeftOf="@+id/btn_item_action"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:textColor="@color/textColorPrimaryInverse"
+                android:textColor="@color/textColorSecondary"
                 android:textSize="10sp"
                 tool:text="11首专辑" />
         </RelativeLayout>
