@@ -24,9 +24,10 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile project(':AndroidSlidingUpPanel')
     compile project(':Android-Universal-Image-Loader')
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
-    compile 'com.android.support:cardview-v7:23.1.1'
+    compile project(':ViewPagerIndicator')
+    compile 'com.android.support:appcompat-v7:23.２.1'
+    compile 'com.android.support:design:23.2.1'
+    compile 'com.android.support:cardview-v7:23.2.1'
     compile 'com.balysv.materialmenu:material-menu-toolbar:1.+'
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
     compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:overScrollMode="never">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp">
+
+        <!--轮播-->
+        <com.sanron.music.view.RatioLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginLeft="-16dp"
+            android:layout_marginRight="-16dp"
+            app:ratio="0.4"
+            app:type="height">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/pager_focus_pic"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <com.viewpagerindicator.CirclePageIndicator
+                    android:id="@+id/page_indicator"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="4dp"
+                    app:centered="true"
+                    app:fillColor="@color/colorPrimary"
+                    app:padding="6dp"
+                    app:pageColor="@android:color/white"
+                    app:radius="2dp"
+                    app:strokeColor="@android:color/white"
+                    app:strokeWidth="0dp" />
+            </RelativeLayout>
+        </com.sanron.music.view.RatioLayout>
+
+        <!-- 分类 -->
+        <com.sanron.music.view.RatioLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginLeft="-4dp"
+            android:layout_marginRight="-4dp"
+            android:layout_marginTop="8dp"
+            app:ratio="0.2"
+            app:type="height">
+            <LinearLayout
+                android:id="@+id/hot_tag_group"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    style="@style/HotTagText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@mipmap/ic_classify_img01"
+                    tools:text="伤感" />
+
+                <TextView
+                    style="@style/HotTagText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@mipmap/ic_classify_img02"
+                    tools:text="情歌" />
+
+                <TextView
+                    style="@style/HotTagText"
+                    android:layout_margin="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@mipmap/ic_classify_img03"
+                    tools:text="红歌" />
+
+
+                <TextView
+                    style="@style/HotTagText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@mipmap/ic_classify_img04"
+                    tools:text="劲爆" />
+
+
+                <TextView
+                    android:id="@+id/tv_more_"
+                    style="@style/HotTagText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@mipmap/ic_classify_img05"
+                    android:text="更多" />
+            </LinearLayout>
+        </com.sanron.music.view.RatioLayout>
+
+        <!--热门歌单-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginTop="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/text_draw_left_rectangle"
+                android:drawablePadding="4dp"
+                android:singleLine="true"
+                android:text="热门歌单"
+                android:textSize="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:singleLine="true"
+                android:text="更多"
+                android:textColor="@color/textColorSecondary" />
+        </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/hot_songlist_group1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+            <com.sanron.music.view.HotSongListView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+            </com.sanron.music.view.HotSongListView>
+
+            <com.sanron.music.view.HotSongListView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="8dp">
+            </com.sanron.music.view.HotSongListView>
+
+            <com.sanron.music.view.HotSongListView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="8dp">
+            </com.sanron.music.view.HotSongListView>
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/hot_songlist_group2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+            <com.sanron.music.view.HotSongListView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+            </com.sanron.music.view.HotSongListView>
+
+            <com.sanron.music.view.HotSongListView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="8dp">
+            </com.sanron.music.view.HotSongListView>
+
+            <com.sanron.music.view.HotSongListView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="8dp">
+            </com.sanron.music.view.HotSongListView>
+
+        </LinearLayout>
+
+        <!--歌曲推荐-->
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginTop="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/text_draw_left_rectangle"
+                android:drawablePadding="4dp"
+                android:singleLine="true"
+                android:text="歌曲推荐"
+                android:textSize="16dp" />
+
+            <TextView
+                android:id="@+id/tv_more_tag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:singleLine="true"
+                android:text="更多"
+                android:textColor="@color/textColorSecondary" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/recmd_song_group"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+            <com.sanron.music.view.RecmdSongView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </com.sanron.music.view.RecmdSongView>
+            <com.sanron.music.view.RecmdSongView
+                android:layout_marginTop="4dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </com.sanron.music.view.RecmdSongView>
+            <com.sanron.music.view.RecmdSongView
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </com.sanron.music.view.RecmdSongView>
+            <com.sanron.music.view.RecmdSongView
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </com.sanron.music.view.RecmdSongView>
+            <com.sanron.music.view.RecmdSongView
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="64dp">
+            </com.sanron.music.view.RecmdSongView>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
