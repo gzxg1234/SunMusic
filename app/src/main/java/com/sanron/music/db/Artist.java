@@ -46,7 +46,6 @@ public class Artist {
         Artist artist = new Artist();
         artist.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
         artist.setName(cursor.getString(cursor.getColumnIndex(DBHelper.ARTIST_NAME)));
-        artist.setAlbumNum(cursor.getInt(cursor.getColumnIndex(DBHelper.ARTIST_ALBUMNUM)));
         artist.setPicPath(cursor.getString(cursor.getColumnIndex(DBHelper.ARTIST_PIC)));
         return artist;
     }

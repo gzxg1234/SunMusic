@@ -59,7 +59,7 @@ public abstract class BaseMusicFrag extends BaseDataFrag<Music> {
 
     @Override
     public String onGetPicturePath(Music data) {
-        return data.getPicPath();
+        return data.getPic();
     }
 
     protected boolean resolveMenuItemClick(MenuItem item, final List<Music> musics) {

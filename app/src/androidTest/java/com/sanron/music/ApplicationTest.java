@@ -1,6 +1,9 @@
 package com.sanron.music;
 
 import android.app.Application;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.test.ApplicationTestCase;
 import android.util.Log;
@@ -10,6 +13,7 @@ import com.sanron.music.net.ApiHttpClient;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.RecommendSong;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -23,8 +27,8 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         super(Application.class);
     }
 
-    public void testScan(){
-    }
+    public MediaScannerConnection connection;
+
 
 
     public void testApi() {

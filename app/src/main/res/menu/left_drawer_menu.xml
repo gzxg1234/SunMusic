@@ -11,6 +11,11 @@
             android:id="@+id/menu_web_music"
             android:icon="@mipmap/ic_public_black_24dp"
             android:title="音乐库" />
+
+        <item
+            android:id="@+id/menu_download_manager"
+            android:icon="@mipmap/ic_file_download_black_24dp"
+            android:title="音乐库" />
     </group>
 
     <group

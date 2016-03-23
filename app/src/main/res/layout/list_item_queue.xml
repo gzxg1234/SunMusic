@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="end"
-            android:textColor="@color/textColorPrimaryInverse"
+            android:textColor="@color/textColorPrimary"
             android:textSize="15dp"
             tools:text="Love Yourself"/>
         <TextView
@@ -45,7 +45,7 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:textSize="12dp"
-            android:textColor="@color/textColorSecondaryInverse"
+            android:textColor="@color/textColorSecondary"
             android:layout_below="@+id/tv_title"
             android:layout_marginTop="4dp"
             tools:text="Justin"/>

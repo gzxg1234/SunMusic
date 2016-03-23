@@ -57,7 +57,6 @@ public class Album {
         Album album = new Album();
         album.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
         album.setName(cursor.getString(cursor.getColumnIndex(DBHelper.ALBUM_NAME)));
-        album.setSongNum(cursor.getInt(cursor.getColumnIndex(DBHelper.ALBUM_MUSICNUM)));
         album.setArtistName(cursor.getString(cursor.getColumnIndex(DBHelper.ALBUM_ARTIST)));
         album.setPicPath(cursor.getString(cursor.getColumnIndex(DBHelper.ARTIST_PIC)));
         return album;

@@ -30,11 +30,6 @@ public class PlayList implements Serializable {
     private int type = -1;
 
     /**
-     * 音乐数量
-     */
-    private int songNum = -1;
-
-    /**
      * 歌曲
      */
     private List<Music> songs;
@@ -71,18 +66,10 @@ public class PlayList implements Serializable {
         this.songs = songs;
     }
 
-    public int getSongNum() {
-        return songNum;
-    }
-
-    public void setSongNum(int songNum) {
-        this.songNum = songNum;
-    }
 
     public static PlayList fromCursor(Cursor cursor) {
         PlayList playList = new PlayList();
         playList.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
-        playList.setSongNum(cursor.getInt(cursor.getColumnIndex(DBHelper.PLAYLIST_MUSICNUM)));
         playList.setName(cursor.getString(cursor.getColumnIndex(DBHelper.PLAYLIST_NAME)));
         playList.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.PLAYLIST_TYPE)));
         return playList;
@@ -95,9 +82,6 @@ public class PlayList implements Serializable {
         }
         if (name != null) {
             values.put(DBHelper.PLAYLIST_NAME, name);
-        }
-        if (songNum != -1) {
-            values.put(DBHelper.PLAYLIST_MUSICNUM, songNum);
         }
         if (id != -1) {
             values.put(DBHelper.ID, id);

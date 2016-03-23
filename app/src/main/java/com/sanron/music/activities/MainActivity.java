@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.NavigationView;
@@ -20,8 +19,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.sanron.music.AppManager;
@@ -98,7 +95,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTranslucentStatusBar();
         setContentView(R.layout.activity_main);
         ServiceConnection callback = new ServiceConnection() {
             @Override
@@ -120,15 +116,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
 
-    private void setTranslucentStatusBar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Window window = getWindow();
-            // Translucent status bar
-            window.setFlags(
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        }
-    }
 
 
     private void initView(Bundle savedInstanceState) {
@@ -214,10 +201,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         bundle.putSerializable("playList", playList);
         listMusicFrag.setArguments(bundle);
         fm.beginTransaction()
-                .setCustomAnimations(R.anim.frag_slide_in,
-                        R.anim.frag_slide_out,
-                        R.anim.frag_slide_in,
-                        R.anim.frag_slide_out)
+                .setCustomAnimations(R.anim.slide_in_top,
+                        R.anim.slide_out_bottom,
+                        R.anim.slide_in_top,
+                        R.anim.slide_out_bottom)
                 .add(R.id.fragment_container, listMusicFrag, ListMusicFrag.TAG)
                 .addToBackStack(ListMusicFrag.class.getSimpleName())
                 .commit();
@@ -263,22 +250,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         currentFragmentTag = tag;
     }
 
-//    private void changeToFragment(String tag) {
-//        FragmentTransaction ft = fm.beginTransaction();
-//        Fragment fragment = fm.findFragmentByTag(tag);
-//        if (fragment == null) {
-//            fragment = instanceFragment(tag);
-//            ft.add(R.id.fragment_container, fragment, tag);
-//        } else {
-//            ft.show(fragment);
-//        }
-//        if(currentFragment != null){
-//            ft.hide(currentFragment);
-//        }
-//        ft.commit();
-//        currentFragment = fragment;
-//        toolbar.setTitle(titles.get(tag));
-//    }
 
     private Fragment instanceFragment(String tag) {
         Fragment fragment = null;
@@ -334,6 +305,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 drawerLayout.closeDrawer(GravityCompat.START);
             }
             break;
+
+            case R.id.menu_download_manager:{
+
+            }break;
 
             case R.id.menu_setting: {
             }

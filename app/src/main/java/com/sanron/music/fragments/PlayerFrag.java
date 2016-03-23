@@ -175,7 +175,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
             int type = playable.type();
             if (type == Playable.TYPE_FILE) {
                 playProgress.setSecondaryProgress(player.getDuration());
-            } else if(type == Playable.TYPE_HTTP){
+            } else if(type == Playable.TYPE_WEB){
                 playProgress.setSecondaryProgress(0);
             }
             updateProgressThread.running();
@@ -310,8 +310,8 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Se
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        player.removeCallback(callback);
         updateProgressThread.end();
+        player.removeCallback(callback);
     }
 
     @Override

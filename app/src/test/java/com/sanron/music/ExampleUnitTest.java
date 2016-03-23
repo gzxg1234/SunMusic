@@ -26,6 +26,7 @@ public class ExampleUnitTest {
 
     @Test
     public void testA(){
+        System.out.println(BMA.Search.searchLrcPic("摩羯座","周杰伦",1));
         System.out.println(BMA.Search.searchSugestion("不得不爱"));
         System.out.println(BMA.Song.songInfo("293547"));
         System.out.println(BMA.Scene.constantScene());

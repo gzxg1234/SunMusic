@@ -2,12 +2,14 @@ package com.sanron.music.fragments.MyMusic;
 
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.sanron.music.R;
+import com.sanron.music.activities.ScanActivity;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.Music;
 import com.sanron.music.task.QueryMusicTask;
@@ -41,27 +43,15 @@ public class LocalMusicFrag extends BaseMusicFrag {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu,inflater);
-        menu.add(ALTERNATIVE_GROUP_ID, MENU_UPDATE_LOCAL_MUSIC,Menu.NONE,"同步媒体库");
+        menu.add(ALTERNATIVE_GROUP_ID, MENU_UPDATE_LOCAL_MUSIC,Menu.NONE,"扫描歌曲");
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case MENU_UPDATE_LOCAL_MUSIC: {
-                final ProgressDialog mProgressDlg = new ProgressDialog(getContext());
-                new RefreshLocalMusicTask(getContext()) {
-                    @Override
-                    protected void onPreExecute() {
-                        mProgressDlg.setMessage("正在与媒体库同步");
-                        mProgressDlg.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                        mProgressDlg.setCancelable(false);
-                        mProgressDlg.show();
-                    }
-                    @Override
-                    protected void onPostExecute(Void aVoid) {
-                        mProgressDlg.cancel();
-                    }
-                }.execute();
+                Intent intent = new Intent(getContext(), ScanActivity.class);
+                startActivity(intent);
             }
             break;
         }

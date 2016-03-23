@@ -4,6 +4,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Administrator on 2015/12/20.
  */
@@ -19,17 +22,17 @@ public class DBHelper extends SQLiteOpenHelper {
      * 音乐
      */
     public static final String TABLE_MUSIC = "music_info";
+    public static final String MUSIC_DISPLAY = "display_name";
     public static final String MUSIC_TYPE = "type";
-    public static final String MUSIC_DISPLAYNAME = "display_name";
     public static final String MUSIC_TITLE = "title";
-    public static final String MUSIC_ALBUMNAME = "album_name";
-    public static final String MUSIC_ALBUMID = "album_id";
-    public static final String MUSIC_ARTISTNAME = "artist_name";
-    public static final String MUSIC_ARTISTID = "artist_id";
-    public static final String MUSIC_DURATION = "duration";
+    public static final String MUSIC_TITLE_KEY = "title_key";
     public static final String MUSIC_PATH = "path";
-    public static final String MUSIC_MUSICID = "musicid";
-    public static final String MUSIC_LETTER = "title_letter";
+    public static final String MUSIC_ALBUM = "album";
+    public static final String MUSIC_ALBUM_KEY = "album_key";
+    public static final String MUSIC_ARTIST = "artist";
+    public static final String MUSIC_ARTIST_KEY = "artist_key";
+    public static final String MUSIC_DURATION = "duration";
+    public static final String MUSIC_SONGID = "song_id";
     public static final String MUSIC_BITRATE = "bitrate";
     public static final String MUSIC_PIC = "picture";
     public static final String MUSIC_LYRIC = "lyric";
@@ -40,7 +43,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String TABLE_ALBUM = "album";
     public static final String ALBUM_NAME = "name";
     public static final String ALBUM_ARTIST = "artist";
-    public static final String ALBUM_MUSICNUM = "music_num";
     public static final String ALBUM_PIC = "picture";
 
     /**
@@ -48,7 +50,6 @@ public class DBHelper extends SQLiteOpenHelper {
      */
     public static final String TABLE_ARTIST = "artist";
     public static final String ARTIST_NAME = "name";
-    public static final String ARTIST_ALBUMNUM = "album_num";
     public static final String ARTIST_PIC = "picture";
 
 
@@ -58,13 +59,11 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String TABLE_PLAYLIST = "playlist";
     public static final String PLAYLIST_NAME = "name";
     public static final String PLAYLIST_TYPE = "type";
-    public static final String PLAYLIST_MUSICNUM = "music_num";
-
 
     /**
      * 播放列表和音乐关系表
      */
-    public static final String TABLE_LISTMUSIC = "playlistmusic";
+    public static final String TABLE_LISTMUSIC = "list_music_map";
     public static final String LISTMUSIC_MUSICID = "music_id";
     public static final String LISTMUSIC_LISTID = "list_id";
 
@@ -84,36 +83,49 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void createTableMusicInfo(SQLiteDatabase db){
-        String[] columns = new String[]{
-                MUSIC_TYPE,
-                MUSIC_DISPLAYNAME,
-                MUSIC_TITLE,
-                MUSIC_ALBUMNAME,
-                MUSIC_ALBUMID,
-                MUSIC_ARTISTNAME,
-                MUSIC_ARTISTID,
-                MUSIC_DURATION,
-                MUSIC_PATH,
-                MUSIC_MUSICID,
-                MUSIC_LETTER,
-                MUSIC_BITRATE,
-                MUSIC_LYRIC,
-                MUSIC_PIC
-        };
-        String[] columnTypes = new String[]{"interger","text","text","text","integer","text","integer",
-                "integer","text","text","text","integer","text","text"};
-        String sql = buildCreateSql(TABLE_MUSIC, columns, columnTypes);
+        Map<String,String>  columnTypes = new HashMap<>();
+        columnTypes.put(MUSIC_TYPE,"integer");
+        columnTypes.put(MUSIC_DISPLAY,"text");
+        columnTypes.put(MUSIC_TITLE,"text");
+        columnTypes.put(MUSIC_TITLE_KEY,"text");
+        columnTypes.put(MUSIC_ALBUM,"text");
+        columnTypes.put(MUSIC_ALBUM_KEY,"text");
+        columnTypes.put(MUSIC_ARTIST,"text");
+        columnTypes.put(MUSIC_ARTIST_KEY,"text");
+        columnTypes.put(MUSIC_PATH,"text");
+        columnTypes.put(MUSIC_DURATION,"integer");
+        columnTypes.put(MUSIC_SONGID,"text");
+        columnTypes.put(MUSIC_BITRATE,"integer");
+        columnTypes.put(MUSIC_LYRIC,"text");
+        columnTypes.put(MUSIC_PIC,"text");
+        String sql = buildCreateSql(TABLE_MUSIC, columnTypes);
+        String index1 = createIndexSql("path_index",TABLE_MUSIC,MUSIC_PATH);
+        String index2 = createIndexSql("title_key_index",TABLE_MUSIC,MUSIC_TITLE_KEY);
+        String index3 = createIndexSql("album_key_index",TABLE_MUSIC,MUSIC_ALBUM_KEY);
+        String index4 = createIndexSql("artist_key_index",TABLE_MUSIC,MUSIC_ARTIST_KEY);
+        String index5 = createIndexSql("type_index",TABLE_MUSIC,MUSIC_TYPE);
         db.execSQL(sql);
+        db.execSQL(index1);
+        db.execSQL(index2);
+        db.execSQL(index3);
+        db.execSQL(index4);
+        db.execSQL(index5);
     }
 
+    public String createIndexSql(String indexname,String tablename,String column){
+        StringBuffer sb = new StringBuffer();
+        return sb.append("create index ").append(indexname)
+                .append(" on ").append(tablename)
+                .append("(").append(column).append(")")
+                .toString();
+    }
+
+
     public void createTablePlayList(SQLiteDatabase db){
-        String[] columns =  new String[]{
-                PLAYLIST_TYPE,
-                PLAYLIST_NAME,
-                PLAYLIST_MUSICNUM,
-        };
-        String[] columnTypes = new String[]{"integer", "text", "integer default 0"};
-        String sql = buildCreateSql(TABLE_PLAYLIST, columns, columnTypes);
+        Map<String,String>  columnTypes = new HashMap<>();
+        columnTypes.put(PLAYLIST_TYPE,"integer");
+        columnTypes.put(PLAYLIST_NAME,"text");
+        String sql = buildCreateSql(TABLE_PLAYLIST, columnTypes);
         db.execSQL(sql);
 
         //创建我喜欢，最近播放两个列表
@@ -126,95 +138,50 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void createTableListMusic(SQLiteDatabase db){
-        String[] columns =  new String[]{
-                LISTMUSIC_LISTID,
-                LISTMUSIC_MUSICID,
-        };
-        String[] columnTypes = new String[]{"integer", "integer"};
-        String sql = buildCreateSql(TABLE_LISTMUSIC, columns, columnTypes);
+        Map<String,String>  columnTypes = new HashMap<>();
+        columnTypes.put(LISTMUSIC_LISTID,"integer");
+        columnTypes.put(LISTMUSIC_MUSICID,"integer");
+        String sql = buildCreateSql(TABLE_LISTMUSIC, columnTypes);
         db.execSQL(sql);
 
     }
 
     public void createTableArtist(SQLiteDatabase db){
-        String[] columns =  new String[]{
-                ARTIST_NAME,
-                ARTIST_ALBUMNUM,
-                ARTIST_PIC
-        };
-        String[] columnTypes = new String[]{"text", "integer default 0","text"};
-        String sql = buildCreateSql(TABLE_ARTIST, columns, columnTypes);
+        Map<String,String>  columns = new HashMap<>();
+        columns.put(ARTIST_NAME,"integer");
+        columns.put(ARTIST_PIC,"integer");
+        String sql = buildCreateSql(TABLE_ARTIST, columns);
         db.execSQL(sql);
     }
 
     public void createTableAlbum(SQLiteDatabase db){
-        String[] columns =  new String[]{
-                ALBUM_NAME,
-                ALBUM_ARTIST,
-                ALBUM_MUSICNUM,
-                ALBUM_PIC
-        };
-        String[] columnTypes = new String[]{"text", "text","integer default 0","text"};
-        String sql = buildCreateSql(TABLE_ALBUM, columns, columnTypes);
+        Map<String,String>  columns = new HashMap<>();
+        columns.put(ALBUM_NAME,"integer");
+        columns.put(ALBUM_ARTIST,"integer");
+        columns.put(ALBUM_PIC,"integer");
+        String sql = buildCreateSql(TABLE_ALBUM, columns);
         db.execSQL(sql);
     }
 
     //创建触发器
     private void createTrigger(SQLiteDatabase db){
-        String trig1 = "create trigger listmusicInsert after insert on "+DBHelper.TABLE_LISTMUSIC
-                +" begin"
-                +" update "+DBHelper.TABLE_PLAYLIST+" set "+DBHelper.PLAYLIST_MUSICNUM +"="+DBHelper.PLAYLIST_MUSICNUM +"+1 where "+DBHelper.ID+"=new."+DBHelper.LISTMUSIC_LISTID +";"
-                +" end;";
-        String trig2 = "create trigger listmusicDelete after delete on "+DBHelper.TABLE_LISTMUSIC
-                +" begin"
-                +" update "+DBHelper.TABLE_PLAYLIST+" set "+DBHelper.PLAYLIST_MUSICNUM +"="+DBHelper.PLAYLIST_MUSICNUM +"-1 where "+DBHelper.ID+"=old."+DBHelper.LISTMUSIC_LISTID +";"
-                +" end;";
-        String trig3 = "create trigger musicinfoInsert after insert on "+DBHelper.TABLE_MUSIC
-                +" begin"
-                +" update "+DBHelper.TABLE_ALBUM+" set "+DBHelper.ALBUM_MUSICNUM +"="+DBHelper.ALBUM_MUSICNUM +"+1 where "+DBHelper.ID+"=new."+DBHelper.MUSIC_ALBUMID +";"
-                +" end;";
-        String trig4 = "create trigger musicinfoDelete after delete on "+DBHelper.TABLE_MUSIC
-                +" begin"
-                +" delete from "+DBHelper.TABLE_LISTMUSIC +" where "+DBHelper.LISTMUSIC_MUSICID +"=old."+DBHelper.ID+";"
-                +" update "+DBHelper.TABLE_ALBUM+" set "+DBHelper.ALBUM_MUSICNUM +"="+DBHelper.ALBUM_MUSICNUM +"-1 where "+DBHelper.ID+"=old."+DBHelper.MUSIC_ALBUMID +";"
-                +" end;";
-        String trig5 = "create trigger playlistDelete after delete on "+DBHelper.TABLE_PLAYLIST
+        String trig1 = "create trigger playlist_cleanup1 after delete on "+DBHelper.TABLE_PLAYLIST
                 +" begin"
                 +" delete from "+DBHelper.TABLE_LISTMUSIC +" where "+DBHelper.LISTMUSIC_LISTID +"=old."+DBHelper.ID+";"
                 +" end;";
-        String trig6 = "create trigger albumInsert after insert on "+DBHelper.TABLE_ALBUM
+        String trig2 = "create trigger playlist_cleanup2 after delete on "+DBHelper.TABLE_MUSIC
                 +" begin"
-                +" update "+DBHelper.TABLE_ARTIST+" set "+DBHelper.ARTIST_ALBUMNUM+"="+DBHelper.ARTIST_ALBUMNUM+"+1 where "+DBHelper.ARTIST_NAME+"=new."+DBHelper.ALBUM_ARTIST+";"
-                +" end;";
-        String trig7 = "create trigger albumDelete after delete on "+DBHelper.TABLE_ALBUM
-                +" begin"
-                +" update "+DBHelper.TABLE_ARTIST+" set "+DBHelper.ARTIST_ALBUMNUM+"="+DBHelper.ARTIST_ALBUMNUM+"-1 where "+DBHelper.ARTIST_NAME+"=old."+DBHelper.ALBUM_ARTIST+";"
-                +" delete from "+DBHelper.TABLE_MUSIC +" where "+DBHelper.MUSIC_ALBUMID +"=old."+DBHelper.ID+";"
-                +" end;";
-        String trig8 = "create trigger albumUpdate after update of "+DBHelper.ALBUM_MUSICNUM +" on "+DBHelper.TABLE_ALBUM+" when new."+DBHelper.ALBUM_MUSICNUM +"=0"
-                +" begin"
-                +" delete from "+DBHelper.TABLE_ALBUM+" where "+DBHelper.ID+"=new."+DBHelper.ID+";"
-                +" end;";
-        String trig9 = "create trigger artistUpdate after update of "+DBHelper.ARTIST_ALBUMNUM+" on "+DBHelper.TABLE_ARTIST+" when new."+DBHelper.ARTIST_ALBUMNUM+"=0"
-                +" begin"
-                +" delete from "+DBHelper.TABLE_ARTIST+" where "+DBHelper.ID+"=new."+DBHelper.ID+";"
+                +" delete from "+DBHelper.TABLE_LISTMUSIC +" where "+DBHelper.LISTMUSIC_MUSICID +"=old."+DBHelper.ID+";"
                 +" end;";
         db.execSQL(trig1);
         db.execSQL(trig2);
-        db.execSQL(trig3);
-        db.execSQL(trig4);
-        db.execSQL(trig5);
-        db.execSQL(trig6);
-        db.execSQL(trig7);
-        db.execSQL(trig8);
-        db.execSQL(trig9);
     }
 
-    private String buildCreateSql(String table, String[] columnNames, String[] type) {
+    private String buildCreateSql(String table, Map<String,String> columns) {
         StringBuilder sb = new StringBuilder("create table if not exists ").append(table).append("(");
         sb.append(ID).append(" integer primary key autoincrement,");
-        for (int i = 0; i < columnNames.length; i++) {
-            sb.append(columnNames[i]).append(" ").append(type[i]).append(",");
+        for(Map.Entry<String,String> column:columns.entrySet()){
+            sb.append(column.getKey()).append(" ").append(column.getValue()).append(",");
         }
         sb.replace(sb.length() - 1, sb.length(), ")");
         return sb.toString();

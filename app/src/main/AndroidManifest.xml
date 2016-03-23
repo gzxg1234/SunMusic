@@ -28,6 +28,13 @@
             android:launchMode="singleInstance">
         </activity>
 
+        <activity android:name="com.sanron.music.activities.ScanActivity"
+            android:theme="@style/AnimActivity">
+        </activity>
+        <activity android:name="com.sanron.music.activities.ScanDiyActivity"
+            android:theme="@style/AnimActivity">
+        </activity>
+
         <service android:name="com.sanron.music.service.PlayerService">
         </service>
     </application>

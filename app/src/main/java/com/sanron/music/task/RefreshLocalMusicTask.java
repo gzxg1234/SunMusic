@@ -59,22 +59,22 @@ public class RefreshLocalMusicTask extends AsyncTask<Void, Void, Void> {
         if (cursor.moveToFirst()) {
             do {
                 String songid = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
-                delSql.append(DBHelper.MUSIC_MUSICID).append("!=").append(songid).append(" and ");
-                values.put(DBHelper.MUSIC_MUSICID, songid);
+                delSql.append(DBHelper.MUSIC_SONGID).append("!=").append(songid).append(" and ");
+                values.put(DBHelper.MUSIC_SONGID, songid);
                 Cursor c2 = songInfoAccess.query(values);
                 if (!c2.moveToFirst()) {
 
                     ContentValues songValues = toContentValues(cursor);
 
                     //歌手信息
-                    String artistName = songValues.getAsString(DBHelper.MUSIC_ARTISTNAME);
+                    String artistName = songValues.getAsString(DBHelper.MUSIC_ARTIST);
                     long artistId = getArtistID(artistName);
-                    songValues.put(DBHelper.MUSIC_ARTISTID, artistId);
+                    songValues.put(DBHelper.MUSIC_ARTIST_KEY, artistId);
 
                     //专辑信息
-                    String albumName = songValues.getAsString(DBHelper.MUSIC_ALBUMNAME);
+                    String albumName = songValues.getAsString(DBHelper.MUSIC_ALBUM);
                     long albumId = getAlbumID(artistName, albumName);
-                    songValues.put(DBHelper.MUSIC_ALBUMID, albumId);
+                    songValues.put(DBHelper.MUSIC_ALBUM_KEY, albumId);
 
                     songInfoAccess.insert(songValues);
                 }
@@ -133,22 +133,17 @@ public class RefreshLocalMusicTask extends AsyncTask<Void, Void, Void> {
         String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
         int bitrate = AudioTool.readBitrate(path);
         int duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
-        String letter = "";
-        if (title.length() > 0) {
-            letter = PinyinHelper.convertToPinyinString(title.substring(0, 1), "", PinyinFormat.WITHOUT_TONE);
-            letter = letter.substring(0, 1);
-        }
+        String letter = PinyinHelper.convertToPinyinString(title, "", PinyinFormat.WITHOUT_TONE);
 
         ContentValues values = new ContentValues();
         values.put(DBHelper.MUSIC_TYPE, Music.TYPE_LOCAL);
         values.put(DBHelper.MUSIC_TITLE, title);
-        values.put(DBHelper.MUSIC_MUSICID, id);
-        values.put(DBHelper.MUSIC_LETTER, letter);
+        values.put(DBHelper.MUSIC_SONGID, id);
+        values.put(DBHelper.MUSIC_TITLE_KEY, letter);
         values.put(DBHelper.MUSIC_PATH, path);
-        values.put(DBHelper.MUSIC_ALBUMNAME, album);
+        values.put(DBHelper.MUSIC_ALBUM, album);
         values.put(DBHelper.MUSIC_DURATION, duration);
-        values.put(DBHelper.MUSIC_DISPLAYNAME, displayName);
-        values.put(DBHelper.MUSIC_ARTISTNAME, artist);
+        values.put(DBHelper.MUSIC_ARTIST, artist);
         values.put(DBHelper.MUSIC_BITRATE, bitrate);
         return values;
     }

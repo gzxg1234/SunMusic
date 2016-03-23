@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:text="新建列表"
         android:textSize="20sp"
-        android:textColor="@color/textColorPrimaryInverse"
+        android:textColor="@color/textColorPrimary"
         />
     
     <EditText

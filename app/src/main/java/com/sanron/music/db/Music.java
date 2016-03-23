@@ -1,6 +1,5 @@
 package com.sanron.music.db;
 
-import android.content.ContentValues;
 import android.database.Cursor;
 
 import com.sanron.music.service.Playable;
@@ -13,20 +12,15 @@ public class Music extends Playable {
     public static final int TYPE_LOCAL = 1; //本地
     public static final int TYPE_WEB = 2;   //网络
 
-    private long id = -1;
+    private long id;
 
     /**
      * 类型
      */
-    private int type = -1;
+    private int type;
 
     /**
-     * 文件路径
-     */
-    private String path;
-
-    /**
-     * 文件名
+     * 名称
      */
     private String displayName;
 
@@ -35,31 +29,31 @@ public class Music extends Playable {
      */
     private String title;
 
+    private String titleKey;
+
     /**
      * 专辑
      */
     private String album;
+
+    private String albumKey;
 
     /**
      * 艺术家
      */
     private String artist;
 
+    private String artistKey;
+
+    /**
+     * 文件路径
+     */
+    private String path;
+
     /**
      * 时长
      */
-    private int duration = -1;
-
-    /**
-     * 比特率
-     */
-    private int bitrate = -1;
-
-
-    /**
-     * 首字母
-     */
-    private String letter;
+    private int duration;
 
     /**
      * 歌曲id(网络歌曲)
@@ -67,19 +61,21 @@ public class Music extends Playable {
     private String songId;
 
     /**
+     * 比特率
+     */
+    private int bitrate;
+
+    /**
+     * 歌词
+     */
+    private String lyric;
+
+    /**
      * 歌曲图片
      *
      * @return
      */
-    private String picPath;
-
-    public String getPicPath() {
-        return picPath;
-    }
-
-    public void setPicPath(String picPath) {
-        this.picPath = picPath;
-    }
+    private String pic;
 
     public long getId() {
         return id;
@@ -95,14 +91,6 @@ public class Music extends Playable {
 
     public void setType(int type) {
         this.type = type;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public String getDisplayName() {
@@ -121,12 +109,28 @@ public class Music extends Playable {
         this.title = title;
     }
 
+    public String getTitleKey() {
+        return titleKey;
+    }
+
+    public void setTitleKey(String titleKey) {
+        this.titleKey = titleKey;
+    }
+
     public String getAlbum() {
         return album;
     }
 
     public void setAlbum(String album) {
         this.album = album;
+    }
+
+    public String getAlbumKey() {
+        return albumKey;
+    }
+
+    public void setAlbumKey(String albumKey) {
+        this.albumKey = albumKey;
     }
 
     public String getArtist() {
@@ -137,20 +141,28 @@ public class Music extends Playable {
         this.artist = artist;
     }
 
+    public String getArtistKey() {
+        return artistKey;
+    }
+
+    public void setArtistKey(String artistKey) {
+        this.artistKey = artistKey;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
     public int getDuration() {
         return duration;
     }
 
     public void setDuration(int duration) {
         this.duration = duration;
-    }
-
-    public String getLetter() {
-        return letter;
-    }
-
-    public void setLetter(String letter) {
-        this.letter = letter;
     }
 
     public String getSongId() {
@@ -169,63 +181,39 @@ public class Music extends Playable {
         this.bitrate = bitrate;
     }
 
+    public String getLyric() {
+        return lyric;
+    }
+
+    public void setLyric(String lyric) {
+        this.lyric = lyric;
+    }
+
+    public String getPic() {
+        return pic;
+    }
+
+    public void setPic(String pic) {
+        this.pic = pic;
+    }
+
     public static Music fromCursor(Cursor cursor) {
         Music music = new Music();
         music.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
-        music.setSongId(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_MUSICID)));
+        music.setSongId(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_SONGID)));
         music.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.MUSIC_TYPE)));
         music.setBitrate(cursor.getInt(cursor.getColumnIndex(DBHelper.MUSIC_BITRATE)));
-        music.setAlbum(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ALBUMNAME)));
-        music.setLetter(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_LETTER)));
-        music.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ARTISTNAME)));
+        music.setAlbum(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ALBUM)));
+        music.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ARTIST)));
         music.setPath(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_PATH)));
         music.setDuration(cursor.getInt(cursor.getColumnIndex(DBHelper.MUSIC_DURATION)));
-        music.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_DISPLAYNAME)));
         music.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_TITLE)));
-        music.setPicPath(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_PIC)));
+        music.setPic(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_PIC)));
         return music;
     }
 
-    public ContentValues toContentValues() {
-        ContentValues values = new ContentValues();
-        if (id != -1) {
-            values.put(DBHelper.ID, id);
-        }
-        if (type != -1) {
-            values.put(DBHelper.MUSIC_TYPE, type);
-        }
-        if (displayName != null) {
-            values.put(DBHelper.MUSIC_DISPLAYNAME, displayName);
-        }
-        if (title != null) {
-            values.put(DBHelper.MUSIC_TITLE, title);
-        }
-        if (album != null) {
-            values.put(DBHelper.MUSIC_ALBUMNAME, album);
-        }
-        if (artist != null) {
-            values.put(DBHelper.MUSIC_ARTISTNAME, artist);
-        }
-        if (duration != -1) {
-            values.put(DBHelper.MUSIC_DURATION, duration);
-        }
-        if (path != null) {
-            values.put(DBHelper.MUSIC_PATH, path);
-        }
-        if (letter != null) {
-            values.put(DBHelper.MUSIC_LETTER, letter);
-        }
-        if (songId != null) {
-            values.put(DBHelper.MUSIC_MUSICID, songId);
-        }
-        if (picPath != null) {
-            values.put(DBHelper.MUSIC_PIC, picPath);
-        }
-        return values;
-    }
-
     @Override
-    public String url() {
+    public String uri() {
         return path;
     }
 
@@ -246,6 +234,11 @@ public class Music extends Playable {
 
     @Override
     public String pic() {
-        return picPath;
+        return pic;
+    }
+
+    @Override
+    public int type() {
+        return Playable.TYPE_FILE;
     }
 }

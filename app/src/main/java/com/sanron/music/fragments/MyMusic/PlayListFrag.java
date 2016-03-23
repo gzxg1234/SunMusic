@@ -48,7 +48,6 @@ public class PlayListFrag extends BaseDataFrag<PlayList> {
     protected void bindViewHolder(DataListAdapter.ItemHolder holder, int position) {
         PlayList playList = mAdapter.getItem(position);
         holder.tvText1.setText(playList.getName());
-        holder.tvText2.setText(playList.getSongNum() + "首歌曲");
     }
 
     @Override

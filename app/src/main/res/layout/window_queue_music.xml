@@ -30,7 +30,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:text="播放列表"
-                android:textColor="@color/textColorPrimaryInverse"
+                android:textColor="@color/textColorPrimary"
                 android:textSize="16dp" />
 
             <ImageButton

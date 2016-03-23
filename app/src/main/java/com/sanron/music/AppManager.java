@@ -40,7 +40,10 @@ public class AppManager {
     }
 
     public Activity currentActivity(){
-        return activities.lastElement();
+        if(activities.size() > 0){
+            return activities.lastElement();
+        }
+        return null;
     }
 
     public void finishAllActivity(){

@@ -48,7 +48,7 @@ public class AlbumFrag extends BaseDataFrag<Album> {
         switch (item.getItemId()){
             case R.id.menu_add_to_quque:{
                 ContentValues query = new ContentValues();
-                query.put(DBHelper.MUSIC_ALBUMID,mAdapter.getItem(position).getId());
+                query.put(DBHelper.MUSIC_ALBUM_KEY,mAdapter.getItem(position).getId());
                 new QueryMusicTask(query){
                     @Override
                     protected void onPostExecute(List<Music> musics) {

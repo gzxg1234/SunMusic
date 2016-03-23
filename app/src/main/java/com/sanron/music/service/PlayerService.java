@@ -352,7 +352,7 @@ public class PlayerService extends Service {
                 mediaPlayer.reset();
                 Playable playable = quque.get(currentIndex);
                 try {
-                    mediaPlayer.setDataSource(PlayerService.this, Uri.parse(playable.url()));
+                    mediaPlayer.setDataSource(PlayerService.this, Uri.parse(playable.uri()));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

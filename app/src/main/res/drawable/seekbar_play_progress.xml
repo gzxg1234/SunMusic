@@ -1,35 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@android:id/background"
-        android:bottom="4dp"
-        android:top="4dp">
+        android:id="@android:id/background">
         <shape>
-            <solid android:color="#44FFFFFF" />
+            <size android:height="4dp"/>
+            <solid android:color="#FFFFFF" />
         </shape>
     </item>
 
     <item
-        android:id="@android:id/secondaryProgress"
-        android:bottom="4dp"
-        android:top="4dp">
+        android:id="@android:id/secondaryProgress">
         <clip>
             <shape>
-                <solid android:color="#FFFFFF" />
+                <size android:height="4dp"/>
+                <solid android:color="#FFB3CC" />
             </shape>
         </clip>
     </item>
 
     <item
-        android:id="@android:id/progress"
-        android:bottom="4dp"
-        android:top="4dp">
+        android:id="@android:id/progress">
         <clip>
             <shape>
+                <size android:height="4dp"/>
                 <solid android:color="@color/colorAccent" />
             </shape>
         </clip>
     </item>
-
 </layer-list>

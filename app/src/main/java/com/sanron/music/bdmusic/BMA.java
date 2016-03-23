@@ -545,7 +545,7 @@ public class BMA {
 
 		/**
 		 * 搜索建议
-		 * @param input	输入词
+		 * @param query	输入词
 		 * @return
 		 */
 		public static String searchSugestion(String query){
@@ -555,24 +555,28 @@ public class BMA {
 			return sb.toString();
 		}
 
+
+
 		/**
 		 * 搜歌词
-		 * @param songname	歌名
+		 * @param word	歌名或者专辑
 		 * @param artist	艺术家
+		 * @param type	1返回有专辑图片,2搜图词
 		 * @return
 		 */
-		public static String searchLrcPic(String songname,String artist){
+		public static String searchLrcPic(String word,String artist,int type){
 			StringBuffer sb = new StringBuffer(BASE);
 			String ts = Long.toString(System.currentTimeMillis());
-			String query = encode(songname) +"$$"+ encode(artist);
-			String e = AESTools.encrpty("query="+songname +"$$"+ artist+"&ts="+ts);
+			String query = encode(word) +"$$"+ encode(artist);
+			String e = AESTools.encrpty("query="+word +"$$"+ artist+"&ts="+ts);
 			sb.append("&method=").append("baidu.ting.search.lrcpic")
 				.append("&query=").append(query)
 				.append("&ts=").append(ts)
-				.append("&type=2")
+				.append("&type=").append(type)
 				.append("&e=").append(e);
 			return sb.toString();
 		}
+
 		
 		/**
 		 * 合并搜索结果，用于搜索建议中的歌曲
