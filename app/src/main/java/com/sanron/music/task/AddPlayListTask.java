@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
-import com.sanron.music.db.model.PlayList;
 
 /**
  * 新建列表
@@ -17,9 +16,9 @@ public abstract class AddPlayListTask extends AsyncTask<String,Void,Integer> {
     @Override
     protected Integer doInBackground(String... params) {
         String listName = params[0];
-        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_PLAYLIST);
+        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.List.TABLE);
         ContentValues values = new ContentValues(2);
-        values.put(DBHelper.PLAYLIST_NAME,listName);
+        values.put(DBHelper.List.NAME,listName);
 
         //检查是否重名
         Cursor cursor = access.query(values);
@@ -30,8 +29,8 @@ public abstract class AddPlayListTask extends AsyncTask<String,Void,Integer> {
         }
 
         //插入
-        values.put(DBHelper.PLAYLIST_TYPE,PlayList.TYPE_USER);
-        int num = access.blukInsert(values);
+        values.put(DBHelper.List.TYPE, DBHelper.List.TYPE_USER);
+        int num = access.bulkInsert(values);
         access.close();
         return num;
     }

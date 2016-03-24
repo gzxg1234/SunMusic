@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.support.v7.util.SortedList;
 import android.support.v7.widget.Toolbar;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -25,7 +24,6 @@ import com.sanron.music.utils.TUtils;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -229,7 +227,7 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
         @Override
         public View getView(final int position, View view, ViewGroup viewGroup) {
             if (view == null) {
-                view = LayoutInflater.from(context).inflate(R.layout.list_item_dir, viewGroup, false);
+                view = LayoutInflater.from(context).inflate(R.layout.list_file_item, viewGroup, false);
             }
             TextView tvDirName = (TextView) view.findViewById(R.id.tv_dir_name);
             CheckBox cbSelect = (CheckBox) view.findViewById(R.id.cb_select);

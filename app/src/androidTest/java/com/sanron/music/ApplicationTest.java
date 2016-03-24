@@ -2,19 +2,10 @@ package com.sanron.music;
 
 import android.app.Application;
 import android.media.MediaScannerConnection;
-import android.net.Uri;
 import android.os.Environment;
-import android.os.SystemClock;
 import android.test.ApplicationTestCase;
-import android.util.Log;
-
-import com.sanron.music.net.ApiCallback;
-import com.sanron.music.net.ApiHttpClient;
-import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.RecommendSong;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
@@ -30,35 +21,9 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
     public MediaScannerConnection connection;
 
 
-
     public void testApi() {
-        ApiHttpClient.init(getContext());
-//        MusicApi.focusPic(10, new ApiCallback<FocusPicResult>() {
-//            @Override
-//            public void onFailure() {
-//                Log.d(TAG,"failure");
-//
-//            }
-//
-//            @Override
-//            public void onSuccess(FocusPicResult data) {
-//                Log.d(TAG,data.getResultCode()+"");
-//            }
-//        });
-//        SystemClock.sleep(2000);
-
-
-        MusicApi.recmdSongs(10, new ApiCallback<List<RecommendSong>>() {
-            @Override
-            public void onFailure() {
-                Log.d(TAG, "failure");
-
-            }
-
-            @Override
-            public void onSuccess(List<RecommendSong> data) {
-            }
-        });
-        SystemClock.sleep(2000);
+        File file = new File(Environment.getExternalStorageDirectory(), "/kgmusic/download/弦子 - 舍不得.mp3");
+        System.out.println(file.exists());
+        System.out.println(file.lastModified() / 1000);
     }
 }

@@ -2,6 +2,8 @@ package com.sanron.music.service;
 
 import android.graphics.Bitmap;
 
+import com.sanron.music.db.model.Music;
+
 import java.util.List;
 
 /**
@@ -14,32 +16,32 @@ public interface IPlayer {
     int MODE_LOOP = 2;//循环播放
 
     int STATE_STOP = 0;//停止状态
-    int STATE_PREPAREING = 1;//准备资源中
-    int STATE_PREPARED = 2;//准备资源完成
+    int STATE_PREPARING = 1;//准备资源中
+    int STATE_PREPARED = 2;//准备完毕
     int STATE_PLAYING = 3;//播放中
     int STATE_PAUSE = 4;//暂停
 
-    List<? extends Playable> getQueue();
+    List<Music> getQueue();
 
-    void enqueue(List<? extends Playable> musics);
+    void enqueue(List<Music> musics);
 
     void dequeue(int position);
 
-    void play(List<? extends Playable> musics, int position);
+    void clearQueue();
 
     void play(int position);
 
     int getCurrentIndex();
 
+    Music getCurrentMusic();
+
     Bitmap getCurMusicPic();
 
-    void play();
-
-    void pause();
+    void togglePlayPause();
 
     void next();
 
-    void last();
+    void previous();
 
     int getState();
 
@@ -51,7 +53,7 @@ public interface IPlayer {
 
     void removeCallback(Callback callback);
 
-    int getCurrentPosition();
+    int getProgress();
 
     int getDuration();
 
@@ -61,8 +63,6 @@ public interface IPlayer {
         void onLoadedPicture(Bitmap musicPic);
 
         void onStateChange(int state);
-
-        void onModeChange(int newMode);
 
         void onBufferingUpdate(int bufferedPosition);
     }

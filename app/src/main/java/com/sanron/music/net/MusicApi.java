@@ -15,6 +15,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
+
 /**
  * Created by sanron on 16-3-18.
  */
@@ -119,6 +123,27 @@ public class MusicApi {
         ApiHttpClient.get(url(params), apiCallback);
     }
 
+    public static void songLink(int songid){
+        ContentValues params = new ContentValues();
+        long currentTimeMillis = System.currentTimeMillis();
+        String str = "songid="+songid+"&ts="+currentTimeMillis;
+        String e = AESTools.encrpty(str);
+        params.put("method", "baidu.ting.song.getInfos");
+        params.put("songid", songid);
+        params.put("ts", currentTimeMillis);
+        params.put("e",e);
+        ApiHttpClient.get(url(params), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+            }
+        });
+    }
 
     private static String url(ContentValues params) {
         StringBuffer sb = new StringBuffer(BASE);

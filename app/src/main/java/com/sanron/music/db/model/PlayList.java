@@ -15,11 +15,7 @@ import java.util.List;
 public class PlayList implements Serializable {
 
 
-    public static final int TYPE_FAVORITE = 1;//我喜欢
-    public static final int TYPE_RECENT = 2;//最近播放
-    public static final int TYPE_USER = 3;//用户添加
-
-    private long id = -1;
+    private long id;
 
     /**
      * 表名
@@ -29,20 +25,18 @@ public class PlayList implements Serializable {
     /**
      * 表类型
      */
-    private int type = -1;
+    private int type;
 
-    /**
-     * 歌曲
-     */
-    private List<Music> songs;
+    private List<Long> musicIds;
 
-    public long getId() {
-        return id;
+    public List<Long> getMusicIds() {
+        return musicIds;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setMusicIds(List<Long> musicIds) {
+        this.musicIds = musicIds;
     }
+
 
     public String getName() {
         return name;
@@ -50,6 +44,14 @@ public class PlayList implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public int getType() {
@@ -60,34 +62,19 @@ public class PlayList implements Serializable {
         this.type = type;
     }
 
-    public List<Music> getSongs() {
-        return songs;
-    }
-
-    public void setSongs(List<Music> songs) {
-        this.songs = songs;
-    }
-
-
     public static PlayList fromCursor(Cursor cursor) {
         PlayList playList = new PlayList();
         playList.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
-        playList.setName(cursor.getString(cursor.getColumnIndex(DBHelper.PLAYLIST_NAME)));
-        playList.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.PLAYLIST_TYPE)));
+        playList.setName(cursor.getString(cursor.getColumnIndex(DBHelper.List.NAME)));
+        playList.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.List.TYPE)));
         return playList;
     }
 
     public ContentValues toContentValues() {
         ContentValues values = new ContentValues();
-        if (type != -1) {
-            values.put(DBHelper.PLAYLIST_TYPE, type);
-        }
-        if (name != null) {
-            values.put(DBHelper.PLAYLIST_NAME, name);
-        }
-        if (id != -1) {
-            values.put(DBHelper.ID, id);
-        }
+        values.put(DBHelper.List.TYPE, type);
+        values.put(DBHelper.List.NAME, name);
+        values.put(DBHelper.ID, id);
         return values;
     }
 }

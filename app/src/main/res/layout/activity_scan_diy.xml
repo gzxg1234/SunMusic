@@ -68,7 +68,7 @@
         android:layout_weight="1"
         android:overScrollMode="never"
         android:scrollbarStyle="outsideOverlay"
-        tools:listitem="@layout/list_item_dir"></ListView>
+        tools:listitem="@layout/list_file_item"></ListView>
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

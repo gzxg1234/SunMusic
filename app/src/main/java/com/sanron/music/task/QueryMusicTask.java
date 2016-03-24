@@ -2,6 +2,7 @@ package com.sanron.music.task;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
 import com.sanron.music.db.DBHelper;
@@ -25,11 +26,12 @@ public abstract class QueryMusicTask extends AsyncTask<Void, Void, List<Music>> 
 
     @Override
     protected List<Music> doInBackground(Void... params) {
-        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_MUSIC);
+        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.Music.TABLE);
         List<Music> musics = new ArrayList<>();
         Cursor cursor = access.query(query);
         while(cursor.moveToNext()){
-            musics.add(Music.fromCursor(cursor));
+            Music music = Music.fromCursor(cursor);
+            musics.add(music);
         }
         access.close();
         return musics;

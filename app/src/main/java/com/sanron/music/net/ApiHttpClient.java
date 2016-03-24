@@ -32,18 +32,18 @@ public class ApiHttpClient {
 
     public static final int HTTP_CACHE_MAX_STALE = 7 * 60 * 60 * 24;//7天
 
-    public static final int HTTP_CACHE_MAX_SIZE = 10*1024*1024;//10MB
+    public static final int HTTP_CACHE_MAX_SIZE = 10 * 1024 * 1024;//10MB
 
     public static void init(Context context) {
-        if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
-            HTTP_CACHE_PATH = context.getExternalCacheDir().getAbsolutePath()+"http_cache";
-        }else{
-            HTTP_CACHE_PATH = context.getCacheDir().getAbsolutePath()+"/http_cache";
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            HTTP_CACHE_PATH = context.getExternalCacheDir().getAbsolutePath() + "/http_cache";
+        } else {
+            HTTP_CACHE_PATH = context.getCacheDir().getAbsolutePath() + "/http_cache";
         }
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(10, TimeUnit.SECONDS);
         builder.readTimeout(5, TimeUnit.SECONDS);
-        builder.cache(new Cache(new File(HTTP_CACHE_PATH),HTTP_CACHE_MAX_SIZE));
+        builder.cache(new Cache(new File(HTTP_CACHE_PATH), HTTP_CACHE_MAX_SIZE));
         builder.networkInterceptors().add(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
@@ -60,14 +60,14 @@ public class ApiHttpClient {
         httpClient = builder.build();
     }
 
-    public static void get(String url,Callback callback){
+    public static void get(String url, Callback callback) {
         getCall(url).enqueue(callback);
     }
 
     public static Call getCall(String url) {
         Request.Builder builder = new Request.Builder();
         builder.url(url)
-            .header("Cache-Control","max-stale="+HTTP_CACHE_MAX_STALE);
+                .header("Cache-Control", "max-stale=" + HTTP_CACHE_MAX_STALE);
         return httpClient.newCall(builder.build());
     }
 }

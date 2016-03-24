@@ -24,7 +24,7 @@ public class PagerFragment extends BaseFragment {
     private String[] titles;
     private String[] fragments;
 
-    public static PagerFragment newInstance(String[] titles,String[] fragments){
+    public static PagerFragment newInstance(String[] titles, String[] fragments) {
         Bundle bundle = new Bundle();
         bundle.putStringArray("titles", titles);
         bundle.putStringArray("fragments", fragments);
@@ -37,7 +37,7 @@ public class PagerFragment extends BaseFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
-        if(arguments != null) {
+        if (arguments != null) {
             titles = arguments.getStringArray("titles");
             fragments = arguments.getStringArray("fragments");
         }
@@ -74,7 +74,8 @@ public class PagerFragment extends BaseFragment {
 
         @Override
         public Fragment getItem(int position) {
-            return Fragment.instantiate(getContext(),fragments[position]);
+            return Fragment.instantiate(getContext(), fragments[position]);
         }
     }
+
 }

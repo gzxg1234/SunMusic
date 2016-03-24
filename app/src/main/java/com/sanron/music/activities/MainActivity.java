@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -20,20 +19,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
-import com.sanron.music.AppManager;
 import com.sanron.music.R;
+import com.sanron.music.db.model.PlayList;
 import com.sanron.music.fragments.MyMusic.AlbumFrag;
 import com.sanron.music.fragments.MyMusic.ArtistFrag;
 import com.sanron.music.fragments.MyMusic.ListMusicFrag;
 import com.sanron.music.fragments.MyMusic.LocalMusicFrag;
 import com.sanron.music.fragments.MyMusic.PlayListFrag;
 import com.sanron.music.fragments.MyMusic.RecentPlayFrag;
-import com.sanron.music.fragments.NavigationHeader;
 import com.sanron.music.fragments.PagerFragment;
 import com.sanron.music.fragments.PlayerFrag;
 import com.sanron.music.fragments.WebMusic.BillboardFrag;
@@ -41,19 +36,18 @@ import com.sanron.music.fragments.WebMusic.GedanFrag;
 import com.sanron.music.fragments.WebMusic.RadioFrag;
 import com.sanron.music.fragments.WebMusic.RecmdFrag;
 import com.sanron.music.fragments.WebMusic.SingerFrag;
-import com.sanron.music.db.model.PlayList;
-import com.sanron.music.service.IPlayer;
-import com.sanron.music.service.Playable;
 import com.sanron.music.utils.MyLog;
+import com.sanron.music.view.NavigationHeader;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private IPlayer player;
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private FragmentManager fm;
@@ -62,7 +56,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private PlayerFrag playerFrag;
     private String currentFragmentTag;//当前显示的fragment;
 
+    private List<BackPressedHandler> backPressedHandlers;
+
     private NavigationView navigationView;
+    private NavigationHeader navigationHeader;
 
     private boolean isShowingPlayListSongsFrag = false;//是否在显示列表歌曲fragment
 
@@ -124,13 +121,23 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
     }
 
+    public void addBackPressedHandler(BackPressedHandler handler) {
+        if (backPressedHandlers != null) {
+            backPressedHandlers.add(handler);
+        }
+    }
 
-
+    public void removeBackPressedHandler(BackPressedHandler handler) {
+        if (backPressedHandlers != null) {
+            backPressedHandlers.remove(handler);
+        }
+    }
 
     private void initView(Bundle savedInstanceState) {
         titles.put(TAG_MYMUSIC, "我的音乐");
         titles.put(TAG_WEBMUSIC, "音乐库");
 
+        backPressedHandlers = new ArrayList<>();
         fm = getSupportFragmentManager();
         slidingUpPanelLayout = $(R.id.sliding_panel);
         navigationView = $(R.id.navigation_view);
@@ -139,8 +146,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         materialMenu = new MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN);
 
         setSupportActionBar(toolbar);
+
         navigationView.setNavigationItemSelectedListener(this);
-        navigationView.addHeaderView(new NavigationHeader(this,appContext.getMusicPlayer()));
+        navigationHeader = new NavigationHeader(this, appContext.getMusicPlayer());
+        navigationView.addHeaderView(navigationHeader);
+        appContext.setViewFitsStatuBar(navigationHeader.getChildAt(0));
 
         toolbar.setNavigationIcon(materialMenu);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -208,7 +218,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public void showPlayListSongs(PlayList playList) {
         ListMusicFrag listMusicFrag = new ListMusicFrag();
         Bundle bundle = new Bundle();
-        bundle.putSerializable("playList", playList);
+        bundle.putSerializable(ListMusicFrag.ARG_PLAY_LIST, playList);
         listMusicFrag.setArguments(bundle);
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_top,
@@ -236,6 +246,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     public void onBackPressed() {
+        if (backPressedHandlers.size() > 0) {
+            for (int i = 0; i < backPressedHandlers.size(); i++) {
+                if (backPressedHandlers.get(i).onBackPressed()) {
+                    return;
+                }
+            }
+        }
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else if (slidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
@@ -292,11 +309,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("isShowingPlayListSongsFrag", isShowingPlayListSongsFrag);
-        outState.putSerializable("materialMenuState", materialMenu.getIconState());
-        outState.putCharSequence("title", toolbar.getTitle());
+        if (materialMenu != null) {
+            outState.putSerializable("materialMenuState", materialMenu.getIconState());
+        }
+        if (toolbar != null) {
+            outState.putCharSequence("title", toolbar.getTitle());
+        }
         outState.putString("currentFragmentTag", currentFragmentTag);
     }
-
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -315,9 +335,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
             break;
 
-            case R.id.menu_download_manager:{
+            case R.id.menu_download_manager: {
 
-            }break;
+            }
+            break;
 
             case R.id.menu_setting: {
 
@@ -325,8 +346,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             break;
 
             case R.id.menu_close_app: {
-                AppManager.instance().finishAllActivity();
-                appContext.tryToStopService();
+                appContext.closeApp();
             }
             break;
         }
@@ -345,8 +365,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 getMenuInflater().inflate(R.menu.option_menu_mymusicfrag, menu);
             }
             break;
+
         }
         return true;
     }
 
+    public interface BackPressedHandler {
+        boolean onBackPressed();
+    }
 }

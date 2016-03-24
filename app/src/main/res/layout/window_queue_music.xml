@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -29,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:text="播放列表"
+                android:text="播放队列"
                 android:textColor="@color/textColorPrimary"
                 android:textSize="16dp" />
 
@@ -50,10 +51,11 @@
             android:layout_height="1dp"
             android:background="@color/colorListDivider" />
 
-        <ListView
+        <android.support.v7.widget.RecyclerView
             android:id="@+id/lv_queue_music"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            tools:listitem="@layout/list_queue_item" />
 
     </LinearLayout>
 </LinearLayout>

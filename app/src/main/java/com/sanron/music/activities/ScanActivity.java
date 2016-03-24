@@ -1,11 +1,9 @@
 package com.sanron.music.activities;
 
 import android.app.ProgressDialog;
-import android.content.AsyncQueryHandler;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -22,8 +20,9 @@ import android.widget.TextView;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
 import com.sanron.music.R;
-import com.sanron.music.db.DBAccess;
+import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
+import com.sanron.music.task.UpdateLocalMusicTask;
 import com.sanron.music.utils.AudioTool;
 import com.sanron.music.utils.MusicScanner;
 import com.sanron.music.utils.MyLog;
@@ -54,6 +53,7 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media.DATE_MODIFIED,
             MediaStore.Audio.Media.DISPLAY_NAME
     };
     public static final String DURATION_SELECTION = MediaStore.Audio.Media.DURATION + ">60000";
@@ -85,44 +85,48 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                     null,
                     MediaStore.Audio.Media.TITLE_KEY);
 
-            if (cursor.moveToFirst()) {
-                String displayName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
-                String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
-                String titleKey = (title == null ?
-                        null : PinyinHelper.convertToPinyinString(title, "", PinyinFormat.WITHOUT_TONE));
-                String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
-                String albumKey = (album == null ?
-                        null : PinyinHelper.convertToPinyinString(album, "", PinyinFormat.WITHOUT_TONE));
-                String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-                String artistKey = (artist == null ?
-                        null : PinyinHelper.convertToPinyinString(artist, "", PinyinFormat.WITHOUT_TONE));
-                String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                int duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
-                int bitrate = AudioTool.readBitrate(path);
-                Music music = new Music();
-                music.setType(Music.TYPE_LOCAL);
-                music.setDisplayName(displayName);
-                music.setTitle(title);
-                music.setTitleKey(titleKey);
-                music.setAlbum(album);
-                music.setAlbumKey(albumKey);
-                music.setArtist(artist);
-                music.setArtistKey(artistKey);
-                music.setPath(path);
-                music.setBitrate(bitrate);
-                music.setDuration(duration);
-                scanResult.add(music);
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    String displayName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
+                    String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+                    String titleKey = (title == null ?
+                            null : PinyinHelper.convertToPinyinString(title, "", PinyinFormat.WITHOUT_TONE));
+                    String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                    String albumKey = (album == null ?
+                            null : PinyinHelper.convertToPinyinString(album, "", PinyinFormat.WITHOUT_TONE));
+                    String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                    String artistKey = (artist == null ?
+                            null : PinyinHelper.convertToPinyinString(artist, "", PinyinFormat.WITHOUT_TONE));
+                    String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                    int duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
+                    int bitrate = AudioTool.readBitrate(path);
+                    long modifiedDate = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED));
+                    Music music = new Music();
+                    music.setType(DBHelper.Music.TYPE_LOCAL);
+                    music.setDisplayName(displayName);
+                    music.setTitle(title);
+                    music.setTitleKey(titleKey);
+                    music.setAlbum(album);
+                    music.setAlbumKey(albumKey);
+                    music.setArtist(artist);
+                    music.setArtistKey(artistKey);
+                    music.setPath(path);
+                    music.setModifiedDate(modifiedDate);
+                    music.setBitrate(bitrate);
+                    music.setDuration(duration);
+                    scanResult.add(music);
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyLog.i(TAG, "扫描到:" + filePath);
-                        tvFileName.setText(filePath);
-                        tvFindNum.setText(String.valueOf(scanResult.size()));
-                    }
-                });
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            MyLog.i(TAG, "扫描到:" + filePath);
+                            tvFileName.setText(filePath);
+                            tvFindNum.setText(String.valueOf(scanResult.size()));
+                        }
+                    });
+                }
+                cursor.close();
             }
-            cursor.close();
         }
 
         @Override
@@ -227,23 +231,18 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                     scanner.stopScan();
                 } else if (TEXT_FINISH.equals(text)) {
                     //完成扫描，更新数据
-                    final ProgressDialog pd = new ProgressDialog(this);
-                    pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    new AsyncTask<Void,Void,Void>(){
+                    final ProgressDialog progressDialog = new ProgressDialog(this);
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    progressDialog.setMessage("正在更新数据，请稍等");
+                    new UpdateLocalMusicTask(scanResult) {
                         @Override
                         protected void onPreExecute() {
-                            pd.show();
-                        }
-
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            DBAccess.instance().updateLocalMusic(scanResult);
-                            return null;
+                            progressDialog.show();
                         }
 
                         @Override
                         protected void onPostExecute(Void aVoid) {
-                            pd.dismiss();
+                            progressDialog.dismiss();
                             finish();
                         }
                     }.execute();

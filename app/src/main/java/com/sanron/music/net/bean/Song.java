@@ -2,6 +2,7 @@ package com.sanron.music.net.bean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.sanron.music.db.model.Music;
 import com.sanron.music.net.converter.SplitConverter;
 
 /**
@@ -23,18 +24,15 @@ public class Song {
 
     /**
      * 所有歌手名
-     * 之所以为数组是因为合唱的歌有多名歌手,下同
      */
     @JsonProperty("author")
-    @JsonDeserialize(converter = SplitConverter.class)
-    private String[] allArtistName;
+    private String allArtistName;
 
     /**
      * 所有歌手id
      */
     @JsonProperty("all_artist_id")
-    @JsonDeserialize(converter = SplitConverter.class)
-    private String[] allArtistId;
+    private String allArtistId;
 
     /**
      * 主要歌手id
@@ -114,13 +112,6 @@ public class Song {
         this.hugePic = hugePic;
     }
 
-    public String[] getAllArtistName() {
-        return allArtistName;
-    }
-
-    public void setAllArtistName(String[] allArtistName) {
-        this.allArtistName = allArtistName;
-    }
 
     public String getSmallPic() {
         return smallPic;
@@ -154,11 +145,19 @@ public class Song {
         this.artistId = artistId;
     }
 
-    public String[] getAllArtistId() {
+    public String getAllArtistName() {
+        return allArtistName;
+    }
+
+    public void setAllArtistName(String allArtistName) {
+        this.allArtistName = allArtistName;
+    }
+
+    public String getAllArtistId() {
         return allArtistId;
     }
 
-    public void setAllArtistId(String[] allArtistId) {
+    public void setAllArtistId(String allArtistId) {
         this.allArtistId = allArtistId;
     }
 
@@ -178,4 +177,12 @@ public class Song {
         this.albumId = albumId;
     }
 
+    public Music toMusic(){
+        Music music = new Music();
+        music.setTitle(title);
+        music.setArtist(allArtistName);
+        music.setAlbum(albumName);
+        music.setSongId(songId);
+        return music;
+    }
 }

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/item_view"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:layout_marginBottom="1dp"
+    android:background="?attr/selectableItemBackground"
+    android:clipToPadding="false"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center_vertical"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/iv_picture"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_alignParentLeft="true"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/icon_favorite_list" />
+
+
+    <ImageButton
+        android:id="@+id/ibtn_item_menu"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="@android:color/transparent"
+        android:padding="12dp"
+        android:scaleType="fitXY"
+        android:src="@mipmap/ic_more_vert_black_24dp" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toLeftOf="@+id/ibtn_item_menu"
+        android:layout_toRightOf="@+id/iv_picture"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingLeft="16dp">
+
+        <TextView
+            android:id="@+id/tv_list_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="14dp"
+            tools:text="我喜欢" />
+
+        <TextView
+            android:id="@+id/tv_music_num"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@color/textColorSecondary"
+            android:textSize="13dp"
+            tools:text="118首" />
+    </LinearLayout>
+
+</RelativeLayout>

@@ -6,17 +6,8 @@ import com.sanron.music.db.model.Music;
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class RecentPlayFrag extends BaseDataFrag<Music> {
+public class RecentPlayFrag extends DataFragment {
 
-
-    public RecentPlayFrag() {
-        super(LAYOUT_LINEAR,null);
-    }
-
-    @Override
-    protected void bindViewHolder(DataListAdapter.ItemHolder holder, int position) {
-
-    }
 
     @Override
     public void refreshData() {

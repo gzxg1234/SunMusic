@@ -1,5 +1,6 @@
 package com.sanron.music.db.model;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 
 import com.sanron.music.db.DBHelper;
@@ -9,10 +10,9 @@ import com.sanron.music.db.DBHelper;
  */
 public class Album {
 
-    private long id = -1;
+    private Long id;
     private String name;
     private String artistName;
-    private int songNum = -1;
     private String picPath;
 
     public String getName() {
@@ -23,13 +23,6 @@ public class Album {
         this.name = name;
     }
 
-    public int getSongNum() {
-        return songNum;
-    }
-
-    public void setSongNum(int songNum) {
-        this.songNum = songNum;
-    }
 
     public String getPicPath() {
         return picPath;
@@ -47,20 +40,25 @@ public class Album {
         this.artistName = artistName;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
+    }
+
+
+    public ContentValues toContentValues() {
+        return null;
     }
 
     public static Album fromCursor(Cursor cursor) {
         Album album = new Album();
         album.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
-        album.setName(cursor.getString(cursor.getColumnIndex(DBHelper.ALBUM_NAME)));
-        album.setArtistName(cursor.getString(cursor.getColumnIndex(DBHelper.ALBUM_ARTIST)));
-        album.setPicPath(cursor.getString(cursor.getColumnIndex(DBHelper.ARTIST_PIC)));
+        album.setName(cursor.getString(cursor.getColumnIndex(DBHelper.Album.NAME)));
+        album.setArtistName(cursor.getString(cursor.getColumnIndex(DBHelper.Album.ARTIST)));
+        album.setPicPath(cursor.getString(cursor.getColumnIndex(DBHelper.Album.PIC)));
         return album;
     }
 }

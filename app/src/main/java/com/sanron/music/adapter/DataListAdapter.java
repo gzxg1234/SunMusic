@@ -125,7 +125,7 @@ public abstract class DataListAdapter<Data> extends RecyclerView.Adapter<DataLis
             ivPicture = (ImageView) itemView.findViewById(R.id.iv_picture);
             tvText1 = (TextView) itemView.findViewById(R.id.tv_text1);
             tvText2 = (TextView) itemView.findViewById(R.id.tv_text2);
-            btnAction = (ImageButton) itemView.findViewById(R.id.btn_item_action);
+            btnAction = (ImageButton) itemView.findViewById(R.id.ibtn_item_menu);
             this.itemView.setOnClickListener(this);
             this.itemView.setOnLongClickListener(this);
             btnAction.setOnClickListener(this);
@@ -136,7 +136,7 @@ public abstract class DataListAdapter<Data> extends RecyclerView.Adapter<DataLis
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.btn_item_action: {
+                case R.id.ibtn_item_menu: {
                     if (mOnItemActionClickListener != null
                             && !isMultiMode()) {
                         mOnItemActionClickListener.onItemActionClick(v, getAdapterPosition());

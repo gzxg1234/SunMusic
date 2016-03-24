@@ -160,11 +160,11 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
             public void onSuccess(FocusPicResult data) {
                 List<FocusPic> focusPics = data.getFocusPicList();
                 final List<FocusPic> result = new LinkedList<>();
-                if(focusPics != null){
-                    for(int i=0; i<focusPics.size() && result.size()<6; i++){
+                if (focusPics != null) {
+                    for (int i = 0; i < focusPics.size() && result.size() < 6; i++) {
                         FocusPic focusPic = focusPics.get(i);
-                        if(focusPic.getType() == FocusPic.TYPE_ALBUM
-                                || focusPic.getType() == FocusPic.TYPE_GEDAN){
+                        if (focusPic.getType() == FocusPic.TYPE_ALBUM
+                                || focusPic.getType() == FocusPic.TYPE_GEDAN) {
                             result.add(focusPic);
                         }
                     }
@@ -232,25 +232,15 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
     }
 
-    private void setRecmdSongs(List<RecommendSong> recmdSongs){
+    private void setRecmdSongs(List<RecommendSong> recmdSongs) {
         this.recmdSongs = recmdSongs;
-        if(recmdSongs != null){
-            for(int i=0; i<recmdSongs.size() && i<recmdSongViews.size(); i++){
+        if (recmdSongs != null) {
+            for (int i = 0; i < recmdSongs.size() && i < recmdSongViews.size(); i++) {
                 RecommendSong recommendSong = recmdSongs.get(i);
                 RecmdSongView recmdSongView = recmdSongViews.get(i);
-                StringBuffer artistText = new StringBuffer();
-                String[] artists = recommendSong.getAllArtistName();
-                if(artists != null){
-                    for(int ii=0; ii<artists.length; ii++){
-                        artistText.append(artists[ii]);
-                        if(ii != artists.length-1){
-                            artistText.append(",");
-                        }
-                    }
-                }
-
-                imageLoader.displayImage(recommendSong.getBigPic(),recmdSongView.getPicView(),imageOptions);
-                recmdSongView.getTitleView().setText(recommendSong.getTitle()+"-"+artistText);
+                String artists = recommendSong.getAllArtistName();
+                imageLoader.displayImage(recommendSong.getBigPic(), recmdSongView.getPicView(), imageOptions);
+                recmdSongView.getTitleView().setText(recommendSong.getTitle() + "-" + artists);
                 recmdSongView.getReasonView().setText(recommendSong.getRecommendReason());
             }
         }

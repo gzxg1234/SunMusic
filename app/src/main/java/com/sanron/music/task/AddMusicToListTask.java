@@ -6,48 +6,49 @@ import android.os.AsyncTask;
 
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
-import com.sanron.music.db.model.PlayList;
 import com.sanron.music.db.model.Music;
+import com.sanron.music.db.model.PlayList;
 
 import java.util.List;
 
 /**
  * 添加歌曲至列表
  */
-public abstract class AddMusicToListTask extends AsyncTask<Void, Void, Integer[]> {
-    private PlayList mPlaylist;
-    private List<Music> mAddSongs;
+public abstract class AddMusicToListTask extends AsyncTask<Void, Void, Integer> {
+    private PlayList playlist;
+    private List<Music> addSongs;
 
     public AddMusicToListTask(PlayList playList, List<Music> musics) {
-        this.mPlaylist = playList;
-        this.mAddSongs = musics;
+        this.playlist = playList;
+        this.addSongs = musics;
     }
 
     @Override
-    protected Integer[] doInBackground(Void... params) {
-        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.TABLE_LISTMUSIC);
-
-        int addNum = 0;//添加成功数量
-        int existsNum = 0;//已存在数量
+    protected Integer doInBackground(Void... params) {
+        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.ListData.TABLE);
+        access.beginTransaction();
+        int insertNum = 0;//添加成功数量
         ContentValues values = new ContentValues(2);
-        for(int i=0; i<mAddSongs.size(); i++){
-            Music music = mAddSongs.get(i);
-            values.put(DBHelper.LISTMUSIC_LISTID,mPlaylist.getId());
-            values.put(DBHelper.LISTMUSIC_MUSICID, music.getId());
-            if(music.getType() == Music.TYPE_LOCAL) {
-                //添加本地歌曲
-                //检查是否已经存在于列表中
-                Cursor cursor = access.query(values);
-                if (cursor.moveToFirst()) {
-                    existsNum++;
-                }else if(access.insert(values) != -1){
-                    addNum ++;
+        for (int i = 0; i < addSongs.size(); i++) {
+            Music music = addSongs.get(i);
+            //检查是否已经存在于列表中
+            String sql = "select 1 from " + DBHelper.ListData.TABLE
+                    + " where " + DBHelper.ListData.LIST_ID + "=?"
+                    + " and " + DBHelper.ListData.MUSIC_ID + "=?";
+            Cursor cursor = access.rawQuery(sql, String.valueOf(playlist.getId()),
+                    String.valueOf(music.getId()));
+            if (!cursor.moveToFirst()) {
+                values.put(DBHelper.ListData.LIST_ID, playlist.getId());
+                values.put(DBHelper.ListData.MUSIC_ID, music.getId());
+                if (access.insert(null, values) != -1) {
+                    insertNum++;
                 }
             }
         }
-
+        access.setTransactionSuccessful();
+        access.endTransaction();
         access.close();
-        return new Integer[]{addNum,existsNum};
+        return insertNum;
     }
 
 }

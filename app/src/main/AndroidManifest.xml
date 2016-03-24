@@ -25,22 +25,21 @@
         </activity>
 
         <activity
-            android:name="com.sanron.music.activities.MainActivity"
-            android:launchMode="singleInstance"
+            android:name=".activities.MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name="com.sanron.music.activities.ScanActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AnimActivity"/>
+            android:theme="@style/AnimActivity" />
 
         <activity
             android:name="com.sanron.music.activities.ScanDiyActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AnimActivity"/>
+            android:theme="@style/AnimActivity" />
 
-        <service android:name="com.sanron.music.service.PlayerService"></service>
+        <service android:name="com.sanron.music.service.PlayerService"/>
     </application>
 
 </manifest>

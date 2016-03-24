@@ -13,7 +13,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.OnApplyWindowInsetsListener;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.view.WindowInsetsCompat;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -343,6 +345,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
         mDragHelper.setMinVelocity(mMinFlingVelocity * density);
 
         mIsTouchEnabled = true;
+
     }
 
     /**
@@ -1491,4 +1494,5 @@ public class SlidingUpPanelLayout extends ViewGroup {
                     }
                 };
     }
+
 }

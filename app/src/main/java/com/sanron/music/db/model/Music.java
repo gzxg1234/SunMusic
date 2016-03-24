@@ -4,15 +4,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 
 import com.sanron.music.db.DBHelper;
-import com.sanron.music.service.Playable;
 
 /**
  * Created by Administrator on 2015/12/19.
  */
-public class Music extends Playable {
+public class Music {
 
-    public static final int TYPE_LOCAL = 1; //本地
-    public static final int TYPE_WEB = 2;   //网络
 
     private long id;
 
@@ -52,6 +49,9 @@ public class Music extends Playable {
      */
     private String path;
 
+    private long modifiedDate;
+
+
     /**
      * 时长
      */
@@ -65,7 +65,7 @@ public class Music extends Playable {
     /**
      * 比特率
      */
-    private int bitrate;
+    private Integer bitrate;
 
     /**
      * 歌词
@@ -79,12 +79,12 @@ public class Music extends Playable {
      */
     private String pic;
 
-    public long getId() {
-        return id;
+    public long getModifiedDate() {
+        return modifiedDate;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setModifiedDate(long modifiedDate) {
+        this.modifiedDate = modifiedDate;
     }
 
     public int getType() {
@@ -93,6 +93,30 @@ public class Music extends Playable {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
+    public Integer getBitrate() {
+        return bitrate;
+    }
+
+    public void setBitrate(Integer bitrate) {
+        this.bitrate = bitrate;
     }
 
     public String getDisplayName() {
@@ -159,13 +183,6 @@ public class Music extends Playable {
         this.path = path;
     }
 
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
 
     public String getSongId() {
         return songId;
@@ -175,13 +192,6 @@ public class Music extends Playable {
         this.songId = songId;
     }
 
-    public int getBitrate() {
-        return bitrate;
-    }
-
-    public void setBitrate(int bitrate) {
-        this.bitrate = bitrate;
-    }
 
     public String getLyric() {
         return lyric;
@@ -199,72 +209,56 @@ public class Music extends Playable {
         this.pic = pic;
     }
 
-    public static Music fromCursor(Cursor cursor) {
-        Music music = new Music();
-        music.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
-        music.setSongId(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_SONGID)));
-        music.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.MUSIC_TYPE)));
-        music.setBitrate(cursor.getInt(cursor.getColumnIndex(DBHelper.MUSIC_BITRATE)));
-        music.setAlbum(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ALBUM)));
-        music.setAlbumKey(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ALBUM_KEY)));
-        music.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ARTIST)));
-        music.setArtistKey(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ARTIST_KEY)));
-        music.setPath(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_PATH)));
-        music.setDuration(cursor.getInt(cursor.getColumnIndex(DBHelper.MUSIC_DURATION)));
-        music.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_TITLE)));
-        music.setTitleKey(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_TITLE_KEY)));
-        music.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_DISPLAY)));
-        music.setPic(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_PIC)));
-        music.setLyric(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_LYRIC)));
-        return music;
-    }
 
-    public ContentValues toValues(){
+    public ContentValues toContentValues() {
         ContentValues values = new ContentValues();
-        values.put(DBHelper.MUSIC_SONGID,songId);
-        values.put(DBHelper.MUSIC_TYPE,type);
-        values.put(DBHelper.MUSIC_BITRATE,bitrate);
-        values.put(DBHelper.MUSIC_ALBUM,album);
-        values.put(DBHelper.MUSIC_ALBUM_KEY,albumKey);
-        values.put(DBHelper.MUSIC_ARTIST,artist);
-        values.put(DBHelper.MUSIC_ARTIST_KEY,artistKey);
-        values.put(DBHelper.MUSIC_PATH,path);
-        values.put(DBHelper.MUSIC_DURATION,duration);
-        values.put(DBHelper.MUSIC_TITLE,title);
-        values.put(DBHelper.MUSIC_TITLE_KEY,titleKey);
-        values.put(DBHelper.MUSIC_DISPLAY,displayName);
-        values.put(DBHelper.MUSIC_PIC,pic);
-        values.put(DBHelper.MUSIC_LYRIC,lyric);
+        values.put(DBHelper.Music.SONG_ID, songId);
+        values.put(DBHelper.Music.TYPE, type);
+        values.put(DBHelper.Music.BITRATE, bitrate);
+        values.put(DBHelper.Music.ALBUM, album);
+        values.put(DBHelper.Music.DATE_MODIFIED, modifiedDate);
+        values.put(DBHelper.Music.ALBUM_KEY, albumKey);
+        values.put(DBHelper.Music.ARTIST, artist);
+        values.put(DBHelper.Music.ARTIST_KEY, artistKey);
+        values.put(DBHelper.Music.PATH, path);
+        values.put(DBHelper.Music.DURATION, duration);
+        values.put(DBHelper.Music.TITLE, title);
+        values.put(DBHelper.Music.TITLE_KEY, titleKey);
+        values.put(DBHelper.Music.DISPLAY, displayName);
+        values.put(DBHelper.Music.PIC, pic);
+        values.put(DBHelper.Music.LYRIC, lyric);
         return values;
     }
 
-    @Override
-    public String uri() {
-        return path;
+    public static Music fromCursor(Cursor cursor) {
+        Music music = new Music();
+        music.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
+        music.setSongId(cursor.getString(cursor.getColumnIndex(DBHelper.Music.SONG_ID)));
+        music.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.Music.TYPE)));
+        music.setBitrate(cursor.getInt(cursor.getColumnIndex(DBHelper.Music.BITRATE)));
+        music.setAlbum(cursor.getString(cursor.getColumnIndex(DBHelper.Music.ALBUM)));
+        music.setAlbumKey(cursor.getString(cursor.getColumnIndex(DBHelper.Music.ALBUM_KEY)));
+        music.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.Music.ARTIST)));
+        music.setArtistKey(cursor.getString(cursor.getColumnIndex(DBHelper.Music.ARTIST_KEY)));
+        music.setPath(cursor.getString(cursor.getColumnIndex(DBHelper.Music.PATH)));
+        music.setDuration(cursor.getInt(cursor.getColumnIndex(DBHelper.Music.DURATION)));
+        music.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.Music.TITLE)));
+        music.setTitleKey(cursor.getString(cursor.getColumnIndex(DBHelper.Music.TITLE_KEY)));
+        music.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.Music.DISPLAY)));
+        music.setPic(cursor.getString(cursor.getColumnIndex(DBHelper.Music.PIC)));
+        music.setLyric(cursor.getString(cursor.getColumnIndex(DBHelper.Music.LYRIC)));
+        return music;
     }
 
     @Override
-    public String title() {
-        return title;
-    }
-
-    @Override
-    public String album() {
-        return album;
-    }
-
-    @Override
-    public String artist() {
-        return artist;
-    }
-
-    @Override
-    public String pic() {
-        return pic;
-    }
-
-    @Override
-    public int type() {
-        return Playable.TYPE_FILE;
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (o instanceof Music) {
+            Music m = (Music) o;
+            return m.id == id;
+        }
+        return false;
     }
 }

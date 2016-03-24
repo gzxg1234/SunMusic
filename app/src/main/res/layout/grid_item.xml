@@ -37,7 +37,7 @@
 
 
             <ImageButton
-                android:id="@+id/btn_item_action"
+                android:id="@+id/ibtn_item_menu"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_alignParentRight="true"
@@ -50,7 +50,7 @@
                 android:id="@+id/tv_text1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf="@+id/btn_item_action"
+                android:layout_toLeftOf="@+id/ibtn_item_menu"
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:textColor="@color/textColorPrimary"
@@ -62,7 +62,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_toLeftOf="@+id/btn_item_action"
+                android:layout_toLeftOf="@+id/ibtn_item_menu"
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:textColor="@color/textColorSecondary"

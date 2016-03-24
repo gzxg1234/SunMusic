@@ -8,10 +8,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
-import android.support.design.internal.ParcelableSparseArray;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.graphics.Palette;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,15 +19,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nineoldandroids.animation.ArgbEvaluator;
 import com.nineoldandroids.animation.ObjectAnimator;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.sanron.music.R;
+import com.sanron.music.db.DBHelper;
+import com.sanron.music.db.model.Music;
 import com.sanron.music.service.IPlayer;
-import com.sanron.music.service.Playable;
 import com.sanron.music.utils.TUtils;
 import com.sanron.music.view.ShowQueueMusicWindow;
 
@@ -51,6 +48,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
     private ImageButton sibtnNext;
 
     private ViewGroup bigPlayer;
+    private ViewGroup playerTopBar;
     private LinearLayout ll1;
     private ObjectAnimator colorAnim1;
     private LinearLayout ll2;
@@ -68,15 +66,12 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
     private ImageButton ibtnForward;
     private ImageButton ibtnPlayQuque;
 
+    /**
+     * 提示播放模式
+     */
+    private Toast modeToast;
     private FastLocateThread threadRewind;
     private FastLocateThread threadForward;
-
-    private DisplayImageOptions imageOptions = new DisplayImageOptions
-            .Builder()
-            .imageScaleType(ImageScaleType.EXACTLY)
-            .build();
-
-    private ImageLoader imageLoader = ImageLoader.getInstance();
 
 
     //刷新播放进度进程
@@ -121,7 +116,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
                     }
                 }
 
-                int position = player.getCurrentPosition();
+                int position = player.getProgress();
                 final int pos = (position == -1 ? 0 : position);
                 Activity activity = getActivity();
                 if (activity != null) {
@@ -188,46 +183,25 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
                 }
                 break;
 
-                case IPlayer.STATE_PREPAREING: {
-                    Playable playable = player.getQueue().get(player.getCurrentIndex());
-                    setTitleText(playable.title());
-                    setArtistText(playable.artist());
-                    setSongDuration(0);
-                    setPlayProgress(0);
+                case IPlayer.STATE_PREPARING: {
+                    Music music = player.getCurrentMusic();
+                    setTitleText(music.getTitle());
+                    setArtistText(music.getArtist());
+                    int type = music.getType();
+                    if (type == DBHelper.Music.TYPE_LOCAL) {
+                        playProgress.setSecondaryProgress(player.getDuration());
+                    } else if (type == DBHelper.Music.TYPE_WEB) {
+                        playProgress.setSecondaryProgress(0);
+                    }
                 }
                 break;
 
                 case IPlayer.STATE_PREPARED: {
-                    Playable playable = player.getQueue().get(player.getCurrentIndex());
                     setSongDuration(player.getDuration());
-                    setPlayProgress(0);
-                    int type = playable.type();
-                    if (type == Playable.TYPE_FILE) {
-                        playProgress.setSecondaryProgress(player.getDuration());
-                    } else if (type == Playable.TYPE_WEB) {
-                        playProgress.setSecondaryProgress(0);
-                    }
-                    updateProgressThread.running();
+                    setPlayProgress(player.getProgress());
                 }
                 break;
             }
-        }
-
-        @Override
-        public void onModeChange(int newMode) {
-            int iconId = 0;
-            switch (newMode) {
-                case IPlayer.MODE_IN_TURN:
-                    iconId = R.mipmap.ic_repeat_white_24dp;
-                    break;
-                case IPlayer.MODE_LOOP:
-                    iconId = R.mipmap.ic_repeat_one_white_24dp;
-                    break;
-                case IPlayer.MODE_RANDOM:
-                    iconId = R.mipmap.ic_shuffle_white_24dp;
-                    break;
-            }
-            ibtnChangeMode.setImageResource(iconId);
         }
 
         @Override
@@ -269,6 +243,10 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
     }
 
     private void setArtistText(String artist) {
+        if (artist == null
+                || artist.equals("<unknown>")) {
+            artist = "未知歌手";
+        }
         stvArtist.setText(artist);
         tvArtist.setText(artist);
     }
@@ -313,6 +291,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
         ll2 = $(R.id.ll_2);
 
         bigPlayer = $(R.id.big_player);
+        playerTopBar = $(R.id.player_top_bar);
         ivSongPicture = $(R.id.iv_song_picture);
         tvTitle = $(R.id.tv_title);
         tvArtist = $(R.id.tv_artist);
@@ -332,6 +311,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
         ibtnForward.setOnClickListener(this);
         ibtnPlayQuque.setOnClickListener(this);
         ibtnBack.setOnClickListener(this);
+        appContext.setViewFitsStatuBar(playerTopBar);
 
 
         updateProgressThread = new UpdateProgressThread();
@@ -339,23 +319,21 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
 
         player.addCallback(callback);
 
-        callback.onModeChange(player.getState());
-
         int state = player.getState();
-        if(state >= IPlayer.STATE_PREPARED){
-            Playable playable = player.getQueue().get(player.getCurrentIndex());
+        if (state >= IPlayer.STATE_PREPARED) {
+            Music music = player.getCurrentMusic();
             setSongDuration(player.getDuration());
-            setTitleText(playable.title());
-            setArtistText(playable.artist());
+            setTitleText(music.getTitle());
+            setArtistText(music.getArtist());
         }
-        if(state < IPlayer.STATE_PLAYING){
+        if (state < IPlayer.STATE_PLAYING) {
             updateProgressThread.pause();
         }
-        if(state == IPlayer.STATE_PLAYING){
+        if (state == IPlayer.STATE_PLAYING) {
             sibtnPlayPause.setImageResource(R.mipmap.ic_pause_black_36dp);
-            ibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_white_24dp);
+            ibtnPlayPause.setImageResource(R.mipmap.ic_pause_white_24dp);
         }
-
+        setModeIcon(player.getPlayMode());
         callback.onLoadedPicture(player.getCurMusicPic());
 
         ibtnRewind.setOnTouchListener(this);
@@ -445,7 +423,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
             }
             updateProgressThread.pause();
             while (running) {
-                int pos = playProgress.getProgress() + speed;
+                int pos = player.getProgress() + speed;
                 if (pos > player.getDuration()) {
                     pos = player.getDuration();
                 } else if (pos < 0) {
@@ -477,34 +455,67 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
         player.removeCallback(callback);
     }
 
+    private void setModeIcon(int mode) {
+        int iconId = 0;
+        switch (mode) {
+            case IPlayer.MODE_IN_TURN:
+                iconId = R.mipmap.ic_repeat_white_24dp;
+                break;
+            case IPlayer.MODE_LOOP:
+                iconId = R.mipmap.ic_repeat_one_white_24dp;
+                break;
+            case IPlayer.MODE_RANDOM:
+                iconId = R.mipmap.ic_shuffle_white_24dp;
+                break;
+        }
+        ibtnChangeMode.setImageResource(iconId);
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
 
             case R.id.ibtn_play_mode: {
-                player.setPlayMode((player.getPlayMode() + 1) % 3);
+                int newMode = (player.getPlayMode() + 1) % 3;
+                player.setPlayMode(newMode);
+                String msg = "";
+                setModeIcon(newMode);
+                switch (newMode) {
+                    case IPlayer.MODE_IN_TURN:
+                        msg = "顺序播放";
+                        break;
+                    case IPlayer.MODE_LOOP:
+                        msg = "单曲循环";
+                        break;
+                    case IPlayer.MODE_RANDOM:
+                        msg = "随机播放";
+                        break;
+                }
+                if (modeToast != null) {
+                    modeToast.cancel();
+                }
+                modeToast = Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT);
+                modeToast.setText(msg);
+                modeToast.show();
             }
             break;
 
             case R.id.ibtn_rewind: {
-                player.last();
+                player.previous();
             }
             break;
 
             case R.id.s_ibtn_play_pause:
             case R.id.ibtn_play_pause: {
-                int state = player.getState();
-                if (state == IPlayer.STATE_PAUSE) {
-                    player.play();
-                } else if (state == IPlayer.STATE_STOP) {
+                if (player.getState() == IPlayer.STATE_STOP) {
                     if (player.getQueue().size() > 0) {
                         player.play(0);
                     } else {
                         TUtils.show(getContext(), "播放列表为空");
                     }
-                } else if (state == IPlayer.STATE_PLAYING) {
-                    player.pause();
+                    return;
                 }
+                player.togglePlayPause();
             }
             break;
 

@@ -2,6 +2,7 @@ package com.sanron.music.view;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
@@ -31,14 +32,12 @@ public class AddSongToListWindow extends PopupWindow {
     private View mContentView;
     private ListView mListPlayList;
     private Button mBtnCancel;
-    private List<PlayList> mPlayLists;
     private Activity mActivity;
     private float mOldAlpha;
 
     public AddSongToListWindow(final Activity activity, final List<PlayList> playLists, final List<Music> musics) {
         super(activity);
         this.mActivity = activity;
-        this.mPlayLists = playLists;
         this.mContentView = LayoutInflater.from(activity).inflate(R.layout.window_select_playlist, null);
         this.mListPlayList = (ListView) mContentView.findViewById(R.id.list_playlist);
         this.mBtnCancel = (Button) mContentView.findViewById(R.id.btn_cancel);
@@ -48,7 +47,7 @@ public class AddSongToListWindow extends PopupWindow {
         setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
         setHeight(screenHeight / 2);
-        setAnimationStyle(R.style.MyWindow);
+        setAnimationStyle(R.style.MyWindowAnim);
         setContentView(mContentView);
 
         List<String> playListNames = new ArrayList<>();
@@ -60,12 +59,20 @@ public class AddSongToListWindow extends PopupWindow {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 new AddMusicToListTask(playLists.get(position), musics) {
+                    private ProgressDialog progressDialog;
                     @Override
-                    protected void onPostExecute(Integer[] num) {
-                        String msg = num[0] + "首歌曲添加成功,";
-                        msg += (num[1] == 0 ? "" : num[1]) + "首歌曲已存在";
+                    protected void onPreExecute() {
+                        progressDialog = new ProgressDialog(activity);
+                        progressDialog.setCancelable(false);
+                        progressDialog.show();
+                    }
+
+                    @Override
+                    protected void onPostExecute(Integer addNum) {
+                        String msg = addNum + "首歌曲添加成功,";
                         TUtils.show(mActivity, msg);
                         AddSongToListWindow.this.dismiss();
+                        progressDialog.dismiss();
                     }
                 }.execute();
             }
@@ -79,8 +86,8 @@ public class AddSongToListWindow extends PopupWindow {
         });
     }
 
-    public void show() {
-        showAtLocation(mActivity.getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
+    public void show(View parent) {
+        showAtLocation(parent, Gravity.BOTTOM, 0, 0);
         animateShow();
     }
 
@@ -88,7 +95,7 @@ public class AddSongToListWindow extends PopupWindow {
     private void animateDismiss() {
         final WindowManager.LayoutParams attr = mActivity.getWindow().getAttributes();
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(0.7f, mOldAlpha);
-        valueAnimator.setDuration(400);
+        valueAnimator.setDuration(300);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -104,7 +111,7 @@ public class AddSongToListWindow extends PopupWindow {
         final WindowManager.LayoutParams attr = mActivity.getWindow().getAttributes();
         mOldAlpha = attr.alpha;
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(attr.alpha, 0.7f);
-        valueAnimator.setDuration(400);
+        valueAnimator.setDuration(300);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
