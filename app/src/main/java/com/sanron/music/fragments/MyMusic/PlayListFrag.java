@@ -18,7 +18,7 @@ import android.widget.TextView;
 import com.sanron.music.R;
 import com.sanron.music.adapter.DataListAdapter;
 import com.sanron.music.db.DBHelper;
-import com.sanron.music.db.PlayList;
+import com.sanron.music.db.model.PlayList;
 import com.sanron.music.task.AddPlayListTask;
 import com.sanron.music.task.DelPlayListTask;
 import com.sanron.music.task.GetPlayListTask;

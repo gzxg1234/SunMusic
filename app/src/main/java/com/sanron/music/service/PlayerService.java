@@ -19,12 +19,15 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.sanron.music.AppContext;
 import com.sanron.music.AppManager;
 import com.sanron.music.R;
@@ -32,7 +35,6 @@ import com.sanron.music.activities.MainActivity;
 import com.sanron.music.utils.MyLog;
 import com.sanron.music.utils.TUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -58,7 +60,6 @@ public class PlayerService extends Service {
     private NotificationCompat.Builder builder;
     private ImageLoader imageLoader = ImageLoader.getInstance();
 
-    private DisplayImageOptions displayImageOptions;
     private Player player;
 
     private BroadcastReceiver cmdReceiver = new BroadcastReceiver() {
@@ -76,7 +77,7 @@ public class PlayerService extends Service {
                     int state = player.getState();
                     if (state == IPlayer.STATE_PAUSE) {
                         player.play();
-                    } else if (state == IPlayer.STATE_IDEL) {
+                    } else if (state == IPlayer.STATE_STOP) {
                         if (player.getQueue().size() > 0) {
                             player.play(0);
                         }
@@ -121,8 +122,6 @@ public class PlayerService extends Service {
         builder.setPriority(Notification.PRIORITY_MAX);
         updateNotification();
 
-        DisplayImageOptions.Builder builder = new DisplayImageOptions.Builder();
-        displayImageOptions = builder.imageScaleType(ImageScaleType.EXACTLY).build();
     }
 
     @Override
@@ -161,6 +160,8 @@ public class PlayerService extends Service {
         }
     }
 
+    private Bitmap curMusicPic;
+
     /**
      * 更新通知
      */
@@ -169,21 +170,21 @@ public class PlayerService extends Service {
         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification_small_layout);
         int state = player.getState();
         switch (state) {
-            case IPlayer.STATE_IDEL: {
+            case IPlayer.STATE_STOP: {
                 bigContentView.setImageViewResource(R.id.iv_picture, R.mipmap.default_song_pic);
-                bigContentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_48dp);
+                bigContentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_24dp);
                 contentView.setImageViewResource(R.id.iv_picture, R.mipmap.default_song_pic);
-                contentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_48dp);
+                contentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_36dp);
             }
             break;
             case IPlayer.STATE_PAUSE: {
-                bigContentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_48dp);
-                contentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_48dp);
+                bigContentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_24dp);
+                contentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_36dp);
             }
             break;
             case IPlayer.STATE_PLAYING: {
-                bigContentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_pause_black_48dp);
-                contentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_pause_black_48dp);
+                bigContentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_pause_black_24dp);
+                contentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_pause_black_36dp);
             }
             break;
         }
@@ -195,38 +196,32 @@ public class PlayerService extends Service {
             bigContentView.setTextViewText(R.id.tv_music_info, musicInfo);
             contentView.setTextViewText(R.id.tv_music_info, musicInfo);
 
-            Bitmap bitmap = null;
-            if (!TextUtils.isEmpty(playable.pic())) {
-                int size = getResources().getDimensionPixelSize(R.dimen.notification_big_picture_size);
-                ImageSize imageSize = new ImageSize(size, size);
-                bitmap = imageLoader.loadImageSync("file://" + playable.pic(), imageSize, displayImageOptions);
-            }
-            if (bitmap != null) {
-                bigContentView.setImageViewBitmap(R.id.iv_picture, bitmap);
-                contentView.setImageViewBitmap(R.id.iv_picture, bitmap);
-            }else{
+            if (curMusicPic != null) {
+                bigContentView.setImageViewBitmap(R.id.iv_picture, curMusicPic);
+                contentView.setImageViewBitmap(R.id.iv_picture, curMusicPic);
+            } else {
                 bigContentView.setImageViewResource(R.id.iv_picture, R.mipmap.default_song_pic);
                 contentView.setImageViewResource(R.id.iv_picture, R.mipmap.default_song_pic);
             }
 
         } else {
             bigContentView.setTextViewText(R.id.tv_music_info, getText(R.string.app_name));
-            contentView.setTextViewText(R.id.tv_music_info,  getText(R.string.app_name));
+            contentView.setTextViewText(R.id.tv_music_info, getText(R.string.app_name));
         }
 
         bigContentView.setOnClickPendingIntent(R.id.ibtn_lrc, cmdIntent(CMD_LYRIC));
-        bigContentView.setOnClickPendingIntent(R.id.ibtn_last, cmdIntent(CMD_PREVIOUS));
+        bigContentView.setOnClickPendingIntent(R.id.ibtn_rewind, cmdIntent(CMD_PREVIOUS));
         bigContentView.setOnClickPendingIntent(R.id.ibtn_play_pause, cmdIntent(CMD_PLAY_PAUSE));
-        bigContentView.setOnClickPendingIntent(R.id.ibtn_next, cmdIntent(CMD_NEXT));
+        bigContentView.setOnClickPendingIntent(R.id.ibtn_forward, cmdIntent(CMD_NEXT));
         bigContentView.setOnClickPendingIntent(R.id.ibtn_close, cmdIntent(CMD_CLOSE));
 
         contentView.setOnClickPendingIntent(R.id.ibtn_lrc, cmdIntent(CMD_LYRIC));
         contentView.setOnClickPendingIntent(R.id.ibtn_play_pause, cmdIntent(CMD_PLAY_PAUSE));
-        contentView.setOnClickPendingIntent(R.id.ibtn_next, cmdIntent(CMD_NEXT));
+        contentView.setOnClickPendingIntent(R.id.ibtn_forward, cmdIntent(CMD_NEXT));
         contentView.setOnClickPendingIntent(R.id.ibtn_close, cmdIntent(CMD_CLOSE));
 
         Notification notification = builder.build();
-        notification.contentIntent = PendingIntent.getActivity(this,1,
+        notification.contentIntent = PendingIntent.getActivity(this, 1,
                 new Intent(this, MainActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         notification.bigContentView = bigContentView;
@@ -259,7 +254,7 @@ public class PlayerService extends Service {
         private List<IPlayer.Callback> callbacks;
         private int mode = MODE_IN_TURN;//模式
         private int currentIndex;//当前位置
-        private int state = STATE_IDEL;//播放状态
+        private int state = STATE_STOP;//播放状态
         private MediaPlayer mediaPlayer;
 
         public Player() {
@@ -273,7 +268,6 @@ public class PlayerService extends Service {
             mediaPlayer.setOnErrorListener(this);
             mediaPlayer.setOnBufferingUpdateListener(this);
         }
-
 
         @Override
         public List<? extends Playable> getQueue() {
@@ -315,7 +309,6 @@ public class PlayerService extends Service {
          */
         @Override
         public void play(List<? extends Playable> musics, int position) {
-
             if (musics == null
                     || musics.size() == 0) {
                 //替换为空队列，即清空了队列，停止播放
@@ -323,7 +316,8 @@ public class PlayerService extends Service {
                     quque.clear();
                     mediaPlayer.reset();
                     currentIndex = -1;
-                    changeState(STATE_IDEL);
+                    changeState(STATE_STOP);
+                    setCurMusicPic(null);
                     updateNotification();
                     return;
                 }
@@ -339,7 +333,7 @@ public class PlayerService extends Service {
          * 播放队列position位置歌曲
          */
         @Override
-        public void play(int position) {
+        public synchronized void play(int position) {
 
             if (state == STATE_PREPAREING) {
                 //mediaplayer执行了prepareAsync方法,正在异步准备资源中，
@@ -348,22 +342,19 @@ public class PlayerService extends Service {
             }
 
             synchronized (this) {
-                currentIndex = position;
                 mediaPlayer.reset();
+                currentIndex = position;
+                changeState(STATE_PREPAREING);
                 Playable playable = quque.get(currentIndex);
                 try {
                     mediaPlayer.setDataSource(PlayerService.this, Uri.parse(playable.uri()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                try {
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                     mediaPlayer.prepareAsync();
                 } catch (Exception e) {
-                    onError(mediaPlayer, MediaPlayer.MEDIA_ERROR_UNSUPPORTED, -1);
+                    e.printStackTrace();
+                    onError(mediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, -1);
                     return;
                 }
-                changeState(STATE_PREPAREING);
             }
         }
 
@@ -372,7 +363,12 @@ public class PlayerService extends Service {
             return currentIndex;
         }
 
-        private void changeState(int newState) {
+        @Override
+        public Bitmap getCurMusicPic() {
+            return curMusicPic;
+        }
+
+        private synchronized void changeState(int newState) {
             if (state != newState) {
                 state = newState;
                 for (Callback callback : callbacks) {
@@ -397,9 +393,11 @@ public class PlayerService extends Service {
 
         @Override
         public void pause() {
-            mediaPlayer.pause();
-            changeState(STATE_PAUSE);
-            updateNotification();
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.pause();
+                changeState(STATE_PAUSE);
+                updateNotification();
+            }
         }
 
         @Override
@@ -415,10 +413,11 @@ public class PlayerService extends Service {
             if (quque.size() == 0) {
                 return;
             }
+            int lastIndex = currentIndex;
             if (currentIndex > 0) {
-                currentIndex--;
+                lastIndex = currentIndex - 1;
             }
-            play(currentIndex);
+            play(lastIndex);
         }
 
         @Override
@@ -462,7 +461,8 @@ public class PlayerService extends Service {
         }
 
         private boolean isPrepared() {
-            return state == STATE_PLAYING || state == STATE_PAUSE;
+            return state == STATE_PLAYING
+                    || state == STATE_PAUSE;
         }
 
         @Override
@@ -504,14 +504,15 @@ public class PlayerService extends Service {
 
         @Override
         public boolean onError(MediaPlayer mp, int what, int extra) {
+            state = STATE_STOP;
             TUtils.show(PlayerService.this, "播放出错，2s后跳到下一首");
-            updateNotification();
-            final int errorPosition = getCurrentPosition();
             new Thread() {
+                final int errorPos = currentIndex;
+
                 @Override
                 public void run() {
                     SystemClock.sleep(2000);
-                    if (getCurrentPosition() == errorPosition) {
+                    if (getCurrentIndex() == errorPos) {
                         next();
                     }
                 }
@@ -519,15 +520,48 @@ public class PlayerService extends Service {
             return true;
         }
 
+        private void setCurMusicPic(Bitmap bmp) {
+            if (curMusicPic != null) {
+                curMusicPic.recycle();
+            }
+            curMusicPic = bmp;
+            for (Callback callback : callbacks) {
+                callback.onLoadedPicture(bmp);
+            }
+            updateNotification();
+        }
+
+        private DisplayImageOptions imageOptions = new DisplayImageOptions
+                .Builder()
+                .imageScaleType(ImageScaleType.EXACTLY)
+                .build();
+
         @Override
         public void onPrepared(MediaPlayer mp) {
+            changeState(STATE_PREPARED);
             mp.start();
             changeState(STATE_PLAYING);
-            updateNotification();
-            for (Callback callback : callbacks) {
-                callback.onPrepared();
+            //加载音乐图片
+            Playable playable = quque.get(currentIndex);
+            if (!TextUtils.isEmpty(playable.pic())) {
+                ImageSize imageSize = new ImageSize(500, 500);
+                imageLoader.loadImage("file://" + playable.pic(),
+                        imageSize,
+                        imageOptions,
+                        new SimpleImageLoadingListener() {
+                            @Override
+                            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                setCurMusicPic(loadedImage);
+                            }
+
+                            @Override
+                            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                                setCurMusicPic(null);
+                            }
+                        });
+            } else {
+                setCurMusicPic(null);
             }
-            MyLog.d(TAG, "start play " + quque.get(currentIndex).title());
         }
 
         @Override
@@ -546,14 +580,12 @@ public class PlayerService extends Service {
         }
 
         public void release() {
-            synchronized (this) {
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
-                }
-                mediaPlayer.release();
-                mediaPlayer = null;
-                state = STATE_IDEL;
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
             }
+            mediaPlayer.release();
+            mediaPlayer = null;
+            state = STATE_STOP;
         }
     }
 

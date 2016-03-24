@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.sanron.music.db.model.PlayList;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -84,15 +86,15 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public void createTableMusicInfo(SQLiteDatabase db){
         Map<String,String>  columnTypes = new HashMap<>();
-        columnTypes.put(MUSIC_TYPE,"integer");
         columnTypes.put(MUSIC_DISPLAY,"text");
+        columnTypes.put(MUSIC_TYPE,"integer");
+        columnTypes.put(MUSIC_PATH,"text");
         columnTypes.put(MUSIC_TITLE,"text");
         columnTypes.put(MUSIC_TITLE_KEY,"text");
         columnTypes.put(MUSIC_ALBUM,"text");
         columnTypes.put(MUSIC_ALBUM_KEY,"text");
         columnTypes.put(MUSIC_ARTIST,"text");
         columnTypes.put(MUSIC_ARTIST_KEY,"text");
-        columnTypes.put(MUSIC_PATH,"text");
         columnTypes.put(MUSIC_DURATION,"integer");
         columnTypes.put(MUSIC_SONGID,"text");
         columnTypes.put(MUSIC_BITRATE,"integer");
@@ -130,7 +132,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         //创建我喜欢，最近播放两个列表
         sql = "insert into "+TABLE_PLAYLIST+"("+PLAYLIST_TYPE+","+PLAYLIST_NAME+") " +
-                "values("+PlayList.TYPE_FAVORITE+",'我喜欢')";
+                "values("+ PlayList.TYPE_FAVORITE+",'我喜欢')";
         db.execSQL(sql);
         sql = "insert into "+TABLE_PLAYLIST+"("+PLAYLIST_TYPE+","+PLAYLIST_NAME+") " +
                 "values("+PlayList.TYPE_RECENT+",'最近播放')";
@@ -169,12 +171,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 +" begin"
                 +" delete from "+DBHelper.TABLE_LISTMUSIC +" where "+DBHelper.LISTMUSIC_LISTID +"=old."+DBHelper.ID+";"
                 +" end;";
-        String trig2 = "create trigger playlist_cleanup2 after delete on "+DBHelper.TABLE_MUSIC
-                +" begin"
-                +" delete from "+DBHelper.TABLE_LISTMUSIC +" where "+DBHelper.LISTMUSIC_MUSICID +"=old."+DBHelper.ID+";"
-                +" end;";
         db.execSQL(trig1);
-        db.execSQL(trig2);
     }
 
     private String buildCreateSql(String table, Map<String,String> columns) {

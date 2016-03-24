@@ -1,8 +1,11 @@
 package com.sanron.music.activities;
 
+import android.app.ProgressDialog;
+import android.content.AsyncQueryHandler;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -19,7 +22,8 @@ import android.widget.TextView;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
 import com.sanron.music.R;
-import com.sanron.music.db.Music;
+import com.sanron.music.db.DBAccess;
+import com.sanron.music.db.model.Music;
 import com.sanron.music.utils.AudioTool;
 import com.sanron.music.utils.MusicScanner;
 import com.sanron.music.utils.MyLog;
@@ -123,7 +127,8 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
 
         @Override
         public void onCompleted(final boolean fromUser) {
-            MyLog.i(TAG, "停止扫描");
+            MyLog.d(TAG, "停止扫描");
+            MyLog.d(TAG, "扫描到" + scanResult.size() + "首歌曲");
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -215,15 +220,33 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                     if (scanner.isScanning()) {
                         TUtils.show(this, "正在扫描，请稍后操作");
                     } else {
-                        MyLog.i(TAG, "开始扫描");
+                        MyLog.d(TAG, "开始扫描");
                         scanner.scan(listener, Environment.getExternalStorageDirectory().getAbsolutePath());
                     }
                 } else if (TEXT_STOP_SCAN.equals(text)) {
                     scanner.stopScan();
                 } else if (TEXT_FINISH.equals(text)) {
                     //完成扫描，更新数据
-                    MyLog.i(TAG, "扫描到" + scanResult.size() + "首歌曲");
-                    finish();
+                    final ProgressDialog pd = new ProgressDialog(this);
+                    pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    new AsyncTask<Void,Void,Void>(){
+                        @Override
+                        protected void onPreExecute() {
+                            pd.show();
+                        }
+
+                        @Override
+                        protected Void doInBackground(Void... voids) {
+                            DBAccess.instance().updateLocalMusic(scanResult);
+                            return null;
+                        }
+
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            pd.dismiss();
+                            finish();
+                        }
+                    }.execute();
                 }
             }
             break;

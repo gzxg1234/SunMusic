@@ -7,7 +7,7 @@ import android.provider.MediaStore;
 
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
-import com.sanron.music.db.Music;
+import com.sanron.music.db.model.Music;
 
 import java.io.File;
 import java.util.List;

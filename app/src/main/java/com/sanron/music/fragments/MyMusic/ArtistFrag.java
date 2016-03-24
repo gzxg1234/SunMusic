@@ -2,7 +2,7 @@ package com.sanron.music.fragments.MyMusic;
 
 import com.sanron.music.adapter.DataListAdapter;
 import com.sanron.music.db.DBHelper;
-import com.sanron.music.db.Artist;
+import com.sanron.music.db.model.Artist;
 import com.sanron.music.task.GetArtistsTask;
 
 import java.util.List;

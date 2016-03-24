@@ -1,7 +1,9 @@
-package com.sanron.music.db;
+package com.sanron.music.db.model;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 
+import com.sanron.music.db.DBHelper;
 import com.sanron.music.service.Playable;
 
 /**
@@ -204,12 +206,36 @@ public class Music extends Playable {
         music.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.MUSIC_TYPE)));
         music.setBitrate(cursor.getInt(cursor.getColumnIndex(DBHelper.MUSIC_BITRATE)));
         music.setAlbum(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ALBUM)));
+        music.setAlbumKey(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ALBUM_KEY)));
         music.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ARTIST)));
+        music.setArtistKey(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_ARTIST_KEY)));
         music.setPath(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_PATH)));
         music.setDuration(cursor.getInt(cursor.getColumnIndex(DBHelper.MUSIC_DURATION)));
         music.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_TITLE)));
+        music.setTitleKey(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_TITLE_KEY)));
+        music.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_DISPLAY)));
         music.setPic(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_PIC)));
+        music.setLyric(cursor.getString(cursor.getColumnIndex(DBHelper.MUSIC_LYRIC)));
         return music;
+    }
+
+    public ContentValues toValues(){
+        ContentValues values = new ContentValues();
+        values.put(DBHelper.MUSIC_SONGID,songId);
+        values.put(DBHelper.MUSIC_TYPE,type);
+        values.put(DBHelper.MUSIC_BITRATE,bitrate);
+        values.put(DBHelper.MUSIC_ALBUM,album);
+        values.put(DBHelper.MUSIC_ALBUM_KEY,albumKey);
+        values.put(DBHelper.MUSIC_ARTIST,artist);
+        values.put(DBHelper.MUSIC_ARTIST_KEY,artistKey);
+        values.put(DBHelper.MUSIC_PATH,path);
+        values.put(DBHelper.MUSIC_DURATION,duration);
+        values.put(DBHelper.MUSIC_TITLE,title);
+        values.put(DBHelper.MUSIC_TITLE_KEY,titleKey);
+        values.put(DBHelper.MUSIC_DISPLAY,displayName);
+        values.put(DBHelper.MUSIC_PIC,pic);
+        values.put(DBHelper.MUSIC_LYRIC,lyric);
+        return values;
     }
 
     @Override

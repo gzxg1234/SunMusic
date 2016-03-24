@@ -1,7 +1,7 @@
 package com.sanron.music.fragments.MyMusic;
 
 import com.sanron.music.adapter.DataListAdapter;
-import com.sanron.music.db.Music;
+import com.sanron.music.db.model.Music;
 
 /**
  * Created by Administrator on 2015/12/21.

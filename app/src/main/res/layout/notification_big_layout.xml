@@ -56,34 +56,38 @@
             android:gravity="center">
 
             <ImageButton
+                android:padding="16dp"
                 style="@style/NotificationButton.Big"
                 android:src="@mipmap/ic_lyric_open_36dp"
                 android:id="@+id/ibtn_lrc" />
-            <ImageView
+            <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
 
             <ImageButton
+                android:padding="16dp"
                 style="@style/NotificationButton.Big"
-                android:src="@mipmap/ic_skip_previous_black_36dp"
-                android:id="@+id/ibtn_last" />
-            <ImageView
+                android:src="@mipmap/ic_skip_previous_black_24dp"
+                android:id="@+id/ibtn_rewind" />
+            <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
             <ImageButton
                 style="@style/NotificationButton.Big"
-                android:src="@mipmap/ic_play_arrow_black_36dp"
+                android:padding="16dp"
+                android:src="@mipmap/ic_play_arrow_black_24dp"
                 android:id="@+id/ibtn_play_pause" />
-            <ImageView
+            <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
             <ImageButton
                 style="@style/NotificationButton.Big"
-                android:src="@mipmap/ic_skip_next_black_36dp"
-                android:id="@+id/ibtn_next" />
+                android:padding="16dp"
+                android:src="@mipmap/ic_skip_next_black_24dp"
+                android:id="@+id/ibtn_forward" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

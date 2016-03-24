@@ -1,6 +1,5 @@
 package com.sanron.music.fragments.MyMusic;
 
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.view.ActionMode;
@@ -11,9 +10,8 @@ import android.view.MenuItem;
 import com.sanron.music.R;
 import com.sanron.music.activities.ScanActivity;
 import com.sanron.music.db.DBHelper;
-import com.sanron.music.db.Music;
+import com.sanron.music.db.model.Music;
 import com.sanron.music.task.QueryMusicTask;
-import com.sanron.music.task.RefreshLocalMusicTask;
 
 import java.util.List;
 

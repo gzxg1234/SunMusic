@@ -1,27 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:background="@android:color/white">
+    android:background="@android:color/white"
+    android:orientation="vertical">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="7">
+        android:layout_weight="1">
+
         <ImageView
             android:id="@+id/iv_song_picture"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@mipmap/default_big_song_pic"/>
+            android:src="@mipmap/default_song_pic" />
 
         <RelativeLayout
-            android:background="@drawable/topbar_bg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/topbar_bg"
             android:paddingTop="@dimen/status_height">
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="?android:attr/actionBarSize">
@@ -31,161 +33,174 @@
                     android:layout_width="?android:attr/actionBarSize"
                     android:layout_height="?android:attr/actionBarSize"
                     android:background="?android:attr/selectableItemBackground"
-                    android:src="@mipmap/ic_chevron_left_white_36dp"
-                    />
+                    android:src="@mipmap/ic_chevron_left_white_36dp" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:layout_toRightOf="@+id/ibtn_back"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:textSize="20dp"
+                    android:text="正在播放"
                     android:textColor="@color/textColorPrimaryInverse"
-                    android:layout_toRightOf="@+id/ibtn_back"
-                    android:text="正在播放"/>
+                    android:textSize="20dp" />
             </RelativeLayout>
 
         </RelativeLayout>
     </FrameLayout>
 
     <LinearLayout
-        android:orientation="vertical"
+        android:id="@+id/ll_1"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="3"
-        android:background="@android:color/white">
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingTop="20dp"
+            android:paddingBottom="16dp"
             android:paddingLeft="16dp"
-            android:gravity="center_vertical">
+            android:paddingRight="16dp">
 
             <TextView
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Love Yourself"
-                android:textSize="18dp"
+                android:layout_alignParentLeft="true"
                 android:singleLine="true"
-                android:textColor="@color/textColorPrimary"
-                android:layout_alignParentLeft="true" />
+                android:text="@string/app_name"
+                android:textColor="@color/textColorPrimaryInverse"
+                android:textSize="28dp" />
 
             <TextView
                 android:id="@+id/tv_artist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Justin"
-                android:textSize="15dp"
+                android:layout_below="@+id/tv_title"
                 android:singleLine="true"
-                android:textColor="@color/textColorPrimary"
-                android:layout_below="@+id/tv_title"/>
-        </RelativeLayout>
+                tools:text="Justin"
+                android:textColor="@color/textColorPrimaryInverse"
+                android:textSize="20dp" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
 
             <TextView
                 android:id="@+id/tv_play_position"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_alignParentLeft="true"
-                tools:text="00:24"
-                android:textSize="10dp"/>
+                android:layout_toLeftOf="@+id/tv_song_duration"
+                android:layout_alignBottom="@+id/tv_song_duration"
+                android:textColor="@color/textColorPrimaryInverse"
+                android:textSize="14dp"
+                android:text="00:00" />
 
             <TextView
                 android:id="@+id/tv_song_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="16dp"
+                android:textColor="@color/textColorPrimaryInverse"
+                android:text="00:00"
+                android:textSize="14dp"
                 android:layout_alignParentRight="true"
-                tools:text="3:28"
-                android:textSize="10dp"/>
-
-            <SeekBar
-                android:id="@+id/play_progress"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxHeight="4dp"
-                android:minHeight="4dp"
-                android:layout_below="@+id/tv_play_position"
-                android:layout_marginTop="2dp"
-                android:thumb="@drawable/seekbar_thumb"
-                android:progressDrawable="@drawable/seekbar_play_progress"
-                tools:max="100"
-                tools:progress="20"
-                tools:secondaryProgress="50"
+                android:layout_alignBottom="@+id/tv_artist"
                 />
-
         </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="3"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_alignParentBottom="true">
+            android:layout_height="40dp">
 
             <android.support.v4.widget.Space
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
+
             <ImageButton
-                style="@style/PlayerButton"
                 android:id="@+id/ibtn_play_mode"
-                android:src="@mipmap/ic_repeat_black_24dp"
-                android:padding="16dp"
-                />
-            <android.support.v4.widget.Space
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-            <ImageButton
-                style="@style/PlayerButton"
-                android:id="@+id/ibtn_last"
+                style="@style/PlayerFunctionButton"
                 android:padding="10dp"
-                android:src="@mipmap/ic_skip_previous_black_36dp"
-                />
-            <android.support.v4.widget.Space
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-            <ImageButton
-                style="@style/PlayerButton"
-                android:id="@+id/ibtn_play_pause"
-                android:padding="4dp"
-                android:src="@mipmap/ic_play_arrow_black_48dp"
-                />
-            <android.support.v4.widget.Space
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-            <ImageButton
-                style="@style/PlayerButton"
-                android:id="@+id/ibtn_next"
-                android:padding="10dp"
-                android:src="@mipmap/ic_skip_next_black_36dp"
-                />
-            <android.support.v4.widget.Space
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-            <ImageButton
-                style="@style/PlayerButton"
-                android:id="@+id/ibtn_play_quque"
-                android:src="@mipmap/ic_queue_music_black_24dp"
-                android:padding="16dp"
-                />
+                android:src="@mipmap/ic_repeat_one_white_24dp" />
 
             <android.support.v4.widget.Space
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/ibtn_play_quque"
+                style="@style/PlayerFunctionButton"
+                android:padding="8dp"
+                android:src="@mipmap/ic_queue_music_white_24dp" />
+
+            <android.support.v4.widget.Space
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
         </LinearLayout>
 
+        <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:id="@+id/play_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="2dp"
+            android:minHeight="2dp"
+            android:progressDrawable="@drawable/seekbar_play_progress"
+            tools:max="100"
+            tools:progress="20"
+            tools:secondaryProgress="50" />
     </LinearLayout>
+
+
+
+    <LinearLayout
+        android:id="@+id/ll_2"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/colorPrimary"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <android.support.v4.widget.Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/ibtn_rewind"
+            style="@style/PlayerControlButton"
+            android:padding="16dp"
+            android:src="@mipmap/ic_fast_rewind_white_24dp" />
+
+        <android.support.v4.widget.Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/ibtn_play_pause"
+            style="@style/PlayerControlButton"
+            android:padding="16dp"
+            android:src="@mipmap/ic_play_arrow_white_24dp" />
+
+        <android.support.v4.widget.Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/ibtn_forward"
+            style="@style/PlayerControlButton"
+            android:padding="16dp"
+            android:src="@mipmap/ic_fast_forward_white_24dp" />
+
+        <android.support.v4.widget.Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
 </LinearLayout>

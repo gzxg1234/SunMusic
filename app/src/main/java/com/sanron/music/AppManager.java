@@ -2,6 +2,8 @@ package com.sanron.music;
 
 import android.app.Activity;
 
+import java.lang.ref.WeakReference;
+import java.util.Iterator;
 import java.util.Stack;
 
 /**
@@ -41,7 +43,7 @@ public class AppManager {
 
     public Activity currentActivity(){
         if(activities.size() > 0){
-            return activities.lastElement();
+            return activities.peek();
         }
         return null;
     }

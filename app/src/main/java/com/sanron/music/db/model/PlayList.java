@@ -1,7 +1,9 @@
-package com.sanron.music.db;
+package com.sanron.music.db.model;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+
+import com.sanron.music.db.DBHelper;
 
 import java.io.Serializable;
 import java.util.List;

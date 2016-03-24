@@ -33,7 +33,7 @@
 
     <ImageButton
         style="@style/NotificationButton.Small"
-        android:id="@+id/ibtn_next"
+        android:id="@+id/ibtn_forward"
         android:src="@mipmap/ic_skip_next_black_36dp" />
 
     <ImageButton

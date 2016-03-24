@@ -1,10 +1,12 @@
 package com.sanron.music.view;
 
 import android.content.Context;
+import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sanron.music.R;
@@ -12,7 +14,7 @@ import com.sanron.music.R;
 /**
  * Created by sanron on 16-3-21.
  */
-public class HotSongListView extends FrameLayout {
+public class HotSongListView extends CardView {
 
     private ImageView ivPic;
     private TextView tvTitle;

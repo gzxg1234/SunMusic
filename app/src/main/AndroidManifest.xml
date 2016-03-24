@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.sanron.music">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name="com.sanron.music.AppContext"
@@ -14,7 +14,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true">
 
-        <activity android:name="com.sanron.music.activities.StartActivity"
+        <activity
+            android:name="com.sanron.music.activities.StartActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,20 +24,23 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.sanron.music.activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:launchMode="singleInstance">
-        </activity>
+        <activity
+            android:name="com.sanron.music.activities.MainActivity"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
 
-        <activity android:name="com.sanron.music.activities.ScanActivity"
-            android:theme="@style/AnimActivity">
-        </activity>
-        <activity android:name="com.sanron.music.activities.ScanDiyActivity"
-            android:theme="@style/AnimActivity">
-        </activity>
+        <activity
+            android:name="com.sanron.music.activities.ScanActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AnimActivity"/>
 
-        <service android:name="com.sanron.music.service.PlayerService">
-        </service>
+        <activity
+            android:name="com.sanron.music.activities.ScanDiyActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AnimActivity"/>
+
+        <service android:name="com.sanron.music.service.PlayerService"></service>
     </application>
 
 </manifest>

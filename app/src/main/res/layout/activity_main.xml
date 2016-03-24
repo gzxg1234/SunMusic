@@ -5,6 +5,7 @@
     android:id="@+id/drawerlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     tools:context=".activities.MainActivity">
 
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -61,12 +62,13 @@
 
     <android.support.design.widget.NavigationView
         android:id="@+id/navigation_view"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        app:itemIconTint="@drawable/selector_color_left_menu_item"
+        app:itemTextColor="@drawable/selector_color_left_menu_item"
         app:itemBackground="@android:color/transparent"
-        app:menu="@menu/left_drawer_menu"
-        app:headerLayout="@layout/navigation_header">
+        app:menu="@menu/left_drawer_menu">
     </android.support.design.widget.NavigationView>
 
 

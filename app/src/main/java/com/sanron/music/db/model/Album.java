@@ -1,6 +1,8 @@
-package com.sanron.music.db;
+package com.sanron.music.db.model;
 
 import android.database.Cursor;
+
+import com.sanron.music.db.DBHelper;
 
 /**
  * Created by Administrator on 2015/12/28.

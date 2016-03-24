@@ -16,8 +16,8 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 
 import com.sanron.music.R;
-import com.sanron.music.db.Music;
-import com.sanron.music.db.PlayList;
+import com.sanron.music.db.model.Music;
+import com.sanron.music.db.model.PlayList;
 import com.sanron.music.task.AddMusicToListTask;
 import com.sanron.music.utils.TUtils;
 

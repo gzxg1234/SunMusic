@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tool="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/item_view"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
+    android:layout_height="72dp"
     android:layout_marginBottom="1dp"
     android:clipToPadding="false"
     android:gravity="center_vertical"
     android:padding="8dp">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/iv_picture"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_alignParentLeft="true"
         android:layout_marginRight="8dp"
         android:scaleType="centerCrop"
@@ -22,6 +23,7 @@
         android:id="@+id/btn_item_action"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:scaleType="fitXY"
         android:padding="12dp"
@@ -42,7 +44,7 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:textColor="@color/textColorPrimary"
-            android:textSize="15dp"
+            android:textSize="14dp"
             tool:text="Suger" />
 
         <TextView
@@ -52,7 +54,7 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:textColor="@color/textColorSecondary"
-            android:textSize="15dp"
+            android:textSize="13dp"
             android:layout_marginTop="4dp"
             tool:text="Maroon5" />
     </LinearLayout>

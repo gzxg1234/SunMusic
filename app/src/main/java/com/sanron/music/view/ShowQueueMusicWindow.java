@@ -2,6 +2,7 @@ package com.sanron.music.view;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -17,7 +19,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.db.Music;
+import com.sanron.music.db.model.Music;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.service.Playable;
 
@@ -26,7 +28,7 @@ import java.util.List;
 /**
  * 播放队列窗口
  */
-public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.Callback {
+public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.Callback, AdapterView.OnItemClickListener, View.OnClickListener {
 
     private Activity mActivity;
     private float mOldAlpha;
@@ -59,23 +61,19 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.Callbac
         ibtnRemoveAll = (ImageButton) mContentView.findViewById(R.id.ibtn_remove_all);
         lvQueue = (ListView) mContentView.findViewById(R.id.lv_queue_music);
 
+        tvTitle.setText("播放队列("+queue.size()+")");
+
         adapter = new MusicAdapter();
         lvQueue.setAdapter(adapter);
-        tvTitle.setText("播放队列("+queue.size()+")");
-        ibtnRemoveAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                player.play(null,0);
-                tvTitle.setText("播放队列(0)");
-                adapter.notifyDataSetChanged();
-            }
-        });
         lvQueue.post(new Runnable() {
             @Override
             public void run() {
                 lvQueue.setSelection(player.getCurrentIndex());
             }
         });
+
+        lvQueue.setOnItemClickListener(this);
+        ibtnRemoveAll.setOnClickListener(this);
     }
 
     public void show() {
@@ -122,13 +120,16 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.Callbac
     }
 
     @Override
-    public void onStateChange(int state) {
+    public void onLoadedPicture(Bitmap musicPic) {
+
     }
 
     @Override
-    public void onPrepared() {
-        adapter.notifyDataSetChanged();
-        lvQueue.setSelection(player.getCurrentIndex());
+    public void onStateChange(int state) {
+        if(state == IPlayer.STATE_PREPARED){
+            adapter.notifyDataSetChanged();
+            lvQueue.setSelection(player.getCurrentIndex());
+        }
     }
 
     @Override
@@ -139,11 +140,31 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.Callbac
     public void onBufferingUpdate(int bufferedPosition) {
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        switch (parent.getId()){
+            case R.id.lv_queue_music:{
+                player.play(position);
+            }break;
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.ibtn_remove_all:{
+                player.play(null,0);
+                tvTitle.setText("播放队列(0)");
+                adapter.notifyDataSetChanged();
+            }break;
+        }
+    }
+
     public class MusicAdapter extends BaseAdapter{
 
-        final int DEFAULT_TITLE_COLOR = mActivity.getResources().getColor(R.color.textColorPrimaryInverse);
-        final int DEFAULT_ARTIST_COLOR = mActivity.getResources().getColor(R.color.textColorSecondaryInverse);
-        final int PLAY_TEXT_COLOR = mActivity.getResources().getColor(R.color.colorPrimary);
+        final int DEFAULT_TITLE_COLOR = mActivity.getResources().getColor(R.color.textColorPrimary);
+        final int DEFAULT_ARTIST_COLOR = mActivity.getResources().getColor(R.color.textColorSecondary);
+        final int PLAY_TEXT_COLOR = mActivity.getResources().getColor(R.color.colorAccent);
 
         class ViewHolder{
             View sign;
@@ -176,7 +197,7 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.Callbac
             if(convertView == null){
                 convertView = LayoutInflater.from(mActivity).inflate(R.layout.list_item_queue,null);
                 holder = new ViewHolder();
-                holder.sign = (View) convertView.findViewById(R.id.playing_sign);
+                holder.sign =  convertView.findViewById(R.id.playing_sign);
                 holder.ivPic = (ImageView) convertView.findViewById(R.id.iv_picture);
                 holder.tvTitle = (TextView) convertView.findViewById(R.id.tv_title);
                 holder.tvArtist = (TextView) convertView.findViewById(R.id.tv_artist);
@@ -198,13 +219,6 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.Callbac
 
             holder.tvTitle.setText(music.getTitle());
             holder.tvArtist.setText(music.getArtist());
-            convertView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    player.play(position);
-                    notifyDataSetChanged();
-                }
-            });
             holder.ibtnRemove.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

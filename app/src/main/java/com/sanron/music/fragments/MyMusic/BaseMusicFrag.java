@@ -8,8 +8,8 @@ import android.view.View;
 
 import com.sanron.music.R;
 import com.sanron.music.adapter.DataListAdapter;
-import com.sanron.music.db.PlayList;
-import com.sanron.music.db.Music;
+import com.sanron.music.db.model.PlayList;
+import com.sanron.music.db.model.Music;
 import com.sanron.music.task.GetPlayListTask;
 import com.sanron.music.utils.TUtils;
 import com.sanron.music.view.AddSongToListWindow;

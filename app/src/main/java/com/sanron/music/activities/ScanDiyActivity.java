@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.v7.util.SortedList;
 import android.support.v7.widget.Toolbar;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -20,11 +21,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.utils.MyLog;
 import com.sanron.music.utils.TUtils;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -42,7 +45,7 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
     private Button btnOk;
     private CheckBox cbSelectAll;
     private File curDir;
-    private File storgeDir;
+    private File storageDir;
 
     public static final String EXTRA_SELECT_PATHS = "select_paths";
 
@@ -84,8 +87,8 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
         });
 
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            storgeDir = Environment.getExternalStorageDirectory();
-            setCurDir(storgeDir);
+            storageDir = Environment.getExternalStorageDirectory();
+            setCurDir(storageDir);
         }
     }
 
@@ -113,27 +116,32 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
             }
             break;
 
-            case R.id.btn_ok:{
+            case R.id.btn_ok: {
                 List<File> selects = dirAdapter.getSelectFiles();
-                if(selects.size() == 0){
-                    TUtils.show(this,"您还为选择文件夹");
+                if (selects.size() == 0) {
+                    TUtils.show(this, "您还未选择文件夹");
                     return;
                 }
 
                 String[] paths = new String[selects.size()];
-                for(int i=0 ;i<selects.size(); i++){
+                for (int i = 0; i < selects.size(); i++) {
                     paths[i] = selects.get(i).getAbsolutePath();
                 }
+
                 Intent data = new Intent();
-                data.putExtra(EXTRA_SELECT_PATHS,paths);
-                setResult(RESULT_OK,data);
+                data.putExtra(EXTRA_SELECT_PATHS, paths);
+                setResult(RESULT_OK, data);
                 finish();
-            }break;
+            }
+            break;
         }
     }
 
+    /**
+     * 返回上层目录
+     */
     private boolean backDir() {
-        if (!curDir.equals(storgeDir)) {
+        if (!curDir.equals(storageDir)) {
             setCurDir(curDir.getParentFile());
             return true;
         }
@@ -150,6 +158,9 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
     public static class DirAdapter extends BaseAdapter {
 
         private Context context;
+        /**
+         * 记录选中状态
+         */
         private SparseBooleanArray checkedState;
         private File[] data;
 
@@ -173,9 +184,16 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
         public void setData(File[] data) {
             this.data = data;
             if (data != null) {
+                //排列文件夹
+                Arrays.sort(data, new Comparator<File>() {
+                    @Override
+                    public int compare(File file, File t1) {
+                        return file.getName().compareTo(t1.getName());
+                    }
+                });
                 checkedState = new SparseBooleanArray(data.length);
-                for(int i=0;i<data.length; i++){
-                    checkedState.put(i,false);
+                for (int i = 0; i < data.length; i++) {
+                    checkedState.put(i, false);
                 }
                 notifyDataSetChanged();
             }

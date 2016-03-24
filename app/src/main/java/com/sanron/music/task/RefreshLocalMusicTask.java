@@ -11,7 +11,7 @@ import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
-import com.sanron.music.db.Music;
+import com.sanron.music.db.model.Music;
 import com.sanron.music.utils.AudioTool;
 
 /**

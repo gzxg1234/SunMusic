@@ -35,11 +35,10 @@
                     android:layout_alignParentBottom="true"
                     android:layout_marginBottom="4dp"
                     app:centered="true"
-                    app:fillColor="@color/colorPrimary"
-                    app:padding="6dp"
-                    app:pageColor="@android:color/white"
-                    app:radius="2dp"
-                    app:strokeColor="@android:color/white"
+                    app:fillColor="#FFFFFFFF"
+                    app:padding="8dp"
+                    app:pageColor="#B2FFFFFF"
+                    app:radius="4dp"
                     app:strokeWidth="0dp" />
             </RelativeLayout>
         </com.sanron.music.view.RatioLayout>
@@ -48,10 +47,10 @@
         <com.sanron.music.view.RatioLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
             android:layout_marginTop="8dp"
-            app:ratio="0.2"
+            app:ratio="0.25"
             app:type="height">
 
             <LinearLayout
@@ -87,15 +86,6 @@
 
 
                 <TextView
-                    style="@style/HotTagText"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@mipmap/ic_classify_img04"
-                    tools:text="劲爆" />
-
-
-                <TextView
                     android:id="@+id/tv_more_"
                     style="@style/HotTagText"
                     android:layout_width="0dp"
@@ -110,9 +100,9 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:layout_marginTop="24dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:gravity="center_vertical">
 
             <TextView
@@ -129,73 +119,88 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:singleLine="true"
-                android:text="更多"
-                android:textColor="@color/textColorSecondary" />
+                android:text="更多"/>
         </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/hot_songlist_group1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:layout_marginTop="16dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:orientation="horizontal">
 
             <com.sanron.music.view.HotSongListView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"></com.sanron.music.view.HotSongListView>
+                android:layout_margin="4dp"
+                android:layout_weight="1"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="2dp" />
 
             <com.sanron.music.view.HotSongListView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_margin="4dp"
                 android:layout_marginLeft="8dp"
-                android:layout_weight="1"></com.sanron.music.view.HotSongListView>
+                android:layout_weight="1"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="2dp"/>
 
             <com.sanron.music.view.HotSongListView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_margin="4dp"
                 android:layout_marginLeft="8dp"
-                android:layout_weight="1"></com.sanron.music.view.HotSongListView>
-
+                android:layout_weight="1"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="2dp"/>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/hot_songlist_group2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:layout_marginTop="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:orientation="horizontal">
 
             <com.sanron.music.view.HotSongListView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"></com.sanron.music.view.HotSongListView>
+                android:layout_margin="4dp"
+                android:layout_weight="1"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="2dp" />
 
             <com.sanron.music.view.HotSongListView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_margin="4dp"
                 android:layout_marginLeft="8dp"
-                android:layout_weight="1"></com.sanron.music.view.HotSongListView>
+                android:layout_weight="1"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="2dp" />
 
             <com.sanron.music.view.HotSongListView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_margin="4dp"
                 android:layout_marginLeft="8dp"
-                android:layout_weight="1"></com.sanron.music.view.HotSongListView>
-
+                android:layout_weight="1"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="2dp" />
         </LinearLayout>
 
         <!--歌曲推荐-->
         <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:layout_marginTop="24dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:gravity="center_vertical">
 
             <TextView
@@ -213,42 +218,37 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:singleLine="true"
-                android:text="更多"
-                android:textColor="@color/textColorSecondary" />
+                android:text="更多"/>
         </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/recmd_song_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:layout_marginTop="16dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:orientation="vertical">
 
             <com.sanron.music.view.RecmdSongView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"></com.sanron.music.view.RecmdSongView>
-
+                android:layout_height="wrap_content"/>
             <com.sanron.music.view.RecmdSongView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"></com.sanron.music.view.RecmdSongView>
-
+                android:layout_marginTop="8dp"/>
             <com.sanron.music.view.RecmdSongView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"></com.sanron.music.view.RecmdSongView>
-
+                android:layout_marginTop="8dp"/>
             <com.sanron.music.view.RecmdSongView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"></com.sanron.music.view.RecmdSongView>
-
+                android:layout_marginTop="8dp"/>
             <com.sanron.music.view.RecmdSongView
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
-                android:layout_marginTop="8dp"></com.sanron.music.view.RecmdSongView>
+                android:layout_marginTop="8dp"/>
         </LinearLayout>
 
     </LinearLayout>

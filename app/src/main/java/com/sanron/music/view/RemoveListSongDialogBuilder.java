@@ -5,8 +5,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
-import com.sanron.music.db.PlayList;
-import com.sanron.music.db.Music;
+import com.sanron.music.db.model.PlayList;
+import com.sanron.music.db.model.Music;
 import com.sanron.music.task.DelListMusicTask;
 import com.sanron.music.utils.TUtils;
 

@@ -1,54 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="56dp"
-    xmlns:tools="http://schemas.android.com/tools"
-    >
+    android:orientation="horizontal">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/iv_recmd_pic"
         android:layout_width="56dp"
-        android:layout_height="56dp" />
+        android:layout_height="56dp"
+        tools:src="@mipmap/default_artist_album_pic" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
+        android:layout_marginLeft="8dp"
         android:gravity="center_vertical"
-        android:layout_marginLeft="8dp">
+        android:orientation="vertical">
+
         <TextView
             android:id="@+id/tv_recmd_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/textColorPrimary"
-            tools:text="喜欢你-Beyond"
-            android:singleLine="true"
             android:ellipsize="end"
-            android:textSize="14dp"/>
+            android:singleLine="true"
+            android:textSize="14dp"
+            tools:text="喜欢你-Beyond" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="16dp"
             android:layout_marginTop="2dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
             <ImageView
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:scaleType="centerInside"
-                android:src="@mipmap/bt_playpage_button_like_hl"
-               />
+                android:src="@mipmap/bt_playpage_button_like_hl" />
 
             <TextView
                 android:id="@+id/tv_recmd_reason"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
                 android:ellipsize="end"
-                android:textColor="@color/textColorSecondary"
-                tools:text="以往片刻欢笑仍挂在脸上"
-                android:textSize="12dp"/>
+                android:singleLine="true"
+                android:textSize="12dp"
+                tools:text="以往片刻欢笑仍挂在脸上" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

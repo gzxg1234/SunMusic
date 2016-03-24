@@ -5,7 +5,7 @@ import android.os.AsyncTask;
 
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
-import com.sanron.music.db.Artist;
+import com.sanron.music.db.model.Artist;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -76,7 +76,6 @@ public class MusicScanner {
 
             @Override
             public void onScanCompleted(String path, Uri uri) {
-                MyLog.d(TAG, "find " + path);
                 listener.onProgress(path, uri);
                 synchronized (lock) {
                     lock.notify();
@@ -115,10 +114,10 @@ public class MusicScanner {
         public void run() {
             traversePaths(paths);
             connection.disconnect();
+            listener.onCompleted(flagStop);
             isScanning = false;
             traverseThread = null;
             listener = null;
-            listener.onCompleted(flagStop);
             MyLog.d(TAG, "scan completed");
         }
 

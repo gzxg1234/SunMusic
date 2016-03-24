@@ -12,6 +12,7 @@ import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.cache.memory.impl.FIFOLimitedMemoryCache;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.sanron.music.db.DBAccess;
 import com.sanron.music.db.DataProvider;
 import com.sanron.music.net.ApiHttpClient;
 import com.sanron.music.service.IPlayer;
@@ -20,6 +21,8 @@ import com.sanron.music.utils.MyLog;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created by Administrator on 2015/12/25.
@@ -43,6 +46,7 @@ public class AppContext extends Application {
         super.onCreate();
         MyLog.i(TAG,"app create");
         ApiHttpClient.init(this);
+        DBAccess.instance().init(this);
         DataProvider.instance().init(this);
         initImageLoader();
     }
@@ -67,7 +71,7 @@ public class AppContext extends Application {
         }
 
         builder.threadPoolSize(THREAD_POOL_SIZE);
-
+        builder.threadPriority(Thread.NORM_PRIORITY - 2);
         imageLoader.init(builder.build());
     }
 

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -19,6 +20,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.sanron.music.AppManager;
@@ -29,6 +33,7 @@ import com.sanron.music.fragments.MyMusic.ListMusicFrag;
 import com.sanron.music.fragments.MyMusic.LocalMusicFrag;
 import com.sanron.music.fragments.MyMusic.PlayListFrag;
 import com.sanron.music.fragments.MyMusic.RecentPlayFrag;
+import com.sanron.music.fragments.NavigationHeader;
 import com.sanron.music.fragments.PagerFragment;
 import com.sanron.music.fragments.PlayerFrag;
 import com.sanron.music.fragments.WebMusic.BillboardFrag;
@@ -36,7 +41,9 @@ import com.sanron.music.fragments.WebMusic.GedanFrag;
 import com.sanron.music.fragments.WebMusic.RadioFrag;
 import com.sanron.music.fragments.WebMusic.RecmdFrag;
 import com.sanron.music.fragments.WebMusic.SingerFrag;
-import com.sanron.music.db.PlayList;
+import com.sanron.music.db.model.PlayList;
+import com.sanron.music.service.IPlayer;
+import com.sanron.music.service.Playable;
 import com.sanron.music.utils.MyLog;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -46,14 +53,16 @@ import java.util.Map;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    private IPlayer player;
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private FragmentManager fm;
     private MaterialMenuDrawable materialMenu;
     private SlidingUpPanelLayout slidingUpPanelLayout;
-    private NavigationView navigationView;
     private PlayerFrag playerFrag;
     private String currentFragmentTag;//当前显示的fragment;
+
+    private NavigationView navigationView;
 
     private boolean isShowingPlayListSongsFrag = false;//是否在显示列表歌曲fragment
 
@@ -131,6 +140,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         setSupportActionBar(toolbar);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.addHeaderView(new NavigationHeader(this,appContext.getMusicPlayer()));
 
         toolbar.setNavigationIcon(materialMenu);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -250,7 +260,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         currentFragmentTag = tag;
     }
 
-
     private Fragment instanceFragment(String tag) {
         Fragment fragment = null;
         switch (tag) {
@@ -311,6 +320,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }break;
 
             case R.id.menu_setting: {
+
             }
             break;
 
@@ -338,4 +348,5 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         return true;
     }
+
 }

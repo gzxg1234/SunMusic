@@ -34,6 +34,7 @@
     </style>
     
     <style name="AnimActivity" parent="AppTheme.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@style/ActivityAnim</item>
     </style>
 
@@ -44,7 +45,14 @@
         <item name="android:activityCloseEnterAnimation">@anim/slide_in_top</item>
     </style>
 
-    <style name="PlayerButton">
+    <style name="PlayerFunctionButton">
+        <item name="android:scaleType">fitXY</item>
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
+
+    <style name="PlayerControlButton">
         <item name="android:scaleType">fitXY</item>
         <item name="android:layout_width">56dp</item>
         <item name="android:layout_height">56dp</item>

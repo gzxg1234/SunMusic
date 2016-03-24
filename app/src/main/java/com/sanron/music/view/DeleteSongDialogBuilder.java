@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 
-import com.sanron.music.db.Music;
+import com.sanron.music.db.model.Music;
 import com.sanron.music.task.DelLocalMusicTask;
 import com.sanron.music.utils.TUtils;
 
