@@ -14,6 +14,7 @@ import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.cache.memory.impl.FIFOLimitedMemoryCache;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
 import com.sanron.music.db.DataProvider;
 import com.sanron.music.net.ApiHttpClient;
 import com.sanron.music.service.IPlayer;
@@ -73,7 +74,7 @@ public class AppContext extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        builder.imageDownloader(new BaseImageDownloader(this,5*1000,30*1000));
         builder.threadPoolSize(THREAD_POOL_SIZE);
         builder.threadPriority(Thread.NORM_PRIORITY - 2);
         imageLoader.init(builder.build());

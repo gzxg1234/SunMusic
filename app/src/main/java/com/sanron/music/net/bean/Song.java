@@ -1,9 +1,7 @@
 package com.sanron.music.net.bean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.sanron.music.db.model.Music;
-import com.sanron.music.net.converter.SplitConverter;
 
 /**
  * Created by sanron on 16-3-19.
@@ -78,14 +76,14 @@ public class Song {
 
     @Override
     public String toString() {
-        return "title:"+title
-                +" id:"+songId
-                +" album:"+albumName
-                +" albumId:"+albumId
-                +" artist:"+albumId
-                +" artistId:"+artistId
-                +" artistIds:"+allArtistId
-                +" picUrl:"+bigPic;
+        return "title:" + title
+                + " id:" + songId
+                + " album:" + albumName
+                + " albumId:" + albumId
+                + " artist:" + albumId
+                + " artistId:" + artistId
+                + " artistIds:" + allArtistId
+                + " picUrl:" + bigPic;
     }
 
     public String getTitle() {
@@ -177,7 +175,7 @@ public class Song {
         this.albumId = albumId;
     }
 
-    public Music toMusic(){
+    public Music toMusic() {
         Music music = new Music();
         music.setTitle(title);
         music.setArtist(allArtistName);

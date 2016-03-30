@@ -288,6 +288,9 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
     }
 
 
+    /**
+     * 轮播pager适配
+     */
     public class FocusPicAdapter extends PagerAdapter {
         private List<FocusPic> data;
         private List<ImageView> views;

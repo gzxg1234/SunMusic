@@ -16,6 +16,7 @@ public class ExampleUnitTest {
     @Test
     public void testApi() throws Exception {
         Date date = new Date(1383394620);
+        System.out.println(BMA.GeDan.geDanInfo("6432"));
         System.out.println(date.toLocaleString());
         System.out.println(BMA.Song.songInfo("7313983"));
         System.out.println(BMA.GeDan.hotGeDan(3));
@@ -24,7 +25,6 @@ public class ExampleUnitTest {
         System.out.println(BMA.Tag.hotTag(4));
         System.out.println(BMA.Tag.allTag());
         System.out.println(BMA.Song.recommendSong(10));
-        System.out.println(BMA.GeDan.geDanInfo("6432"));
         System.out.println(BMA.Artist.artistSongList("54505", 0, 10));
         System.out.println(BMA.Tag.tagSongList("伤感",10));
     }

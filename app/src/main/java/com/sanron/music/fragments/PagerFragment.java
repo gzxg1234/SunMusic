@@ -51,7 +51,7 @@ public class PagerFragment extends BaseFragment {
         viewPager = $(R.id.viewpager);
         adapter = new LocalPagerAdapter(getChildFragmentManager());
         viewPager.setAdapter(adapter);
-        tabLayout = $(R.id.tablayout);
+        tabLayout = $(R.id.tab_layout);
         tabLayout.setupWithViewPager(viewPager);
         return contentView;
     }
@@ -77,5 +77,4 @@ public class PagerFragment extends BaseFragment {
             return Fragment.instantiate(getContext(), fragments[position]);
         }
     }
-
 }

@@ -23,7 +23,7 @@ public class MusicScanner {
 
     public interface OnScanMediaListener {
         /**
-         * 扫描开始,ui线程内
+         * 扫描开始,ui线程
          */
         void onStart();
 
@@ -51,9 +51,6 @@ public class MusicScanner {
         return isScanning;
     }
 
-    public void scan(String[] paths,final OnScanMediaListener listener){
-
-    }
 
     public void scan(final OnScanMediaListener listener,String... paths) {
         if (isScanning) {

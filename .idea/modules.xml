@@ -7,7 +7,6 @@
       <module fileurl="file://$PROJECT_DIR$/SunMusic.iml" filepath="$PROJECT_DIR$/SunMusic.iml" />
       <module fileurl="file://$PROJECT_DIR$/ViewPagerIndicator/ViewPagerIndicator.iml" filepath="$PROJECT_DIR$/ViewPagerIndicator/ViewPagerIndicator.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ViewPagerIndicator/viewpagerindicator.iml" filepath="$PROJECT_DIR$/ViewPagerIndicator/viewpagerindicator.iml" />
     </modules>
   </component>
 </project>

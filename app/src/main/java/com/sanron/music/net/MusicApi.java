@@ -42,7 +42,7 @@ public class MusicApi {
     /**
      * 推荐歌曲
      *
-     * @param num   　数量
+     * @param num         　数量
      * @param apiCallback
      */
     public static void recmdSongs(int num, final ApiCallback<List<RecommendSong>> apiCallback) {
@@ -94,7 +94,7 @@ public class MusicApi {
             @Override
             public void onSuccess(JsonNode node) {
                 JsonNode content = node.get("content");
-                if(content != null) {
+                if (content != null) {
                     String json = content.get("list").toString();
                     try {
                         List<SongList> hotSongLists = JsonUtils.fromJson(json,
@@ -123,15 +123,27 @@ public class MusicApi {
         ApiHttpClient.get(url(params), apiCallback);
     }
 
-    public static void songLink(int songid){
+    /**
+     * 歌单信息
+     * @param listId
+     * @param apiCallback
+     */
+    public static void songListInfo(String listId, ApiCallback<SongList> apiCallback) {
+        ContentValues params = new ContentValues();
+        params.put("method", "baidu.ting.diy.gedanInfo");
+        params.put("listid", listId);
+        ApiHttpClient.get(url(params), apiCallback);
+    }
+
+    public static void songLink(String songid) {
         ContentValues params = new ContentValues();
         long currentTimeMillis = System.currentTimeMillis();
-        String str = "songid="+songid+"&ts="+currentTimeMillis;
+        String str = "songid=" + songid + "&ts=" + currentTimeMillis;
         String e = AESTools.encrpty(str);
         params.put("method", "baidu.ting.song.getInfos");
         params.put("songid", songid);
         params.put("ts", currentTimeMillis);
-        params.put("e",e);
+        params.put("e", e);
         ApiHttpClient.get(url(params), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
