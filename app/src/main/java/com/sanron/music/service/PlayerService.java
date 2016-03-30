@@ -197,9 +197,9 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         int state = player.getState();
         switch (state) {
             case IPlayer.STATE_STOP: {
-                bigContentView.setImageViewResource(R.id.iv_picture, R.mipmap.default_song_pic);
+                bigContentView.setImageViewResource(R.id.top_image, R.mipmap.default_song_pic);
                 bigContentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_24dp);
-                contentView.setImageViewResource(R.id.iv_picture, R.mipmap.default_song_pic);
+                contentView.setImageViewResource(R.id.top_image, R.mipmap.default_song_pic);
                 contentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_36dp);
             }
             break;
@@ -223,11 +223,11 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             contentView.setTextViewText(R.id.tv_music_info, musicInfo);
 
             if (curMusicPic != null) {
-                bigContentView.setImageViewBitmap(R.id.iv_picture, curMusicPic);
-                contentView.setImageViewBitmap(R.id.iv_picture, curMusicPic);
+                bigContentView.setImageViewBitmap(R.id.top_image, curMusicPic);
+                contentView.setImageViewBitmap(R.id.top_image, curMusicPic);
             } else {
-                bigContentView.setImageViewResource(R.id.iv_picture, R.mipmap.default_song_pic);
-                contentView.setImageViewResource(R.id.iv_picture, R.mipmap.default_song_pic);
+                bigContentView.setImageViewResource(R.id.top_image, R.mipmap.default_song_pic);
+                contentView.setImageViewResource(R.id.top_image, R.mipmap.default_song_pic);
             }
 
         } else {

@@ -7,19 +7,18 @@
     android:gravity="center_horizontal">
 
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbar"
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/status_height"
+        android:fitsSystemWindows="true"
         android:theme="@style/AppTheme.AppBarOverlay"
         app:elevation="0dp">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
-            android:minHeight="?attr/actionBarSize"
             app:elevation="0dp"
             app:navigationIcon="@mipmap/ic_arrow_back_white_24dp"
             app:popupTheme="@style/AppTheme.PopupOverlay"
@@ -34,11 +33,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/linear1"
-        android:layout_below="@+id/appbar"
+        android:layout_below="@+id/app_bar"
         android:layout_marginBottom="64dp"
         android:layout_marginTop="64dp"
         android:scaleType="centerInside"
-        android:src="@drawable/bg_scan_music" />
+        android:src="@mipmap/bg_scan_music" />
 
     <LinearLayout
         android:id="@+id/linear1"

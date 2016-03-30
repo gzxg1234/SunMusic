@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -34,8 +35,8 @@ import java.util.List;
  */
 public class ScanDiyActivity extends BaseActivity implements View.OnClickListener {
 
-
-    private Toolbar toolbar;
+    private AppBarLayout appBar;
+    private Toolbar toolBar;
     private ListView lvFileExplore;
     private TextView tvCurDir;
     private LinearLayout llDirBack;
@@ -55,10 +56,14 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
         dirAdapter = new DirAdapter(this);
         cbSelectAll = $(R.id.cb_select_all);
         btnOk = $(R.id.btn_ok);
-        toolbar = $(R.id.toolbar);
+        toolBar = $(R.id.toolbar);
         lvFileExplore = $(R.id.lv_file_explore);
         llDirBack = $(R.id.ll_directory_back);
         tvCurDir = $(R.id.tv_cur_directory);
+        appBar = $(R.id.app_bar);
+
+        appContext.setViewFitsStatusBar(appBar);
+
         lvFileExplore.setAdapter(dirAdapter);
 
         llDirBack.setOnClickListener(this);
@@ -70,7 +75,7 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
                 setCurDir(file);
             }
         });
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        toolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 setResult(RESULT_CANCELED);

@@ -1,11 +1,12 @@
 package com.sanron.music.fragments;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import com.nineoldandroids.animation.ArgbEvaluator;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.sanron.music.R;
+import com.sanron.music.activities.MainActivity;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.service.IPlayer;
@@ -65,6 +67,8 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
     private ImageButton ibtnPlayPause;
     private ImageButton ibtnForward;
     private ImageButton ibtnPlayQuque;
+    private ShowQueueMusicWindow showQueueMusicWindow;
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     /**
      * 提示播放模式
@@ -116,17 +120,13 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
                     }
                 }
 
-                int position = player.getProgress();
-                final int pos = (position == -1 ? 0 : position);
-                Activity activity = getActivity();
-                if (activity != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            setPlayProgress(pos);
-                        }
-                    });
-                }
+                final int position = player.getProgress();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        setPlayProgress(position);
+                    }
+                });
                 SystemClock.sleep(100);
             }
         }
@@ -252,6 +252,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
     }
 
     private void setPlayProgress(int position) {
+        position = Math.max(0, position);
         playProgress.setProgress(position);
         splayProgress.setProgress(position);
         tvPlayPostion.setText(formatTime(position));
@@ -272,11 +273,6 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         contentView = LayoutInflater.from(getContext()).inflate(R.layout.frag_player, null);
-        return contentView;
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         smallPlayer = $(R.id.small_player);
         splayProgress = $(R.id.s_play_progress);
         sivSongPicture = $(R.id.s_iv_song_pic);
@@ -284,12 +280,8 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
         stvArtist = $(R.id.s_tv_artist);
         sibtnPlayPause = $(R.id.s_ibtn_play_pause);
         sibtnNext = $(R.id.s_ibtn_next);
-        sibtnPlayPause.setOnClickListener(this);
-        sibtnNext.setOnClickListener(this);
-
         ll1 = $(R.id.ll_1);
         ll2 = $(R.id.ll_2);
-
         bigPlayer = $(R.id.big_player);
         playerTopBar = $(R.id.player_top_bar);
         ivSongPicture = $(R.id.iv_song_picture);
@@ -304,15 +296,26 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
         ibtnForward = $(R.id.ibtn_forward);
         ibtnPlayQuque = $(R.id.ibtn_play_quque);
         playProgress = $(R.id.play_progress);
+        return contentView;
+    }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        sibtnPlayPause.setOnClickListener(this);
+        sibtnNext.setOnClickListener(this);
         ibtnChangeMode.setOnClickListener(this);
         ibtnRewind.setOnClickListener(this);
         ibtnPlayPause.setOnClickListener(this);
         ibtnForward.setOnClickListener(this);
         ibtnPlayQuque.setOnClickListener(this);
         ibtnBack.setOnClickListener(this);
-        appContext.setViewFitsStatuBar(playerTopBar);
 
+        appContext.setViewFitsStatusBar(playerTopBar);
+
+        if (savedInstanceState != null) {
+            smallPlayer.setVisibility(savedInstanceState.getInt("smallPlayerVisibility", View.VISIBLE));
+            bigPlayer.setVisibility(savedInstanceState.getInt("bigPlayerVisibility", View.VISIBLE));
+        }
 
         updateProgressThread = new UpdateProgressThread();
         updateProgressThread.start();
@@ -424,11 +427,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
             updateProgressThread.pause();
             while (running) {
                 int pos = player.getProgress() + speed;
-                if (pos > player.getDuration()) {
-                    pos = player.getDuration();
-                } else if (pos < 0) {
-                    pos = 0;
-                }
+                pos = Math.min(player.getDuration(), Math.max(0, pos));
                 final int postPos = pos;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -453,6 +452,9 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
         super.onDestroyView();
         updateProgressThread.end();
         player.removeCallback(callback);
+        if (showQueueMusicWindow != null && showQueueMusicWindow.isShowing()) {
+            showQueueMusicWindow.dismiss();
+        }
     }
 
     private void setModeIcon(int mode) {
@@ -526,13 +528,15 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
             break;
 
             case R.id.ibtn_play_quque: {
-                new ShowQueueMusicWindow(getActivity(), player).show();
+                showQueueMusicWindow = new ShowQueueMusicWindow(getActivity(), player);
+                showQueueMusicWindow.show();
             }
             break;
 
             case R.id.ibtn_back: {
-                Intent intent = new Intent(PlayerFrag.class.getName());
-                intent.putExtra("event", EVENT_CLICK_BACK);
+                Intent intent = new Intent(MainActivity.ACTION_FRAG_EVENT);
+                intent.putExtra(MainActivity.EXTRA_FROM, getClass().getName());
+                intent.putExtra(MainActivity.EXTRA_EVENT, EVENT_CLICK_BACK);
                 LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
             }
             break;
@@ -547,6 +551,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putInt("smallPlayerVisibility", smallPlayer.getVisibility());
+        outState.putInt("bigPlayerVisibility", bigPlayer.getVisibility());
     }
-
 }

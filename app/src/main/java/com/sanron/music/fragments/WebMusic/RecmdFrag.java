@@ -1,7 +1,10 @@
 package com.sanron.music.fragments.WebMusic;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
@@ -17,6 +20,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.sanron.music.R;
+import com.sanron.music.activities.MainActivity;
 import com.sanron.music.fragments.BaseFragment;
 import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
@@ -65,6 +69,13 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
     private List<RecmdSongView> recmdSongViews;
 
     private DisplayImageOptions imageOptions;
+
+
+    public static final int EVENT_CLICK_SONGLIST = 1;
+    public static final String EXTRA_SONGLIST_ID = "list_id";
+
+
+    private Handler handler = new Handler();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -169,7 +180,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
                         }
                     }
                 }
-                getActivity().runOnUiThread(new Runnable() {
+                handler.post(new Runnable() {
                     @Override
                     public void run() {
                         setFocusPics(result);
@@ -186,7 +197,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
             @Override
             public void onSuccess(final HotTagResult data) {
-                getActivity().runOnUiThread(new Runnable() {
+                handler.post(new Runnable() {
                     @Override
                     public void run() {
                         setHogTags(data.getHotTags());
@@ -204,7 +215,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
             @Override
             public void onSuccess(final List<SongList> data) {
-                getActivity().runOnUiThread(new Runnable() {
+                handler.post(new Runnable() {
                     @Override
                     public void run() {
                         setHotSongList(data);
@@ -221,7 +232,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
             @Override
             public void onSuccess(final List<RecommendSong> data) {
-                getActivity().runOnUiThread(new Runnable() {
+                handler.post(new Runnable() {
                     @Override
                     public void run() {
                         setRecmdSongs(data);
@@ -255,9 +266,20 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
         this.hotSongLists = hotSongLists;
         if (hotSongLists != null) {
             for (int i = 0; i < hotSongLists.size() && i < hotSongListViews.size(); i++) {
-                SongList songList = hotSongLists.get(i);
+                final SongList songList = hotSongLists.get(i);
                 HotSongListView hotSongListView = hotSongListViews.get(i);
                 hotSongListView.getTitleView().setText(songList.getTitle());
+                hotSongListView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(MainActivity.ACTION_FRAG_EVENT);
+                        intent.putExtra(MainActivity.EXTRA_FROM, RecmdFrag.class.getName());
+                        intent.putExtra(MainActivity.EXTRA_EVENT, EVENT_CLICK_SONGLIST);
+                        intent.putExtra(EXTRA_SONGLIST_ID, songList.getListId());
+                        LocalBroadcastManager.getInstance(getContext())
+                                .sendBroadcast(intent);
+                    }
+                });
                 imageLoader.displayImage(songList.getPic(), hotSongListView.getImageView(), imageOptions);
             }
         }

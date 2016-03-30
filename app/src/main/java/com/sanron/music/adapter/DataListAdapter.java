@@ -122,7 +122,7 @@ public abstract class DataListAdapter<Data> extends RecyclerView.Adapter<DataLis
         public ItemHolder(View itemView) {
             super(itemView);
             this.itemView = itemView.findViewById(R.id.item_view);
-            ivPicture = (ImageView) itemView.findViewById(R.id.iv_picture);
+            ivPicture = (ImageView) itemView.findViewById(R.id.top_image);
             tvText1 = (TextView) itemView.findViewById(R.id.tv_text1);
             tvText2 = (TextView) itemView.findViewById(R.id.tv_text2);
             btnAction = (ImageButton) itemView.findViewById(R.id.ibtn_item_menu);

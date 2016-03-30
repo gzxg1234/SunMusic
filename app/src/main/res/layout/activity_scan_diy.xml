@@ -7,19 +7,18 @@
     android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbar"
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/status_height"
+        android:background="@color/colorPrimary"
+        android:fitsSystemWindows="true"
         android:theme="@style/AppTheme.AppBarOverlay"
         app:elevation="0dp">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
-            android:minHeight="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
             app:elevation="0dp"
             app:navigationIcon="@mipmap/ic_arrow_back_white_24dp"
             app:popupTheme="@style/AppTheme.PopupOverlay"
@@ -69,6 +68,7 @@
         android:overScrollMode="never"
         android:scrollbarStyle="outsideOverlay"
         tools:listitem="@layout/list_file_item"></ListView>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -91,11 +91,11 @@
 
         <CheckBox
             android:id="@+id/cb_select_all"
-            android:layout_marginRight="16dp"
-            android:text="全选"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
             android:layout_toLeftOf="@+id/btn_ok"
-            android:layout_height="wrap_content" />
+            android:text="全选" />
     </RelativeLayout>
 
 </LinearLayout>

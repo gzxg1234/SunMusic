@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,7 +40,8 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
 
     private MusicScanner scanner;
 
-    private Toolbar toolbar;
+    private AppBarLayout appBar;
+    private Toolbar toolBar;
     private Button btnStart;
     private LinearLayout llFindSongNum;
     private TextView tvFindNum;
@@ -157,17 +159,21 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void initView() {
-        toolbar = $(R.id.toolbar);
+        toolBar = $(R.id.toolbar);
         btnStart = $(R.id.btn_start_scan);
         cbIgnore = $(R.id.cb_ignore_60);
         tvFindNum = $(R.id.tv_find_song_num);
         tvFileName = $(R.id.tv_filename);
         llFindSongNum = $(R.id.linear1);
+        appBar = $(R.id.app_bar);
         scanResult = new LinkedList<>();
         scanner = new MusicScanner(this);
 
-        setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        setSupportActionBar(toolBar);
+
+        appContext.setViewFitsStatusBar(appBar);
+
+        toolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();

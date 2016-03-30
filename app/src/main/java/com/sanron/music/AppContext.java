@@ -32,7 +32,7 @@ public class AppContext extends Application {
 
     private IPlayer musicPlayer;
     private ServiceConnection connection;
-    private int statusBarHeight;
+    private int statusBarHeight = -1;
 
     public static final int DISK_CACHE_SIZE = 50 * 1024 * 1024;//磁盘缓存大小
     public static final int DISK_CACHE_MAX_COUNT = 100;//磁盘缓存文件数量
@@ -50,13 +50,11 @@ public class AppContext extends Application {
         ApiHttpClient.init(this);
         DataProvider.instance().init(this);
         initImageLoader();
-        initStatusBarHeight();
     }
 
     private void initImageLoader() {
         ImageLoader imageLoader = ImageLoader.getInstance();
         ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(getApplicationContext());
-
 
         int memoryCacheSize = (int) (Runtime.getRuntime().maxMemory() * MEMORY_CACHE_PERCENTAGE);
         if (memoryCacheSize > MAX_MEMORY_CACHE_SIZE) {
@@ -74,7 +72,7 @@ public class AppContext extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        builder.imageDownloader(new BaseImageDownloader(this,5*1000,30*1000));
+        builder.imageDownloader(new BaseImageDownloader(this, 5 * 1000, 30 * 1000));
         builder.threadPoolSize(THREAD_POOL_SIZE);
         builder.threadPriority(Thread.NORM_PRIORITY - 2);
         imageLoader.init(builder.build());
@@ -117,24 +115,23 @@ public class AppContext extends Application {
         return bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
-    /**
-     * 设置view的内间距适应状态栏
-     *
-     * @param view
-     */
-    public void setViewFitsStatuBar(View view) {
-        if (Build.VERSION.SDK_INT < 19) {
+    public void setViewFitsStatusBar(View view) {
+        if (statusBarHeight == 0) {
             return;
+        } else if (statusBarHeight == -1) {
+            initStatusBarHeight();
         }
-
         view.setPadding(view.getPaddingLeft(), statusBarHeight,
                 view.getPaddingRight(), view.getPaddingBottom());
         view.requestLayout();
         view.invalidate();
     }
 
-
     private void initStatusBarHeight() {
+        if (Build.VERSION.SDK_INT < 19) {
+            statusBarHeight = 0;
+            return;
+        }
         try {
             Class<?> clazz = Class.forName("com.android.internal.R$dimen");
             Object obj = clazz.newInstance();

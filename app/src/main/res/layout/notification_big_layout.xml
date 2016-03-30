@@ -6,7 +6,7 @@
     android:layout_height="100dp">
 
     <ImageView
-        android:id="@+id/iv_picture"
+        android:id="@+id/top_image"
         android:layout_width="@dimen/notification_big_picture_size"
         android:layout_height="@dimen/notification_big_picture_size"
         android:scaleType="centerCrop"

@@ -29,6 +29,15 @@ public class ListMusicFrag extends BaseMusicFrag {
 
     public static final String ARG_PLAY_LIST = "play_list";
 
+    public static ListMusicFrag newInstance(PlayList list){
+        ListMusicFrag listMusicFrag = new ListMusicFrag();
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_PLAY_LIST,list);
+        listMusicFrag.setArguments(args);
+        return listMusicFrag;
+    }
+
+
     @Override
     protected void onMultiActionDeleteClick(List<Music> checkedMusics) {
         new RemoveListSongDialogBuilder(getContext(), playList, checkedMusics)

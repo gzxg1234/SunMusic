@@ -75,7 +75,7 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.ListIt
 
         public ListItemHolder(final View itemView) {
             super(itemView);
-            ivType = (ImageView) itemView.findViewById(R.id.iv_picture);
+            ivType = (ImageView) itemView.findViewById(R.id.top_image);
             tvMusicNum = (TextView) itemView.findViewById(R.id.tv_music_num);
             tvName = (TextView) itemView.findViewById(R.id.tv_list_name);
             ibtnMenu = (ImageButton) itemView.findViewById(R.id.ibtn_item_menu);

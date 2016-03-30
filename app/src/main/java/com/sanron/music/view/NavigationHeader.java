@@ -5,8 +5,10 @@ import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.sanron.music.AppContext;
 import com.sanron.music.R;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.service.IPlayer;
@@ -17,6 +19,7 @@ import com.sanron.music.service.IPlayer;
 public class NavigationHeader extends FrameLayout implements IPlayer.Callback {
 
     private IPlayer player;
+    private LinearLayout linearLayout;
     private ImageView ivMusicPic;
     private TextView tvMusicTitle;
     private TextView tvMusicArtist;
@@ -26,16 +29,18 @@ public class NavigationHeader extends FrameLayout implements IPlayer.Callback {
         super(context, null);
         this.player = player;
         LayoutInflater.from(context).inflate(R.layout.navigation_header, this);
+        linearLayout = (LinearLayout) getChildAt(0);
         ivMusicPic = (ImageView) findViewById(R.id.civ_music_pic);
         tvMusicTitle = (TextView) findViewById(R.id.tv_music_title);
         tvMusicArtist = (TextView) findViewById(R.id.tv_music_artist);
+        ((AppContext) context.getApplicationContext()).setViewFitsStatusBar(linearLayout);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         player.addCallback(this);
-        if(player.getState() != player.STATE_STOP){
+        if (player.getState() != player.STATE_STOP) {
             onStateChange(IPlayer.STATE_PREPARING);
         }
     }

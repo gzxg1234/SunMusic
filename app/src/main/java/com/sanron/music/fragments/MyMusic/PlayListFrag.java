@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.sanron.music.R;
+import com.sanron.music.activities.MainActivity;
 import com.sanron.music.adapter.ListItemAdapter;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
@@ -125,8 +126,9 @@ public class PlayListFrag extends DataFragment implements QueryTask.QueryCallbac
     @Override
     public void onItemClick(View itemView, int position) {
         PlayList playList = adapter.getData().get(position);
-        Intent intent = new Intent(PlayListFrag.class.getName());
-        intent.putExtra("event", EVENT_CLICK_LIST);
+        Intent intent = new Intent(MainActivity.ACTION_FRAG_EVENT);
+        intent.putExtra(MainActivity.EXTRA_FROM, getClass().getName());
+        intent.putExtra(MainActivity.EXTRA_EVENT, EVENT_CLICK_LIST);
         intent.putExtra(EXTRA_PLAYLIST, playList);
         LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
     }
