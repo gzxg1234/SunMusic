@@ -3,7 +3,12 @@ package com.sanron.music;
 import android.app.Application;
 import android.media.MediaScannerConnection;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.test.ApplicationTestCase;
+
+import com.sanron.music.net.ApiCallback;
+import com.sanron.music.net.MusicApi;
+import com.sanron.music.net.bean.DetailSongInfo;
 
 import java.io.File;
 
@@ -22,8 +27,17 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
 
 
     public void testApi() {
-        File file = new File(Environment.getExternalStorageDirectory(), "/kgmusic/download/弦子 - 舍不得.mp3");
-        System.out.println(file.exists());
-        System.out.println(file.lastModified() / 1000);
+        MusicApi.songLink("7313983", new ApiCallback<DetailSongInfo>() {
+            @Override
+            public void onFailure() {
+
+            }
+
+            @Override
+            public void onSuccess(DetailSongInfo data) {
+                System.out.println(data);
+            }
+        });
+        SystemClock.sleep(100000);
     }
 }

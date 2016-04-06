@@ -55,7 +55,7 @@
         android:paddingLeft="16dp">
 
         <TextView
-            android:id="@+id/tv_text1"
+            android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
@@ -65,7 +65,7 @@
             tools:text="Suger" />
 
         <TextView
-            android:id="@+id/tv_text2"
+            android:id="@+id/tv_artist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -77,11 +77,11 @@
     </LinearLayout>
 
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="-8dp"
-        android:layout_toRightOf="@+id/top_image"
-        android:background="@color/colorListDivider"/>
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="1dp"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_marginBottom="-8dp"-->
+        <!--android:layout_toRightOf="@+id/top_image"-->
+        <!--android:background="@color/colorListDivider"/>-->
 </RelativeLayout>

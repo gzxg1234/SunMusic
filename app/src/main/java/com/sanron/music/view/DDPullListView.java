@@ -1,6 +1,7 @@
 package com.sanron.music.view;
 
 import android.content.Context;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewConfigurationCompat;
 import android.support.v4.widget.Space;
 import android.util.AttributeSet;
@@ -21,6 +22,7 @@ import com.nineoldandroids.animation.ValueAnimator;
  */
 public class DDPullListView extends ObservableListView {
 
+    private static final int INVALID_POINTER = -1;
     /**
      * 展开最大高度
      */
@@ -32,11 +34,6 @@ public class DDPullListView extends ObservableListView {
     private int normalHeaderHeight;
 
     /**
-     * 当前头部高度
-     */
-    private int headerHeight;
-
-    /**
      * 头部
      */
     private Space dummyHeader;
@@ -46,20 +43,17 @@ public class DDPullListView extends ObservableListView {
      */
     private ValueAnimator backAnimator;
 
+    private int activePointerId = -1;
+
     /**
      * 上次触摸y位置
      */
-    private float oldY;
-
-    /**
-     * 按下y位置
-     */
-    private float downY;
+    private float lastY;
 
     /**
      * 是否在拖动
      */
-    private boolean isDrag;
+    private boolean isDraging;
 
     /**
      * 最小滑动距离
@@ -119,7 +113,7 @@ public class DDPullListView extends ObservableListView {
 
 
     public boolean isPulling() {
-        return headerHeight != normalHeaderHeight;
+        return dummyHeader.getHeight() > normalHeaderHeight;
     }
 
 
@@ -156,9 +150,8 @@ public class DDPullListView extends ObservableListView {
         if (lp.height != height) {
             lp.height = height;
             dummyHeader.setLayoutParams(lp);
-            final int offset = height - headerHeight;
+            final int offset = height - dummyHeader.getHeight();
             final int pullHeight = height - normalHeaderHeight;
-            headerHeight = height;
             if (onPullListener != null) {
                 onPullListener.onPull(offset, pullHeight);
             }
@@ -166,7 +159,7 @@ public class DDPullListView extends ObservableListView {
     }
 
     public int getHeaderHeight() {
-        return headerHeight;
+        return dummyHeader.getHeight();
     }
 
 
@@ -192,17 +185,18 @@ public class DDPullListView extends ObservableListView {
         } else if (backAnimator.isRunning()) {
             backAnimator.cancel();
         }
-        backAnimator.setIntValues(headerHeight, normalHeaderHeight);
+        backAnimator.setIntValues(dummyHeader.getHeight(), normalHeaderHeight);
         backAnimator.start();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        int y = (int) ev.getY();
-        switch (ev.getAction()) {
+        final int action = MotionEventCompat.getActionMasked(ev);
+        switch (action) {
             case MotionEvent.ACTION_DOWN: {
-                oldY = y;
-                downY = y;
+                final int index = MotionEventCompat.getActionIndex(ev);
+                activePointerId = MotionEventCompat.getPointerId(ev, index);
+                lastY = ev.getY();
                 if (backAnimator != null
                         && backAnimator.isRunning()) {
                     //按下停止回缩动画
@@ -212,23 +206,31 @@ public class DDPullListView extends ObservableListView {
             break;
 
             case MotionEvent.ACTION_MOVE: {
-                float offsetY = y - oldY;
-                oldY = y;
-                if (isDrag) {
+                final int index = MotionEventCompat.findPointerIndex(ev, activePointerId);
+                float y = MotionEventCompat.getY(ev, index);
+                float deltaY = y - lastY;
+                if (!isDraging) {
+                    if (Math.abs(deltaY) >= touchSlop) {
+                        isDraging = true;
+                        lastY = y;
+                    }
+                }else{
+                    lastY = y;
                     //已在最顶端
                     if (isInTop) {
                         //下滑，且header未展开到最大
-                        if (offsetY > 0
+                        final int headerHeight = dummyHeader.getHeight();
+                        if (deltaY > 0
                                 && headerHeight < maxHeaderHeight) {
                             //阻力效果
-                            offsetY *= (1 - (float) (headerHeight - normalHeaderHeight)
+                            deltaY *= (1 - (float) (headerHeight - normalHeaderHeight)
                                     / (maxHeaderHeight - normalHeaderHeight));
-                            int setHeight = (int) (headerHeight + Math.ceil(offsetY));
+                            int setHeight = (int) (headerHeight + Math.ceil(deltaY));
                             updateHeaderHeight(setHeight);
-                        } else if (offsetY < 0
+                        } else if (deltaY < 0
                                 && headerHeight > normalHeaderHeight) {
                             //上滑，且header已展开未恢复
-                            int setHeight = (int) (headerHeight + Math.ceil(offsetY));
+                            int setHeight = (int) (headerHeight + Math.ceil(deltaY));
                             updateHeaderHeight(setHeight);
                             if (setHeight == normalHeaderHeight) {
                                 //listview从展开状态回到收缩状态后能够继续滑动，设置为点击事件
@@ -237,22 +239,41 @@ public class DDPullListView extends ObservableListView {
                             }
                         }
                     }
-                } else if (Math.abs(y - downY) > touchSlop) {
-                    isDrag = true;
                 }
+
                 if (isPulling()) {
                     return true;
                 }
             }
             break;
 
+            case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
-                if (headerHeight > normalHeaderHeight) {
+                if (dummyHeader.getHeight() > normalHeaderHeight) {
                     animBack();
                 }
-                isDrag = false;
+                isDraging = false;
             }
             break;
+
+            case MotionEventCompat.ACTION_POINTER_DOWN: {
+                final int index = MotionEventCompat.getActionIndex(ev);
+                lastY = MotionEventCompat.getY(ev, index);
+                activePointerId = MotionEventCompat.getPointerId(ev, index);
+            }
+            break;
+
+            case MotionEventCompat.ACTION_POINTER_UP: {
+                final int index = MotionEventCompat.getActionIndex(ev);
+                final int pointerId = MotionEventCompat.getPointerId(ev, index);
+                if (pointerId == activePointerId) {
+                    int newIndex = index == 0 ? 1 : 0;
+                    activePointerId = MotionEventCompat.getPointerId(ev, newIndex);
+                }
+                lastY = MotionEventCompat.getY(ev, MotionEventCompat.findPointerIndex(ev, activePointerId));
+            }
+            break;
+
         }
         return super.onTouchEvent(ev);
     }
@@ -260,5 +281,4 @@ public class DDPullListView extends ObservableListView {
     public interface OnPullListener {
         void onPull(int pullOffset, int pullHeight);
     }
-
 }

@@ -187,18 +187,22 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
                     Music music = player.getCurrentMusic();
                     setTitleText(music.getTitle());
                     setArtistText(music.getArtist());
+                    setSongDuration(0);
+                    setPlayProgress(0);
+                    playProgress.setSecondaryProgress(0);
+                }
+                break;
+
+                case IPlayer.STATE_PREPARED: {
+                    Music music = player.getCurrentMusic();
+                    setSongDuration(player.getDuration());
+                    setPlayProgress(player.getProgress());
                     int type = music.getType();
                     if (type == DBHelper.Music.TYPE_LOCAL) {
                         playProgress.setSecondaryProgress(player.getDuration());
                     } else if (type == DBHelper.Music.TYPE_WEB) {
                         playProgress.setSecondaryProgress(0);
                     }
-                }
-                break;
-
-                case IPlayer.STATE_PREPARED: {
-                    setSongDuration(player.getDuration());
-                    setPlayProgress(player.getProgress());
                 }
                 break;
             }
@@ -427,7 +431,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
             updateProgressThread.pause();
             while (running) {
                 int pos = player.getProgress() + speed;
-                pos = Math.min(player.getDuration(), Math.max(0, pos));
+                pos = Math.min(playProgress.getSecondaryProgress(), Math.max(0, pos));
                 final int postPos = pos;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override

@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.sanron.music.net.bean.DetailSongInfo;
 import com.sanron.music.net.bean.FocusPicResult;
 import com.sanron.music.net.bean.HotTagResult;
 import com.sanron.music.net.bean.RecommendSong;
@@ -16,8 +17,6 @@ import java.util.List;
 import java.util.Set;
 
 import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 /**
  * Created by sanron on 16-3-18.
@@ -125,17 +124,18 @@ public class MusicApi {
 
     /**
      * 歌单信息
+     *
      * @param listId
      * @param apiCallback
      */
-    public static void songListInfo(String listId, ApiCallback<SongList> apiCallback) {
+    public static Call songListInfo(String listId, ApiCallback<SongList> apiCallback) {
         ContentValues params = new ContentValues();
         params.put("method", "baidu.ting.diy.gedanInfo");
         params.put("listid", listId);
-        ApiHttpClient.get(url(params), apiCallback);
+        return ApiHttpClient.get(url(params), apiCallback);
     }
 
-    public static void songLink(String songid) {
+    public static void songLink(String songid, ApiCallback<DetailSongInfo> callback) {
         ContentValues params = new ContentValues();
         long currentTimeMillis = System.currentTimeMillis();
         String str = "songid=" + songid + "&ts=" + currentTimeMillis;
@@ -144,17 +144,7 @@ public class MusicApi {
         params.put("songid", songid);
         params.put("ts", currentTimeMillis);
         params.put("e", e);
-        ApiHttpClient.get(url(params), new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-
-            }
-        });
+        ApiHttpClient.get(url(params),callback);
     }
 
     private static String url(ContentValues params) {

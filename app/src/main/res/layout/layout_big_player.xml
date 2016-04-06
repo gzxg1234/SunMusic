@@ -177,7 +177,7 @@
         android:id="@+id/player_top_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_player_topbar">
+        android:background="@drawable/cover_up_background">
 
         <LinearLayout
             android:layout_width="match_parent"

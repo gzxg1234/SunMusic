@@ -33,7 +33,11 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import com.sanron.music.AppContext;
 import com.sanron.music.AppManager;
 import com.sanron.music.R;
+import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
+import com.sanron.music.net.ApiCallback;
+import com.sanron.music.net.MusicApi;
+import com.sanron.music.net.bean.DetailSongInfo;
 import com.sanron.music.utils.MyLog;
 import com.sanron.music.utils.TUtils;
 
@@ -76,6 +80,10 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
     private Bitmap curMusicPic;
 
     private Player player;
+
+    private boolean isLossAudioFocus;
+
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     private BroadcastReceiver cmdReceiver = new BroadcastReceiver() {
         @Override
@@ -278,13 +286,18 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             //暂时失去音频焦点，比如电话
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT: {
-                player.pause();
+                if (player.getState() == IPlayer.STATE_PLAYING) {
+                    player.pause();
+                    isLossAudioFocus = true;
+                }
             }
             break;
 
             case AudioManager.AUDIOFOCUS_GAIN: {
-                if (player.getState() == IPlayer.STATE_PAUSE) {
+                if (player.getState() == IPlayer.STATE_PAUSE
+                        && isLossAudioFocus) {
                     player.resume();
+                    isLossAudioFocus = false;
                 }
             }
             break;
@@ -356,7 +369,6 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 changeState(STATE_STOP);
                 setCurMusicPic(null);
                 updateNotification();
-                return;
             }
         }
 
@@ -375,18 +387,76 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             synchronized (this) {
                 mediaPlayer.reset();
                 currentIndex = position;
-                Music playable = queue.get(currentIndex);
-                try {
-                    changeState(STATE_PREPARING);
-                    mediaPlayer.setDataSource(PlayerService.this, Uri.parse(playable.getPath()));
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mediaPlayer.prepareAsync();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    onError(mediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, -1);
-                    return;
+                Music music = queue.get(currentIndex);
+                changeState(STATE_PREPARING);
+                switch (music.getType()) {
+                    case DBHelper.Music.TYPE_LOCAL: {
+                        try {
+                            mediaPlayer.setDataSource(PlayerService.this, Uri.parse(music.getPath()));
+                            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                            mediaPlayer.prepareAsync();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            onError(mediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, -1);
+                            return;
+                        }
+                    }
+                    break;
+
+                    case DBHelper.Music.TYPE_WEB: {
+                        //播放网络歌曲
+                        playWebMusic(music.getSongId());
+                    }
+                    break;
                 }
             }
+        }
+
+        private void handlerError(final String errorMsg) {
+            state = STATE_STOP;
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    TUtils.show(PlayerService.this, errorMsg);
+                }
+            });
+            handler.postDelayed(new Runnable() {
+                final int errorPos = currentIndex;
+                @Override
+                public void run() {
+                    if (getCurrentIndex() == errorPos) {
+                        next();
+                    }
+                }
+            }, 3000);
+        }
+
+        private void playWebMusic(String songid) {
+            MusicApi.songLink(songid, new ApiCallback<DetailSongInfo>() {
+                @Override
+                public void onFailure() {
+                    handlerError("网络错误，3s后跳转至下一首");
+                }
+
+                @Override
+                public void onSuccess(DetailSongInfo data) {
+                    List<DetailSongInfo.SongUrl.FileInfo> fileInfos = data.getSongUrl().getFileInfos();
+                    for (DetailSongInfo.SongUrl.FileInfo fileInfo : fileInfos) {
+                        String url = fileInfo.getFileLink();
+                        if (!TextUtils.isEmpty(url)) {
+                            try {
+                                mediaPlayer.setDataSource(PlayerService.this, Uri.parse(url));
+                                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                                mediaPlayer.prepareAsync();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                onError(mediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, -1);
+                            }
+                            break;
+                        }
+                    }
+                }
+            });
         }
 
         @Override
@@ -535,25 +605,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         @Override
         public boolean onError(MediaPlayer mp, int what, int extra) {
-            System.out.println(state);
-            state = STATE_STOP;
-            Handler handler = new Handler(Looper.getMainLooper());
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    TUtils.show(PlayerService.this, "播放出错，2s后跳到下一首");
-                }
-            });
-            handler.postDelayed(new Runnable() {
-                final int errorPos = currentIndex;
-
-                @Override
-                public void run() {
-                    if (getCurrentIndex() == errorPos) {
-                        next();
-                    }
-                }
-            }, 2000);
+            handlerError("播放出错，3s后跳转至下一首");
             return true;
         }
 
@@ -600,14 +652,16 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         public void onBufferingUpdate(MediaPlayer mp, int percent) {
             //percent是已缓冲的时间减去已播放的时间 占  未播放的时间 的百分百
             //比如歌曲时长300s,已播放20s,已缓冲50s,则percent=(50-20)/(300-50);
-            int duration = mp.getDuration();
-            int currentPosition = mp.getCurrentPosition();
-            int remain = duration - currentPosition;
-            int buffedPosition = (int) (currentPosition + (remain * percent / 100f));
+            if (state >= STATE_PREPARED) {
+                int duration = mp.getDuration();
+                int currentPosition = mp.getCurrentPosition();
+                int remain = duration - currentPosition;
+                int buffedPosition = (int) (currentPosition + (remain * percent / 100f));
 
-            MyLog.d(TAG, "buffered position " + buffedPosition);
-            for (Callback callback : callbacks) {
-                callback.onBufferingUpdate(buffedPosition);
+                MyLog.d(TAG, "buffered position " + buffedPosition);
+                for (Callback callback : callbacks) {
+                    callback.onBufferingUpdate(buffedPosition);
+                }
             }
         }
 

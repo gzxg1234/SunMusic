@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name="com.sanron.music.AppContext"
@@ -39,7 +40,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AnimActivity" />
 
-        <service android:name="com.sanron.music.service.PlayerService"/>
+        <service android:name="com.sanron.music.service.PlayerService" />
     </application>
 
 </manifest>

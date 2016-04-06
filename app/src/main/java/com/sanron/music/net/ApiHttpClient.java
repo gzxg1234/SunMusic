@@ -34,6 +34,9 @@ public class ApiHttpClient {
 
     public static final int HTTP_CACHE_MAX_SIZE = 10 * 1024 * 1024;//10MB
 
+    public static final int READ_TIMEOUT = 10;
+    public static final int CONNECT_TIMEOUT = 10;
+
     public static void init(Context context) {
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             HTTP_CACHE_PATH = context.getExternalCacheDir().getAbsolutePath() + "/http_cache";
@@ -41,8 +44,8 @@ public class ApiHttpClient {
             HTTP_CACHE_PATH = context.getCacheDir().getAbsolutePath() + "/http_cache";
         }
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        builder.connectTimeout(10, TimeUnit.SECONDS);
-        builder.readTimeout(5, TimeUnit.SECONDS);
+        builder.connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS);
+        builder.readTimeout(READ_TIMEOUT, TimeUnit.SECONDS);
         builder.cache(new Cache(new File(HTTP_CACHE_PATH), HTTP_CACHE_MAX_SIZE));
         builder.networkInterceptors().add(new Interceptor() {
             @Override
@@ -60,8 +63,10 @@ public class ApiHttpClient {
         httpClient = builder.build();
     }
 
-    public static void get(String url, Callback callback) {
-        getCall(url).enqueue(callback);
+    public static Call get(String url, Callback callback) {
+        Call call = getCall(url);
+        call.enqueue(callback);
+        return call;
     }
 
     public static Call getCall(String url) {

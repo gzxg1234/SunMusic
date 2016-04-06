@@ -555,8 +555,8 @@ public abstract class BaseMusicFrag extends DataFragment implements Observer, Co
             public MusicItemHolder(final View itemView) {
                 super(itemView);
                 ivPicture = (ImageView) itemView.findViewById(R.id.top_image);
-                tvTitle = (TextView) itemView.findViewById(R.id.tv_text1);
-                tvArtist = (TextView) itemView.findViewById(R.id.tv_text2);
+                tvTitle = (TextView) itemView.findViewById(R.id.tv_title);
+                tvArtist = (TextView) itemView.findViewById(R.id.tv_artist);
                 cbSelect = (CheckBox) itemView.findViewById(R.id.cb_select);
                 ibtnMenu = (ImageButton) itemView.findViewById(R.id.ibtn_item_menu);
                 itemView.setOnClickListener(new View.OnClickListener() {

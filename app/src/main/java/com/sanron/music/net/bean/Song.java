@@ -1,6 +1,7 @@
 package com.sanron.music.net.bean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
 
 /**
@@ -49,6 +50,12 @@ public class Song {
      */
     @JsonProperty("album_id")
     private String albumId;
+
+    /**
+     * 是否有mv
+     */
+    @JsonProperty("has_mv")
+    private int hasMv;
 
     /**
      * 小图,90x90
@@ -175,12 +182,21 @@ public class Song {
         this.albumId = albumId;
     }
 
+    public int getHasMv() {
+        return hasMv;
+    }
+
+    public void setHasMv(int hasMv) {
+        this.hasMv = hasMv;
+    }
+
     public Music toMusic() {
         Music music = new Music();
         music.setTitle(title);
         music.setArtist(allArtistName);
         music.setAlbum(albumName);
         music.setSongId(songId);
+        music.setType(DBHelper.Music.TYPE_WEB);
         return music;
     }
 }
