@@ -34,9 +34,12 @@ import com.sanron.music.view.HotSongListView;
 import com.sanron.music.view.RecmdSongView;
 import com.viewpagerindicator.CirclePageIndicator;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import okhttp3.Call;
 
 /**
  * Created by Administrator on 2016/3/10.
@@ -163,12 +166,14 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
     public void refreshData() {
         //获取轮播信息
         MusicApi.focusPic(10, new ApiCallback<FocusPicResult>() {
+
             @Override
-            public void onFailure() {
+            public void onFailure(Call call, IOException e) {
+
             }
 
             @Override
-            public void onSuccess(FocusPicResult data) {
+            public void onSuccess(Call call, FocusPicResult data) {
                 List<FocusPic> focusPics = data.getFocusPicList();
                 final List<FocusPic> result = new LinkedList<>();
                 if (focusPics != null) {
@@ -191,12 +196,14 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
         //热门标签
         MusicApi.hotTag(tvHotTags.size(), new ApiCallback<HotTagResult>() {
+
             @Override
-            public void onFailure() {
+            public void onFailure(Call call, IOException e) {
+
             }
 
             @Override
-            public void onSuccess(final HotTagResult data) {
+            public void onSuccess(Call call, final HotTagResult data) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -210,11 +217,12 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
         //获取热门歌单
         MusicApi.hotSongList(6, new ApiCallback<List<SongList>>() {
             @Override
-            public void onFailure() {
+            public void onFailure(Call call, IOException e) {
             }
 
+
             @Override
-            public void onSuccess(final List<SongList> data) {
+            public void onSuccess(Call call, final List<SongList> data) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -226,12 +234,13 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
         //获取推荐歌曲
         MusicApi.recmdSongs(6, new ApiCallback<List<RecommendSong>>() {
+
             @Override
-            public void onFailure() {
+            public void onFailure(Call call, IOException e) {
             }
 
             @Override
-            public void onSuccess(final List<RecommendSong> data) {
+            public void onSuccess(Call call, final List<RecommendSong> data) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {

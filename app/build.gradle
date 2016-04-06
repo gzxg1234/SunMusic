@@ -35,5 +35,4 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
     compile 'de.hdodenhof:circleimageview:2.0.0'
-    compile 'com.github.ksoichiro:android-observablescrollview:1.6.0'
 }

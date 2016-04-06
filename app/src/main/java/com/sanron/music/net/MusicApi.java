@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.sanron.music.net.bean.DetailSongInfo;
 import com.sanron.music.net.bean.FocusPicResult;
 import com.sanron.music.net.bean.HotTagResult;
 import com.sanron.music.net.bean.RecommendSong;
@@ -16,8 +17,6 @@ import java.util.List;
 import java.util.Set;
 
 import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 /**
  * Created by sanron on 16-3-18.
@@ -36,7 +35,7 @@ public class MusicApi {
         ContentValues params = new ContentValues();
         params.put("method", "baidu.ting.plaza.getFocusPic");
         params.put("num", num);
-        ApiHttpClient.get(url(params), apiCallback);
+        ApiHttpClient.get(url(params), 600, apiCallback);
     }
 
     /**
@@ -49,14 +48,14 @@ public class MusicApi {
         ContentValues params = new ContentValues();
         params.put("method", "baidu.ting.song.getEditorRecommend");
         params.put("num", num);
-        ApiHttpClient.get(url(params), new ApiCallback<JsonNode>() {
+        ApiHttpClient.get(url(params), 600, new ApiCallback<JsonNode>() {
             @Override
-            public void onFailure() {
-                apiCallback.onFailure();
+            public void onFailure(Call call, IOException e) {
+                apiCallback.onFailure(call, e);
             }
 
             @Override
-            public void onSuccess(JsonNode node) {
+            public void onSuccess(Call call, JsonNode node) {
                 ArrayNode arrayNode = (ArrayNode) node.get("content");
                 if (arrayNode != null
                         && arrayNode.size() > 0) {
@@ -65,10 +64,10 @@ public class MusicApi {
                         List<RecommendSong> recommendSongs = JsonUtils.fromJson(json,
                                 new TypeReference<List<RecommendSong>>() {
                                 });
-                        apiCallback.onSuccess(recommendSongs);
+                        apiCallback.onSuccess(call, recommendSongs);
                     } catch (IOException e) {
                         e.printStackTrace();
-                        apiCallback.onFailure();
+                        apiCallback.onFailure(call, e);
                     }
                 }
             }
@@ -85,14 +84,14 @@ public class MusicApi {
         ContentValues params = new ContentValues();
         params.put("method", "baidu.ting.diy.getHotGeDanAndOfficial");
         params.put("num", num);
-        ApiHttpClient.get(url(params), new ApiCallback<JsonNode>() {
+        ApiHttpClient.get(url(params), 600, new ApiCallback<JsonNode>() {
             @Override
-            public void onFailure() {
-                apiCallback.onFailure();
+            public void onFailure(Call call, IOException e) {
+                apiCallback.onFailure(call, e);
             }
 
             @Override
-            public void onSuccess(JsonNode node) {
+            public void onSuccess(Call call, JsonNode node) {
                 JsonNode content = node.get("content");
                 if (content != null) {
                     String json = content.get("list").toString();
@@ -100,10 +99,10 @@ public class MusicApi {
                         List<SongList> hotSongLists = JsonUtils.fromJson(json,
                                 new TypeReference<List<SongList>>() {
                                 });
-                        apiCallback.onSuccess(hotSongLists);
+                        apiCallback.onSuccess(call, hotSongLists);
                     } catch (IOException e) {
                         e.printStackTrace();
-                        apiCallback.onFailure();
+                        apiCallback.onFailure(call, e);
                     }
                 }
             }
@@ -111,7 +110,7 @@ public class MusicApi {
     }
 
     /**
-     * 热门歌单
+     * 热门分类
      *
      * @param num
      * @param apiCallback
@@ -120,22 +119,29 @@ public class MusicApi {
         ContentValues params = new ContentValues();
         params.put("method", "baidu.ting.tag.getHotTag");
         params.put("nums", num);
-        ApiHttpClient.get(url(params), apiCallback);
+        ApiHttpClient.get(url(params), 600, apiCallback);
     }
 
     /**
      * 歌单信息
+     *
      * @param listId
      * @param apiCallback
      */
-    public static void songListInfo(String listId, ApiCallback<SongList> apiCallback) {
+    public static Call songListInfo(String listId, ApiCallback<SongList> apiCallback) {
         ContentValues params = new ContentValues();
         params.put("method", "baidu.ting.diy.gedanInfo");
         params.put("listid", listId);
-        ApiHttpClient.get(url(params), apiCallback);
+        return ApiHttpClient.get(url(params), 3600, apiCallback);
     }
 
-    public static void songLink(String songid) {
+    /**
+     * 歌曲文件链接
+     * @param songid
+     * @param callback
+     * @return
+     */
+    public static Call songLink(String songid, ApiCallback<DetailSongInfo> callback) {
         ContentValues params = new ContentValues();
         long currentTimeMillis = System.currentTimeMillis();
         String str = "songid=" + songid + "&ts=" + currentTimeMillis;
@@ -144,17 +150,7 @@ public class MusicApi {
         params.put("songid", songid);
         params.put("ts", currentTimeMillis);
         params.put("e", e);
-        ApiHttpClient.get(url(params), new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-
-            }
-        });
+        return ApiHttpClient.get(url(params), callback);
     }
 
     private static String url(ContentValues params) {

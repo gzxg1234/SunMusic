@@ -39,7 +39,7 @@ public class AppContext extends Application {
     public static final int THREAD_POOL_SIZE = 3;
     public static final int MAX_MEMORY_CACHE_SIZE = 16 * 1024 * 1024;//RAM缓存最多16MB
     public static final float MEMORY_CACHE_PERCENTAGE = 0.1f;//默认10%程序最大内存的ram缓存
-    public static final String CACHE_PATH = "img_cache";
+    public static final String IMG_CACHE = "img_cache";
 
     public static final String TAG = AppContext.class.getSimpleName();
 
@@ -61,8 +61,8 @@ public class AppContext extends Application {
             memoryCacheSize = MAX_MEMORY_CACHE_SIZE;
         }
         builder.memoryCache(new FIFOLimitedMemoryCache(memoryCacheSize));
-        File diskCacheFile = new File(getExternalCacheDir(), CACHE_PATH);
-        File reserveCacheFile = new File(getCacheDir(), CACHE_PATH);
+        File diskCacheFile = new File(getExternalCacheDir(), IMG_CACHE);
+        File reserveCacheFile = new File(getCacheDir(), IMG_CACHE);
         try {
             builder.diskCache(new LruDiskCache(diskCacheFile,
                     reserveCacheFile,

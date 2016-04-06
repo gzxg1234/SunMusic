@@ -47,7 +47,7 @@
                 android:src="@mipmap/ic_more_vert_black_24dp" />
 
             <TextView
-                android:id="@+id/tv_text1"
+                android:id="@+id/tv_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@+id/ibtn_item_menu"
@@ -58,7 +58,7 @@
                 tool:text="周杰伦" />
 
             <TextView
-                android:id="@+id/tv_text2"
+                android:id="@+id/tv_artist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"

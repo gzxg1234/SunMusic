@@ -86,6 +86,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
 
     private class UpdateProgressThread extends Thread {
 
+        private int period = 100;
         private Object lock = new Object();
         private boolean pause = false;
         private boolean running = true;
@@ -127,7 +128,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
                         setPlayProgress(position);
                     }
                 });
-                SystemClock.sleep(100);
+                SystemClock.sleep(period);
             }
         }
     }
@@ -187,18 +188,22 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
                     Music music = player.getCurrentMusic();
                     setTitleText(music.getTitle());
                     setArtistText(music.getArtist());
+                    setSongDuration(0);
+                    setPlayProgress(0);
+                    playProgress.setSecondaryProgress(0);
+                }
+                break;
+
+                case IPlayer.STATE_PREPARED: {
+                    Music music = player.getCurrentMusic();
+                    setSongDuration(player.getDuration());
+                    setPlayProgress(player.getProgress());
                     int type = music.getType();
                     if (type == DBHelper.Music.TYPE_LOCAL) {
                         playProgress.setSecondaryProgress(player.getDuration());
                     } else if (type == DBHelper.Music.TYPE_WEB) {
                         playProgress.setSecondaryProgress(0);
                     }
-                }
-                break;
-
-                case IPlayer.STATE_PREPARED: {
-                    setSongDuration(player.getDuration());
-                    setPlayProgress(player.getProgress());
                 }
                 break;
             }
@@ -322,20 +327,24 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
 
         player.addCallback(callback);
 
+        Music music = player.getCurrentMusic();
         int state = player.getState();
-        if (state >= IPlayer.STATE_PREPARED) {
-            Music music = player.getCurrentMusic();
-            setSongDuration(player.getDuration());
+        if (state >= IPlayer.STATE_PREPARING) {
             setTitleText(music.getTitle());
             setArtistText(music.getArtist());
         }
-        if (state < IPlayer.STATE_PLAYING) {
-            updateProgressThread.pause();
+
+        if (state >= IPlayer.STATE_PREPARED) {
+            setSongDuration(player.getDuration());
         }
+
         if (state == IPlayer.STATE_PLAYING) {
             sibtnPlayPause.setImageResource(R.mipmap.ic_pause_black_36dp);
             ibtnPlayPause.setImageResource(R.mipmap.ic_pause_white_24dp);
+        } else {
+            updateProgressThread.pause();
         }
+
         setModeIcon(player.getPlayMode());
         callback.onLoadedPicture(player.getCurMusicPic());
 
@@ -427,7 +436,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
             updateProgressThread.pause();
             while (running) {
                 int pos = player.getProgress() + speed;
-                pos = Math.min(player.getDuration(), Math.max(0, pos));
+                pos = Math.min(playProgress.getSecondaryProgress(), Math.max(0, pos));
                 final int postPos = pos;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override

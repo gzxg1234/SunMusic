@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.sanron.music.view.SlideFinishLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:layout_height="match_parent">
+
 
     <com.sanron.music.view.DDPullListView
-        android:id="@+id/lv_songlist_songs"
+        android:id="@+id/pull_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/white">
-
-    </com.sanron.music.view.DDPullListView>
+        android:background="@android:color/white"/>
 
     <com.sanron.music.view.DDImageView
         android:id="@+id/top_image"
@@ -20,20 +18,27 @@
     <FrameLayout
         android:id="@+id/view_info"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:background="@drawable/cover_down_background" />
 
     <LinearLayout
-        android:orientation="vertical"
         android:id="@+id/float_group"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:orientation="vertical" />
 
-    </LinearLayout>
+    <include layout="@layout/layout_loading" />
+
+    <include
+        layout="@layout/layout_load_failed"
+        android:visibility="gone" />
 
     <FrameLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@drawable/cover_up_background">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -51,12 +56,12 @@
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:ellipsize="end"
                 android:gravity="center"
-                android:textSize="20dp"
-                android:text="Light It Up"
-                android:visibility="gone"/>
+                android:singleLine="true"
+                android:textColor="@color/textColorPrimaryInverse"
+                android:textSize="18dp" />
         </LinearLayout>
     </FrameLayout>
 
-
-</FrameLayout>
+</com.sanron.music.view.SlideFinishLayout>

@@ -20,7 +20,7 @@ public class DetailSongInfo {
         this.songUrl = songUrl;
     }
 
-    public class SongUrl {
+    public static class SongUrl {
 
         @JsonProperty("url")
         private List<FileInfo> fileInfos;
@@ -33,7 +33,7 @@ public class DetailSongInfo {
             this.fileInfos = fileInfos;
         }
 
-        public class FileInfo {
+        public static class FileInfo {
             /**
              * 比特率
              */

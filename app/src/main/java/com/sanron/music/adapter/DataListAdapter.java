@@ -123,8 +123,8 @@ public abstract class DataListAdapter<Data> extends RecyclerView.Adapter<DataLis
             super(itemView);
             this.itemView = itemView.findViewById(R.id.item_view);
             ivPicture = (ImageView) itemView.findViewById(R.id.top_image);
-            tvText1 = (TextView) itemView.findViewById(R.id.tv_text1);
-            tvText2 = (TextView) itemView.findViewById(R.id.tv_text2);
+            tvText1 = (TextView) itemView.findViewById(R.id.tv_title);
+            tvText2 = (TextView) itemView.findViewById(R.id.tv_artist);
             btnAction = (ImageButton) itemView.findViewById(R.id.ibtn_item_menu);
             this.itemView.setOnClickListener(this);
             this.itemView.setOnLongClickListener(this);

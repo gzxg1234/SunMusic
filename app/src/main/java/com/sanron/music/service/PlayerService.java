@@ -33,13 +33,20 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import com.sanron.music.AppContext;
 import com.sanron.music.AppManager;
 import com.sanron.music.R;
+import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
+import com.sanron.music.net.ApiCallback;
+import com.sanron.music.net.MusicApi;
+import com.sanron.music.net.bean.DetailSongInfo;
 import com.sanron.music.utils.MyLog;
 import com.sanron.music.utils.TUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import okhttp3.Call;
 
 /**
  * Created by Administrator on 2015/12/16.
@@ -76,6 +83,10 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
     private Bitmap curMusicPic;
 
     private Player player;
+
+    private boolean isLossAudioFocus;
+
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     private BroadcastReceiver cmdReceiver = new BroadcastReceiver() {
         @Override
@@ -220,7 +231,8 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             String musicInfo = music.getTitle() + "-" + music.getArtist();
 
             bigContentView.setTextViewText(R.id.tv_music_info, musicInfo);
-            contentView.setTextViewText(R.id.tv_music_info, musicInfo);
+            contentView.setTextViewText(R.id.tv_title, music.getTitle());
+            contentView.setTextViewText(R.id.tv_artist, music.getArtist());
 
             if (curMusicPic != null) {
                 bigContentView.setImageViewBitmap(R.id.top_image, curMusicPic);
@@ -232,7 +244,8 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         } else {
             bigContentView.setTextViewText(R.id.tv_music_info, getText(R.string.app_name));
-            contentView.setTextViewText(R.id.tv_music_info, getText(R.string.app_name));
+            contentView.setTextViewText(R.id.tv_title, getText(R.string.app_name));
+            contentView.setTextViewText(R.id.tv_artist, "");
         }
 
         bigContentView.setOnClickPendingIntent(R.id.ibtn_lrc, cmdIntent(CMD_LYRIC));
@@ -278,13 +291,18 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             //暂时失去音频焦点，比如电话
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT: {
-                player.pause();
+                if (player.getState() == IPlayer.STATE_PLAYING) {
+                    player.pause();
+                    isLossAudioFocus = true;
+                }
             }
             break;
 
             case AudioManager.AUDIOFOCUS_GAIN: {
-                if (player.getState() == IPlayer.STATE_PAUSE) {
+                if (player.getState() == IPlayer.STATE_PAUSE
+                        && isLossAudioFocus) {
                     player.resume();
+                    isLossAudioFocus = false;
                 }
             }
             break;
@@ -293,19 +311,37 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
     public class Player extends Binder implements IPlayer, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnBufferingUpdateListener {
 
-        private List<Music> queue;//播放队列;
+        /**
+         * 播放队列
+         */
+        private List<Music> queue;
+        /**
+         * 播放模式
+         */
+        private int mode = MODE_IN_TURN;
+        /**
+         * 当前播放歌曲位置
+         */
+        private int currentIndex;
+        /**
+         * 播放器状态
+         */
+        private int state = STATE_STOP;
+        /**
+         * 音乐文件地址请求
+         */
+        private Call fileLinkCall;
         private List<IPlayer.Callback> callbacks;
-        private int mode = MODE_IN_TURN;//模式
-        private int currentIndex;//当前位置
-        private int state = STATE_STOP;//播放状态
         private MediaPlayer mediaPlayer;
 
         public Player() {
-            mediaPlayer = new MediaPlayer();
             queue = new ArrayList<>();
             callbacks = new ArrayList<>();
             currentIndex = -1;
+        }
 
+        private void initMediaPlayer() {
+            mediaPlayer = new MediaPlayer();
             mediaPlayer.setOnPreparedListener(this);
             mediaPlayer.setOnCompletionListener(this);
             mediaPlayer.setOnErrorListener(this);
@@ -323,7 +359,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         @Override
         public void enqueue(List<Music> musics) {
             queue.addAll(musics);
-            Log.d(TAG, musics.size() + "首歌加入队列");
+            Log.d(TAG, "enqueue " + musics.size() + " songs");
         }
 
         /**
@@ -349,6 +385,9 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         @Override
         public void clearQueue() {
+            if (mediaPlayer == null) {
+                return;
+            }
             synchronized (this) {
                 queue.clear();
                 currentIndex = -1;
@@ -356,7 +395,27 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 changeState(STATE_STOP);
                 setCurMusicPic(null);
                 updateNotification();
-                return;
+            }
+        }
+
+        private void prepare(Uri uri) {
+            synchronized (this) {
+                if (mediaPlayer == null) {
+                    initMediaPlayer();
+                } else {
+                    mediaPlayer.reset();
+                }
+
+                try {
+                    mediaPlayer.setDataSource(PlayerService.this, uri);
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mediaPlayer.prepareAsync();
+                } catch (IllegalStateException e) {
+                    MyLog.e(TAG, "IllegalState");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    handlerPlayError("播放出错");
+                }
             }
         }
 
@@ -366,27 +425,73 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         @Override
         public void play(int position) {
 
-            if (state == STATE_PREPARING) {
-                //mediaplayer执行了prepareAsync方法,正在异步准备资源中，
-                //不能重置mediaplayer，否则会出错
-                return;
+            if (fileLinkCall != null) {
+                fileLinkCall.cancel();
             }
-
-            synchronized (this) {
-                mediaPlayer.reset();
-                currentIndex = position;
-                Music playable = queue.get(currentIndex);
-                try {
-                    changeState(STATE_PREPARING);
-                    mediaPlayer.setDataSource(PlayerService.this, Uri.parse(playable.getPath()));
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mediaPlayer.prepareAsync();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    onError(mediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, -1);
-                    return;
+            currentIndex = position;
+            Music music = queue.get(currentIndex);
+            changeState(STATE_PREPARING);
+            updateNotification();
+            switch (music.getType()) {
+                case DBHelper.Music.TYPE_LOCAL: {
+                    prepare(Uri.parse(music.getPath()));
                 }
+                break;
+
+                case DBHelper.Music.TYPE_WEB: {
+                    //播放网络歌曲
+                    playWebMusic(music.getSongId());
+                }
+                break;
             }
+        }
+
+        private void handlerPlayError(final String errorMsg) {
+            state = STATE_STOP;
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    TUtils.show(PlayerService.this, errorMsg + ",3s后播放下一曲");
+                }
+            });
+            handler.postDelayed(new Runnable() {
+                final int errorPos = currentIndex;
+
+                @Override
+                public void run() {
+                    if (getCurrentIndex() == errorPos) {
+                        next();
+                    }
+                }
+            }, 3000);
+        }
+
+
+        private void playWebMusic(final String songid) {
+            fileLinkCall = MusicApi.songLink(songid, new ApiCallback<DetailSongInfo>() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                    if (!call.isCanceled()) {
+                        handlerPlayError("网络请求失败");
+                    }
+                }
+
+                @Override
+                public void onSuccess(Call call, DetailSongInfo data) {
+                    DetailSongInfo.SongUrl.FileInfo playFileInfo = null;
+                    DetailSongInfo.SongUrl songUrl = data.getSongUrl();
+                    if (songUrl != null) {
+                        List<DetailSongInfo.SongUrl.FileInfo> files = songUrl.getFileInfos();
+                        playFileInfo = PlayerHelper.selectFileUrl(getApplicationContext(), files);
+                    }
+                    if (playFileInfo == null) {
+                        handlerPlayError("此歌曲暂无网络资源");
+                    } else {
+                        prepare(Uri.parse(playFileInfo.getFileLink()));
+                    }
+                }
+            });
         }
 
         @Override
@@ -408,12 +513,12 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         }
 
         private void changeState(int newState) {
-            if (state != newState) {
-                state = newState;
-                for (Callback callback : callbacks) {
-                    callback.onStateChange(state);
-                }
+//            if (state != newState) {
+            state = newState;
+            for (Callback callback : callbacks) {
+                callback.onStateChange(state);
             }
+//            }
         }
 
         void resume() {
@@ -521,7 +626,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 break;
 
                 case MODE_LOOP: {
-                    play(currentIndex);
+                    mediaPlayer.start();
                 }
                 break;
 
@@ -535,25 +640,36 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         @Override
         public boolean onError(MediaPlayer mp, int what, int extra) {
-            System.out.println(state);
-            state = STATE_STOP;
-            Handler handler = new Handler(Looper.getMainLooper());
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    TUtils.show(PlayerService.this, "播放出错，2s后跳到下一首");
+            MyLog.e(TAG, "error (" + what + "," + extra + ")");
+            switch (what) {
+                case MediaPlayer.MEDIA_ERROR_SERVER_DIED: {
+                    //media服务失效，初始化meidaplayer
+                    MyLog.e(TAG, "MediaPlayer died");
+                    release();
+                    initMediaPlayer();
+                    return true;
                 }
-            });
-            handler.postDelayed(new Runnable() {
-                final int errorPos = currentIndex;
+            }
 
-                @Override
-                public void run() {
-                    if (getCurrentIndex() == errorPos) {
-                        next();
-                    }
+            switch (extra) {
+                case MediaPlayer.MEDIA_ERROR_UNSUPPORTED:
+                case MediaPlayer.MEDIA_ERROR_MALFORMED: {
+                    MyLog.e(TAG, "不支持的音乐文件");
+                    handlerPlayError("无法播放此音乐");
                 }
-            }, 2000);
+                break;
+
+                case MediaPlayer.MEDIA_ERROR_IO: {
+                    MyLog.e(TAG, "读写文件错误");
+                    handlerPlayError("打开歌曲文件出错");
+                }
+                break;
+
+                case MediaPlayer.MEDIA_ERROR_TIMED_OUT: {
+                    MyLog.w(TAG, "Some operation takes too long to complete");
+                }
+                break;
+            }
             return true;
         }
 
@@ -573,6 +689,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 mp.start();
                 changeState(STATE_PLAYING);
             }
+
             //加载音乐图片
             Music music = queue.get(currentIndex);
             if (!TextUtils.isEmpty(music.getPic())) {
@@ -600,21 +717,24 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         public void onBufferingUpdate(MediaPlayer mp, int percent) {
             //percent是已缓冲的时间减去已播放的时间 占  未播放的时间 的百分百
             //比如歌曲时长300s,已播放20s,已缓冲50s,则percent=(50-20)/(300-50);
-            int duration = mp.getDuration();
-            int currentPosition = mp.getCurrentPosition();
-            int remain = duration - currentPosition;
-            int buffedPosition = (int) (currentPosition + (remain * percent / 100f));
+            if (state >= STATE_PREPARED) {
+                int duration = mp.getDuration();
+                int currentPosition = mp.getCurrentPosition();
+                int remain = duration - currentPosition;
+                int buffedPosition = (int) (currentPosition + (remain * percent / 100f));
 
-            MyLog.d(TAG, "buffered position " + buffedPosition);
-            for (Callback callback : callbacks) {
-                callback.onBufferingUpdate(buffedPosition);
+                for (Callback callback : callbacks) {
+                    callback.onBufferingUpdate(buffedPosition);
+                }
             }
         }
 
         void release() {
             changeState(STATE_STOP);
-            mediaPlayer.release();
-            mediaPlayer = null;
+            if (mediaPlayer != null) {
+                mediaPlayer.release();
+                mediaPlayer = null;
+            }
         }
     }
 
