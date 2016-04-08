@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="2dp"
+    app:cardElevation="8dp">
+
+    <LinearLayout
+        android:id="@+id/item_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.sanron.music.view.RatioLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:type="height"
+            app:ratio="1">
+            <ImageView
+                android:id="@+id/top_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                tool:src="@mipmap/default_artist_album_pic" />
+        </com.sanron.music.view.RatioLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:padding="4dp">
+
+
+            <ImageButton
+                android:id="@+id/ibtn_item_menu"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:scaleType="fitXY"
+                android:src="@mipmap/ic_more_vert_black_24dp" />
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/ibtn_item_menu"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="@color/textColorPrimary"
+                android:textSize="12sp"
+                tool:text="周杰伦" />
+
+            <TextView
+                android:id="@+id/tv_artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@+id/ibtn_item_menu"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="@color/textColorSecondary"
+                android:textSize="10sp"
+                tool:text="11首专辑" />
+        </RelativeLayout>
+    </LinearLayout>
+</android.support.v7.widget.CardView>

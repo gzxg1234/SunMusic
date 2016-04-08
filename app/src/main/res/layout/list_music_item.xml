@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/item_view"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:layout_marginBottom="1dp"
+    android:background="?attr/selectableItemBackground"
+    android:clipToPadding="false"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center_vertical"
+    android:padding="8dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/top_image"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_alignParentLeft="true"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/default_small_song_pic"/>
+
+    <FrameLayout
+        android:id="@+id/frame_layout"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true">
+
+        <ImageButton
+            android:id="@+id/ibtn_item_menu"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:padding="12dp"
+            android:scaleType="fitXY"
+            android:src="@mipmap/ic_more_vert_black_24dp" />
+
+        <CheckBox
+            android:id="@+id/cb_select"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:textSize="0dp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+    </FrameLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toLeftOf="@+id/frame_layout"
+        android:layout_toRightOf="@+id/top_image"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingLeft="16dp">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="14dp"
+            tools:text="Suger" />
+
+        <TextView
+            android:id="@+id/tv_artist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@color/textColorSecondary"
+            android:textSize="13dp"
+            tools:text="Maroon5" />
+    </LinearLayout>
+
+
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="1dp"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_marginBottom="-8dp"-->
+        <!--android:layout_toRightOf="@+id/top_image"-->
+        <!--android:background="@color/colorListDivider"/>-->
+</RelativeLayout>

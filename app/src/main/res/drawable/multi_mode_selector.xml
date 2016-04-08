@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--多选模式选中下-->
+    <item
+        android:state_selected="true"
+        android:drawable="@color/selectedBackground"
+        />
+    <item
+        android:state_selected="false"
+        android:drawable="@android:color/transparent"
+        />
+</selector>

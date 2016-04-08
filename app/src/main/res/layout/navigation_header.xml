@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="240dp"
+    android:background="@mipmap/bg_navigation_header"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:paddingLeft="40dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/civ_music_pic"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginBottom="24dp"
+        android:src="@mipmap/default_small_song_pic" />
+
+    <TextView
+        android:id="@+id/tv_music_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:text="@string/app_name"
+        android:textColor="@color/textColorPrimaryInverse"
+        android:textSize="16dp" />
+
+    <TextView
+        android:id="@+id/tv_music_artist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:singleLine="true"
+        android:text=""
+        android:textColor="@color/textColorPrimaryInverse"
+        android:textSize="14dp" />
+</LinearLayout>

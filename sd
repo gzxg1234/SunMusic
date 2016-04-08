@@ -1,0 +1,32 @@
+[33mcommit 04fe8221f95d36b0ab34549fba0bc04bf95a8b07[m
+Merge: c1b97b4 369ddb6
+Author: sanron <741085972@qq.com>
+Date:   Wed Dec 16 02:20:51 2015 +0800
+
+    Merge branch 'master' of https://git.oschina.net/sanron/SunMusic
+
+[33mcommit c1b97b441587e119a5f350f1b700acc05b853a3d[m
+Merge: a5f4dbd e1a57fd
+Author: sanron <741085972@qq.com>
+Date:   Wed Dec 16 02:13:26 2015 +0800
+
+    构建UI
+
+[33mcommit e1a57fdd636c9ba68452ab070b86a4ec716ff9ee[m
+Author: 三荣君 <741085972@qq.com>
+Date:   Wed Dec 16 02:14:27 2015 +0800
+
+    Initial commit
+
+[33mcommit 369ddb67e429d2160ba8bb98bb4e4a74b2ae95cb[m
+Merge: a5f4dbd e1a57fd
+Author: sanron <741085972@qq.com>
+Date:   Wed Dec 16 02:13:26 2015 +0800
+
+    Merge branch 'master' of https://git.oschina.net/sanron/SunMusic
+
+[33mcommit a5f4dbdf5f8ec3b037f1ccf7545062759d471390[m
+Author: sanron <741085972@qq.com>
+Date:   Wed Dec 16 02:11:40 2015 +0800
+
+    构建UI

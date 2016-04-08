@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        app:elevation="0dp">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            app:elevation="0dp"
+            app:navigationIcon="@mipmap/ic_arrow_back_white_24dp"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:title="扫描歌曲"
+            app:titleTextColor="@color/textColorPrimaryInverse">
+
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/linear1"
+        android:layout_below="@+id/app_bar"
+        android:layout_marginBottom="64dp"
+        android:layout_marginTop="64dp"
+        android:scaleType="centerInside"
+        android:src="@mipmap/bg_scan_music" />
+
+    <LinearLayout
+        android:id="@+id/linear1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/tv_filename"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal"
+        android:visibility="invisible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="找到"
+            android:textSize="16dp" />
+
+        <TextView
+            android:id="@+id/tv_find_song_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="@color/colorAccent"
+            android:textSize="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="首歌曲"
+            android:textSize="16dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_filename"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btn_start_scan"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:ellipsize="middle"
+        android:maxEms="10"
+        android:singleLine="true"
+        android:visibility="invisible"
+        tools:text="/storge/0/ddmusic/download" />
+
+
+    <Button
+        android:id="@+id/btn_start_scan"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:layout_above="@+id/cb_ignore_60"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/bg_button_scan"
+        android:gravity="center"
+        android:text="开始扫描"
+        android:textColor="@color/textColorPrimaryInverse"
+        android:textSize="16dp" />
+
+    <CheckBox
+        android:id="@+id/cb_ignore_60"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:checked="true"
+        android:text="忽略小于60秒的文件"
+        android:textColor="@color/textColorSecondary"
+        android:textSize="14dp" />
+</RelativeLayout>
