@@ -8,7 +8,7 @@ import android.support.v7.app.AlertDialog;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.task.DeleteTask;
-import com.sanron.music.utils.TUtils;
+import com.sanron.music.utils.T;
 
 import java.util.List;
 
@@ -78,9 +78,9 @@ public class DeleteSongDialogBuilder extends AlertDialog.Builder implements Dial
     @Override
     public void onDeleteFinish(int deleteCount) {
         if (deleteCount > 0) {
-            TUtils.show(getContext(), "删除" + deleteCount + "首歌曲");
+            T.show(getContext(), "删除" + deleteCount + "首歌曲");
         } else {
-            TUtils.show(getContext(), "删除失败");
+            T.show(getContext(), "删除失败");
         }
         progressDialog.dismiss();
     }

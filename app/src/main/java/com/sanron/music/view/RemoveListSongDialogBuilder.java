@@ -9,7 +9,7 @@ import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.db.model.PlayList;
 import com.sanron.music.task.DeleteTask;
-import com.sanron.music.utils.TUtils;
+import com.sanron.music.utils.T;
 
 import java.util.List;
 
@@ -77,9 +77,9 @@ public class RemoveListSongDialogBuilder extends AlertDialog.Builder implements 
     @Override
     public void onDeleteFinish(int deleteCount) {
         if (deleteCount > 0) {
-            TUtils.show(getContext(), "移除" + deleteCount + "首歌曲");
+            T.show(getContext(), "移除" + deleteCount + "首歌曲");
         } else {
-            TUtils.show(getContext(), "移除失败");
+            T.show(getContext(), "移除失败");
         }
         progressDialog.dismiss();
     }

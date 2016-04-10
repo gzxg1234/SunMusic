@@ -1,12 +1,23 @@
 package com.sanron.music.activities;
 
-import android.content.ContentValues;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.Window;
 
-import com.sanron.music.db.DBHelper;
-import com.sanron.music.db.DataProvider;
+import com.nostra13.universalimageloader.cache.disc.impl.ext.LruDiskCache;
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.cache.memory.impl.FIFOLimitedMemoryCache;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
+import com.sanron.music.AppConfig;
+import com.sanron.music.net.ApiHttpClient;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by Administrator on 2016/3/5.
@@ -16,35 +27,57 @@ public class StartActivity extends BaseActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        String s = Environment.getExternalStorageDirectory().getAbsolutePath()+"/pic/";
-        ContentValues values = new ContentValues();
-        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.Music.TABLE);
-        values.put(DBHelper.Music.PIC,s+"b.jpg");
-        access.update(values,DBHelper.ID+"=?",""+2);
-        values.put(DBHelper.Music.PIC,s+"c.png");
-        access.update(values,DBHelper.ID+"=?",""+3);
-        values.put(DBHelper.Music.PIC,s+"d.jpg");
-        access.update(values,DBHelper.ID+"=?",""+4);
-        values.put(DBHelper.Music.PIC,s+"e.jpg");
-        access.update(values,DBHelper.ID+"=?",""+5);
-        values.put(DBHelper.Music.PIC,s+"f.jpg");
-        access.update(values,DBHelper.ID+"=?",""+6);
-        values.put(DBHelper.Music.PIC,s+"g.jpg");
-        access.update(values,DBHelper.ID+"=?",""+7);
-        values.put(DBHelper.Music.PIC,s+"h.png");
-        access.update(values,DBHelper.ID+"=?",""+8);
-        values.put(DBHelper.Music.PIC,s+"i.jpg");
-        access.update(values,DBHelper.ID+"=?",""+9);
-        access.close();
-
-        finish();
-        Intent intent = new Intent(StartActivity.this,MainActivity.class);
-        startActivity(intent);
-//        Intent intent = new Intent(StartActivity.this,ScanActivity.class);
-//        startActivity(intent);
-//        Intent intent = new Intent(StartActivity.this,ScanDiyActivity.class);
-//        startActivity(intent);
+        checkExternalStorage();
+        initImageLoader();
+        ApiHttpClient.init();
+        gotoMainActivity();
     }
 
+    private void gotoMainActivity() {
+        Intent intent = new Intent(StartActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void initImageLoader() {
+        File cacheDir = new File(Environment.getExternalStorageDirectory(),
+                AppConfig.IMG_CACHE_PATH);
+        ImageLoader imageLoader = ImageLoader.getInstance();
+        ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(getApplicationContext());
+
+        int memoryCacheSize = (int) (Runtime.getRuntime().maxMemory() * AppConfig.MEMORY_CACHE_PERCENTAGE);
+        memoryCacheSize = Math.min(memoryCacheSize,
+                AppConfig.MAX_MEMORY_CACHE_SIZE);
+        builder.memoryCache(new FIFOLimitedMemoryCache(memoryCacheSize));
+        try {
+            builder.diskCache(new LruDiskCache(cacheDir,
+                    null,
+                    new Md5FileNameGenerator(),
+                    AppConfig.IMG_DISK_CACHE_MAX_SIZE,
+                    AppConfig.IMG_DISK_CACHE_MAX_COUNT));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        builder.imageDownloader(new BaseImageDownloader(this, 5 * 1000, 30 * 1000));
+        builder.threadPoolSize(AppConfig.THREAD_POOL_SIZE);
+        builder.threadPriority(Thread.NORM_PRIORITY - 2);
+        imageLoader.init(builder.build());
+    }
+
+    //检测是否有外置存储
+    private void checkExternalStorage() {
+        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("抱歉，手机无外置存储，无法正常使用app");
+            builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    appContext.closeApp();
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+            dialog.show();
+        }
+    }
 }

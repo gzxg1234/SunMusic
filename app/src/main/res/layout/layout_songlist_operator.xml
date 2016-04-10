@@ -30,7 +30,7 @@
             android:background="@android:color/transparent"
             android:padding="12dp"
             android:scaleType="fitXY"
-            android:src="@mipmap/ic_favorite_black_24dp" />
+            android:src="@mipmap/ic_favorite_border_black_24dp" />
 
         <ImageButton
             android:id="@+id/ibtn_download"

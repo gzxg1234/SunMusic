@@ -1,7 +1,13 @@
 package com.sanron.music.task;
 
+import android.content.ContentValues;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.v4.widget.CursorAdapter;
 
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
@@ -24,8 +30,9 @@ public class QueryListTask extends AsyncTask<Void, Void, List<PlayList>> {
         Cursor c1 = listAccess.query(null,
                 DBHelper.List.TYPE + "=" + DBHelper.List.TYPE_FAVORITE
                         + " or " + DBHelper.List.TYPE + "=" + DBHelper.List.TYPE_USER
-                        + " or " + DBHelper.List.TYPE + "=" + DBHelper.List.TYPE_ONLINE,
+                        + " or " + DBHelper.List.TYPE + "=" + DBHelper.List.TYPE_COLLECTION,
                 null, null, null, DBHelper.List.ADD_TIME, null);
+
         while (c1.moveToNext()) {
             PlayList playList = PlayList.fromCursor(c1);
             Cursor c2 = listMemberAccess.rawQuery("select count(1) from " + DBHelper.ListMember.TABLE

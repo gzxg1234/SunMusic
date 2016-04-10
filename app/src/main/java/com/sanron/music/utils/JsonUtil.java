@@ -11,7 +11,7 @@ import java.io.IOException;
  * Json工具
  * Created by sanron on 16-3-19.
  */
-public class JsonUtils {
+public class JsonUtil {
 
     public static ObjectMapper objectMapper = new ObjectMapper();
     static {

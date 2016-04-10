@@ -27,18 +27,15 @@ public abstract class UpdateListNameTask extends AsyncTask<Void, Void, Integer> 
         DataProvider.Access listAccess = DataProvider.instance().getAccess(DBHelper.List.TABLE);
         int result = FAILED;
         //检查列表名是否已存在
-        ContentValues values = new ContentValues(1);
-        values.put(DBHelper.List.TITLE, updatePlayList.getTitle());
-        String sql = "select 1 from " + DBHelper.List.TABLE
-                + " where " + DBHelper.List.TITLE + "=?"
-                + " and " + DBHelper.ID + "!=?";
-        Cursor cursor = listAccess.rawQuery(sql,
-                updatePlayList.getTitle(),
-                String.valueOf(updatePlayList.getId()));
+        Cursor cursor = listAccess.query(new String[]{DBHelper.ID},
+                DBHelper.List.TITLE + "=? and " + DBHelper.List.TYPE + "=?",
+                new String[]{updatePlayList.getTitle(), String.valueOf(DBHelper.List.TYPE_USER)});
         if (cursor.moveToFirst()) {
             //列表名已存在
             result = EXISTS;
         } else {
+            ContentValues values = new ContentValues(1);
+            values.put(DBHelper.List.TITLE, updatePlayList.getTitle());
             int num = listAccess.update(values,
                     DBHelper.ID + "=?",
                     String.valueOf(updatePlayList.getId()));

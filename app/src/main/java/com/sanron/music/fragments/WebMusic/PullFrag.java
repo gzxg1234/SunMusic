@@ -33,22 +33,20 @@ public abstract class PullFrag extends BaseFragment implements SlideFinishLayout
 
 
     protected boolean isLoaded;
+    protected DDPullListView pullListView;
+    protected FrameLayout infoContainer;
+    protected LinearLayout operatorContainer;
     private boolean animEnd;
     private View viewLoading;
     private View viewLoadFailed;
-    protected DDPullListView pullListView;
     private View topbar;
     private SlideFinishLayout slideFinishLayout;
     private DDImageView topImage;
-    private FrameLayout viewInfo;
-    private LinearLayout floatGroup;
     private TextView tvTitle;
     private ImageButton ibtnBack;
     protected Handler handler = new Handler(Looper.getMainLooper());
     private float imageHeightRatio = 0.6f;
     public static final String TAG = PullFrag.class.getSimpleName();
-
-    protected abstract View createViewInfo();
 
     public void setTitle(String title) {
         tvTitle.setText(title);
@@ -59,9 +57,9 @@ public abstract class PullFrag extends BaseFragment implements SlideFinishLayout
         public void onPull(int pullOffset, int pullHeight) {
             int normalHeaderHeight = pullListView.getNormalHeaderHeight();
             updateImageHeight(topImage.getHeight() + pullOffset);
-            ViewHelper.setTranslationY(viewInfo, normalHeaderHeight
-                    - viewInfo.getHeight() + pullHeight - floatGroup.getHeight());
-            ViewHelper.setTranslationY(floatGroup, normalHeaderHeight + pullHeight - floatGroup.getHeight());
+            ViewHelper.setTranslationY(infoContainer, normalHeaderHeight
+                    - infoContainer.getHeight() + pullHeight - operatorContainer.getHeight());
+            ViewHelper.setTranslationY(operatorContainer, normalHeaderHeight + pullHeight - operatorContainer.getHeight());
         }
     };
 
@@ -78,7 +76,7 @@ public abstract class PullFrag extends BaseFragment implements SlideFinishLayout
                 int scrollY;
                 int topbarHeight = topbar.getHeight();
                 int normalHeaderHeight = pullListView.getNormalHeaderHeight();
-                final int maxScrollY = normalHeaderHeight - topbarHeight - floatGroup.getHeight();
+                final int maxScrollY = normalHeaderHeight - topbarHeight - operatorContainer.getHeight();
                 if (firstVisibleItem == 0) {
                     View header = pullListView.getChildAt(0);
                     scrollY = header.getHeight() - header.getBottom();
@@ -87,7 +85,7 @@ public abstract class PullFrag extends BaseFragment implements SlideFinishLayout
                     scrollY = maxScrollY;
                 }
                 final float alpha = 1 - (float) scrollY / maxScrollY;
-                viewInfo.setAlpha(alpha);
+                infoContainer.setAlpha(alpha);
                 if (alpha == 0f) {
                     tvTitle.setVisibility(View.VISIBLE);
                 } else {
@@ -95,9 +93,9 @@ public abstract class PullFrag extends BaseFragment implements SlideFinishLayout
                 }
 
                 ViewHelper.setTranslationY(topImage, -scrollY);
-                ViewHelper.setTranslationY(viewInfo, normalHeaderHeight
-                        - viewInfo.getHeight() - scrollY - floatGroup.getHeight());
-                ViewHelper.setTranslationY(floatGroup, normalHeaderHeight - scrollY - floatGroup.getHeight());
+                ViewHelper.setTranslationY(infoContainer, normalHeaderHeight
+                        - infoContainer.getHeight() - scrollY - operatorContainer.getHeight());
+                ViewHelper.setTranslationY(operatorContainer, normalHeaderHeight - scrollY - operatorContainer.getHeight());
             }
 
         }
@@ -110,11 +108,11 @@ public abstract class PullFrag extends BaseFragment implements SlideFinishLayout
         slideFinishLayout = (SlideFinishLayout) contentView;
         viewLoading = $(R.id.layout_loading);
         viewLoadFailed = $(R.id.layout_load_failed);
-        viewInfo = $(R.id.view_info);
+        infoContainer = $(R.id.info_container);
         topImage = $(R.id.top_image);
         topbar = $(R.id.top_bar);
         pullListView = $(R.id.pull_list_view);
-        floatGroup = $(R.id.float_group);
+        operatorContainer = $(R.id.operator_container);
         tvTitle = $(R.id.tv_title);
         ibtnBack = $(R.id.ibtn_back);
         return contentView;
@@ -124,7 +122,6 @@ public abstract class PullFrag extends BaseFragment implements SlideFinishLayout
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         appContext.setViewFitsStatusBar(topbar);
-        viewInfo.addView(createViewInfo());
         slideFinishLayout.setSlideFinishCallback(this);
         ibtnBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,8 +191,8 @@ public abstract class PullFrag extends BaseFragment implements SlideFinishLayout
                 topImage.getViewTreeObserver().removeOnPreDrawListener(this);
                 int height = topImage.getHeight();
                 int newImageHeight = (int) (height * imageHeightRatio);
-                int normalHeaderHieght = newImageHeight + floatGroup.getHeight();
-                pullListView.setMaxHeaderHeight(height + floatGroup.getHeight());
+                int normalHeaderHieght = newImageHeight + operatorContainer.getHeight();
+                pullListView.setMaxHeaderHeight(height + operatorContainer.getHeight());
                 pullListView.setNormalHeaderHeight(normalHeaderHieght);
                 updateImageHeight(newImageHeight);
                 return true;
@@ -208,10 +205,6 @@ public abstract class PullFrag extends BaseFragment implements SlideFinishLayout
         ViewGroup.LayoutParams lp = topImage.getLayoutParams();
         lp.height = height;
         topImage.setLayoutParams(lp);
-    }
-
-    protected void addFloatView(View view) {
-        floatGroup.addView(view);
     }
 
     @Override

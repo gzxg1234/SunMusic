@@ -16,20 +16,17 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Message;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.RemoteViews;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.sanron.music.AppContext;
 import com.sanron.music.AppManager;
 import com.sanron.music.R;
@@ -37,8 +34,9 @@ import com.sanron.music.db.model.Music;
 import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.DetailSongInfo;
+import com.sanron.music.net.bean.LrcPicResult;
 import com.sanron.music.utils.MyLog;
-import com.sanron.music.utils.TUtils;
+import com.sanron.music.utils.T;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,18 +63,15 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
     public static final String CMD_LYRIC = "lyric";
     public static final String CMD_CLOSE = "close_app";
 
+    public static final int WHAT_PLAY_ERROR = 1;
+    public static final int WHAT_BUFFER_TIMEOUT = 2;
+
     private AppContext appContext;
 
     private PowerManager.WakeLock wakeLock;
 
     private NotificationCompat.Builder builder;
 
-    private ImageLoader imageLoader = ImageLoader.getInstance();
-
-    private DisplayImageOptions imageOptions = new DisplayImageOptions.Builder()
-            .imageScaleType(ImageScaleType.EXACTLY)
-            .cacheInMemory(true)
-            .build();
 
     private AudioManager audioManager;
 
@@ -86,7 +81,30 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
     private boolean isLossAudioFocus;
 
-    private Handler handler = new Handler(Looper.getMainLooper());
+    private ImageLoader imageLoader = ImageLoader.getInstance();
+
+    private DisplayImageOptions imageOptions = new DisplayImageOptions.Builder()
+            .imageScaleType(ImageScaleType.EXACTLY)
+            .cacheOnDisk(true)
+            .build();
+
+    private Handler handler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case WHAT_PLAY_ERROR: {
+                    player.next();
+                }
+                break;
+
+                case WHAT_BUFFER_TIMEOUT: {
+                    player.next();
+                    T.show(getApplicationContext(), "缓冲超时,自动播放下一曲");
+                }
+                break;
+            }
+        }
+    };
 
     private BroadcastReceiver cmdReceiver = new BroadcastReceiver() {
         @Override
@@ -229,7 +247,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         if (player.getCurrentIndex() != -1) {
             Music music = player.getCurrentMusic();
             String artist = music.getArtist();
-            artist = artist == null || artist.equals("<unknown>") ? "未知歌手" : artist;
+            artist = artist.equals("<unknown>") ? "未知歌手" : artist;
             String musicInfo = music.getTitle() + "-" + artist;
 
             bigContentView.setTextViewText(R.id.tv_music_info, musicInfo);
@@ -311,7 +329,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         }
     }
 
-    public class Player extends Binder implements IPlayer, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnBufferingUpdateListener {
+    public class Player extends Binder implements IPlayer, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnInfoListener {
 
         /**
          * 播放队列
@@ -333,10 +351,18 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
          * 音乐文件地址请求
          */
         private Call fileLinkCall;
+        private Call searchPicCall;
+        private List<OnBufferListener> onBufferListeners;
         private List<IPlayer.Callback> callbacks;
         private MediaPlayer mediaPlayer;
 
+        /**
+         * 超时时间
+         */
+        public static final int BUFFER_TIMEOUT = 30 * 1000;
+
         public Player() {
+            onBufferListeners = new ArrayList<>();
             queue = new ArrayList<>();
             callbacks = new ArrayList<>();
             currentIndex = -1;
@@ -347,6 +373,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             mediaPlayer.setOnPreparedListener(this);
             mediaPlayer.setOnCompletionListener(this);
             mediaPlayer.setOnErrorListener(this);
+            mediaPlayer.setOnInfoListener(this);
             mediaPlayer.setOnBufferingUpdateListener(this);
         }
 
@@ -400,35 +427,23 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             }
         }
 
-        private void prepare(Uri uri) {
-            synchronized (this) {
-                if (mediaPlayer == null) {
-                    initMediaPlayer();
-                } else {
-                    mediaPlayer.reset();
-                }
-
-                try {
-                    mediaPlayer.setDataSource(PlayerService.this, uri);
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mediaPlayer.prepareAsync();
-                } catch (IllegalStateException e) {
-                    MyLog.e(TAG, "IllegalState");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    handlerPlayError("播放出错");
-                }
-            }
-        }
-
         /**
          * 播放队列position位置歌曲
          */
         @Override
         public void play(int position) {
-
+            handler.removeMessages(WHAT_PLAY_ERROR);
+            handler.removeMessages(WHAT_BUFFER_TIMEOUT);
             if (fileLinkCall != null) {
                 fileLinkCall.cancel();
+            }
+            if (searchPicCall != null) {
+                searchPicCall.cancel();
+            }
+
+
+            if (mediaPlayer != null) {
+                mediaPlayer.reset();
             }
             currentIndex = position;
             Music music = queue.get(currentIndex);
@@ -449,24 +464,34 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             }
         }
 
+        private void prepare(Uri uri) {
+            synchronized (this) {
+                if (mediaPlayer == null) {
+                    initMediaPlayer();
+                }
+                try {
+                    mediaPlayer.setDataSource(PlayerService.this, uri);
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mediaPlayer.prepareAsync();
+                } catch (IllegalStateException e) {
+                    MyLog.e(TAG, "IllegalState");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    handlerPlayError("播放出错");
+                }
+            }
+        }
+
+
         private void handlerPlayError(final String errorMsg) {
             state = STATE_STOP;
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    TUtils.show(PlayerService.this, errorMsg + ",3s后播放下一曲");
+                    T.show(PlayerService.this, errorMsg + ",3s后播放下一曲");
                 }
             });
-            handler.postDelayed(new Runnable() {
-                final int errorPos = currentIndex;
-
-                @Override
-                public void run() {
-                    if (getCurrentIndex() == errorPos) {
-                        next();
-                    }
-                }
-            }, 3000);
+            handler.sendEmptyMessageDelayed(WHAT_PLAY_ERROR, 3000);
         }
 
 
@@ -592,6 +617,16 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         }
 
         @Override
+        public void addOnBufferListener(OnBufferListener onBufferListener) {
+            onBufferListeners.add(onBufferListener);
+        }
+
+        @Override
+        public void removeBufferListener(OnBufferListener onBufferListener) {
+            onBufferListeners.remove(onBufferListener);
+        }
+
+        @Override
         public int getProgress() {
             synchronized (this) {
                 if (state >= IPlayer.STATE_PREPARED) {
@@ -693,26 +728,50 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
             //加载音乐图片
             Music music = queue.get(currentIndex);
-            if (!TextUtils.isEmpty(music.getPic())) {
-                ImageSize imageSize = new ImageSize(500, 500);
-                imageLoader.loadImage("file://" + music.getPic(),
-                        imageSize,
-                        imageOptions,
-                        new SimpleImageLoadingListener() {
-                            @Override
-                            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                                setCurMusicPic(loadedImage);
-                            }
+            String artist = music.getArtist();
+            searchPicCall = MusicApi.searchLrcPic(music.getTitle(),
+                    "<unknown>".equals(artist) ? "" : artist,
+                    2,
+                    new ApiCallback<LrcPicResult>() {
+                        final int requestIndex = currentIndex;
 
-                            @Override
-                            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                                setCurMusicPic(null);
+                        @Override
+                        public void onSuccess(Call call, LrcPicResult data) {
+                            List<LrcPicResult.LrcPic> lrcPics = data.getLrcPics();
+                            Bitmap loadedImage = null;
+                            String pic = null;
+                            if (lrcPics != null) {
+                                for (LrcPicResult.LrcPic lrcPic : lrcPics) {
+                                    pic = lrcPic.getPic1000x1000();
+                                    if (pic == null) {
+                                        pic = lrcPic.getPic500x500();
+                                    }
+                                    if (pic != null) {
+                                        break;
+                                    }
+                                }
                             }
-                        });
-            } else {
-                setCurMusicPic(null);
-            }
+                            if (!TextUtils.isEmpty(pic)) {
+                                loadedImage = imageLoader.loadImageSync(pic, imageOptions);
+                            }
+                            if (requestIndex == getCurrentIndex()) {
+                                final Bitmap finalLoadedImage = loadedImage;
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        setCurMusicPic(finalLoadedImage);
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            setCurMusicPic(null);
+                        }
+                    });
         }
+
 
         @Override
         public void onBufferingUpdate(MediaPlayer mp, int percent) {
@@ -722,10 +781,10 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 int duration = mp.getDuration();
                 int currentPosition = mp.getCurrentPosition();
                 int remain = duration - currentPosition;
-                int buffedPosition = (int) (currentPosition + (remain * percent / 100f));
+                int buffedPosition = currentPosition + (int) Math.floor(remain * percent / 100f);
 
-                for (Callback callback : callbacks) {
-                    callback.onBufferingUpdate(buffedPosition);
+                for (OnBufferListener listener : onBufferListeners) {
+                    listener.onBufferingUpdate(buffedPosition);
                 }
             }
         }
@@ -736,6 +795,28 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 mediaPlayer.release();
                 mediaPlayer = null;
             }
+        }
+
+        @Override
+        public boolean onInfo(MediaPlayer mp, int what, int extra) {
+            switch (what) {
+                case MediaPlayer.MEDIA_INFO_BUFFERING_START: {
+                    handler.sendEmptyMessageDelayed(WHAT_BUFFER_TIMEOUT, BUFFER_TIMEOUT);
+                    for (OnBufferListener listener : onBufferListeners) {
+                        listener.onBufferStart();
+                    }
+                }
+                break;
+
+                case MediaPlayer.MEDIA_INFO_BUFFERING_END: {
+                    handler.removeMessages(WHAT_BUFFER_TIMEOUT);
+                    for (OnBufferListener listener : onBufferListeners) {
+                        listener.onBufferEnd();
+                    }
+                }
+                break;
+            }
+            return true;
         }
     }
 

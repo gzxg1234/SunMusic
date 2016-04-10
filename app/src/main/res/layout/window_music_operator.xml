@@ -41,7 +41,6 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-
         android:paddingLeft="16dp"
         android:paddingRight="16dp">
 
@@ -54,7 +53,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:text="稍后播"
+            android:text="加入队列"
             android:textColor="#FFFFFF"
             android:textSize="14dp" />
     </LinearLayout>

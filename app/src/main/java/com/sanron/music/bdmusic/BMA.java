@@ -1,12 +1,24 @@
 package com.sanron.music.bdmusic;
+import android.graphics.Bitmap;
+import android.view.View;
+
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.sanron.music.R;
+import com.sanron.music.net.ApiCallback;
+import com.sanron.music.net.MusicApi;
+import com.sanron.music.net.bean.LrcPicResult;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
+
+import okhttp3.Call;
 
 public class BMA {
 	
 	public static final String FORMATE = "json";
 	public static final String BASE = "http://tingapi.ting.baidu.com/v1/restserver/ting?from=android&version=5.6.5.6&format="+FORMATE;
-
 
 	public static class FocusPic{
 
@@ -568,13 +580,15 @@ public class BMA {
 			StringBuffer sb = new StringBuffer(BASE);
 			String ts = Long.toString(System.currentTimeMillis());
 			String query = encode(word) +"$$"+ encode(artist);
-			String e = AESTools.encrpty("query="+word +"$$"+ artist+"&ts="+ts);
+			String e = AESTools.encrpty("query="+query +"$$"+ artist+"&ts="+ts);
 			sb.append("&method=").append("baidu.ting.search.lrcpic")
 				.append("&query=").append(query)
 				.append("&ts=").append(ts)
 				.append("&type=").append(type)
 				.append("&e=").append(e);
 			return sb.toString();
+
+
 		}
 
 		

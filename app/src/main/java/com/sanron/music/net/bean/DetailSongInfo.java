@@ -76,6 +76,10 @@ public class DetailSongInfo {
             }
 
             public void setFileLink(String fileLink) {
+                if (fileLink != null
+                        && !fileLink.contains("xcode")) {
+                    fileLink = null;
+                }
                 this.fileLink = fileLink;
             }
 

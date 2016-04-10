@@ -18,7 +18,6 @@ import java.util.List;
  */
 public class AddOnlineSongListTask extends AsyncTask<Void, Void, Integer> {
 
-    public static final int EXISTS = -1;
     public static final int FAILED = 0;
     public static final int SUCCESS = 1;
 
@@ -37,18 +36,11 @@ public class AddOnlineSongListTask extends AsyncTask<Void, Void, Integer> {
 
 
         try {
-
-            //是否已经添加过
-            Cursor cur = listAccess.rawQuery("select 1 from " + DBHelper.List.TABLE
-                    + " where " + DBHelper.List.LIST_ID + "=?", songList.getListId());
-            if (cur.moveToFirst()) {
-                return EXISTS;
-            }
             PlayList playList = new PlayList();
             playList.setIcon(songList.getPic300());
             playList.setTitle(songList.getTitle());
             playList.setListId(songList.getListId());
-            playList.setType(DBHelper.List.TYPE_ONLINE);
+            playList.setType(DBHelper.List.TYPE_COLLECTION);
             playList.setAddTime(System.currentTimeMillis());
             List<Song> songs = songList.getSongs();
 

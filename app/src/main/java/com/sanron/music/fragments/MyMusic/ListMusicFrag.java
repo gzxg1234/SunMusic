@@ -37,7 +37,7 @@ public class ListMusicFrag extends BaseMusicFrag {
 
 
     @Override
-    protected void onMultiActionDeleteClick(List<Music> checkedMusics) {
+    protected void onDeleteOperator(List<Music> checkedMusics) {
         new RemoveListSongDialogBuilder(getContext(), playList, checkedMusics)
                 .show();
     }

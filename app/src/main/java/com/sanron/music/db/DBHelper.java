@@ -34,7 +34,6 @@ public class DBHelper extends SQLiteOpenHelper {
         public static final String DURATION = "duration";
         public static final String SONG_ID = "song_id";
         public static final String BITRATE = "bitrate";
-        public static final String PIC = "picture";
         public static final String LYRIC = "lyric";
     }
 
@@ -46,7 +45,6 @@ public class DBHelper extends SQLiteOpenHelper {
         public static final String TABLE = "album";
         public static final String NAME = "name";
         public static final String ARTIST = "artist";
-        public static final String PIC = "picture";
     }
 
     public static class Artist {
@@ -55,7 +53,6 @@ public class DBHelper extends SQLiteOpenHelper {
          */
         public static final String TABLE = "artist";
         public static final String NAME = "name";
-        public static final String PIC = "picture";
     }
 
     public static class List {
@@ -73,7 +70,7 @@ public class DBHelper extends SQLiteOpenHelper {
         public static final int TYPE_RECENT = 2;//最近播放
         public static final int TYPE_FAVORITE = 3;//我喜欢
         public static final int TYPE_USER = 4;//用户自建
-        public static final int TYPE_ONLINE = 5;//收藏网络歌单
+        public static final int TYPE_COLLECTION = 5;//收藏歌单
 
         public static final int TYPE_LOCAL_ID = 1;
         public static final int TYPE_RECENT_ID = 2;
@@ -111,12 +108,11 @@ public class DBHelper extends SQLiteOpenHelper {
         columnTypes.put(Music.TITLE, "text");
         columnTypes.put(Music.TITLE_KEY, "text");
         columnTypes.put(Music.ALBUM, "text");
-        columnTypes.put(Music.ARTIST, "text");
+        columnTypes.put(Music.ARTIST, "text default <unknown>");
         columnTypes.put(Music.DURATION, "integer");
         columnTypes.put(Music.SONG_ID, "text");
         columnTypes.put(Music.BITRATE, "integer");
         columnTypes.put(Music.LYRIC, "text");
-        columnTypes.put(Music.PIC, "text");
         String sql = buildCreateSql(Music.TABLE, columnTypes);
         db.execSQL(sql);
         String index1 = createIndexSql("path_index", Music.TABLE, Music.DATA);
@@ -165,7 +161,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public void createTableArtist(SQLiteDatabase db) {
         Map<String, String> columns = new LinkedHashMap<>();
         columns.put(Artist.NAME, "integer");
-        columns.put(Artist.PIC, "integer");
         String sql = buildCreateSql(Artist.TABLE, columns);
         db.execSQL(sql);
     }
@@ -174,7 +169,6 @@ public class DBHelper extends SQLiteOpenHelper {
         Map<String, String> columns = new LinkedHashMap<>();
         columns.put(Album.NAME, "integer");
         columns.put(Album.ARTIST, "integer");
-        columns.put(Album.PIC, "integer");
         String sql = buildCreateSql(Album.TABLE, columns);
         db.execSQL(sql);
     }

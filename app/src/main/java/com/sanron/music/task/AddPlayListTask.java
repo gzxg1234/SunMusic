@@ -21,26 +21,29 @@ public abstract class AddPlayListTask extends AsyncTask<String, Void, Integer> {
     protected Integer doInBackground(String... params) {
         int result = FAILED;
         String listName = params[0];
-        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.List.TABLE);
-        ContentValues values = new ContentValues(2);
-        values.put(DBHelper.List.TITLE, listName);
+        DataProvider.Access listAccess = DataProvider.instance().getAccess(DBHelper.List.TABLE);
 
         //检查是否重名
-        Cursor cursor = access.query(values);
+        Cursor cursor = listAccess.query(new String[]{DBHelper.ID},
+                DBHelper.List.TITLE + "=? and " + DBHelper.List.TYPE + "=?",
+                new String[]{listName, String.valueOf(DBHelper.List.TYPE_USER)});
         boolean isExists = cursor.moveToFirst();
         cursor.close();
         if (isExists) {
             result = EXISTS;
         } else {
 
+            ContentValues values = new ContentValues(2);
+            values.put(DBHelper.List.TITLE, listName);
+            values.put(DBHelper.List.TYPE, DBHelper.List.TYPE_USER);
             //插入
             values.put(DBHelper.List.TYPE, DBHelper.List.TYPE_USER);
             values.put(DBHelper.List.ADD_TIME, System.currentTimeMillis());
-            if (access.insert(null, values) != -1) {
+            if (listAccess.insert(null, values) != -1) {
                 result = SUCCESS;
             }
         }
-        access.close();
+        listAccess.close();
         return result;
     }
 

@@ -33,7 +33,7 @@ import com.sanron.music.task.DeleteTask;
 import com.sanron.music.task.QueryListMemberDatasTask;
 import com.sanron.music.task.QueryListTask;
 import com.sanron.music.task.UpdateListNameTask;
-import com.sanron.music.utils.TUtils;
+import com.sanron.music.utils.T;
 
 import java.util.List;
 
@@ -102,11 +102,15 @@ public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItem
         PopupMenu popupMenu = new PopupMenu(getContext(), view);
         Menu menu = popupMenu.getMenu();
         popupMenu.getMenuInflater().inflate(R.menu.popup_menu_playlist, menu);
-        if (adapter.getItem(position).getType() == DBHelper.List.TYPE_FAVORITE) {
+        int type = adapter.getItem(position).getType();
+        if (type == DBHelper.List.TYPE_FAVORITE) {
             //不是用户创建的列表，不能重命名和删除
             menu.removeItem(R.id.menu_delete_list);
             menu.removeItem(R.id.menu_rename_list);
+        } else if (type == DBHelper.List.TYPE_COLLECTION) {
+            menu.removeItem(R.id.menu_rename_list);
         }
+
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -145,7 +149,7 @@ public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItem
             @Override
             protected void onPostExecute(List<Music> musics) {
                 if (musics.size() == 0) {
-                    TUtils.show(getContext(), "列表暂时没有歌曲");
+                    T.show(getContext(), "列表暂时没有歌曲");
                 } else {
                     player.clearQueue();
                     player.enqueue(musics);
@@ -201,12 +205,12 @@ public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItem
                     protected void onPostExecute(Integer result) {
                         switch (result) {
                             case FAILED: {
-                                TUtils.show(getContext(), "修改失败");
+                                T.show(getContext(), "修改失败");
                                 dlg.dismiss();
                             }
                             break;
                             case SUCCESS: {
-                                TUtils.show(getContext(), "修改成功");
+                                T.show(getContext(), "修改成功");
                                 dlg.dismiss();
 
                             }
@@ -243,13 +247,13 @@ public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItem
 
                         switch (result) {
                             case FAILED: {
-                                TUtils.show(getContext(), "新建列表失败");
+                                T.show(getContext(), "新建列表失败");
                                 dlg.dismiss();
                             }
                             break;
 
                             case SUCCESS: {
-                                TUtils.show(getContext(), "新建列表成功");
+                                T.show(getContext(), "新建列表成功");
                                 dlg.dismiss();
                             }
                             break;
@@ -306,9 +310,9 @@ public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItem
         @Override
         public void onDeleteFinish(int deleteCount) {
             if (deleteCount == 0) {
-                TUtils.show(getContext(), "删除失败");
+                T.show(getContext(), "删除失败");
             } else {
-                TUtils.show(getContext(), "删除歌单成功");
+                T.show(getContext(), "删除歌单成功");
             }
         }
     }

@@ -36,12 +36,7 @@ public class AppContext extends Application {
     private ServiceConnection connection;
     private int statusBarHeight = -1;
 
-    public static final int DISK_CACHE_SIZE = 50 * 1024 * 1024;//磁盘缓存大小
-    public static final int DISK_CACHE_MAX_COUNT = 100;//磁盘缓存文件数量
-    public static final int THREAD_POOL_SIZE = 3;
-    public static final int MAX_MEMORY_CACHE_SIZE = 16 * 1024 * 1024;//RAM缓存最多16MB
-    public static final float MEMORY_CACHE_PERCENTAGE = 0.1f;//默认10%程序最大内存的ram缓存
-    public static final String IMG_CACHE = "img_cache";
+
 
     public static final String TAG = AppContext.class.getSimpleName();
 
@@ -49,36 +44,9 @@ public class AppContext extends Application {
     public void onCreate() {
         super.onCreate();
         MyLog.i(TAG, "app create");
-        ApiHttpClient.init(this);
         DataProvider.instance().init(this);
-        initImageLoader();
     }
 
-    private void initImageLoader() {
-        ImageLoader imageLoader = ImageLoader.getInstance();
-        ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(getApplicationContext());
-
-        int memoryCacheSize = (int) (Runtime.getRuntime().maxMemory() * MEMORY_CACHE_PERCENTAGE);
-        if (memoryCacheSize > MAX_MEMORY_CACHE_SIZE) {
-            memoryCacheSize = MAX_MEMORY_CACHE_SIZE;
-        }
-        builder.memoryCache(new FIFOLimitedMemoryCache(memoryCacheSize));
-        File diskCacheFile = new File(getExternalCacheDir(), IMG_CACHE);
-        File reserveCacheFile = new File(getCacheDir(), IMG_CACHE);
-        try {
-            builder.diskCache(new LruDiskCache(diskCacheFile,
-                    reserveCacheFile,
-                    new Md5FileNameGenerator(),
-                    DISK_CACHE_SIZE,
-                    DISK_CACHE_MAX_COUNT));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        builder.imageDownloader(new BaseImageDownloader(this, 5 * 1000, 30 * 1000));
-        builder.threadPoolSize(THREAD_POOL_SIZE);
-        builder.threadPriority(Thread.NORM_PRIORITY - 2);
-        imageLoader.init(builder.build());
-    }
 
     public void closeApp() {
         AppManager.instance().finishAllActivity();

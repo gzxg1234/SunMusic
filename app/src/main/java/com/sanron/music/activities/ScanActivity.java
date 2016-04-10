@@ -21,13 +21,12 @@ import android.widget.TextView;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
 import com.sanron.music.R;
-import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.task.UpdateLocalMusicTask;
 import com.sanron.music.utils.AudioTool;
 import com.sanron.music.utils.MusicScanner;
 import com.sanron.music.utils.MyLog;
-import com.sanron.music.utils.TUtils;
+import com.sanron.music.utils.T;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -221,7 +220,7 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                 String text = ((TextView) view).getText().toString();
                 if (TEXT_START_SCAN.equals(text)) {
                     if (scanner.isScanning()) {
-                        TUtils.show(this, "正在扫描，请稍后操作");
+                        T.show(this, "正在扫描，请稍后操作");
                     } else {
                         MyLog.d(TAG, "开始扫描");
                         scanner.scan(listener, Environment.getExternalStorageDirectory().getAbsolutePath());

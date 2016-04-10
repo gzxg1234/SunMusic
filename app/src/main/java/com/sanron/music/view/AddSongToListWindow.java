@@ -20,7 +20,7 @@ import com.sanron.music.R;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.db.model.PlayList;
 import com.sanron.music.task.AddMusicToListTask;
-import com.sanron.music.utils.TUtils;
+import com.sanron.music.utils.T;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +71,7 @@ public class AddSongToListWindow extends PopupWindow {
                     @Override
                     protected void onPostExecute(Integer addNum) {
                         String msg = addNum + "首歌曲添加成功,";
-                        TUtils.show(AddSongToListWindow.this.activity, msg);
+                        T.show(AddSongToListWindow.this.activity, msg);
                         AddSongToListWindow.this.dismiss();
                         progressDialog.dismiss();
                     }

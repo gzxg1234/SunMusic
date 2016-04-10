@@ -35,7 +35,7 @@ public class LocalMusicFrag extends ListMusicFrag implements MainActivity.BackPr
     }
 
     @Override
-    protected void onMultiActionDeleteClick(List<Music> checkedMusics) {
+    protected void onDeleteOperator(List<Music> checkedMusics) {
         new DeleteSongDialogBuilder(getContext(), checkedMusics)
                 .show();
     }

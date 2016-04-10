@@ -2,15 +2,15 @@ package com.sanron.music.db;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteTransactionListener;
+import android.net.Uri;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Observable;
-import java.util.Set;
 
 /**
  * Created by Administrator on 2015/12/21.
@@ -39,28 +39,13 @@ public class DataProvider extends Observable {
     public class Access {
         private String mTableName;
         private List<Cursor> mCursors;
-        private boolean change;
+        private boolean changed;
+        private List<Integer> changedIds;
 
         private Access(String table) {
             mTableName = table;
             mCursors = new LinkedList<>();
-        }
-
-        public Cursor query(String[] columns, ContentValues values) {
-            StringBuffer selection = new StringBuffer();
-            String[] selectionArgs = new String[values.size()];
-            Set<Map.Entry<String, Object>> set = values.valueSet();
-            int i = 0;
-            for (Map.Entry<String, Object> entry : set) {
-                selection.append(entry.getKey()).append("=? and ");
-                selectionArgs[i++] = String.valueOf(entry.getValue());
-            }
-            selection.replace(selection.length() - 5, selection.length(), "");
-            return query(columns, selection.toString(), selectionArgs);
-        }
-
-        public Cursor query(ContentValues values) {
-            return query(null, values);
+            changedIds = new LinkedList<>();
         }
 
         public Cursor rawQuery(String sql, String... selectionArgs) {
@@ -96,7 +81,7 @@ public class DataProvider extends Observable {
                 }
             }
             if (num != 0) {
-                change = true;
+                changed = true;
             }
             return num;
         }
@@ -104,7 +89,7 @@ public class DataProvider extends Observable {
         public long insert(String nullColumnHack, ContentValues values) {
             long id = mDatabase.insert(mTableName, null, values);
             if (id != -1) {
-                change = true;
+                changed = true;
             }
             return id;
         }
@@ -112,7 +97,7 @@ public class DataProvider extends Observable {
         public int delete(String where, String... whereArgs) {
             int num = mDatabase.delete(mTableName, where, whereArgs);
             if (num > 0) {
-                change = true;
+                changed = true;
             }
             return num;
         }
@@ -120,7 +105,7 @@ public class DataProvider extends Observable {
         public int update(ContentValues contentValues, String where, String... whereArgs) {
             int num = mDatabase.update(mTableName, contentValues, where, whereArgs);
             if (num > 0) {
-                change = true;
+                changed = true;
             }
             return num;
         }
@@ -130,7 +115,7 @@ public class DataProvider extends Observable {
                 mCursors.get(i).close();
             }
             synchronized (DataProvider.this) {
-                if (change) {
+                if (changed) {
                     setChanged();
                     notifyObservers(mTableName);
                 }
