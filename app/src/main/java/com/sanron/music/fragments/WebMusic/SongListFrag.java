@@ -1,6 +1,7 @@
 package com.sanron.music.fragments.WebMusic;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,12 +19,15 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.sanron.music.R;
+import com.sanron.music.db.DBHelper;
+import com.sanron.music.db.DataProvider;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.Song;
 import com.sanron.music.net.bean.SongList;
 import com.sanron.music.task.AddOnlineSongListTask;
+import com.sanron.music.utils.T;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -41,13 +45,12 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
     private Call requestCall;
     private String listId;
     private SongList data;
+    private boolean isCollected;
 
     private ViewGroup songListInfo;
     private TextView tvSongListTitle;
     private TextView tvSongListTag;
-    private ImageButton ibtnPlay;
 
-    private ViewGroup viewOperator;
     private TextView tvSongNum;
     private ImageButton ibtnFavorite;
     private ImageButton ibtnDownload;
@@ -83,14 +86,18 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewOperator = (ViewGroup) LayoutInflater.from(getContext()).inflate(R.layout.layout_songlist_operator, null);
-        tvSongNum = (TextView) viewOperator.findViewById(R.id.tv_song_num);
-        ibtnDownload = (ImageButton) viewOperator.findViewById(R.id.ibtn_download);
-        ibtnFavorite = (ImageButton) viewOperator.findViewById(R.id.ibtn_favorite);
-        ibtnShare = (ImageButton) viewOperator.findViewById(R.id.ibtn_share);
-        addFloatView(viewOperator);
-        pullListView.setAdapter(adapter);
+        LayoutInflater.from(getContext())
+                .inflate(R.layout.layout_songlist_operator, operatorContainer, true);
+        LayoutInflater.from(getContext())
+                .inflate(R.layout.layout_songlist_info, infoContainer, true);
+        tvSongNum = (TextView) operatorContainer.findViewById(R.id.tv_song_num);
+        ibtnDownload = (ImageButton) operatorContainer.findViewById(R.id.ibtn_download);
+        ibtnFavorite = (ImageButton) operatorContainer.findViewById(R.id.ibtn_favorite);
+        ibtnShare = (ImageButton) operatorContainer.findViewById(R.id.ibtn_share);
+        tvSongListTag = (TextView) infoContainer.findViewById(R.id.tv_list_tag);
+        tvSongListTitle = (TextView) infoContainer.findViewById(R.id.tv_list_title);
 
+        pullListView.setAdapter(adapter);
         ibtnDownload.setOnClickListener(this);
         ibtnShare.setOnClickListener(this);
         ibtnFavorite.setOnClickListener(this);
@@ -107,11 +114,12 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
     }
 
     private void loadData() {
-        System.out.println("loadData");
         requestCall = MusicApi.songListInfo(listId, new ApiCallback<SongList>() {
             @Override
             public void onFailure(Call call, IOException e) {
-                showLoadFailedView();
+                if (!call.isCanceled()) {
+                    showLoadFailedView();
+                }
             }
 
             @Override
@@ -123,7 +131,10 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
                         pic = data.getPic300();
                     }
                 }
+                //加载图片
                 final Bitmap image = imageLoader.loadImageSync(pic, imageOptions);
+                //检查是否已收藏
+                isCollected = checkIsCollected(listId);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -144,16 +155,11 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
         adapter.setData(data.getSongs());
         setTitle(data.getTitle());
         setHeaderImage(image);
+        if (isCollected) {
+            ibtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
+        }
     }
 
-    @Override
-    protected View createViewInfo() {
-        songListInfo = (ViewGroup) LayoutInflater.from(getContext()).inflate(R.layout.layout_songlist_info, null);
-        tvSongListTag = (TextView) songListInfo.findViewById(R.id.tv_list_tag);
-        tvSongListTitle = (TextView) songListInfo.findViewById(R.id.tv_list_title);
-        ibtnPlay = (ImageButton) songListInfo.findViewById(R.id.ibtn_play);
-        return songListInfo;
-    }
 
     @Override
     public void onClick(View v) {
@@ -164,27 +170,29 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
             break;
 
             case R.id.ibtn_favorite: {
-                new AddOnlineSongListTask(data) {
-                    @Override
-                    protected void onPostExecute(Integer result) {
-                        switch (result) {
-                            case EXISTS: {
+                if (isCollected) {
+                    T.show(getContext(), "已收藏过此歌单");
+                } else {
+                    new AddOnlineSongListTask(data) {
+                        @Override
+                        protected void onPostExecute(Integer result) {
+                            switch (result) {
 
+                                case SUCCESS: {
+                                    T.show(getContext(), "收藏成功");
+                                    isCollected = true;
+                                    ibtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
+                                }
+                                break;
+
+                                case FAILED: {
+                                    T.show(getContext(), "收藏歌单失败");
+                                }
+                                break;
                             }
-                            break;
-
-                            case SUCCESS: {
-
-                            }
-                            break;
-
-                            case FAILED: {
-
-                            }
-                            break;
                         }
-                    }
-                }.execute();
+                    }.execute();
+                }
             }
             break;
 
@@ -193,6 +201,16 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
             }
             break;
         }
+    }
+
+    private boolean checkIsCollected(String listid) {
+        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.List.TABLE);
+        Cursor c = access.query(new String[]{DBHelper.ID},
+                DBHelper.List.LIST_ID + "=?",
+                new String[]{listid});
+        boolean result = c.moveToFirst();
+        access.close();
+        return result;
     }
 
     @Override

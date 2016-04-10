@@ -53,6 +53,10 @@ public interface IPlayer {
 
     void removeCallback(Callback callback);
 
+    void addOnBufferListener(OnBufferListener onBufferListener);
+
+    void removeBufferListener(OnBufferListener onBufferListener);
+
     int getProgress();
 
     int getDuration();
@@ -63,7 +67,13 @@ public interface IPlayer {
         void onLoadedPicture(Bitmap musicPic);
 
         void onStateChange(int state);
+    }
 
+    interface OnBufferListener {
         void onBufferingUpdate(int bufferedPosition);
+
+        void onBufferStart();
+
+        void onBufferEnd();
     }
 }

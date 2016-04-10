@@ -64,12 +64,6 @@ public class Music {
      */
     private String lyric;
 
-    /**
-     * 歌曲图片
-     *
-     * @return
-     */
-    private String pic;
 
     public long getModifiedDate() {
         return modifiedDate;
@@ -169,14 +163,6 @@ public class Music {
         this.lyric = lyric;
     }
 
-    public String getPic() {
-        return pic;
-    }
-
-    public void setPic(String pic) {
-        this.pic = pic;
-    }
-
 
     public ContentValues toContentValues() {
         ContentValues values = new ContentValues();
@@ -190,7 +176,6 @@ public class Music {
         values.put(DBHelper.Music.TITLE, title);
         values.put(DBHelper.Music.TITLE_KEY, titleKey);
         values.put(DBHelper.Music.DISPLAY, displayName);
-        values.put(DBHelper.Music.PIC, pic);
         values.put(DBHelper.Music.LYRIC, lyric);
         return values;
     }
@@ -207,7 +192,6 @@ public class Music {
         music.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.Music.TITLE)));
         music.setTitleKey(cursor.getString(cursor.getColumnIndex(DBHelper.Music.TITLE_KEY)));
         music.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.Music.DISPLAY)));
-        music.setPic(cursor.getString(cursor.getColumnIndex(DBHelper.Music.PIC)));
         music.setLyric(cursor.getString(cursor.getColumnIndex(DBHelper.Music.LYRIC)));
         return music;
     }
@@ -219,7 +203,8 @@ public class Music {
         }
         if (o instanceof Music) {
             Music m = (Music) o;
-            return m.id == id;
+            return m.id == id
+                    ||m.songId == songId;
         }
         return false;
     }

@@ -16,13 +16,13 @@
         android:layout_height="wrap_content" />
 
     <FrameLayout
-        android:id="@+id/view_info"
+        android:id="@+id/info_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/cover_down_background" />
 
     <LinearLayout
-        android:id="@+id/float_group"
+        android:id="@+id/operator_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"

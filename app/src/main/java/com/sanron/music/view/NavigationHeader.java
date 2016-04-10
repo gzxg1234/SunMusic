@@ -73,19 +73,12 @@ public class NavigationHeader extends FrameLayout implements IPlayer.Callback {
                 Music music = player.getCurrentMusic();
                 tvMusicTitle.setText(music.getTitle());
                 String artist = music.getArtist();
-                if (artist == null
-                        || artist.equals("<unknown>")) {
+                if ("<unknown>".equals(artist)) {
                     artist = "未知歌手";
                 }
                 tvMusicArtist.setText(artist);
             }
             break;
         }
-    }
-
-
-    @Override
-    public void onBufferingUpdate(int bufferedPosition) {
-
     }
 }

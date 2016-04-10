@@ -58,7 +58,6 @@ public class Album {
         album.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
         album.setName(cursor.getString(cursor.getColumnIndex(DBHelper.Album.NAME)));
         album.setArtistName(cursor.getString(cursor.getColumnIndex(DBHelper.Album.ARTIST)));
-        album.setPicPath(cursor.getString(cursor.getColumnIndex(DBHelper.Album.PIC)));
         return album;
     }
 }

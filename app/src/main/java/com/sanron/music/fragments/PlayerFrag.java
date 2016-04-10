@@ -29,7 +29,8 @@ import com.sanron.music.R;
 import com.sanron.music.activities.MainActivity;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.service.IPlayer;
-import com.sanron.music.utils.TUtils;
+import com.sanron.music.utils.MyLog;
+import com.sanron.music.utils.T;
 import com.sanron.music.view.ShowQueueMusicWindow;
 
 import java.text.SimpleDateFormat;
@@ -208,11 +209,25 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
             }
         }
 
+    };
+
+    private IPlayer.OnBufferListener onBufferListener = new IPlayer.OnBufferListener() {
+
         @Override
         public void onBufferingUpdate(int bufferedPosition) {
             if (bufferedPosition > playProgress.getSecondaryProgress()) {
                 playProgress.setSecondaryProgress(bufferedPosition);
             }
+        }
+
+        @Override
+        public void onBufferStart() {
+            System.out.println("buffer start");
+        }
+
+        @Override
+        public void onBufferEnd() {
+            System.out.println("buffer end");
         }
     };
 
@@ -325,6 +340,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
         updateProgressThread.start();
 
         player.addCallback(callback);
+        player.addOnBufferListener(onBufferListener);
 
         Music music = player.getCurrentMusic();
         int state = player.getState();
@@ -460,6 +476,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
         super.onDestroyView();
         updateProgressThread.end();
         player.removeCallback(callback);
+        player.removeBufferListener(onBufferListener);
         if (showQueueMusicWindow != null && showQueueMusicWindow.isShowing()) {
             showQueueMusicWindow.dismiss();
         }
@@ -521,7 +538,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
                     if (player.getQueue().size() > 0) {
                         player.play(0);
                     } else {
-                        TUtils.show(getContext(), "播放列表为空");
+                        T.show(getContext(), "播放列表为空");
                     }
                     return;
                 }

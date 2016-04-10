@@ -35,11 +35,4 @@
             android:textSize="15dp" />
     </LinearLayout>
 
-    <ImageButton
-        android:id="@+id/ibtn_play"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:background="@android:color/transparent"
-        android:src="@mipmap/ic_play_arrow_black_36dp" />
-
 </LinearLayout>

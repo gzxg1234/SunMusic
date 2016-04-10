@@ -43,8 +43,11 @@ public class DetailSongInfo {
             /**
              * 下载链接
              */
-            @JsonProperty("show_link")
+            @JsonProperty("file_link")
             private String fileLink;
+
+            @JsonProperty("show_link")
+            private String showLink;
 
             /**
              * 是否试听地址
@@ -77,6 +80,14 @@ public class DetailSongInfo {
 
             public void setFileLink(String fileLink) {
                 this.fileLink = fileLink;
+            }
+
+            public String getShowLink() {
+                return showLink;
+            }
+
+            public void setShowLink(String showLink) {
+                this.showLink = showLink;
             }
 
             public int getFileSize() {

@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
-import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.sanron.music.R;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.PlayList;
@@ -23,7 +22,7 @@ import java.util.List;
 
 public class ListItemAdapter extends RecyclerView.Adapter {
     private List<PlayList> data;
-    private List<Object> objects;
+    private List<Object> items;
     private Context context;
     private ImageLoader imageLoader;
     private DisplayImageOptions imageOptions;
@@ -36,7 +35,7 @@ public class ListItemAdapter extends RecyclerView.Adapter {
         imageOptions = new DisplayImageOptions.Builder()
                 .cacheOnDisk(true)
                 .imageScaleType(ImageScaleType.EXACTLY)
-                .displayer(new FadeInBitmapDisplayer(300)).build();
+                .build();
     }
 
     public void setData(List<PlayList> data) {
@@ -46,23 +45,23 @@ public class ListItemAdapter extends RecyclerView.Adapter {
 
         this.data = data;
         if (data != null) {
-            objects = new ArrayList<>();
+            items = new ArrayList<>();
             List<PlayList> selfList = new LinkedList<>();
             List<PlayList> onlineList = new LinkedList<>();
             for (PlayList playList : data) {
-                if (playList.getType() == DBHelper.List.TYPE_ONLINE) {
+                if (playList.getType() == DBHelper.List.TYPE_COLLECTION) {
                     onlineList.add(playList);
                 } else {
                     selfList.add(playList);
                 }
             }
             if (selfList.size() > 0) {
-                objects.add("自建歌单");
-                objects.addAll(selfList);
+                items.add("自建歌单");
+                items.addAll(selfList);
             }
             if (onlineList.size() > 0) {
-                objects.add("收藏歌单");
-                objects.addAll(onlineList);
+                items.add("收藏歌单");
+                items.addAll(onlineList);
             }
         }
         notifyDataSetChanged();
@@ -73,14 +72,14 @@ public class ListItemAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        if (objects.get(position) instanceof String) {
+        if (items.get(position) instanceof String) {
             return TYPE_GROUP;
         }
         return TYPE_ITEM;
     }
 
     public PlayList getItem(int position) {
-        return (PlayList) objects.get(position);
+        return (PlayList) items.get(position);
     }
 
     @Override
@@ -104,7 +103,7 @@ public class ListItemAdapter extends RecyclerView.Adapter {
         int holderType = getItemViewType(position);
         if (holderType == TYPE_ITEM) {
             ListItemHolder itemHolder = (ListItemHolder) holder;
-            PlayList playList = (PlayList) objects.get(position);
+            PlayList playList = (PlayList) items.get(position);
             if (playList.getType() == DBHelper.List.TYPE_FAVORITE) {
                 itemHolder.ivPicture.setImageResource(R.mipmap.ic_favorite_list);
             } else if (playList.getType() == DBHelper.List.TYPE_USER) {
@@ -116,14 +115,14 @@ public class ListItemAdapter extends RecyclerView.Adapter {
             itemHolder.tvName.setText(playList.getTitle());
             itemHolder.tvMusicNum.setText(playList.getSongNum() + "首");
         } else if (holderType == TYPE_GROUP) {
-            GroupHolder headerHolder = (GroupHolder) holder;
-            headerHolder.tvText.setText((String) objects.get(position));
+            GroupHolder groupHolder = (GroupHolder) holder;
+            groupHolder.tvText.setText((String) items.get(position));
         }
     }
 
     @Override
     public int getItemCount() {
-        return objects == null ? 0 : objects.size();
+        return items == null ? 0 : items.size();
     }
 
     public List<PlayList> getData() {

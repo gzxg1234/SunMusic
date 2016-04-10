@@ -7,7 +7,7 @@ import android.widget.Toast;
  * Toast工具类
  * Created by Administrator on 2015/12/25.
  */
-public class TUtils {
+public class T {
 
     public static final int SHORT = Toast.LENGTH_SHORT;
     public static final int LONG = Toast.LENGTH_LONG;

@@ -130,9 +130,6 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.Callbac
     }
 
 
-    @Override
-    public void onBufferingUpdate(int bufferedPosition) {
-    }
 
     @Override
     public void onClick(View v) {

@@ -16,6 +16,8 @@ public class ExampleUnitTest {
     @Test
     public void testApi() throws Exception {
         Date date = new Date(1383394620);
+        System.out.println(BMA.Search.searchLrcPic("天黑黑","胡彦斌",2));
+        System.out.println(BMA.Song.baseInfo("7313983"));
         System.out.println(BMA.GeDan.geDanInfo("6432"));
         System.out.println(date.toLocaleString());
         System.out.println(BMA.Song.songInfo("7313983"));
@@ -42,6 +44,6 @@ public class ExampleUnitTest {
         String json = "{\"content\":[{\"title\":434}]}";
 //        String json = "{\"content\":\"\"}";
 //        String json = "{\"content\":}";
-//        JsonUtils.fromJson(json, RecommendSongResult.class);
+//        JsonUtil.fromJson(json, RecommendSongResult.class);
     }
 }

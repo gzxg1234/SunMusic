@@ -8,11 +8,14 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.sanron.music.net.bean.DetailSongInfo;
 import com.sanron.music.net.bean.FocusPicResult;
 import com.sanron.music.net.bean.HotTagResult;
+import com.sanron.music.net.bean.LrcPicResult;
 import com.sanron.music.net.bean.RecommendSong;
 import com.sanron.music.net.bean.SongList;
-import com.sanron.music.utils.JsonUtils;
+import com.sanron.music.utils.JsonUtil;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
@@ -61,7 +64,7 @@ public class MusicApi {
                         && arrayNode.size() > 0) {
                     try {
                         String json = arrayNode.get(0).get("song_list").toString();
-                        List<RecommendSong> recommendSongs = JsonUtils.fromJson(json,
+                        List<RecommendSong> recommendSongs = JsonUtil.fromJson(json,
                                 new TypeReference<List<RecommendSong>>() {
                                 });
                         apiCallback.onSuccess(call, recommendSongs);
@@ -96,7 +99,7 @@ public class MusicApi {
                 if (content != null) {
                     String json = content.get("list").toString();
                     try {
-                        List<SongList> hotSongLists = JsonUtils.fromJson(json,
+                        List<SongList> hotSongLists = JsonUtil.fromJson(json,
                                 new TypeReference<List<SongList>>() {
                                 });
                         apiCallback.onSuccess(call, hotSongLists);
@@ -137,6 +140,7 @@ public class MusicApi {
 
     /**
      * 歌曲文件链接
+     *
      * @param songid
      * @param callback
      * @return
@@ -153,6 +157,29 @@ public class MusicApi {
         return ApiHttpClient.get(url(params), callback);
     }
 
+    /**
+     * 搜图词
+     *
+     * @param word
+     * @param artist
+     * @param type
+     * @param callback
+     * @return
+     */
+    public static Call searchLrcPic(String word, String artist, int type, ApiCallback<LrcPicResult> callback) {
+        ContentValues params = new ContentValues();
+        String ts = Long.toString(System.currentTimeMillis());
+        String query = word + "$$" + artist;
+        String e = com.sanron.music.bdmusic.AESTools.encrpty("query=" + query + "&ts=" + ts);
+        params.put("method", "baidu.ting.search.lrcpic");
+        params.put("query", query);
+        params.put("ts", ts);
+        params.put("type", type);
+        params.put("e", e);
+        System.out.println(url(params));
+        return ApiHttpClient.get(url(params), 10, callback);
+    }
+
     private static String url(ContentValues params) {
         StringBuffer sb = new StringBuffer(BASE);
         Set<String> keys = params.keySet();
@@ -161,5 +188,16 @@ public class MusicApi {
             sb.append("&").append(name).append("=").append(value);
         }
         return sb.toString();
+    }
+
+    public static String encode(String str) {
+        if (str == null) return "";
+
+        try {
+            return URLEncoder.encode(str, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return str;
     }
 }

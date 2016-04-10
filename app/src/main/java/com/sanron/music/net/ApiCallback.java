@@ -1,6 +1,6 @@
 package com.sanron.music.net;
 
-import com.sanron.music.utils.JsonUtils;
+import com.sanron.music.utils.JsonUtil;
 import com.sanron.music.utils.MyLog;
 
 import java.io.IOException;
@@ -26,13 +26,13 @@ public abstract class ApiCallback<T> implements Callback {
             MyLog.d("MusicApi", "json:" + json);
             Type superClass = getClass().getGenericSuperclass();
             Class<T> clazz = (Class<T>) ((ParameterizedType) superClass).getActualTypeArguments()[0];
-            data = JsonUtils.fromJson(json, clazz);
+            data = JsonUtil.fromJson(json, clazz);
+            onSuccess(call, data);
         } catch (IOException e) {
             e.printStackTrace();
             onFailure(call, e);
             return;
         }
-        onSuccess(call, data);
     }
 
     public abstract void onSuccess(Call call, T data);
