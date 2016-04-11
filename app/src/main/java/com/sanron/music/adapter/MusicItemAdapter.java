@@ -163,6 +163,8 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         return false;
     }
 
+
+
     public void setItemChecked(int position, boolean checked) {
         if (isMultiMode && checkStates != null) {
             boolean oldChecked = checkStates.get(position);
@@ -345,7 +347,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
 
         public MusicItemHolder(final View itemView) {
             super(itemView);
-            ivPicture = (ImageView) itemView.findViewById(R.id.top_image);
+            ivPicture = (ImageView) itemView.findViewById(R.id.top_board);
             tvTitle = (TextView) itemView.findViewById(R.id.tv_title);
             tvArtist = (TextView) itemView.findViewById(R.id.tv_artist);
             cbSelect = (CheckBox) itemView.findViewById(R.id.cb_select);

@@ -22,7 +22,7 @@
             app:type="height"
             app:ratio="1">
             <ImageView
-                android:id="@+id/top_image"
+                android:id="@+id/top_board"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"

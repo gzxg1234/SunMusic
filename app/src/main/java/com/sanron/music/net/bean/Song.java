@@ -100,9 +100,6 @@ public class Song {
         music.setTitle(title);
         music.setArtist(author);
         music.setAlbum(albumTitle);
-        String titleKey = (title == null ?
-                null : PinyinHelper.convertToPinyinString(title, "", PinyinFormat.WITHOUT_TONE));
-        music.setTitleKey(titleKey);
         music.setSongId(songId);
         return music;
     }

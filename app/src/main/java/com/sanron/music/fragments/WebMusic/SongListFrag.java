@@ -1,16 +1,16 @@
 package com.sanron.music.fragments.WebMusic;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
+import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,6 +19,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.sanron.music.R;
+import com.sanron.music.adapter.SongItemAdapter;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
 import com.sanron.music.db.model.Music;
@@ -26,11 +27,11 @@ import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.Song;
 import com.sanron.music.net.bean.SongList;
+import com.sanron.music.service.IPlayer;
 import com.sanron.music.task.AddOnlineSongListTask;
 import com.sanron.music.utils.T;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 
 import okhttp3.Call;
@@ -38,7 +39,7 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-1.
  */
-public class SongListFrag extends PullFrag implements View.OnClickListener, AdapterView.OnItemClickListener {
+public class SongListFrag extends PullFrag implements View.OnClickListener, IPlayer.Callback {
 
     public static final String ARG_LIST_ID = "list_id";
 
@@ -54,10 +55,13 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
     private ImageButton ibtnFavorite;
     private ImageButton ibtnDownload;
     private ImageButton ibtnShare;
+    private ImageView ivPicture;
 
-    private SongListItemAdapter adapter;
+    private SongItemAdapter adapter;
     private ImageLoader imageLoader = ImageLoader.getInstance();
     private DisplayImageOptions imageOptions;
+
+    private Handler handler = new Handler(Looper.getMainLooper());
 
 
     public static SongListFrag newInstance(String songListId) {
@@ -71,7 +75,7 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        adapter = new SongListItemAdapter(getContext());
+        adapter = new SongItemAdapter(getContext(), player);
         imageOptions = new DisplayImageOptions.Builder()
                 .imageScaleType(ImageScaleType.EXACTLY)
                 .cacheOnDisk(true)
@@ -82,31 +86,47 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
         }
     }
 
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.frag_songlist, null);
+    }
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        LayoutInflater.from(getContext())
-                .inflate(R.layout.layout_songlist_operator, operatorContainer, true);
-        LayoutInflater.from(getContext())
-                .inflate(R.layout.layout_songlist_info, infoContainer, true);
-        tvSongNum = (TextView) operatorContainer.findViewById(R.id.tv_song_num);
-        ibtnDownload = (ImageButton) operatorContainer.findViewById(R.id.ibtn_download);
-        ibtnFavorite = (ImageButton) operatorContainer.findViewById(R.id.ibtn_favorite);
-        ibtnShare = (ImageButton) operatorContainer.findViewById(R.id.ibtn_share);
-        tvSongListTag = (TextView) infoContainer.findViewById(R.id.tv_list_tag);
-        tvSongListTitle = (TextView) infoContainer.findViewById(R.id.tv_list_title);
+        tvSongNum = $(R.id.tv_song_num);
+        ibtnDownload = $(R.id.ibtn_download);
+        ibtnFavorite = $(R.id.ibtn_favorite);
+        ibtnShare = $(R.id.ibtn_share);
+        tvSongListTag = $(R.id.tv_list_tag);
+        tvSongListTitle = $(R.id.tv_list_title);
+        ivPicture = $(R.id.top_board);
 
         pullListView.setAdapter(adapter);
         ibtnDownload.setOnClickListener(this);
         ibtnShare.setOnClickListener(this);
         ibtnFavorite.setOnClickListener(this);
-        pullListView.setOnItemClickListener(this);
+        pullListView.setHasMore(false);
+        player.addCallback(this);
+
+        ivPicture.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                ivPicture.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                int width = ivPicture.getWidth();
+                int normalHeaderHieght = ivPicture.getHeight() + viewOperator.getHeight();
+                pullListView.setMaxHeaderHeight(width + viewOperator.getHeight());
+                pullListView.setNormalHeaderHeight(normalHeaderHieght);
+            }
+        });
         loadData();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        player.removeCallback(this);
         if (requestCall != null) {
             requestCall.cancel();
         }
@@ -146,19 +166,17 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
 
     private void setData(SongList data, Bitmap image) {
         this.data = data;
-        isLoaded = true;
-        hideLoadingView();
+        setHasLoadData(true);
+        ivPicture.setImageBitmap(image);
         tvSongListTag.setText(data.tag);
         tvSongListTitle.setText(data.title);
         tvSongNum.setText("共" + data.songs.size() + "首歌");
         adapter.setData(data.songs);
         setTitle(data.title);
-        setHeaderImage(image);
         if (isCollected) {
             ibtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
         }
     }
-
 
     @Override
     public void onClick(View v) {
@@ -213,74 +231,26 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        switch (parent.getId()) {
-            case R.id.pull_list_view: {
-                List<Song> songs = adapter.getData();
-                List<Music> musics = new LinkedList<>();
-                for (Song song : songs) {
-                    musics.add(song.toMusic());
-                }
-                player.clearQueue();
-                player.enqueue(musics);
-                player.play(position - 1);
-            }
-            break;
-        }
+    public void onLoadedPicture(Bitmap musicPic) {
+
     }
 
-
-    public static class SongListItemAdapter extends BaseAdapter {
-
-        private Context context;
-        private List<Song> data;
-
-        public SongListItemAdapter(Context context) {
-            this.context = context;
-        }
-
-        @Override
-        public int getCount() {
-            return data == null ? 0 : data.size();
-        }
-
-        public void setData(List<Song> data) {
-            this.data = data;
-            notifyDataSetChanged();
-        }
-
-        public List<Song> getData() {
-            return data;
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return data.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            Song song = data.get(position);
-            if (convertView == null) {
-                convertView = LayoutInflater.from(context).inflate(R.layout.list_list_song_item, parent, false);
+    @Override
+    public void onStateChange(int state) {
+        if (state == IPlayer.STATE_PREPARING) {
+            //列表中是否有播放中的歌曲
+            Music currentMusic = player.getCurrentMusic();
+            List<Song> listData = adapter.getData();
+            if (listData != null) {
+                for (int i = 0; i < listData.size(); i++) {
+                    if (listData.get(i).songId.equals(currentMusic.getSongId())) {
+                        adapter.setPlayingPosition(i);
+                        break;
+                    }
+                }
             }
-            TextView tvTitle = (TextView) convertView.findViewById(R.id.tv_title);
-            TextView tvArtist = (TextView) convertView.findViewById(R.id.tv_artist);
-            ImageView ivMv = (ImageView) convertView.findViewById(R.id.iv_mv);
-            tvTitle.setText(song.title);
-            tvArtist.setText(song.author);
-            if (song.hasMv == 1) {
-                ivMv.setVisibility(View.VISIBLE);
-            } else {
-                ivMv.setVisibility(View.GONE);
-            }
-            return convertView;
+        } else if (state == IPlayer.STATE_STOP) {
+            adapter.setPlayingPosition(-1);
         }
-
     }
 }

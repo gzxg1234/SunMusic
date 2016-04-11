@@ -155,13 +155,15 @@ public class BMA {
 		 * 标签为tagname的歌曲
 		 * @param tagname	标签名
 		 * @param limit		数量
+		 * @param offset	偏移量
 		 * @return
 		 */
-		public static String tagSongList(String tagname, int limit){
+		public static String tagSongList(String tagname, int limit,int offset){
 			StringBuffer sb = new StringBuffer(BASE);
 			sb.append("&method=").append("baidu.ting.tag.songlist")
 				.append("&tagname=").append(encode(tagname))
-				.append("&limit=").append(limit);
+					.append("&limit=").append(limit)
+					.append("&offset=").append(offset);
 			return sb.toString();
 		}
 	}

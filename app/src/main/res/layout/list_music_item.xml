@@ -12,7 +12,7 @@
     android:padding="8dp">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/top_image"
+        android:id="@+id/top_board"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_alignParentLeft="true"
@@ -49,7 +49,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_toLeftOf="@+id/frame_layout"
-        android:layout_toRightOf="@+id/top_image"
+        android:layout_toRightOf="@+id/top_board"
         android:gravity="center_vertical"
         android:orientation="vertical"
         android:paddingLeft="16dp">

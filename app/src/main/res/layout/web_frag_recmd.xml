@@ -108,7 +108,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/text_draw_left_rectangle"
+                android:drawableLeft="@drawable/recmd_title_draw_left"
                 android:drawablePadding="4dp"
                 android:singleLine="true"
                 android:text="热门歌单"
@@ -206,7 +206,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/text_draw_left_rectangle"
+                android:drawableLeft="@drawable/recmd_title_draw_left"
                 android:drawablePadding="4dp"
                 android:singleLine="true"
                 android:text="歌曲推荐"

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.sanron.music.view.SlideFinishLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/slide_finish_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <com.sanron.music.view.DDPullListView
+        android:id="@+id/pull_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white" />
+
+    <ImageView
+        android:id="@+id/top_board"
+        android:layout_width="match_parent"
+        android:scaleType="centerCrop"
+        android:layout_height="240dp" />
+
+    <LinearLayout
+        android:id="@+id/info"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@drawable/scrim_bottom"
+        android:orientation="horizontal"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_list_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="我们相爱吧 在花开的季节"
+                android:textColor="@color/textColorPrimaryInverse"
+                android:textSize="18dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_list_tag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:singleLine="true"
+                android:text="甜蜜，情侣，浪漫"
+                android:textColor="@color/textColorSecondaryInverse"
+                android:textSize="15dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/operator"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:background="@android:color/white"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp">
+
+            <TextView
+                android:id="@+id/tv_song_num"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:textColor="@color/textColorSecondary"
+                android:textSize="16dp"
+                tools:text="共18首歌" />
+
+            <ImageButton
+                android:id="@+id/ibtn_favorite"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:padding="12dp"
+                android:scaleType="fitXY"
+                android:src="@mipmap/ic_favorite_border_black_24dp" />
+
+            <ImageButton
+                android:id="@+id/ibtn_download"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:padding="12dp"
+                android:scaleType="fitXY"
+                android:src="@mipmap/ic_file_download_black_24dp" />
+
+            <ImageButton
+                android:id="@+id/ibtn_share"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:padding="12dp"
+                android:scaleType="fitXY"
+                android:src="@mipmap/ic_share_black_24dp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="#D8D8D8" />
+    </LinearLayout>
+
+    <include layout="@layout/layout_loading" />
+
+    <include
+        layout="@layout/layout_load_failed"
+        android:visibility="gone" />
+
+    <include layout="@layout/layout_title_bar" />
+
+</com.sanron.music.view.SlideFinishLayout>

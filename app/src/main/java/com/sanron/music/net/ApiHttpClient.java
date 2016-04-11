@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
+import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -39,7 +40,7 @@ public class ApiHttpClient {
         Request.Builder builder = new Request.Builder();
         builder.url(url);
         if (cacheAge != 0) {
-            builder.header("Cache-Control", "max-stale=" + cacheAge);
+            builder.header("Cache-Control", "max-stale=" + cacheAge).cacheControl(CacheControl.FORCE_NETWORK);
         }
         Call call = httpClient.newCall(builder.build());
         call.enqueue(callback);

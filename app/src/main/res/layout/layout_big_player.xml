@@ -200,7 +200,7 @@
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/cover_up_background">
+        android:background="@drawable/scrim_up">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -208,7 +208,7 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/ibtn_back"
+                android:id="@+id/view_back"
                 android:layout_width="?android:attr/actionBarSize"
                 android:layout_height="?android:attr/actionBarSize"
                 android:background="?android:attr/selectableItemBackground"

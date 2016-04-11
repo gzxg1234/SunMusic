@@ -41,6 +41,7 @@ import com.sanron.music.fragments.WebMusic.RadioFrag;
 import com.sanron.music.fragments.WebMusic.RecmdFrag;
 import com.sanron.music.fragments.WebMusic.SingerFrag;
 import com.sanron.music.fragments.WebMusic.SongListFrag;
+import com.sanron.music.fragments.WebMusic.TagSongFrag;
 import com.sanron.music.utils.MyLog;
 import com.sanron.music.view.NavigationHeader;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -73,7 +74,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public static final String TAG_MYMUSIC = "MyMusic";
     public static final String TAG_WEBMUSIC = "WebMusic";
     private Map<String, String> titles;
-
 
 
     private BroadcastReceiver eventReceiver = new BroadcastReceiver() {
@@ -112,6 +112,20 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                                 .add(R.id.fragment_container_1, SongListFrag.newInstance(listId),
                                         SongListFrag.class.getName())
                                 .addToBackStack(SongListFrag.class.getName())
+                                .commit();
+                    }
+                    break;
+
+                    case RecmdFrag.EVENT_CLICK_TAG: {
+                        String tag = intent.getStringExtra(RecmdFrag.EXTRA_TAG_NAME);
+                        fm.beginTransaction()
+                                .setCustomAnimations(R.anim.slide_in_right,
+                                        R.anim.slide_out_right,
+                                        R.anim.slide_in_right,
+                                        R.anim.slide_out_right)
+                                .add(R.id.fragment_container_1, TagSongFrag.newInstance(tag),
+                                        TagSongFrag.class.getName())
+                                .addToBackStack(TagSongFrag.class.getName())
                                 .commit();
                     }
                     break;

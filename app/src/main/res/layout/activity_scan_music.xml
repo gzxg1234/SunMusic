@@ -91,7 +91,7 @@
         android:layout_above="@+id/cb_ignore_60"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="24dp"
-        android:background="@drawable/bg_button_scan"
+        android:background="@drawable/btn_scan_bg"
         android:gravity="center"
         android:text="全盘扫描"
         android:textColor="@color/textColorPrimaryInverse"

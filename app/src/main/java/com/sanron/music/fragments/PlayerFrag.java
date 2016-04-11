@@ -310,7 +310,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
         tvArtist = $(R.id.tv_artist);
         tvDuration = $(R.id.tv_music_duration);
         tvPlayPostion = $(R.id.tv_music_progress);
-        ibtnBack = $(R.id.ibtn_back);
+        ibtnBack = $(R.id.view_back);
         ibtnChangeMode = $(R.id.ibtn_play_mode);
         ibtnRewind = $(R.id.ibtn_rewind);
         ibtnPlayPause = $(R.id.ibtn_play_pause);
@@ -556,7 +556,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
             }
             break;
 
-            case R.id.ibtn_back: {
+            case R.id.view_back: {
                 Intent intent = new Intent(ACTION_FRAG_EVENT);
                 intent.putExtra(EXTRA_FROM, getClass().getName());
                 intent.putExtra(EXTRA_EVENT, EVENT_CLICK_BACK);

@@ -10,4 +10,6 @@
     <color name="textColorSecondaryInverse">#B2FFFFFF</color>
     <color name="colorListDivider">#D8D8D8</color>
     <color name="selectedBackground">#89000000</color>
+
+    <color name="pull_list_footer_default_label_color">#90000000</color>
 </resources>

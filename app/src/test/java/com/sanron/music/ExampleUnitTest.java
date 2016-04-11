@@ -16,6 +16,7 @@ public class ExampleUnitTest {
     @Test
     public void testApi() throws Exception {
 
+        System.out.println(BMA.Tag.tagSongList("劲爆",100,100));
         System.out.println(BMA.FocusPic.focusPic(10));
         System.out.println(BMA.GeDan.hotGeDan(3));
         System.out.println(BMA.Song.songInfo("7313983"));
@@ -29,7 +30,6 @@ public class ExampleUnitTest {
         System.out.println(BMA.Tag.allTag());
         System.out.println(BMA.Song.recommendSong(10));
         System.out.println(BMA.Artist.artistSongList("54505", 0, 10));
-        System.out.println(BMA.Tag.tagSongList("伤感",10));
     }
 
     @Test

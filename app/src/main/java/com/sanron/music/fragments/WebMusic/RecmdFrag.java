@@ -75,8 +75,10 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
     private DisplayImageOptions imageOptions;
 
 
-    public static final int EVENT_CLICK_SONGLIST = 1;
+    public static final int EVENT_CLICK_TAG = 1;
+    public static final int EVENT_CLICK_SONGLIST = 2 ;
     public static final String EXTRA_SONGLIST_ID = "list_id";
+    public static final String EXTRA_TAG_NAME = "tag";
 
 
     private Handler handler = new Handler();
@@ -310,6 +312,17 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
                 final TextView tvTag = tvHotTags.get(i);
                 final String title = hotTags.get(i).getTitle();
                 tvTag.setText(title);
+                tvTag.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                            Intent intent = new Intent(ACTION_FRAG_EVENT);
+                            intent.putExtra(EXTRA_FROM, RecmdFrag.class.getName());
+                            intent.putExtra(EXTRA_EVENT, EVENT_CLICK_TAG);
+                            intent.putExtra(EXTRA_TAG_NAME, title);
+                            LocalBroadcastManager.getInstance(getContext())
+                                    .sendBroadcast(intent);
+                    }
+                });
             }
         }
     }

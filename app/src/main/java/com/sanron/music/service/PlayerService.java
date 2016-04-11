@@ -54,7 +54,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
     public static final String TAG = PlayerService.class.getSimpleName();
     public static final int FORGROUND_ID = 0x88;
 
-    public static final String CMD_ACTION = "com.sanron.music.PLAYBACK";
+    public static final String NOTIFY_ACTION = "com.sanron.music.PLAYBACK";
     public static final String EXTRA_CMD = "CMD";
     public static final String CMD_BACK_APP = "back_app";
     public static final String CMD_PREVIOUS = "previous";
@@ -110,7 +110,6 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         @Override
         public void onReceive(Context context, Intent intent) {
             String cmd = intent.getStringExtra(EXTRA_CMD);
-            MyLog.d(TAG, "playback cmd : " + cmd);
             switch (cmd) {
                 case CMD_PREVIOUS: {
                     player.previous();
@@ -173,7 +172,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
 
-        IntentFilter intentFilter = new IntentFilter(CMD_ACTION);
+        IntentFilter intentFilter = new IntentFilter(NOTIFY_ACTION);
         registerReceiver(cmdReceiver, intentFilter);
 
         builder = new NotificationCompat.Builder(this);
@@ -226,9 +225,9 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         int state = player.getState();
         switch (state) {
             case IPlayer.STATE_STOP: {
-                bigContentView.setImageViewResource(R.id.top_image, R.mipmap.default_song_pic);
+                bigContentView.setImageViewResource(R.id.top_board, R.mipmap.default_song_pic);
                 bigContentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_24dp);
-                contentView.setImageViewResource(R.id.top_image, R.mipmap.default_song_pic);
+                contentView.setImageViewResource(R.id.top_board, R.mipmap.default_song_pic);
                 contentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_36dp);
             }
             break;
@@ -255,11 +254,11 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             contentView.setTextViewText(R.id.tv_artist, artist);
 
             if (curMusicPic != null) {
-                bigContentView.setImageViewBitmap(R.id.top_image, curMusicPic);
-                contentView.setImageViewBitmap(R.id.top_image, curMusicPic);
+                bigContentView.setImageViewBitmap(R.id.top_board, curMusicPic);
+                contentView.setImageViewBitmap(R.id.top_board, curMusicPic);
             } else {
-                bigContentView.setImageViewResource(R.id.top_image, R.mipmap.default_song_pic);
-                contentView.setImageViewResource(R.id.top_image, R.mipmap.default_song_pic);
+                bigContentView.setImageViewResource(R.id.top_board, R.mipmap.default_song_pic);
+                contentView.setImageViewResource(R.id.top_board, R.mipmap.default_song_pic);
             }
 
         } else {
@@ -287,7 +286,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
     }
 
     private PendingIntent cmdIntent(String cmd) {
-        Intent intent = new Intent(CMD_ACTION);
+        Intent intent = new Intent(NOTIFY_ACTION);
         intent.putExtra(EXTRA_CMD, cmd);
         return PendingIntent.getBroadcast(this, cmd.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }

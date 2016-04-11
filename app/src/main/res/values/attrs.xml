@@ -7,4 +7,5 @@
             <enum name="height" value="2"/>
         </attr>
     </declare-styleable>
+
 </resources>
