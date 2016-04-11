@@ -20,13 +20,14 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.sanron.music.R;
-import com.sanron.music.activities.MainActivity;
 import com.sanron.music.fragments.BaseFragment;
 import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.FocusPic;
-import com.sanron.music.net.bean.FocusPicResult;
-import com.sanron.music.net.bean.HotTagResult;
+import com.sanron.music.net.bean.FocusPicData;
+import com.sanron.music.net.bean.HotSongListData;
+import com.sanron.music.net.bean.HotTagData;
+import com.sanron.music.net.bean.RecmdSongData;
 import com.sanron.music.net.bean.RecommendSong;
 import com.sanron.music.net.bean.SongList;
 import com.sanron.music.net.bean.Tag;
@@ -94,16 +95,16 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        contentView = inflater.inflate(R.layout.web_frag_recmd, null);
-        return contentView;
+        return inflater.inflate(R.layout.web_frag_recmd, null);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         //轮播
         pagerFocusPic = $(R.id.pager_focus_pic);
-        pagerFocusPic.setAdapter(focusPicAdapter);
         pageIndicator = $(R.id.page_indicator);
+
+        pagerFocusPic.setAdapter(focusPicAdapter);
         pageIndicator.setViewPager(pagerFocusPic);
 
         //热门标签
@@ -165,7 +166,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
     public void refreshData() {
         //获取轮播信息
-        MusicApi.focusPic(10, new ApiCallback<FocusPicResult>() {
+        MusicApi.focusPic(10, new ApiCallback<FocusPicData>() {
 
             @Override
             public void onFailure(Call call, IOException e) {
@@ -173,14 +174,14 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
             }
 
             @Override
-            public void onSuccess(Call call, FocusPicResult data) {
-                List<FocusPic> focusPics = data.getFocusPicList();
+            public void onSuccess(Call call, FocusPicData data) {
+                List<FocusPic> focusPics = data.pics;
                 final List<FocusPic> result = new LinkedList<>();
                 if (focusPics != null) {
                     for (int i = 0; i < focusPics.size() && result.size() < 6; i++) {
                         FocusPic focusPic = focusPics.get(i);
-                        if (focusPic.getType() == FocusPic.TYPE_ALBUM
-                                || focusPic.getType() == FocusPic.TYPE_GEDAN) {
+                        if (focusPic.type == FocusPic.TYPE_ALBUM
+                                || focusPic.type == FocusPic.TYPE_GEDAN) {
                             result.add(focusPic);
                         }
                     }
@@ -195,7 +196,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
         });
 
         //热门标签
-        MusicApi.hotTag(tvHotTags.size(), new ApiCallback<HotTagResult>() {
+        MusicApi.hotTag(tvHotTags.size(), new ApiCallback<HotTagData>() {
 
             @Override
             public void onFailure(Call call, IOException e) {
@@ -203,11 +204,11 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
             }
 
             @Override
-            public void onSuccess(Call call, final HotTagResult data) {
+            public void onSuccess(Call call, final HotTagData data) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        setHogTags(data.getHotTags());
+                        setHogTags(data.tags);
                     }
                 });
             }
@@ -215,38 +216,44 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
 
         //获取热门歌单
-        MusicApi.hotSongList(6, new ApiCallback<List<SongList>>() {
+        MusicApi.hotSongList(6, new ApiCallback<HotSongListData>() {
             @Override
             public void onFailure(Call call, IOException e) {
             }
 
 
             @Override
-            public void onSuccess(Call call, final List<SongList> data) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setHotSongList(data);
-                    }
-                });
+            public void onSuccess(Call call, final HotSongListData data) {
+                if (data != null
+                        && data.content != null) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            setHotSongList(data.content.songLists);
+                        }
+                    });
+                }
             }
         });
 
         //获取推荐歌曲
-        MusicApi.recmdSongs(6, new ApiCallback<List<RecommendSong>>() {
+        MusicApi.recmdSongs(6, new ApiCallback<RecmdSongData>() {
 
             @Override
             public void onFailure(Call call, IOException e) {
             }
 
             @Override
-            public void onSuccess(Call call, final List<RecommendSong> data) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setRecmdSongs(data);
-                    }
-                });
+            public void onSuccess(Call call, final RecmdSongData data) {
+                if (data.content != null
+                        && data.content.size() > 0) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            setRecmdSongs(data.content.get(0).songs);
+                        }
+                    });
+                }
             }
         });
 
@@ -258,10 +265,10 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
             for (int i = 0; i < recmdSongs.size() && i < recmdSongViews.size(); i++) {
                 RecommendSong recommendSong = recmdSongs.get(i);
                 RecmdSongView recmdSongView = recmdSongViews.get(i);
-                String artists = recommendSong.getAllArtistName();
-                imageLoader.displayImage(recommendSong.getBigPic(), recmdSongView.getPicView(), imageOptions);
-                recmdSongView.getTitleView().setText(recommendSong.getTitle() + "-" + artists);
-                recmdSongView.getReasonView().setText(recommendSong.getRecommendReason());
+                String artists = recommendSong.author;
+                imageLoader.displayImage(recommendSong.bigPic, recmdSongView.getPicView(), imageOptions);
+                recmdSongView.getTitleView().setText(recommendSong.title + "-" + artists);
+                recmdSongView.getReasonView().setText(recommendSong.recommendReason);
             }
         }
     }
@@ -277,19 +284,19 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
             for (int i = 0; i < hotSongLists.size() && i < hotSongListViews.size(); i++) {
                 final SongList songList = hotSongLists.get(i);
                 HotSongListView hotSongListView = hotSongListViews.get(i);
-                hotSongListView.getTitleView().setText(songList.getTitle());
+                hotSongListView.getTitleView().setText(songList.title);
                 hotSongListView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(MainActivity.ACTION_FRAG_EVENT);
-                        intent.putExtra(MainActivity.EXTRA_FROM, RecmdFrag.class.getName());
-                        intent.putExtra(MainActivity.EXTRA_EVENT, EVENT_CLICK_SONGLIST);
-                        intent.putExtra(EXTRA_SONGLIST_ID, songList.getListId());
+                        Intent intent = new Intent(ACTION_FRAG_EVENT);
+                        intent.putExtra(EXTRA_FROM, RecmdFrag.class.getName());
+                        intent.putExtra(EXTRA_EVENT, EVENT_CLICK_SONGLIST);
+                        intent.putExtra(EXTRA_SONGLIST_ID, songList.listId);
                         LocalBroadcastManager.getInstance(getContext())
                                 .sendBroadcast(intent);
                     }
                 });
-                imageLoader.displayImage(songList.getPic(), hotSongListView.getImageView(), imageOptions);
+                imageLoader.displayImage(songList.pic, hotSongListView.getImageView(), imageOptions);
             }
         }
     }
@@ -336,7 +343,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
                     view.setLayoutParams(lp);
                     view.setAdjustViewBounds(true);
                     views.add(view);
-                    imageLoader.displayImage(data.get(i).getPicUrl(), view, imageOptions);
+                    imageLoader.displayImage(data.get(i).picUrl, view, imageOptions);
                 }
             }
         }

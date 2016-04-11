@@ -1,6 +1,8 @@
 package com.sanron.music.net;
 
-import com.sanron.music.utils.JsonUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.parser.Feature;
 import com.sanron.music.utils.MyLog;
 
 import java.io.IOException;
@@ -23,10 +25,9 @@ public abstract class ApiCallback<T> implements Callback {
         T data = null;
         try {
             json = response.body().string();
-            MyLog.d("MusicApi", "json:" + json);
-            Type superClass = getClass().getGenericSuperclass();
-            Class<T> clazz = (Class<T>) ((ParameterizedType) superClass).getActualTypeArguments()[0];
-            data = JsonUtil.fromJson(json, clazz);
+            Type superClass = this.getClass().getGenericSuperclass();
+            Class<T> clazz = (Class<T>) ((ParameterizedType)superClass).getActualTypeArguments()[0];
+            data = JSON.parseObject(json,clazz);
             onSuccess(call, data);
         } catch (IOException e) {
             e.printStackTrace();

@@ -33,8 +33,8 @@ import com.sanron.music.R;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.DetailSongInfo;
 import com.sanron.music.net.bean.LrcPicResult;
+import com.sanron.music.net.bean.SongUrlInfo;
 import com.sanron.music.utils.MyLog;
 import com.sanron.music.utils.T;
 
@@ -417,14 +417,13 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             if (mediaPlayer == null) {
                 return;
             }
-            synchronized (this) {
-                queue.clear();
-                currentIndex = -1;
-                mediaPlayer.reset();
-                changeState(STATE_STOP);
-                setCurMusicPic(null);
-                updateNotification();
-            }
+
+            queue.clear();
+            currentIndex = -1;
+            mediaPlayer.reset();
+            changeState(STATE_STOP);
+            setCurMusicPic(null);
+            updateNotification();
         }
 
         /**
@@ -440,11 +439,10 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             if (searchPicCall != null) {
                 searchPicCall.cancel();
             }
-
-
-            if (mediaPlayer != null) {
-                mediaPlayer.reset();
+            if (mediaPlayer == null) {
+                initMediaPlayer();
             }
+            mediaPlayer.reset();
             currentIndex = position;
             Music music = queue.get(currentIndex);
             changeState(STATE_PREPARING);
@@ -465,20 +463,15 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         }
 
         private void prepare(Uri uri) {
-            synchronized (this) {
-                if (mediaPlayer == null) {
-                    initMediaPlayer();
-                }
-                try {
-                    mediaPlayer.setDataSource(PlayerService.this, uri);
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mediaPlayer.prepareAsync();
-                } catch (IllegalStateException e) {
-                    MyLog.e(TAG, "IllegalState");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    handlerPlayError("播放出错");
-                }
+            try {
+                mediaPlayer.setDataSource(PlayerService.this, uri);
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mediaPlayer.prepareAsync();
+            } catch (IllegalStateException e) {
+                MyLog.w(TAG, "IllegalState");
+            } catch (IOException e) {
+                e.printStackTrace();
+                handlerPlayError("播放出错");
             }
         }
 
@@ -496,7 +489,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
 
         private void playWebMusic(final String songid) {
-            fileLinkCall = MusicApi.songLink(songid, new ApiCallback<DetailSongInfo>() {
+            fileLinkCall = MusicApi.songLink(songid, new ApiCallback<SongUrlInfo>() {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     e.printStackTrace();
@@ -506,17 +499,16 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 }
 
                 @Override
-                public void onSuccess(Call call, DetailSongInfo data) {
-                    DetailSongInfo.SongUrl.FileInfo playFileInfo = null;
-                    DetailSongInfo.SongUrl songUrl = data.getSongUrl();
-                    if (songUrl != null) {
-                        List<DetailSongInfo.SongUrl.FileInfo> files = songUrl.getFileInfos();
-                        playFileInfo = PlayerHelper.selectFileUrl(getApplicationContext(), files);
+                public void onSuccess(Call call, SongUrlInfo data) {
+                    SongUrlInfo.SongUrl.Url url = null;
+                    if (data != null
+                            && data.songUrl != null) {
+                        url = PlayerHelper.selectFileUrl(getApplicationContext(), data.songUrl.urls);
                     }
-                    if (playFileInfo == null) {
+                    if (url == null) {
                         handlerPlayError("此歌曲暂无网络资源");
                     } else {
-                        prepare(Uri.parse(playFileInfo.getFileLink()));
+                        prepare(Uri.parse(url.fileLink));
                     }
                 }
             });
@@ -628,22 +620,18 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         @Override
         public int getProgress() {
-            synchronized (this) {
-                if (state >= IPlayer.STATE_PREPARED) {
-                    return mediaPlayer.getCurrentPosition();
-                }
-                return -1;
+            if (state >= IPlayer.STATE_PREPARED) {
+                return mediaPlayer.getCurrentPosition();
             }
+            return -1;
         }
 
         @Override
         public int getDuration() {
-            synchronized (this) {
-                if (state >= IPlayer.STATE_PREPARED) {
-                    return mediaPlayer.getDuration();
-                }
-                return -1;
+            if (state >= IPlayer.STATE_PREPARED) {
+                return mediaPlayer.getDuration();
             }
+            return -1;
         }
 
         @Override
@@ -719,12 +707,9 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         @Override
         public void onPrepared(MediaPlayer mp) {
-            boolean isPause = (state == STATE_PAUSE);
             changeState(STATE_PREPARED);
-            if (!isPause) {
-                mp.start();
-                changeState(STATE_PLAYING);
-            }
+            mp.start();
+            changeState(STATE_PLAYING);
 
             //加载音乐图片
             Music music = queue.get(currentIndex);
@@ -767,7 +752,12 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
                         @Override
                         public void onFailure(Call call, IOException e) {
-                            setCurMusicPic(null);
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setCurMusicPic(null);
+                                }
+                            });
                         }
                     });
         }

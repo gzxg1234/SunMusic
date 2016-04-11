@@ -198,14 +198,16 @@ public class Music {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
+        if (o == null) {
+            return false;
         }
-        if (o instanceof Music) {
-            Music m = (Music) o;
-            return m.id == id
-                    ||m.songId == songId;
-        }
-        return false;
+
+        Music m = (Music) o;
+        long mId = m.getId();
+        String mSongId = m.getSongId();
+        return (id != 0 && id == mId)
+                ||
+                (songId != null && songId.length() != 0 && songId.equals(mSongId));
+
     }
 }

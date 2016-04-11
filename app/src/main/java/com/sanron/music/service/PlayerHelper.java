@@ -4,7 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.text.TextUtils;
 
-import com.sanron.music.net.bean.DetailSongInfo;
+import com.sanron.music.net.bean.SongUrlInfo;
 import com.sanron.music.utils.NetTool;
 
 import java.util.List;
@@ -21,28 +21,28 @@ public class PlayerHelper {
      * @param files
      * @return
      */
-    public static DetailSongInfo.SongUrl.FileInfo selectFileUrl(Context context, List<DetailSongInfo.SongUrl.FileInfo> files) {
-        DetailSongInfo.SongUrl.FileInfo result = null;
+    public static SongUrlInfo.SongUrl.Url selectFileUrl(Context context, List<SongUrlInfo.SongUrl.Url> files) {
+        SongUrlInfo.SongUrl.Url result = null;
         if (files != null
                 && files.size() > 0) {
-            DetailSongInfo.SongUrl.FileInfo minBitrateFile = null;
-            DetailSongInfo.SongUrl.FileInfo maxBitrateFile = null;
+            SongUrlInfo.SongUrl.Url minBitrateFile = null;
+            SongUrlInfo.SongUrl.Url maxBitrateFile = null;
             int minBitrate = Integer.MAX_VALUE;
             int maxBitrate = 0;
-            for (DetailSongInfo.SongUrl.FileInfo fileInfo : files) {
-                String fileUrl = fileInfo.getFileLink();
-                int fileBitrate = fileInfo.getFileBitrate();
+            for (SongUrlInfo.SongUrl.Url url : files) {
+                String fileUrl = url.fileLink;
+                int fileBitrate = url.fileBitrate;
                 if (TextUtils.isEmpty(fileUrl)) {
                     continue;
                 }
 
                 if (fileBitrate < minBitrate) {
-                    minBitrateFile = fileInfo;
+                    minBitrateFile = url;
                     minBitrate = fileBitrate;
                 }
 
                 if (fileBitrate > maxBitrate) {
-                    maxBitrateFile = fileInfo;
+                    maxBitrateFile = url;
                     maxBitrate = fileBitrate;
                 }
             }

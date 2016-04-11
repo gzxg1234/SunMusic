@@ -1,6 +1,6 @@
 package com.sanron.music.net.bean;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.alibaba.fastjson.annotation.JSONField;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class LrcPicResult {
 
-    @JsonProperty("songinfo")
+    @JSONField(name = "songinfo")
     private List<LrcPic> lrcPics;
 
     public List<LrcPic> getLrcPics() {
@@ -24,44 +24,44 @@ public class LrcPicResult {
         /**
          * 歌词
          */
-        @JsonProperty("lrclink")
+        @JSONField(name = "lrclink")
         private String lrc;
 
-        @JsonProperty("song_id")
+        @JSONField(name = "song_id")
         private String songId;
 
-        @JsonProperty("author")
+        @JSONField(name = "author")
         private String author;
 
-        @JsonProperty("song_title")
+        @JSONField(name = "song_title")
         private String title;
 
         /**
          * 艺术家图片
          */
-        @JsonProperty("artist_480_480")
+        @JSONField(name = "artist_480_480")
         private String artist480x480;
-        @JsonProperty("artist_640_1136")
+        @JSONField(name = "artist_640_1136")
         private String artist640x1136;
-        @JsonProperty("artist_1000_1000")
+        @JSONField(name = "artist_1000_1000")
         private String artist1000x1000;
 
         /**
          * 歌曲相关图片
          */
-        @JsonProperty("pic_s180")
+        @JSONField(name = "pic_s180")
         private String pic180x180;
-        @JsonProperty("pic_s500")
+        @JSONField(name = "pic_s500")
         private String pic500x500;
-        @JsonProperty("pic_s1000")
+        @JSONField(name = "pic_s1000")
         private String pic1000x1000;
 
         /**
          * 头像
          */
-        @JsonProperty("avatar_s180")
+        @JSONField(name = "avatar_s180")
         private String avatar180x180;
-        @JsonProperty("avatar_s500")
+        @JSONField(name = "avatar_s500")
         private String avatar500x500;
 
         public String getLrc() {

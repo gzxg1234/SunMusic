@@ -29,7 +29,6 @@ public class BaseActivity extends AppCompatActivity {
         AppManager.instance().removeActivity(this);
     }
 
-
     protected <T extends View> T $(int id) {
         return (T) findViewById(id);
     }

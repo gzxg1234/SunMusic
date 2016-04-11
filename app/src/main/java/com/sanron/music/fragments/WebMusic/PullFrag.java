@@ -104,8 +104,13 @@ public abstract class PullFrag extends BaseFragment implements SlideFinishLayout
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        contentView = inflater.inflate(R.layout.layout_pull_frag, null);
-        slideFinishLayout = (SlideFinishLayout) contentView;
+        return inflater.inflate(R.layout.layout_pull_frag, null);
+    }
+
+    @Override
+    public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        slideFinishLayout = (SlideFinishLayout) getView();
         viewLoading = $(R.id.layout_loading);
         viewLoadFailed = $(R.id.layout_load_failed);
         infoContainer = $(R.id.info_container);
@@ -115,12 +120,7 @@ public abstract class PullFrag extends BaseFragment implements SlideFinishLayout
         operatorContainer = $(R.id.operator_container);
         tvTitle = $(R.id.tv_title);
         ibtnBack = $(R.id.ibtn_back);
-        return contentView;
-    }
 
-    @Override
-    public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
         appContext.setViewFitsStatusBar(topbar);
         slideFinishLayout.setSlideFinishCallback(this);
         ibtnBack.setOnClickListener(new View.OnClickListener() {

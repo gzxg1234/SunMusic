@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.sanron.music.AppContext;
 import com.sanron.music.activities.MainActivity;
@@ -15,10 +17,13 @@ import com.sanron.music.service.IPlayer;
  */
 public class BaseFragment extends Fragment implements MainActivity.BackPressedHandler {
 
-    protected View contentView;
     protected IPlayer player;
     protected AppContext appContext;
     protected MainActivity mainActivity;
+
+    public static final String ACTION_FRAG_EVENT = "com.sanron.FragmentEvent";
+    public static final String EXTRA_FROM = "from";
+    public static final String EXTRA_EVENT = "event";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,7 +47,7 @@ public class BaseFragment extends Fragment implements MainActivity.BackPressedHa
     }
 
     public <T extends View> T $(int id) {
-        return (T) contentView.findViewById(id);
+        return (T) getView().findViewById(id);
     }
 
     @Override

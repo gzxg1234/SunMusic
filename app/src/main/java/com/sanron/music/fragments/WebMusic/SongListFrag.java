@@ -47,7 +47,6 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
     private SongList data;
     private boolean isCollected;
 
-    private ViewGroup songListInfo;
     private TextView tvSongListTitle;
     private TextView tvSongListTag;
 
@@ -124,11 +123,11 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
 
             @Override
             public void onSuccess(Call call, final SongList data) {
-                String pic = data.getPic700();
+                String pic = data.pic700;
                 if (TextUtils.isEmpty(pic)) {
-                    pic = data.getPic500();
+                    pic = data.pic500;
                     if (TextUtils.isEmpty(pic)) {
-                        pic = data.getPic300();
+                        pic = data.pic500;
                     }
                 }
                 //加载图片
@@ -149,11 +148,11 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
         this.data = data;
         isLoaded = true;
         hideLoadingView();
-        tvSongListTag.setText(data.getTag());
-        tvSongListTitle.setText(data.getTitle());
-        tvSongNum.setText("共" + data.getSongs().size() + "首歌");
-        adapter.setData(data.getSongs());
-        setTitle(data.getTitle());
+        tvSongListTag.setText(data.tag);
+        tvSongListTitle.setText(data.title);
+        tvSongNum.setText("共" + data.songs.size() + "首歌");
+        adapter.setData(data.songs);
+        setTitle(data.title);
         setHeaderImage(image);
         if (isCollected) {
             ibtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
@@ -273,9 +272,9 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, Adap
             TextView tvTitle = (TextView) convertView.findViewById(R.id.tv_title);
             TextView tvArtist = (TextView) convertView.findViewById(R.id.tv_artist);
             ImageView ivMv = (ImageView) convertView.findViewById(R.id.iv_mv);
-            tvTitle.setText(song.getTitle());
-            tvArtist.setText(song.getAllArtistName());
-            if (song.getHasMv() == 1) {
+            tvTitle.setText(song.title);
+            tvArtist.setText(song.author);
+            if (song.hasMv == 1) {
                 ivMv.setVisibility(View.VISIBLE);
             } else {
                 ivMv.setVisibility(View.GONE);

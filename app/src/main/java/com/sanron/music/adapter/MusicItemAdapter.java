@@ -130,6 +130,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         if (data != null) {
             avatarUrls = new HashMap<>(data.size());
         }
+        setFirstBindView(true);
         notifyDataSetChanged();
     }
 
@@ -310,7 +311,12 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
 
                         @Override
                         public void onFailure(Call call, IOException e) {
-                            holder.ivPicture.setImageResource(R.mipmap.default_small_song_pic);
+                            holder.ivPicture.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    holder.ivPicture.setImageResource(R.mipmap.default_small_song_pic);
+                                }
+                            });
                         }
                     });
 

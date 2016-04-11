@@ -61,7 +61,7 @@ public class ListMusicFrag extends BaseMusicFrag {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mainActivity.addBackPressedHandler(this);
-        contentView.setBackgroundColor(Color.WHITE);
+        getView().setBackgroundColor(Color.WHITE);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class ListMusicFrag extends BaseMusicFrag {
             @Override
             protected void onPostExecute(List<Music> musics) {
                 adapter.setData(musics);
-                callback.onStateChange(IPlayer.STATE_PLAYING);
+                callback.onStateChange(IPlayer.STATE_PREPARING);
             }
         }.execute();
     }

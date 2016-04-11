@@ -9,22 +9,12 @@ import android.os.Build;
 import android.os.IBinder;
 import android.view.View;
 
-import com.nostra13.universalimageloader.cache.disc.impl.ext.LruDiskCache;
-import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
-import com.nostra13.universalimageloader.cache.memory.impl.FIFOLimitedMemoryCache;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
 import com.sanron.music.db.DataProvider;
-import com.sanron.music.net.ApiHttpClient;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.service.PlayerService;
 import com.sanron.music.utils.MyLog;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 
 /**
@@ -35,7 +25,6 @@ public class AppContext extends Application {
     private IPlayer musicPlayer;
     private ServiceConnection connection;
     private int statusBarHeight = -1;
-
 
 
     public static final String TAG = AppContext.class.getSimpleName();
@@ -50,8 +39,10 @@ public class AppContext extends Application {
 
     public void closeApp() {
         AppManager.instance().finishAllActivity();
-        unbindService(connection);
-        connection = null;
+        if(connection!=null) {
+            unbindService(connection);
+            connection = null;
+        }
         stopService(new Intent(this, PlayerService.class));
         ImageLoader.getInstance().destroy();
         android.os.Process.killProcess(android.os.Process.myPid());

@@ -1,5 +1,7 @@
 package com.sanron.music;
 
+import android.os.Environment;
+
 /**
  * Created by sanron on 16-4-10.
  */
@@ -7,7 +9,7 @@ public class AppConfig {
 
     public static final String DATA_PATH = "ddmusic";
 
-    public static final String CACHE_PATH = DATA_PATH + "/cache";
+    public static final String CACHE_PATH = DATA_PATH + "/.cache";
 
     public static final String DOWNLOAD_PATH = DATA_PATH + "/download";
 

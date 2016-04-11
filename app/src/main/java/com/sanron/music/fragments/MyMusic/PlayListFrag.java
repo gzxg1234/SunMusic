@@ -23,7 +23,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.activities.MainActivity;
 import com.sanron.music.adapter.ListItemAdapter;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
@@ -62,14 +61,13 @@ public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItem
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        contentView = inflater.inflate(R.layout.layout_playlist, null);
-        lvPlayList = $(R.id.recycler_view);
-        return contentView;
+        return inflater.inflate(R.layout.layout_playlist, null);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        lvPlayList = $(R.id.recycler_view);
         lvPlayList.setLayoutManager(new LinearLayoutManager(getContext()));
         lvPlayList.setItemAnimator(null);
         lvPlayList.setAdapter(adapter);
@@ -90,9 +88,9 @@ public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItem
     @Override
     public void onItemClick(View itemView, int position) {
         PlayList playList = adapter.getItem(position);
-        Intent intent = new Intent(MainActivity.ACTION_FRAG_EVENT);
-        intent.putExtra(MainActivity.EXTRA_FROM, getClass().getName());
-        intent.putExtra(MainActivity.EXTRA_EVENT, EVENT_CLICK_LIST);
+        Intent intent = new Intent(ACTION_FRAG_EVENT);
+        intent.putExtra(EXTRA_FROM, getClass().getName());
+        intent.putExtra(EXTRA_EVENT, EVENT_CLICK_LIST);
         intent.putExtra(EXTRA_PLAYLIST, playList);
         LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
     }

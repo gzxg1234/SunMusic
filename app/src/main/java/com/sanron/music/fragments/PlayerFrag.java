@@ -26,10 +26,8 @@ import android.widget.Toast;
 import com.nineoldandroids.animation.ArgbEvaluator;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.sanron.music.R;
-import com.sanron.music.activities.MainActivity;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.service.IPlayer;
-import com.sanron.music.utils.MyLog;
 import com.sanron.music.utils.T;
 import com.sanron.music.view.ShowQueueMusicWindow;
 
@@ -291,7 +289,11 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        contentView = LayoutInflater.from(getContext()).inflate(R.layout.frag_player, null);
+        return inflater.inflate(R.layout.frag_player, null);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         smallPlayer = $(R.id.small_player);
         splayProgress = $(R.id.s_play_progress);
         sivSongPicture = $(R.id.s_iv_song_pic);
@@ -302,24 +304,20 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
         ll1 = $(R.id.ll_1);
         ll2 = $(R.id.ll_2);
         bigPlayer = $(R.id.big_player);
-        playerTopBar = $(R.id.player_top_bar);
-        ivSongPicture = $(R.id.iv_song_picture);
+        playerTopBar = $(R.id.top_bar);
+        ivSongPicture = $(R.id.iv_music_picture);
         tvTitle = $(R.id.tv_title);
         tvArtist = $(R.id.tv_artist);
-        tvDuration = $(R.id.tv_song_duration);
-        tvPlayPostion = $(R.id.tv_play_position);
+        tvDuration = $(R.id.tv_music_duration);
+        tvPlayPostion = $(R.id.tv_music_progress);
         ibtnBack = $(R.id.ibtn_back);
         ibtnChangeMode = $(R.id.ibtn_play_mode);
         ibtnRewind = $(R.id.ibtn_rewind);
         ibtnPlayPause = $(R.id.ibtn_play_pause);
         ibtnForward = $(R.id.ibtn_forward);
         ibtnPlayQuque = $(R.id.ibtn_play_quque);
-        playProgress = $(R.id.play_progress);
-        return contentView;
-    }
+        playProgress = $(R.id.progress_play);
 
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         sibtnPlayPause.setOnClickListener(this);
         sibtnNext.setOnClickListener(this);
         ibtnChangeMode.setOnClickListener(this);
@@ -559,9 +557,9 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
             break;
 
             case R.id.ibtn_back: {
-                Intent intent = new Intent(MainActivity.ACTION_FRAG_EVENT);
-                intent.putExtra(MainActivity.EXTRA_FROM, getClass().getName());
-                intent.putExtra(MainActivity.EXTRA_EVENT, EVENT_CLICK_BACK);
+                Intent intent = new Intent(ACTION_FRAG_EVENT);
+                intent.putExtra(EXTRA_FROM, getClass().getName());
+                intent.putExtra(EXTRA_EVENT, EVENT_CLICK_BACK);
                 LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
             }
             break;

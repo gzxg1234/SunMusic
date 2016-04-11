@@ -15,12 +15,13 @@ import java.util.Date;
 public class ExampleUnitTest {
     @Test
     public void testApi() throws Exception {
-        Date date = new Date(1383394620);
+
+        System.out.println(BMA.FocusPic.focusPic(10));
+        System.out.println(BMA.GeDan.hotGeDan(3));
+        System.out.println(BMA.Song.songInfo("7313983"));
         System.out.println(BMA.Search.searchLrcPic("天黑黑","胡彦斌",2));
         System.out.println(BMA.Song.baseInfo("7313983"));
         System.out.println(BMA.GeDan.geDanInfo("6432"));
-        System.out.println(date.toLocaleString());
-        System.out.println(BMA.Song.songInfo("7313983"));
         System.out.println(BMA.GeDan.hotGeDan(3));
         System.out.println(BMA.GeDan.geDan(1,2));
         System.out.println(BMA.Album.recommendAlbum(0,10));

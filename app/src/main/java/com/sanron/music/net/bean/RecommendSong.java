@@ -1,19 +1,11 @@
 package com.sanron.music.net.bean;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.alibaba.fastjson.annotation.JSONField;
 
 public class RecommendSong extends Song {
     /**
      * 推荐理由
      */
-    @JsonProperty("recommend_reason")
-    private String recommendReason;
-
-    public String getRecommendReason() {
-        return recommendReason;
-    }
-
-    public void setRecommendReason(String recommendReason) {
-        this.recommendReason = recommendReason;
-    }
+    @JSONField(name = "recommend_reason")
+    public String recommendReason;
 }

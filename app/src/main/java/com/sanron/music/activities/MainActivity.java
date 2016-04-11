@@ -26,6 +26,7 @@ import android.view.View;
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.sanron.music.R;
 import com.sanron.music.db.model.PlayList;
+import com.sanron.music.fragments.BaseFragment;
 import com.sanron.music.fragments.MyMusic.AlbumFrag;
 import com.sanron.music.fragments.MyMusic.ArtistFrag;
 import com.sanron.music.fragments.MyMusic.ListMusicFrag;
@@ -73,15 +74,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public static final String TAG_WEBMUSIC = "WebMusic";
     private Map<String, String> titles;
 
-    public static final String ACTION_FRAG_EVENT = "com.sanron.MainActivity";
-    public static final String EXTRA_FROM = "from";
-    public static final String EXTRA_EVENT = "event";
+
 
     private BroadcastReceiver eventReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String from = intent.getStringExtra(EXTRA_FROM);
-            int event = intent.getIntExtra(EXTRA_EVENT, -1);
+            String from = intent.getStringExtra(BaseFragment.EXTRA_FROM);
+            int event = intent.getIntExtra(BaseFragment.EXTRA_EVENT, -1);
             if (PlayListFrag.class.getName().equals(from)) {
                 //
                 switch (event) {
@@ -231,7 +230,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         });
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(eventReceiver, new IntentFilter(ACTION_FRAG_EVENT));
+        LocalBroadcastManager.getInstance(this).registerReceiver(eventReceiver,
+                new IntentFilter(BaseFragment.ACTION_FRAG_EVENT));
     }
 
     /**

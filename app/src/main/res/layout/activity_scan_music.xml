@@ -93,7 +93,7 @@
         android:layout_marginBottom="24dp"
         android:background="@drawable/bg_button_scan"
         android:gravity="center"
-        android:text="开始扫描"
+        android:text="全盘扫描"
         android:textColor="@color/textColorPrimaryInverse"
         android:textSize="16dp" />
 

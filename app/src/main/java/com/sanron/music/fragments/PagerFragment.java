@@ -47,13 +47,18 @@ public class PagerFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        contentView = inflater.inflate(R.layout.frag_layout_pager, null);
+        return inflater.inflate(R.layout.frag_layout_pager, null);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         viewPager = $(R.id.viewpager);
+        tabLayout = $(R.id.tab_layout);
+
         adapter = new LocalPagerAdapter(getChildFragmentManager());
         viewPager.setAdapter(adapter);
-        tabLayout = $(R.id.tab_layout);
         tabLayout.setupWithViewPager(viewPager);
-        return contentView;
     }
 
     public class LocalPagerAdapter extends FragmentPagerAdapter {

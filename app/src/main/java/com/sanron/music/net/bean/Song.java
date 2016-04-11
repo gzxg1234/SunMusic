@@ -1,6 +1,6 @@
 package com.sanron.music.net.bean;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
 import com.sanron.music.db.model.Music;
@@ -13,80 +13,80 @@ public class Song {
     /**
      * 歌名
      */
-    @JsonProperty("title")
-    private String title;
+    @JSONField(name = "title")
+    public String title;
 
     /**
      * 歌曲id
      */
-    @JsonProperty("song_id")
-    private String songId;
+    @JSONField(name = "song_id")
+    public String songId;
 
     /**
      * 所有歌手名
      */
-    @JsonProperty("author")
-    private String allArtistName;
+    @JSONField(name = "author")
+    public String author;
 
     /**
      * 所有歌手id
      */
-    @JsonProperty("all_artist_id")
-    private String allArtistId;
+    @JSONField(name = "all_artist_id")
+    public String allArtistId;
 
     /**
      * 主要歌手id
      */
-    @JsonProperty("artist_id")
-    private String artistId;
+    @JSONField(name = "artist_id")
+    public String artistId;
 
     /**
      * 专辑名
      */
-    @JsonProperty("album_title")
-    private String albumName;
+    @JSONField(name = "album_title")
+    public String albumTitle;
 
     /**
      * 专辑id
      */
-    @JsonProperty("album_id")
-    private String albumId;
+    @JSONField(name = "album_id")
+    public String albumId;
 
     /**
      * 是否有mv
      */
-    @JsonProperty("has_mv")
-    private int hasMv;
+    @JSONField(name = "has_mv")
+    public int hasMv;
 
     /**
      * 小图,90x90
      */
-    @JsonProperty("pic_small")
-    private String smallPic;
+    @JSONField(name = "pic_small")
+    public String smallPic;
 
     /**
      * 大图,150x150
      */
-    @JsonProperty("pic_big")
-    private String bigPic;
+    @JSONField(name = "pic_big")
+    public String bigPic;
 
     /**
      * 更大图,500x500
      */
-    @JsonProperty("pic_premium")
-    private String premiumPic;
+    @JSONField(name = "pic_premium")
+    public String premiumPic;
 
     /**
      * 巨大图,1000x1000
      */
-    @JsonProperty("pic_huge")
-    private String hugePic;
+    @JSONField(name = "pic_huge")
+    public String hugePic;
 
     @Override
     public String toString() {
         return "title:" + title
                 + " id:" + songId
-                + " album:" + albumName
+                + " album:" + albumTitle
                 + " albumId:" + albumId
                 + " artist:" + albumId
                 + " artistId:" + artistId
@@ -94,108 +94,12 @@ public class Song {
                 + " picUrl:" + bigPic;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getSongId() {
-        return songId;
-    }
-
-    public void setSongId(String songId) {
-        this.songId = songId;
-    }
-
-    public String getHugePic() {
-        return hugePic;
-    }
-
-    public void setHugePic(String hugePic) {
-        this.hugePic = hugePic;
-    }
-
-
-    public String getSmallPic() {
-        return smallPic;
-    }
-
-    public void setSmallPic(String smallPic) {
-        this.smallPic = smallPic;
-    }
-
-    public String getBigPic() {
-        return bigPic;
-    }
-
-    public void setBigPic(String bigPic) {
-        this.bigPic = bigPic;
-    }
-
-    public String getPremiumPic() {
-        return premiumPic;
-    }
-
-    public void setPremiumPic(String premiumPic) {
-        this.premiumPic = premiumPic;
-    }
-
-    public String getArtistId() {
-        return artistId;
-    }
-
-    public void setArtistId(String artistId) {
-        this.artistId = artistId;
-    }
-
-    public String getAllArtistName() {
-        return allArtistName;
-    }
-
-    public void setAllArtistName(String allArtistName) {
-        this.allArtistName = allArtistName;
-    }
-
-    public String getAllArtistId() {
-        return allArtistId;
-    }
-
-    public void setAllArtistId(String allArtistId) {
-        this.allArtistId = allArtistId;
-    }
-
-    public String getAlbumName() {
-        return albumName;
-    }
-
-    public void setAlbumName(String albumName) {
-        this.albumName = albumName;
-    }
-
-    public String getAlbumId() {
-        return albumId;
-    }
-
-    public void setAlbumId(String albumId) {
-        this.albumId = albumId;
-    }
-
-    public int getHasMv() {
-        return hasMv;
-    }
-
-    public void setHasMv(int hasMv) {
-        this.hasMv = hasMv;
-    }
 
     public Music toMusic() {
         Music music = new Music();
         music.setTitle(title);
-        music.setArtist(allArtistName);
-        music.setAlbum(albumName);
+        music.setArtist(author);
+        music.setAlbum(albumTitle);
         String titleKey = (title == null ?
                 null : PinyinHelper.convertToPinyinString(title, "", PinyinFormat.WITHOUT_TONE));
         music.setTitleKey(titleKey);

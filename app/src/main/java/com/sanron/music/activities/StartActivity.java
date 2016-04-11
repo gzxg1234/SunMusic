@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.renderscript.RenderScript;
 import android.view.Window;
 
 import com.nostra13.universalimageloader.cache.disc.impl.ext.LruDiskCache;
@@ -18,6 +19,7 @@ import com.sanron.music.net.ApiHttpClient;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.IllegalFormatException;
 
 /**
  * Created by Administrator on 2016/3/5.

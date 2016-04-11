@@ -108,7 +108,7 @@ public class DBHelper extends SQLiteOpenHelper {
         columnTypes.put(Music.TITLE, "text");
         columnTypes.put(Music.TITLE_KEY, "text");
         columnTypes.put(Music.ALBUM, "text");
-        columnTypes.put(Music.ARTIST, "text default <unknown>");
+        columnTypes.put(Music.ARTIST, "text");
         columnTypes.put(Music.DURATION, "integer");
         columnTypes.put(Music.SONG_ID, "text");
         columnTypes.put(Music.BITRATE, "integer");

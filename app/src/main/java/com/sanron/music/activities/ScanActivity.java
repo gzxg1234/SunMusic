@@ -47,6 +47,7 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
     private TextView tvFileName;
     private CheckBox cbIgnore;
     private List<Music> scanResult;
+    private boolean isFullScan;
 
     public static final String[] PROJECTIONS = new String[]{
             MediaStore.Audio.Media.TITLE,
@@ -61,7 +62,7 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
 
     public static final int MENU_DIY_SCAN = 1;
     public static final int REQUEST_CODE_DIY = 1;
-    public static final String TEXT_START_SCAN = "开始扫描";
+    public static final String TEXT_START_SCAN = "全盘扫描";
     public static final String TEXT_STOP_SCAN = "停止扫描";
     public static final String TEXT_FINISH = "完成";
     public static final String TAG = ScanActivity.class.getSimpleName();
@@ -94,7 +95,7 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                             null : PinyinHelper.convertToPinyinString(title, "", PinyinFormat.WITHOUT_TONE));
                     String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
                     String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-                     String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                    String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
                     int duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
                     int bitrate = AudioTool.readBitrate(path);
                     long modifiedDate = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED));
@@ -204,6 +205,7 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                         if (paths != null) {
                             //自定义扫描开始
                             scanner.scan(listener, paths);
+                            isFullScan = false;
                         }
                     }
                     break;
@@ -224,6 +226,7 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                     } else {
                         MyLog.d(TAG, "开始扫描");
                         scanner.scan(listener, Environment.getExternalStorageDirectory().getAbsolutePath());
+                        isFullScan = true;
                     }
                 } else if (TEXT_STOP_SCAN.equals(text)) {
                     scanner.stopScan();
@@ -232,7 +235,7 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                     final ProgressDialog progressDialog = new ProgressDialog(this);
                     progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                     progressDialog.setMessage("正在更新数据，请稍等");
-                    new UpdateLocalMusicTask(scanResult) {
+                    new UpdateLocalMusicTask(scanResult, isFullScan) {
                         @Override
                         protected void onPreExecute() {
                             progressDialog.show();

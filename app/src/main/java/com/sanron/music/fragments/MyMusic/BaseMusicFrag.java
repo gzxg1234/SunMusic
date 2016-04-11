@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -28,20 +27,14 @@ import com.sanron.music.adapter.MusicItemAdapter;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.db.model.PlayList;
-import com.sanron.music.net.ApiCallback;
-import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.LrcPicResult;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.task.QueryTask;
 import com.sanron.music.utils.T;
 import com.sanron.music.view.AddSongToListWindow;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Observer;
-
-import okhttp3.Call;
 
 /**
  * Created by sanron on 16-3-28.
@@ -74,9 +67,8 @@ public abstract class BaseMusicFrag extends DataFragment implements Observer, Co
                 //列表中是否有播放中的歌曲
                 Music currentMusic = player.getCurrentMusic();
                 List<Music> listData = adapter.getData();
-                if (listData != null && listData.size() > 0) {
-                    int playingPos = listData.indexOf(currentMusic);
-                    adapter.setPlayingPosition(playingPos);
+                if (listData != null) {
+                    adapter.setPlayingPosition(listData.indexOf(currentMusic));
                 }
             } else if (state == IPlayer.STATE_STOP) {
                 adapter.setPlayingPosition(-1);
@@ -107,17 +99,17 @@ public abstract class BaseMusicFrag extends DataFragment implements Observer, Co
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        contentView = inflater.inflate(R.layout.frag_music, null);
-        lvData = $(R.id.lv_data);
-        llCheckBar = $(R.id.ll_multi_mode_bar);
-        tvCheckedNum = $(R.id.tv_checked_num);
-        cbCheckedAll = $(R.id.cb_checked_all);
-        return contentView;
+        return inflater.inflate(R.layout.frag_music, null);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        lvData = $(R.id.lv_data);
+        llCheckBar = $(R.id.ll_multi_mode_bar);
+        tvCheckedNum = $(R.id.tv_checked_num);
+        cbCheckedAll = $(R.id.cb_checked_all);
+
         initWindow();
         adapter.setFirstBindView(true);
         adapter.setOnItemClickListener(new MusicItemAdapter.OnItemClickListener() {
@@ -206,7 +198,7 @@ public abstract class BaseMusicFrag extends DataFragment implements Observer, Co
 
                     case R.id.menu_add_to_quque: {
                         player.enqueue(musics);
-                        T.show(getContext(),musics.size()+"首歌曲加入队列");
+                        T.show(getContext(), musics.size() + "首歌曲加入队列");
                     }
                     break;
 
@@ -255,7 +247,7 @@ public abstract class BaseMusicFrag extends DataFragment implements Observer, Co
                 List<Music> checkedMusics = getCheckedMusics();
                 player.enqueue(checkedMusics);
                 endMultiMode();
-                T.show(getContext(),checkedMusics.size()+"首歌曲加入队列");
+                T.show(getContext(), checkedMusics.size() + "首歌曲加入队列");
             }
         });
 
@@ -288,7 +280,7 @@ public abstract class BaseMusicFrag extends DataFragment implements Observer, Co
                         new AddSongToListWindow(getActivity(),
                                 playLists,
                                 checkedMusics)
-                                .show(contentView);
+                                .show(getView());
                     }
                 });
     }

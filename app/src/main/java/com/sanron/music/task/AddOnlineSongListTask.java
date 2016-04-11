@@ -37,12 +37,12 @@ public class AddOnlineSongListTask extends AsyncTask<Void, Void, Integer> {
 
         try {
             PlayList playList = new PlayList();
-            playList.setIcon(songList.getPic300());
-            playList.setTitle(songList.getTitle());
-            playList.setListId(songList.getListId());
+            playList.setIcon(songList.pic300);
+            playList.setTitle(songList.title);
+            playList.setListId(songList.listId);
             playList.setType(DBHelper.List.TYPE_COLLECTION);
             playList.setAddTime(System.currentTimeMillis());
-            List<Song> songs = songList.getSongs();
+            List<Song> songs = songList.songs;
 
             //插入歌单信息
             long listid = listAccess.insert(null, playList.toContentValues());
@@ -53,7 +53,7 @@ public class AddOnlineSongListTask extends AsyncTask<Void, Void, Integer> {
             //插入歌单歌曲信息
             for (Song song : songs) {
                 Music music = song.toMusic();
-                String songid = song.getSongId();
+                String songid = song.songId;
 
                 long musicid;
                 //是否存有歌曲信息
