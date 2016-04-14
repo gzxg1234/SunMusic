@@ -5,21 +5,27 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.renderscript.RenderScript;
 import android.view.Window;
 
+import com.nostra13.universalimageloader.cache.disc.DiskCache;
 import com.nostra13.universalimageloader.cache.disc.impl.ext.LruDiskCache;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.cache.memory.impl.FIFOLimitedMemoryCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
 import com.sanron.music.AppConfig;
+import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.ApiHttpClient;
+import com.sanron.music.net.MusicApi;
+import com.sanron.music.net.bean.AllTag;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.IllegalFormatException;
+
+import okhttp3.Call;
 
 /**
  * Created by Administrator on 2016/3/5.
@@ -31,7 +37,6 @@ public class StartActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         checkExternalStorage();
         initImageLoader();
-        ApiHttpClient.init();
         gotoMainActivity();
     }
 
@@ -42,27 +47,40 @@ public class StartActivity extends BaseActivity {
     }
 
     private void initImageLoader() {
-        File cacheDir = new File(Environment.getExternalStorageDirectory(),
-                AppConfig.IMG_CACHE_PATH);
         ImageLoader imageLoader = ImageLoader.getInstance();
         ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(getApplicationContext());
 
         int memoryCacheSize = (int) (Runtime.getRuntime().maxMemory() * AppConfig.MEMORY_CACHE_PERCENTAGE);
-        memoryCacheSize = Math.min(memoryCacheSize,
-                AppConfig.MAX_MEMORY_CACHE_SIZE);
-        builder.memoryCache(new FIFOLimitedMemoryCache(memoryCacheSize));
+        memoryCacheSize = Math.min(memoryCacheSize, AppConfig.MAX_MEMORY_CACHE_SIZE);
+
+        DiskCache diskCache = null;
         try {
-            builder.diskCache(new LruDiskCache(cacheDir,
+            File cacheDir = new File(Environment.getExternalStorageDirectory(),
+                    AppConfig.IMG_CACHE_PATH);
+            diskCache = new LruDiskCache(cacheDir,
                     null,
                     new Md5FileNameGenerator(),
                     AppConfig.IMG_DISK_CACHE_MAX_SIZE,
-                    AppConfig.IMG_DISK_CACHE_MAX_COUNT));
+                    AppConfig.IMG_DISK_CACHE_MAX_COUNT);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        builder.imageDownloader(new BaseImageDownloader(this, 5 * 1000, 30 * 1000));
-        builder.threadPoolSize(AppConfig.THREAD_POOL_SIZE);
-        builder.threadPriority(Thread.NORM_PRIORITY - 2);
+
+        DisplayImageOptions defaultImageOptions = new DisplayImageOptions.Builder()
+                .cacheOnDisk(true)
+                .cacheInMemory(true)
+                .imageScaleType(ImageScaleType.EXACTLY)
+                .build();
+
+        builder.memoryCache(new FIFOLimitedMemoryCache(memoryCacheSize))
+                .diskCache(diskCache)
+                .imageDownloader(new BaseImageDownloader(this, 5 * 1000, 30 * 1000))
+                .threadPoolSize(AppConfig.THREAD_POOL_SIZE)
+                .threadPriority(Thread.NORM_PRIORITY - 2)
+                .denyCacheImageMultipleSizesInMemory()
+                .memoryCacheExtraOptions(1000, 1000)
+                .defaultDisplayImageOptions(defaultImageOptions);
+
         imageLoader.init(builder.build());
     }
 

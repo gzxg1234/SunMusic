@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -41,6 +42,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 /**
  * Created by Administrator on 2016/3/10.
@@ -77,6 +80,8 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
     public static final int EVENT_CLICK_TAG = 1;
     public static final int EVENT_CLICK_SONGLIST = 2 ;
+    public static final int EVENT_CLICK_MORE_TAG = 3;
+
     public static final String EXTRA_SONGLIST_ID = "list_id";
     public static final String EXTRA_TAG_NAME = "tag";
 
@@ -116,7 +121,6 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
             TextView tv = (TextView) (hotTagGroup.getChildAt(i));
             if (i == hotTagGroup.getChildCount() - 1) {
                 tvMoreTag = tv;
-                tvMoreTag.setOnClickListener(this);
                 break;
             }
             tvHotTags.add(tv);
@@ -151,7 +155,13 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
 
         if (!hasLoadData) {
-            refreshData();
+            getView().getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    getView().getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    refreshData();
+                }
+            });
             hasLoadData = true;
         } else {
             setFocusPics(focusPics);
@@ -159,6 +169,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
             setHotSongList(hotSongLists);
             setRecmdSongs(recmdSongs);
         }
+
     }
 
     @Override
@@ -168,7 +179,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
     public void refreshData() {
         //获取轮播信息
-        MusicApi.focusPic(10, new ApiCallback<FocusPicData>() {
+        MusicApi.focusPic(10 , new ApiCallback<FocusPicData>() {
 
             @Override
             public void onFailure(Call call, IOException e) {
@@ -310,7 +321,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
             int ts = hotTags.size();
             for (int i = 0; i < vs && i < ts; i++) {
                 final TextView tvTag = tvHotTags.get(i);
-                final String title = hotTags.get(i).getTitle();
+                final String title = hotTags.get(i).title;
                 tvTag.setText(title);
                 tvTag.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -324,6 +335,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
                     }
                 });
             }
+            tvMoreTag.setOnClickListener(this);
         }
     }
 
@@ -332,7 +344,11 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tv_more_tag: {
-
+                Intent intent = new Intent(ACTION_FRAG_EVENT);
+                intent.putExtra(EXTRA_FROM, RecmdFrag.class.getName());
+                intent.putExtra(EXTRA_EVENT, EVENT_CLICK_MORE_TAG);
+                LocalBroadcastManager.getInstance(getContext())
+                        .sendBroadcast(intent);
             }
             break;
         }

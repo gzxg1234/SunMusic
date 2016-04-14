@@ -35,6 +35,7 @@ import com.sanron.music.fragments.MyMusic.PlayListFrag;
 import com.sanron.music.fragments.MyMusic.RecentPlayFrag;
 import com.sanron.music.fragments.PagerFragment;
 import com.sanron.music.fragments.PlayerFrag;
+import com.sanron.music.fragments.WebMusic.AllTagFrag;
 import com.sanron.music.fragments.WebMusic.BillboardFrag;
 import com.sanron.music.fragments.WebMusic.GedanFrag;
 import com.sanron.music.fragments.WebMusic.RadioFrag;
@@ -74,7 +75,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public static final String TAG_MYMUSIC = "MyMusic";
     public static final String TAG_WEBMUSIC = "WebMusic";
     private Map<String, String> titles;
-
 
     private BroadcastReceiver eventReceiver = new BroadcastReceiver() {
         @Override
@@ -116,6 +116,35 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     }
                     break;
 
+                    case RecmdFrag.EVENT_CLICK_TAG: {
+                        String tag = intent.getStringExtra(RecmdFrag.EXTRA_TAG_NAME);
+                        fm.beginTransaction()
+                                .setCustomAnimations(R.anim.slide_in_right,
+                                        R.anim.slide_out_right,
+                                        R.anim.slide_in_right,
+                                        R.anim.slide_out_right)
+                                .add(R.id.fragment_container_1, TagSongFrag.newInstance(tag),
+                                        TagSongFrag.class.getName())
+                                .addToBackStack(TagSongFrag.class.getName())
+                                .commit();
+                    }
+                    break;
+
+                    case RecmdFrag.EVENT_CLICK_MORE_TAG: {
+                        fm.beginTransaction()
+                                .setCustomAnimations(R.anim.slide_in_right,
+                                        R.anim.slide_out_right,
+                                        R.anim.slide_in_right,
+                                        R.anim.slide_out_right)
+                                .add(R.id.fragment_container_1, AllTagFrag.newInstance(),
+                                        AllTagFrag.class.getName())
+                                .addToBackStack(AllTagFrag.class.getName())
+                                .commit();
+                    }
+                    break;
+                }
+            } else if (AllTagFrag.class.getName().equals(from)) {
+                switch (event) {
                     case RecmdFrag.EVENT_CLICK_TAG: {
                         String tag = intent.getStringExtra(RecmdFrag.EXTRA_TAG_NAME);
                         fm.beginTransaction()

@@ -47,7 +47,6 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
     private boolean isFirstBindView = true;
     private int playingPosition = -1;//
     private ImageLoader imageLoader;
-    private DisplayImageOptions imageOptions;
     private MemoryCache memoryCache;
     private int playingTextColor;//播放中文字颜色
     private int normalTitleTextColor;//正常title颜色
@@ -58,12 +57,6 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         this.context = context;
         imageLoader = ImageLoader.getInstance();
         memoryCache = imageLoader.getMemoryCache();
-        imageOptions = new DisplayImageOptions.Builder()
-                .imageScaleType(ImageScaleType.EXACTLY)
-                .showImageOnFail(R.mipmap.default_small_song_pic)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .build();
         Resources resources = context.getResources();
         playingTextColor = resources.getColor(R.color.colorAccent);
         normalTitleTextColor = resources.getColor(R.color.textColorPrimary);
@@ -162,7 +155,6 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         }
         return false;
     }
-
 
 
     public void setItemChecked(int position, boolean checked) {
@@ -305,7 +297,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
                                 holder.ivPicture.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        imageLoader.displayImage(finalAvatar, holder.ivPicture, imageOptions);
+                                        imageLoader.displayImage(finalAvatar, holder.ivPicture);
                                     }
                                 });
                             }
@@ -323,7 +315,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
                     });
 
         } else if (!avatar.isEmpty()) {
-            imageLoader.displayImage(avatar, holder.ivPicture, imageOptions);
+            imageLoader.displayImage(avatar, holder.ivPicture);
         }
     }
 

@@ -58,15 +58,6 @@ public class LocalMusicFrag extends ListMusicFrag implements MainActivity.BackPr
     }
 
     @Override
-    public boolean onBackPressed() {
-        if (adapter.isMultiMode()) {
-            endMultiMode();
-            return true;
-        }
-        return super.onBackPressed();
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         menu.add(ALTERNATIVE_GROUP_ID, MENU_UPDATE_LOCAL_MUSIC, Menu.NONE, "扫描歌曲");

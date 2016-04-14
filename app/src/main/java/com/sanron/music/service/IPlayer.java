@@ -49,13 +49,17 @@ public interface IPlayer {
 
     int getPlayMode();
 
-    void addCallback(Callback callback);
+    void addPlayStateChangeListener(OnPlayStateChangeListener onPlayStateChangeListener);
 
-    void removeCallback(Callback callback);
+    void removePlayStateChangeListener(OnPlayStateChangeListener onPlayStateChangeListener);
 
     void addOnBufferListener(OnBufferListener onBufferListener);
 
     void removeBufferListener(OnBufferListener onBufferListener);
+
+    void addOnLoadedPictureListener(OnLoadedPictureListener onLoadedPictureListener);
+
+    void removeOnLoadedPictureListener(OnLoadedPictureListener onLoadedPictureListener);
 
     int getProgress();
 
@@ -63,10 +67,12 @@ public interface IPlayer {
 
     void seekTo(int position);
 
-    interface Callback {
-        void onLoadedPicture(Bitmap musicPic);
+    interface OnPlayStateChangeListener {
+        void onPlayStateChange(int state);
+    }
 
-        void onStateChange(int state);
+    interface OnLoadedPictureListener {
+        void onLoadedPicture(Bitmap img);
     }
 
     interface OnBufferListener {

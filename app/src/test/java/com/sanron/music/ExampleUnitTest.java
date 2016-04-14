@@ -16,6 +16,7 @@ public class ExampleUnitTest {
     @Test
     public void testApi() throws Exception {
 
+        System.out.println(BMA.Tag.allTag());
         System.out.println(BMA.Tag.tagSongList("劲爆",100,100));
         System.out.println(BMA.FocusPic.focusPic(10));
         System.out.println(BMA.GeDan.hotGeDan(3));

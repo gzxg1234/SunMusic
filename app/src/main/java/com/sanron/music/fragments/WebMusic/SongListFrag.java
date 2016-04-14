@@ -39,7 +39,7 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-1.
  */
-public class SongListFrag extends PullFrag implements View.OnClickListener, IPlayer.Callback {
+public class SongListFrag extends PullFrag implements View.OnClickListener, IPlayer.OnPlayStateChangeListener {
 
     public static final String ARG_LIST_ID = "list_id";
 
@@ -89,7 +89,7 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_songlist, null);
+        return inflater.inflate(R.layout.web_frag_songlist, null);
     }
 
     @Override
@@ -108,36 +108,38 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
         ibtnShare.setOnClickListener(this);
         ibtnFavorite.setOnClickListener(this);
         pullListView.setHasMore(false);
-        player.addCallback(this);
+        player.addPlayStateChangeListener(this);
 
         ivPicture.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 ivPicture.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 int width = ivPicture.getWidth();
-                int normalHeaderHieght = ivPicture.getHeight() + viewOperator.getHeight();
+                int normalHeaderHeight = ivPicture.getHeight() + viewOperator.getHeight();
                 pullListView.setMaxHeaderHeight(width + viewOperator.getHeight());
-                pullListView.setNormalHeaderHeight(normalHeaderHieght);
+                pullListView.setNormalHeaderHeight(normalHeaderHeight);
             }
         });
-        loadData();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        player.removeCallback(this);
-        if (requestCall != null) {
-            requestCall.cancel();
-        }
+        player.removePlayStateChangeListener(this);
     }
 
-    private void loadData() {
-        requestCall = MusicApi.songListInfo(listId, new ApiCallback<SongList>() {
+    @Override
+    protected Call loadData() {
+        return MusicApi.songListInfo(listId, new ApiCallback<SongList>() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (!call.isCanceled()) {
-                    showLoadFailedView();
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            showLoadFailedView();
+                        }
+                    });
                 }
             }
 
@@ -164,9 +166,9 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
         });
     }
 
+
     private void setData(SongList data, Bitmap image) {
         this.data = data;
-        setHasLoadData(true);
         ivPicture.setImageBitmap(image);
         tvSongListTag.setText(data.tag);
         tvSongListTitle.setText(data.title);
@@ -176,6 +178,7 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
         if (isCollected) {
             ibtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
         }
+        hideLoadingView();
     }
 
     @Override
@@ -230,13 +233,9 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
         return result;
     }
 
-    @Override
-    public void onLoadedPicture(Bitmap musicPic) {
-
-    }
 
     @Override
-    public void onStateChange(int state) {
+    public void onPlayStateChange(int state) {
         if (state == IPlayer.STATE_PREPARING) {
             //列表中是否有播放中的歌曲
             Music currentMusic = player.getCurrentMusic();

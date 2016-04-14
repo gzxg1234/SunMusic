@@ -1,6 +1,5 @@
 package com.sanron.music.fragments.WebMusic;
 
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,12 +30,13 @@ import okhttp3.Call;
  * 分类歌曲
  * Created by sanron on 16-4-12.
  */
-public class TagSongFrag extends PullFrag implements IPlayer.Callback {
+public class TagSongFrag extends PullFrag implements IPlayer.OnPlayStateChangeListener {
 
     private String tag;
     private TextView tvPlay;
     private ImageButton ibtnDownload;
     private TagData tagData;
+    private TextView tvTagName;
     private SongItemAdapter adapter;
     private Handler handler = new Handler(Looper.getMainLooper());
     public static final int LOAD_LIMIT = 100;
@@ -61,7 +61,7 @@ public class TagSongFrag extends PullFrag implements IPlayer.Callback {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_tag_song, null);
+        return inflater.inflate(R.layout.web_frag_tag_song, null);
     }
 
     @Override
@@ -69,9 +69,11 @@ public class TagSongFrag extends PullFrag implements IPlayer.Callback {
         super.onViewCreated(view, savedInstanceState);
         tvPlay = $(R.id.tv_play);
         ibtnDownload = $(R.id.ibtn_download);
+        tvTagName = $(R.id.tv_tag_name);
 
         setTitle(tag);
-        player.addCallback(this);
+        tvTagName.setText(tag);
+        player.addPlayStateChangeListener(this);
         adapter = new SongItemAdapter(getContext(), player);
         pullListView.setAdapter(adapter);
         pullListView.setOnPullUpListener(new DDPullListView.OnPullUpListener() {
@@ -85,29 +87,29 @@ public class TagSongFrag extends PullFrag implements IPlayer.Callback {
         topBoard.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+                topBoard.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 int height = topBoard.getHeight();
-                pullListView.setMaxHeaderHeight(height);
+                pullListView.setMaxHeaderHeight(height+200);
                 pullListView.setNormalHeaderHeight(height);
             }
         });
-        loadData();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        player.removeCallback(this);
+        player.removePlayStateChangeListener(this);
     }
 
-    private void loadData() {
-        MusicApi.tagInfo(tag, LOAD_LIMIT, adapter.getCount(), new ApiCallback<TagData>() {
+    @Override
+    protected Call loadData() {
+        return MusicApi.tagInfo(tag, LOAD_LIMIT, adapter == null ? 0 : adapter.getCount(), new ApiCallback<TagData>() {
             @Override
             public void onSuccess(Call call, final TagData data) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         pullListView.onLoadCompleted();
-                        setHasLoadData(true);
                         setData(data);
                     }
                 });
@@ -115,10 +117,18 @@ public class TagSongFrag extends PullFrag implements IPlayer.Callback {
 
             @Override
             public void onFailure(Call call, IOException e) {
-
+                if (!call.isCanceled()) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            showLoadFailedView();
+                        }
+                    });
+                }
             }
         });
     }
+
 
     private void setData(TagData tagData) {
         this.tagData = tagData;
@@ -129,15 +139,11 @@ public class TagSongFrag extends PullFrag implements IPlayer.Callback {
                 pullListView.setHasMore(false);
             }
         }
+        hideLoadingView();
     }
 
     @Override
-    public void onLoadedPicture(Bitmap musicPic) {
-
-    }
-
-    @Override
-    public void onStateChange(int state) {
+    public void onPlayStateChange(int state) {
         if (state == IPlayer.STATE_PREPARING) {
             //列表中是否有播放中的歌曲
             Music currentMusic = player.getCurrentMusic();

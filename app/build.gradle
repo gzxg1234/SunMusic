@@ -32,4 +32,5 @@ dependencies {
     compile 'com.balysv.materialmenu:material-menu-toolbar:1.5.4'
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
     compile 'de.hdodenhof:circleimageview:2.0.0'
+    compile 'com.github.mmin18:flexlayout:1.2.1'
 }

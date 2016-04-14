@@ -22,7 +22,7 @@ public class ApiHttpClient {
 
     private static OkHttpClient httpClient;
 
-    public static void init() {
+    static{
         File cacheDir = new File(Environment.getExternalStorageDirectory(),
                 AppConfig.HTTP_CACHE_PATH);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();

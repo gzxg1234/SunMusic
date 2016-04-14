@@ -1,9 +1,9 @@
 package com.sanron.music.fragments.WebMusic;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -22,19 +22,14 @@ public abstract class PullFrag extends BaseWebFrag implements SlideFinishLayout.
     protected DDPullListView pullListView;
     protected View viewInfo;
     protected View viewOperator;
-    protected View topbar;
     protected View topBoard;
-    protected TextView tvTitle;
     public static final String TAG = PullFrag.class.getSimpleName();
 
-    public void setTitle(String title) {
-        tvTitle.setText(title);
-    }
 
     private DDPullListView.OnPullDownListener pullListener = new DDPullListView.OnPullDownListener() {
         @Override
         public void onPullDown(int pullOffset) {
-            int headerHeight = pullListView.getPullHeader().getHeight()+pullOffset;
+            int headerHeight = pullListView.getPullHeader().getHeight() + pullOffset;
             updateBoardHeight(topBoard.getHeight() + pullOffset);
             ViewHelper.setTranslationY(viewInfo,
                     -viewInfo.getHeight() + headerHeight - viewOperator.getHeight());
@@ -60,7 +55,7 @@ public abstract class PullFrag extends BaseWebFrag implements SlideFinishLayout.
                     &&
                     pullListView.getPullHeader().getHeight() == pullListView.getNormalHeaderHeight()) {
                 int scrollY;
-                int topbarHeight = topbar.getHeight();
+                int topbarHeight = topBar.getHeight();
                 int normalHeaderHeight = pullListView.getNormalHeaderHeight();
                 final int maxScrollY = normalHeaderHeight - topbarHeight - viewOperator.getHeight();
                 if (firstVisibleItem == 0) {
@@ -93,11 +88,8 @@ public abstract class PullFrag extends BaseWebFrag implements SlideFinishLayout.
         super.onViewCreated(view, savedInstanceState);
         viewInfo = $(R.id.info);
         topBoard = $(R.id.top_board);
-        topbar = $(R.id.top_bar);
         pullListView = $(R.id.pull_list_view);
         viewOperator = $(R.id.operator);
-        tvTitle = $(R.id.tv_title);
-        appContext.setViewFitsStatusBar(topbar);
         pullListView.setOnPullDownListener(pullListener);
         pullListView.setOnScrollListener(onScrollListener);
     }

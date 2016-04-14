@@ -2,36 +2,44 @@ package com.sanron.music.fragments.WebMusic;
 
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 
 import com.sanron.music.R;
 import com.sanron.music.fragments.BaseFragment;
 import com.sanron.music.view.SlideFinishLayout;
 
+import okhttp3.Call;
+
 /**
  * Created by sanron on 16-4-12.
  */
-public class BaseWebFrag extends BaseFragment implements SlideFinishLayout.SlideFinishCallback {
+public abstract class BaseWebFrag extends BaseFragment implements SlideFinishLayout.SlideFinishCallback {
 
 
     private SlideFinishLayout slideFinishLayout;
+    protected View topBar;
+    protected TextView tvTitle;
+    protected Call dataCall;
     private View viewBack;
     private View viewLoading;
     private View viewLoadFailed;
-    private boolean isAnimEnd;
-    private boolean hasLoadData;
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        topBar = $(R.id.top_bar);
+        tvTitle = $(R.id.tv_title);
         slideFinishLayout = $(R.id.slide_finish_layout);
         viewBack = $(R.id.view_back);
         viewLoading = $(R.id.layout_loading);
         viewLoadFailed = $(R.id.layout_load_failed);
+        appContext.setViewFitsStatusBar(topBar);
 
         slideFinishLayout.setSlideFinishCallback(this);
         viewBack.setOnClickListener(new View.OnClickListener() {
@@ -43,13 +51,15 @@ public class BaseWebFrag extends BaseFragment implements SlideFinishLayout.Slide
         });
     }
 
-    protected void setHasLoadData(boolean hasLoadData) {
-        this.hasLoadData = hasLoadData;
-        if (hasLoadData
-                && isAnimEnd) {
-            viewLoading.setVisibility(View.GONE);
-        }
+    protected void setTitle(String title) {
+        tvTitle.setText(title);
     }
+
+    protected void hideLoadingView() {
+        viewLoading.setVisibility(View.GONE);
+    }
+
+    protected abstract Call loadData();
 
     @Override
     public Animation onCreateAnimation(int transit, boolean enter, int nextAnim) {
@@ -63,10 +73,7 @@ public class BaseWebFrag extends BaseFragment implements SlideFinishLayout.Slide
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
-                        isAnimEnd = true;
-                        if(hasLoadData){
-                            viewLoading.setVisibility(View.GONE);
-                        }
+                        dataCall = loadData();
                     }
 
                     @Override
@@ -75,14 +82,19 @@ public class BaseWebFrag extends BaseFragment implements SlideFinishLayout.Slide
                 });
                 return enterAnim;
             } catch (Resources.NotFoundException e) {
-                isAnimEnd = true;
-                if(hasLoadData){
-                    viewLoading.setVisibility(View.GONE);
-                }
+                dataCall = loadData();
             }
 
         }
         return super.onCreateAnimation(transit, enter, nextAnim);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (dataCall != null) {
+            dataCall.cancel();
+        }
     }
 
     protected void showLoadFailedView() {

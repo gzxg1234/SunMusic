@@ -1,7 +1,7 @@
 package com.sanron.music.net;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.parser.Feature;
 import com.sanron.music.utils.MyLog;
 
@@ -19,22 +19,27 @@ import okhttp3.Response;
 
 public abstract class ApiCallback<T> implements Callback {
 
+    public static final int FAILURE_CANCLE = 1;
+    public static final int FAILURE_PARESE = 2;
+    public static final int FAILURE_IO = 3;
+
     @Override
-    public void onResponse(Call call, Response response) {
-        String json;
-        T data = null;
+    public void onResponse(Call call, Response response) throws IOException {
+        String json = null;
+        T data;
         try {
             json = response.body().string();
             Type superClass = this.getClass().getGenericSuperclass();
-            Class<T> clazz = (Class<T>) ((ParameterizedType)superClass).getActualTypeArguments()[0];
-            data = JSON.parseObject(json,clazz);
+            Class<T> clazz = (Class<T>) ((ParameterizedType) superClass).getActualTypeArguments()[0];
+            data = JSON.parseObject(json, clazz, Feature.IgnoreNotMatch);
             onSuccess(call, data);
-        } catch (IOException e) {
+        } catch (JSONException e) {
+            MyLog.d("MusicApi", "error json:" + json);
             e.printStackTrace();
-            onFailure(call, e);
-            return;
+            onSuccess(call, null);
         }
     }
+
 
     public abstract void onSuccess(Call call, T data);
 }

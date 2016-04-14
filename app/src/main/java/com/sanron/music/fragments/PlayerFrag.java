@@ -38,7 +38,7 @@ import java.util.Date;
  * 播放界面
  * Created by Administrator on 2016/3/5.
  */
-public class PlayerFrag extends BaseFragment implements View.OnClickListener, View.OnTouchListener {
+public class PlayerFrag extends BaseFragment implements View.OnClickListener, View.OnTouchListener, IPlayer.OnPlayStateChangeListener, IPlayer.OnBufferListener, IPlayer.OnLoadedPictureListener {
 
     private ViewGroup smallPlayer;
     private ProgressBar splayProgress;
@@ -83,151 +83,240 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
     //点击左上角回退键事件
     public static final int EVENT_CLICK_BACK = 1;
 
-    private class UpdateProgressThread extends Thread {
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.frag_player, null);
+    }
 
-        private int period = 100;
-        private Object lock = new Object();
-        private boolean pause = false;
-        private boolean running = true;
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        smallPlayer = $(R.id.small_player);
+        splayProgress = $(R.id.s_play_progress);
+        sivSongPicture = $(R.id.s_iv_song_pic);
+        stvTitle = $(R.id.s_tv_title);
+        stvArtist = $(R.id.s_tv_artist);
+        sibtnPlayPause = $(R.id.s_ibtn_play_pause);
+        sibtnNext = $(R.id.s_ibtn_next);
+        ll1 = $(R.id.ll_1);
+        ll2 = $(R.id.ll_2);
+        bigPlayer = $(R.id.big_player);
+        playerTopBar = $(R.id.top_bar);
+        ivSongPicture = $(R.id.iv_music_picture);
+        tvTitle = $(R.id.tv_title);
+        tvArtist = $(R.id.tv_artist);
+        tvDuration = $(R.id.tv_music_duration);
+        tvPlayPostion = $(R.id.tv_music_progress);
+        ibtnBack = $(R.id.view_back);
+        ibtnChangeMode = $(R.id.ibtn_play_mode);
+        ibtnRewind = $(R.id.ibtn_rewind);
+        ibtnPlayPause = $(R.id.ibtn_play_pause);
+        ibtnForward = $(R.id.ibtn_forward);
+        ibtnPlayQuque = $(R.id.ibtn_play_quque);
+        playProgress = $(R.id.progress_play);
 
-        public void pause() {
-            pause = true;
+        sibtnPlayPause.setOnClickListener(this);
+        sibtnNext.setOnClickListener(this);
+        ibtnChangeMode.setOnClickListener(this);
+        ibtnRewind.setOnClickListener(this);
+        ibtnPlayPause.setOnClickListener(this);
+        ibtnForward.setOnClickListener(this);
+        ibtnPlayQuque.setOnClickListener(this);
+        ibtnBack.setOnClickListener(this);
+
+        appContext.setViewFitsStatusBar(playerTopBar);
+
+        if (savedInstanceState != null) {
+            smallPlayer.setVisibility(savedInstanceState.getInt("smallPlayerVisibility", View.VISIBLE));
+            bigPlayer.setVisibility(savedInstanceState.getInt("bigPlayerVisibility", View.VISIBLE));
         }
 
-        public void running() {
-            if (pause) {
-                synchronized (lock) {
-                    lock.notify();
-                    pause = false;
+        updateProgressThread = new UpdateProgressThread();
+        updateProgressThread.start();
+
+        player.addPlayStateChangeListener(this);
+        player.addOnBufferListener(this);
+        player.addOnLoadedPictureListener(this);
+
+        Music music = player.getCurrentMusic();
+        int state = player.getState();
+        if (state >= IPlayer.STATE_PREPARING) {
+            setTitleText(music.getTitle());
+            setArtistText(music.getArtist());
+        }
+
+        if (state >= IPlayer.STATE_PREPARED) {
+            setSongDuration(player.getDuration());
+        }
+
+        if (state == IPlayer.STATE_PLAYING) {
+            sibtnPlayPause.setImageResource(R.mipmap.ic_pause_black_36dp);
+            ibtnPlayPause.setImageResource(R.mipmap.ic_pause_white_24dp);
+        } else {
+            updateProgressThread.pause();
+        }
+
+        setModeIcon(player.getPlayMode());
+        onLoadedPicture(player.getCurMusicPic());
+
+        ibtnRewind.setOnTouchListener(this);
+        ibtnForward.setOnTouchListener(this);
+    }
+
+
+    @Override
+    public void onPlayStateChange(int state) {
+        switch (state) {
+            case IPlayer.STATE_STOP: {
+                updateProgressThread.pause();
+                setTitleText(getContext().getString(R.string.app_name));
+                setArtistText("");
+                setSongDuration(0);
+                setPlayProgress(0);
+                sibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_black_36dp);
+                ibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_white_24dp);
+            }
+            break;
+
+            case IPlayer.STATE_PAUSE: {
+                updateProgressThread.pause();
+                sibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_black_36dp);
+                ibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_white_24dp);
+            }
+            break;
+
+            case IPlayer.STATE_PLAYING: {
+                updateProgressThread.running();
+                sibtnPlayPause.setImageResource(R.mipmap.ic_pause_black_36dp);
+                ibtnPlayPause.setImageResource(R.mipmap.ic_pause_white_24dp);
+            }
+            break;
+
+            case IPlayer.STATE_PREPARING: {
+                Music music = player.getCurrentMusic();
+                setTitleText(music.getTitle());
+                setArtistText(music.getArtist());
+                setSongDuration(0);
+                setPlayProgress(0);
+                playProgress.setSecondaryProgress(0);
+            }
+            break;
+
+            case IPlayer.STATE_PREPARED: {
+                Music music = player.getCurrentMusic();
+                setSongDuration(player.getDuration());
+                setPlayProgress(player.getProgress());
+                if (TextUtils.isEmpty(music.getData())) {
+                    playProgress.setSecondaryProgress(0);
+                } else {
+                    playProgress.setSecondaryProgress(player.getDuration());
                 }
             }
-        }
-
-        public void end() {
-            running = false;
-        }
-
-        @Override
-        public void run() {
-            while (running) {
-                if (pause) {
-                    try {
-                        synchronized (lock) {
-                            lock.wait();
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                final int position = player.getProgress();
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setPlayProgress(position);
-                    }
-                });
-                SystemClock.sleep(period);
-            }
+            break;
         }
     }
 
-    private IPlayer.Callback callback = new IPlayer.Callback() {
-        @Override
-        public void onLoadedPicture(Bitmap musicPic) {
-            if (musicPic == null) {
-                sivSongPicture.setImageResource(R.mipmap.default_song_pic);
-                ivSongPicture.setImageResource(R.mipmap.default_song_pic);
-            } else {
-                sivSongPicture.setImageBitmap(musicPic);
-                ivSongPicture.setImageBitmap(musicPic);
-            }
-            Bitmap bmp = ((BitmapDrawable) ivSongPicture.getDrawable()).getBitmap();
-            Palette.generateAsync(bmp, new Palette.PaletteAsyncListener() {
-                @Override
-                public void onGenerated(Palette palette) {
-                    int oldColor1 = ((ColorDrawable) ll1.getBackground()).getColor();
-                    int oldColor2 = ((ColorDrawable) ll2.getBackground()).getColor();
-                    int newColor1 = palette.getDarkVibrantColor(0xFF000000);
-                    int newColor2 = palette.getDarkMutedColor(0xFF000000);
-                    animBackgroundColor(oldColor1, newColor1, oldColor2, newColor2);
-                }
-            });
+    @Override
+    public void onBufferingUpdate(int bufferedPosition) {
+
+        if (bufferedPosition > playProgress.getSecondaryProgress()) {
+            playProgress.setSecondaryProgress(bufferedPosition);
         }
+    }
 
-        @Override
-        public void onStateChange(int state) {
-            switch (state) {
-                case IPlayer.STATE_STOP: {
-                    updateProgressThread.pause();
-                    setTitleText(getContext().getString(R.string.app_name));
-                    setArtistText("");
-                    setSongDuration(0);
-                    setPlayProgress(0);
-                    sibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_black_36dp);
-                    ibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_white_24dp);
-                }
-                break;
+    @Override
+    public void onBufferStart() {
+        System.out.println("buffer start");
+    }
 
-                case IPlayer.STATE_PAUSE: {
-                    updateProgressThread.pause();
-                    sibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_black_36dp);
-                    ibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_white_24dp);
-                }
-                break;
+    @Override
+    public void onBufferEnd() {
+        System.out.println("buffer end");
+    }
 
-                case IPlayer.STATE_PLAYING: {
-                    updateProgressThread.running();
-                    sibtnPlayPause.setImageResource(R.mipmap.ic_pause_black_36dp);
-                    ibtnPlayPause.setImageResource(R.mipmap.ic_pause_white_24dp);
-                }
-                break;
+    @Override
+    public void onLoadedPicture(Bitmap img) {
+        if (img == null) {
+            sivSongPicture.setImageResource(R.mipmap.default_song_pic);
+            ivSongPicture.setImageResource(R.mipmap.default_song_pic);
+        } else {
+            sivSongPicture.setImageBitmap(img);
+            ivSongPicture.setImageBitmap(img);
+        }
+        Bitmap bmp = ((BitmapDrawable) ivSongPicture.getDrawable()).getBitmap();
+        Palette.generateAsync(bmp, new Palette.PaletteAsyncListener() {
+            @Override
+            public void onGenerated(Palette palette) {
+                int oldColor1 = ((ColorDrawable) ll1.getBackground()).getColor();
+                int oldColor2 = ((ColorDrawable) ll2.getBackground()).getColor();
+                int newColor1 = palette.getDarkVibrantColor(0xFF000000);
+                int newColor2 = palette.getDarkMutedColor(0xFF000000);
+                animBackgroundColor(oldColor1, newColor1, oldColor2, newColor2);
+            }
+        });
+    }
 
-                case IPlayer.STATE_PREPARING: {
-                    Music music = player.getCurrentMusic();
-                    setTitleText(music.getTitle());
-                    setArtistText(music.getArtist());
-                    setSongDuration(0);
-                    setPlayProgress(0);
-                    playProgress.setSecondaryProgress(0);
-                }
-                break;
-
-                case IPlayer.STATE_PREPARED: {
-                    Music music = player.getCurrentMusic();
-                    setSongDuration(player.getDuration());
-                    setPlayProgress(player.getProgress());
-                    if (TextUtils.isEmpty(music.getData())) {
-                        playProgress.setSecondaryProgress(0);
-                    } else {
-                        playProgress.setSecondaryProgress(player.getDuration());
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        boolean handled = false;
+        switch (v.getId()) {
+            case R.id.ibtn_rewind: {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        threadRewind = new FastLocateThread(FastLocateThread.REWIND);
+                        threadRewind.start();
                     }
+                    break;
+
+                    case MotionEvent.ACTION_CANCEL:
+                    case MotionEvent.ACTION_UP: {
+                        threadRewind.stopRun();
+                        if (threadRewind.isLocating()) {
+                            handled = true;
+                            v.setPressed(false);
+                        }
+                    }
+                    break;
                 }
-                break;
             }
-        }
+            break;
 
-    };
+            case R.id.ibtn_forward: {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        threadForward = new FastLocateThread(FastLocateThread.FORWARD);
+                        threadForward.start();
+                    }
+                    break;
 
-    private IPlayer.OnBufferListener onBufferListener = new IPlayer.OnBufferListener() {
-
-        @Override
-        public void onBufferingUpdate(int bufferedPosition) {
-            if (bufferedPosition > playProgress.getSecondaryProgress()) {
-                playProgress.setSecondaryProgress(bufferedPosition);
+                    case MotionEvent.ACTION_CANCEL:
+                    case MotionEvent.ACTION_UP: {
+                        threadForward.stopRun();
+                        if (threadForward.isLocating()) {
+                            handled = true;
+                            v.setPressed(false);
+                        }
+                    }
+                    break;
+                }
             }
+            break;
         }
+        return handled;
+    }
 
-        @Override
-        public void onBufferStart() {
-            System.out.println("buffer start");
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        updateProgressThread.end();
+        player.removePlayStateChangeListener(this);
+        player.removeBufferListener(this);
+        player.removeOnLoadedPictureListener(this);
+        if (showQueueMusicWindow != null && showQueueMusicWindow.isShowing()) {
+            showQueueMusicWindow.dismiss();
         }
+    }
 
-        @Override
-        public void onBufferEnd() {
-            System.out.println("buffer end");
-        }
-    };
 
     private void animBackgroundColor(int oldColor1, int newColor1, int oldColor2, int newColor2) {
         if (colorAnim1 != null
@@ -286,199 +375,6 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
         return sdf.format(new Date(millis));
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_player, null);
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        smallPlayer = $(R.id.small_player);
-        splayProgress = $(R.id.s_play_progress);
-        sivSongPicture = $(R.id.s_iv_song_pic);
-        stvTitle = $(R.id.s_tv_title);
-        stvArtist = $(R.id.s_tv_artist);
-        sibtnPlayPause = $(R.id.s_ibtn_play_pause);
-        sibtnNext = $(R.id.s_ibtn_next);
-        ll1 = $(R.id.ll_1);
-        ll2 = $(R.id.ll_2);
-        bigPlayer = $(R.id.big_player);
-        playerTopBar = $(R.id.top_bar);
-        ivSongPicture = $(R.id.iv_music_picture);
-        tvTitle = $(R.id.tv_title);
-        tvArtist = $(R.id.tv_artist);
-        tvDuration = $(R.id.tv_music_duration);
-        tvPlayPostion = $(R.id.tv_music_progress);
-        ibtnBack = $(R.id.view_back);
-        ibtnChangeMode = $(R.id.ibtn_play_mode);
-        ibtnRewind = $(R.id.ibtn_rewind);
-        ibtnPlayPause = $(R.id.ibtn_play_pause);
-        ibtnForward = $(R.id.ibtn_forward);
-        ibtnPlayQuque = $(R.id.ibtn_play_quque);
-        playProgress = $(R.id.progress_play);
-
-        sibtnPlayPause.setOnClickListener(this);
-        sibtnNext.setOnClickListener(this);
-        ibtnChangeMode.setOnClickListener(this);
-        ibtnRewind.setOnClickListener(this);
-        ibtnPlayPause.setOnClickListener(this);
-        ibtnForward.setOnClickListener(this);
-        ibtnPlayQuque.setOnClickListener(this);
-        ibtnBack.setOnClickListener(this);
-
-        appContext.setViewFitsStatusBar(playerTopBar);
-
-        if (savedInstanceState != null) {
-            smallPlayer.setVisibility(savedInstanceState.getInt("smallPlayerVisibility", View.VISIBLE));
-            bigPlayer.setVisibility(savedInstanceState.getInt("bigPlayerVisibility", View.VISIBLE));
-        }
-
-        updateProgressThread = new UpdateProgressThread();
-        updateProgressThread.start();
-
-        player.addCallback(callback);
-        player.addOnBufferListener(onBufferListener);
-
-        Music music = player.getCurrentMusic();
-        int state = player.getState();
-        if (state >= IPlayer.STATE_PREPARING) {
-            setTitleText(music.getTitle());
-            setArtistText(music.getArtist());
-        }
-
-        if (state >= IPlayer.STATE_PREPARED) {
-            setSongDuration(player.getDuration());
-        }
-
-        if (state == IPlayer.STATE_PLAYING) {
-            sibtnPlayPause.setImageResource(R.mipmap.ic_pause_black_36dp);
-            ibtnPlayPause.setImageResource(R.mipmap.ic_pause_white_24dp);
-        } else {
-            updateProgressThread.pause();
-        }
-
-        setModeIcon(player.getPlayMode());
-        callback.onLoadedPicture(player.getCurMusicPic());
-
-        ibtnRewind.setOnTouchListener(this);
-        ibtnForward.setOnTouchListener(this);
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        boolean handled = false;
-        switch (v.getId()) {
-            case R.id.ibtn_rewind: {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN: {
-                        threadRewind = new FastLocateThread(FastLocateThread.REWIND);
-                        threadRewind.start();
-                    }
-                    break;
-
-                    case MotionEvent.ACTION_CANCEL:
-                    case MotionEvent.ACTION_UP: {
-                        threadRewind.stopRun();
-                        if (threadRewind.isLocating()) {
-                            handled = true;
-                            v.setPressed(false);
-                        }
-                    }
-                    break;
-                }
-            }
-            break;
-
-            case R.id.ibtn_forward: {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN: {
-                        threadForward = new FastLocateThread(FastLocateThread.FORWARD);
-                        threadForward.start();
-                    }
-                    break;
-
-                    case MotionEvent.ACTION_CANCEL:
-                    case MotionEvent.ACTION_UP: {
-                        threadForward.stopRun();
-                        if (threadForward.isLocating()) {
-                            handled = true;
-                            v.setPressed(false);
-                        }
-                    }
-                    break;
-                }
-            }
-            break;
-        }
-        return handled;
-    }
-
-    public class FastLocateThread extends Thread {
-
-        public static final int MIN_TIME = 1000;
-        private volatile boolean running = true;
-        private boolean isLocating = false;
-        private int speed;
-        public static final int REWIND = 1;//快退
-        public static final int FORWARD = 2;//快进
-
-        public FastLocateThread(int type) {
-            if (type == REWIND) {
-                speed = -4000;
-            } else if (type == FORWARD) {
-                speed = 4000;
-            }
-        }
-
-        public void stopRun() {
-            running = false;
-        }
-
-        public boolean isLocating() {
-            return isLocating;
-        }
-
-        @Override
-        public void run() {
-            SystemClock.sleep(MIN_TIME);
-            isLocating = true;
-            if (!running) {
-                return;
-            }
-            updateProgressThread.pause();
-            while (running) {
-                int pos = player.getProgress() + speed;
-                pos = Math.min(playProgress.getSecondaryProgress(), Math.max(0, pos));
-                final int postPos = pos;
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        setPlayProgress(postPos);
-                    }
-                });
-                if (speed < 0) {
-                    speed -= 1000;
-                } else {
-                    speed += 1000;
-                }
-                player.seekTo(pos);
-                SystemClock.sleep(500);
-            }
-            updateProgressThread.running();
-        }
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        updateProgressThread.end();
-        player.removeCallback(callback);
-        player.removeBufferListener(onBufferListener);
-        if (showQueueMusicWindow != null && showQueueMusicWindow.isShowing()) {
-            showQueueMusicWindow.dismiss();
-        }
-    }
 
     private void setModeIcon(int mode) {
         int iconId = 0;
@@ -577,4 +473,109 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
         outState.putInt("smallPlayerVisibility", smallPlayer.getVisibility());
         outState.putInt("bigPlayerVisibility", bigPlayer.getVisibility());
     }
+
+    private class UpdateProgressThread extends Thread {
+
+        private int period = 100;
+        private Object lock = new Object();
+        private boolean pause = false;
+        private boolean running = true;
+
+        public void pause() {
+            pause = true;
+        }
+
+        public void running() {
+            if (pause) {
+                synchronized (lock) {
+                    lock.notify();
+                    pause = false;
+                }
+            }
+        }
+
+        public void end() {
+            running = false;
+        }
+
+        @Override
+        public void run() {
+            while (running) {
+                if (pause) {
+                    try {
+                        synchronized (lock) {
+                            lock.wait();
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                final int position = player.getProgress();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        setPlayProgress(position);
+                    }
+                });
+                SystemClock.sleep(period);
+            }
+        }
+    }
+
+    public class FastLocateThread extends Thread {
+
+        public static final int MIN_TIME = 1000;
+        private volatile boolean running = true;
+        private boolean isLocating = false;
+        private int speed;
+        public static final int REWIND = 1;//快退
+        public static final int FORWARD = 2;//快进
+
+        public FastLocateThread(int type) {
+            if (type == REWIND) {
+                speed = -4000;
+            } else if (type == FORWARD) {
+                speed = 4000;
+            }
+        }
+
+        public void stopRun() {
+            running = false;
+        }
+
+        public boolean isLocating() {
+            return isLocating;
+        }
+
+        @Override
+        public void run() {
+            SystemClock.sleep(MIN_TIME);
+            isLocating = true;
+            if (!running) {
+                return;
+            }
+            updateProgressThread.pause();
+            while (running) {
+                int pos = player.getProgress() + speed;
+                pos = Math.min(playProgress.getSecondaryProgress(), Math.max(0, pos));
+                final int postPos = pos;
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setPlayProgress(postPos);
+                    }
+                });
+                if (speed < 0) {
+                    speed -= 1000;
+                } else {
+                    speed += 1000;
+                }
+                player.seekTo(pos);
+                SystemClock.sleep(500);
+            }
+            updateProgressThread.running();
+        }
+    }
+
 }

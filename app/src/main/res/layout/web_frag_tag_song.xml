@@ -5,12 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
     <com.sanron.music.view.DDPullListView
         android:id="@+id/pull_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/white" />
+
 
     <RelativeLayout
         android:id="@+id/top_board"
@@ -38,10 +38,10 @@
             android:layout_gravity="center_vertical"
             android:ellipsize="end"
             android:singleLine="true"
-            tools:text="伤感"
             android:textColor="@color/textColorPrimaryInverse"
             android:textSize="18dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="伤感" />
 
     </LinearLayout>
 
@@ -88,6 +88,6 @@
         layout="@layout/layout_load_failed"
         android:visibility="gone" />
 
-    <include layout="@layout/layout_title_bar" />
+    <include layout="@layout/layout_top_bar" />
 
 </com.sanron.music.view.SlideFinishLayout>

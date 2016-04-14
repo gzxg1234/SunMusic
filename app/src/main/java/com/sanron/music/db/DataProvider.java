@@ -2,11 +2,8 @@ package com.sanron.music.db;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.ContentObserver;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +15,7 @@ import java.util.Observable;
 public class DataProvider extends Observable {
     private DBHelper mDbHelper;
     private SQLiteDatabase mDatabase;
-    private static DataProvider mInstance;
+    private volatile static DataProvider mInstance;
 
     public static DataProvider instance() {
         if (mInstance == null) {

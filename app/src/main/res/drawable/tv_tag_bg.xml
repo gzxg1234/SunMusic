@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:color="@color/textColorPrimaryInverse" android:state_pressed="true">
+        <shape>
+            <size android:height="40dp"/>
+            <stroke android:color="@color/textColorPrimaryInverse"
+                android:width="1dp" />
+            <solid android:color="@color/colorAccent" />
+        </shape>
+    </item>
+
+    <item android:color="@color/textColorSecondary">
+        <shape>
+            <size android:height="40dp"/>
+            <stroke android:width="1dp" android:color="@color/textColorSecondary" />
+        </shape>
+    </item>
+
+</selector>

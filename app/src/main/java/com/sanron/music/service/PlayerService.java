@@ -41,8 +41,10 @@ import com.sanron.music.utils.T;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import okhttp3.Call;
 
@@ -82,11 +84,6 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
     private boolean isLossAudioFocus;
 
     private ImageLoader imageLoader = ImageLoader.getInstance();
-
-    private DisplayImageOptions imageOptions = new DisplayImageOptions.Builder()
-            .imageScaleType(ImageScaleType.EXACTLY)
-            .cacheOnDisk(true)
-            .build();
 
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -351,9 +348,11 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
          */
         private Call fileLinkCall;
         private Call searchPicCall;
-        private List<OnBufferListener> onBufferListeners;
-        private List<IPlayer.Callback> callbacks;
+        private Set<OnLoadedPictureListener> onLoadedPictureListeners;
+        private Set<OnBufferListener> onBufferListeners;
+        private Set<OnPlayStateChangeListener> onPlayStateChangeListeners;
         private MediaPlayer mediaPlayer;
+
 
         /**
          * 超时时间
@@ -361,9 +360,10 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         public static final int BUFFER_TIMEOUT = 30 * 1000;
 
         public Player() {
-            onBufferListeners = new ArrayList<>();
+            onBufferListeners = new HashSet<>();
+            onPlayStateChangeListeners = new HashSet<>();
+            onLoadedPictureListeners = new HashSet<>();
             queue = new ArrayList<>();
-            callbacks = new ArrayList<>();
             currentIndex = -1;
         }
 
@@ -533,8 +533,8 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         private void changeState(int newState) {
             state = newState;
-            for (Callback callback : callbacks) {
-                callback.onStateChange(state);
+            for (OnPlayStateChangeListener onPlayStateChangeListener : onPlayStateChangeListeners) {
+                onPlayStateChangeListener.onPlayStateChange(state);
             }
         }
 
@@ -598,13 +598,13 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         }
 
         @Override
-        public void addCallback(Callback callback) {
-            callbacks.add(callback);
+        public void addPlayStateChangeListener(OnPlayStateChangeListener onPlayStateChangeListener) {
+            onPlayStateChangeListeners.add(onPlayStateChangeListener);
         }
 
         @Override
-        public void removeCallback(Callback callback) {
-            callbacks.remove(callback);
+        public void removePlayStateChangeListener(OnPlayStateChangeListener onPlayStateChangeListener) {
+            onPlayStateChangeListeners.remove(onPlayStateChangeListener);
         }
 
         @Override
@@ -615,6 +615,16 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         @Override
         public void removeBufferListener(OnBufferListener onBufferListener) {
             onBufferListeners.remove(onBufferListener);
+        }
+
+        @Override
+        public void addOnLoadedPictureListener(OnLoadedPictureListener onLoadedPictureListener) {
+            onLoadedPictureListeners.add(onLoadedPictureListener);
+        }
+
+        @Override
+        public void removeOnLoadedPictureListener(OnLoadedPictureListener onLoadedPictureListener) {
+            onLoadedPictureListeners.remove(onLoadedPictureListener);
         }
 
         @Override
@@ -696,10 +706,10 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             return true;
         }
 
-        private void setCurMusicPic(Bitmap bmp) {
-            curMusicPic = bmp;
-            for (Callback callback : callbacks) {
-                callback.onLoadedPicture(bmp);
+        private void setCurMusicPic(Bitmap img) {
+            curMusicPic = img;
+            for (OnLoadedPictureListener listener : onLoadedPictureListeners) {
+                listener.onLoadedPicture(img);
             }
             updateNotification();
         }
@@ -736,7 +746,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                                 }
                             }
                             if (!TextUtils.isEmpty(pic)) {
-                                loadedImage = imageLoader.loadImageSync(pic, imageOptions);
+                                loadedImage = imageLoader.loadImageSync(pic);
                             }
                             if (requestIndex == getCurrentIndex()) {
                                 final Bitmap finalLoadedImage = loadedImage;

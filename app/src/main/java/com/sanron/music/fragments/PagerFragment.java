@@ -47,7 +47,7 @@ public class PagerFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_layout_pager, null);
+        return inflater.inflate(R.layout.frag_pager, null);
     }
 
     @Override

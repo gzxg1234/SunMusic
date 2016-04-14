@@ -7,13 +7,8 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 public class Tag {
     @JSONField(name = "title")
-    private String title;
+    public String title;
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    @JSONField(name = "hot")
+    public int isHot;
 }

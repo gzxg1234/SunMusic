@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * 播放队列窗口
  */
-public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.Callback, View.OnClickListener {
+public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.OnPlayStateChangeListener, View.OnClickListener {
 
     private Activity mActivity;
     private float mOldAlpha;
@@ -44,7 +44,7 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.Callbac
         this.mActivity = activity;
         this.mContentView = LayoutInflater.from(activity).inflate(R.layout.window_queue_music, null);
         this.queue = player.getQueue();
-        player.addCallback(this);
+        player.addPlayStateChangeListener(this);
         int screenHeight = activity.getResources().getDisplayMetrics().heightPixels;
         setFocusable(true);
         setTouchable(true);
@@ -113,16 +113,12 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.Callbac
     public void dismiss() {
         animateDismiss();
         super.dismiss();
-        player.removeCallback(this);
+        player.removePlayStateChangeListener(this);
     }
 
-    @Override
-    public void onLoadedPicture(Bitmap musicPic) {
-
-    }
 
     @Override
-    public void onStateChange(int state) {
+    public void onPlayStateChange(int state) {
         if (state == IPlayer.STATE_PREPARING) {
             adapter.notifyDataSetChanged();
             lvQueue.scrollToPosition(player.getCurrentIndex());

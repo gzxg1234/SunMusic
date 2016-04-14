@@ -41,8 +41,6 @@ public class SongItemAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-
-
     @Override
     public int getCount() {
         return data == null ? 0 : data.size();

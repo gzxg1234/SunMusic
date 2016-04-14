@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/recmd_title_draw_left"
+        android:drawablePadding="4dp"
+        android:singleLine="true"
+        android:textSize="16dp"
+        tools:text="风格" />
+
+    <com.sanron.music.view.InScrollGridView
+        android:id="@+id/grid_view"
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:numColumns="4"
+        android:horizontalSpacing="4dp"
+        android:verticalSpacing="4dp"
+        android:layout_height="match_parent">
+    </com.sanron.music.view.InScrollGridView>
+</LinearLayout>

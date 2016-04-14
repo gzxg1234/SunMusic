@@ -2,7 +2,7 @@ package com.sanron.music.net;
 
 import android.content.ContentValues;
 
-import com.sanron.music.bdmusic.BMA;
+import com.sanron.music.net.bean.AllTag;
 import com.sanron.music.net.bean.FocusPicData;
 import com.sanron.music.net.bean.HotSongListData;
 import com.sanron.music.net.bean.HotTagData;
@@ -11,8 +11,6 @@ import com.sanron.music.net.bean.RecmdSongData;
 import com.sanron.music.net.bean.SongList;
 import com.sanron.music.net.bean.SongUrlInfo;
 import com.sanron.music.net.bean.TagData;
-
-import org.jaudiotagger.tag.Tag;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -33,11 +31,11 @@ public class MusicApi {
      * @param num
      * @param apiCallback
      */
-    public static void focusPic(int num, ApiCallback<FocusPicData> apiCallback) {
+    public static Call focusPic(int num, ApiCallback<FocusPicData> apiCallback) {
         ContentValues params = new ContentValues();
         params.put("method", "baidu.ting.plaza.getFocusPic");
         params.put("num", num);
-        ApiHttpClient.get(url(params), 600, apiCallback);
+        return ApiHttpClient.get(url(params), 600, apiCallback);
     }
 
     /**
@@ -46,11 +44,11 @@ public class MusicApi {
      * @param num         　数量
      * @param apiCallback
      */
-    public static void recmdSongs(int num, final ApiCallback<RecmdSongData> apiCallback) {
+    public static Call recmdSongs(int num, final ApiCallback<RecmdSongData> apiCallback) {
         ContentValues params = new ContentValues();
         params.put("method", "baidu.ting.song.getEditorRecommend");
         params.put("num", num);
-        ApiHttpClient.get(url(params), 600, apiCallback);
+        return ApiHttpClient.get(url(params), 600, apiCallback);
     }
 
     /**
@@ -59,11 +57,11 @@ public class MusicApi {
      * @param num
      * @param apiCallback
      */
-    public static void hotSongList(int num, final ApiCallback<HotSongListData> apiCallback) {
+    public static Call hotSongList(int num, final ApiCallback<HotSongListData> apiCallback) {
         ContentValues params = new ContentValues();
         params.put("method", "baidu.ting.diy.getHotGeDanAndOfficial");
         params.put("num", num);
-        ApiHttpClient.get(url(params), 600, apiCallback);
+        return ApiHttpClient.get(url(params), 600, apiCallback);
     }
 
     /**
@@ -72,11 +70,22 @@ public class MusicApi {
      * @param num
      * @param apiCallback
      */
-    public static void hotTag(int num, ApiCallback<HotTagData> apiCallback) {
+    public static Call hotTag(int num, ApiCallback<HotTagData> apiCallback) {
         ContentValues params = new ContentValues();
         params.put("method", "baidu.ting.tag.getHotTag");
         params.put("nums", num);
-        ApiHttpClient.get(url(params), 21600, apiCallback);
+        return ApiHttpClient.get(url(params), 21600, apiCallback);
+    }
+
+    /**
+     * 所有分类
+     *
+     * @param apiCallback
+     */
+    public static Call allTag(ApiCallback<AllTag> apiCallback) {
+        ContentValues params = new ContentValues();
+        params.put("method", "baidu.ting.tag.getAllTag");
+        return ApiHttpClient.get(url(params), 21600, apiCallback);
     }
 
     /**
@@ -87,21 +96,14 @@ public class MusicApi {
      * @param offset      偏移量
      * @param apiCallback
      */
-    public static void tagInfo(String tagName, int limit, int offset, ApiCallback<TagData> apiCallback) {
+    public static Call tagInfo(String tagName, int limit, int offset, ApiCallback<TagData> apiCallback) {
         ContentValues params = new ContentValues();
         params.put("method", "baidu.ting.tag.songlist");
-        params.put("tagname",tagName);
+        params.put("tagname", tagName);
         params.put("limit", limit);
         params.put("offset", offset);
-        ApiHttpClient.get(url(params), 21600, apiCallback);
+        return ApiHttpClient.get(url(params), 21600, apiCallback);
     }
-
-    public static void allTag(ApiCallback<Tag> apiCallback) {
-        ContentValues params = new ContentValues();
-        params.put("method", "baidu.ting.tag.getAllTag");
-        ApiHttpClient.get(url(params), 21600, apiCallback);
-    }
-
 
     /**
      * 歌单信息

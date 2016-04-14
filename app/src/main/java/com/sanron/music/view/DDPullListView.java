@@ -2,6 +2,7 @@ package com.sanron.music.view;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.DataSetObserver;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.widget.Space;
 import android.util.AttributeSet;
@@ -13,16 +14,17 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.AbsListView;
+import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.nineoldandroids.animation.ValueAnimator;
 import com.sanron.music.R;
-import com.sanron.music.utils.MyLog;
 
 /**
  * Created by sanron on 16-3-30.
@@ -95,6 +97,7 @@ public class DDPullListView extends ListView {
     private OnPullDownListener onPullDownListener;
     private OnScrollListener onScrollListener;
 
+    public static final int STATE_NO_DATA = -1;
     /**
      * 正常状态
      */
@@ -120,6 +123,7 @@ public class DDPullListView extends ListView {
      */
     public static final int STATE_LOADING = 4;
 
+
     private static final int INVALID_POINTER_ID = -1;
 
     private OnScrollListener internalScrollListener = new OnScrollListener() {
@@ -139,8 +143,9 @@ public class DDPullListView extends ListView {
                 readyPullDown = (pullHeader.getTop() - getPaddingTop() == 0);
             }
             if (firstVisibleItem + visibleItemCount == totalItemCount) {
-                readyPullUp = (pullFooter.getBottom() + getPaddingBottom() == getMeasuredHeight());
-                MyLog.d("PullList", "readyPullUp:" + readyPullUp);
+                if (DDPullListView.this == pullFooter.getParent()) {
+                    readyPullUp = (pullFooter.getBottom() + getPaddingBottom() == getMeasuredHeight());
+                }
             }
             if (onScrollListener != null) {
                 onScrollListener.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
@@ -228,7 +233,6 @@ public class DDPullListView extends ListView {
 
         pullFooter = new FrameLayout(getContext());
         pullFooter.addView(footerContent, lp);
-        addFooterView(pullFooter);
     }
 
     public int getState() {
@@ -371,7 +375,8 @@ public class DDPullListView extends ListView {
                         state = STATE_PULLING_DOWN;
                     } else if (deltaY < 0
                             && readyPullUp
-                            && hasMore) {
+                            && hasMore
+                            && pullFooter.getParent() == this) {
                         state = STATE_PULLING_UP;
                     }
                     return true;
@@ -452,8 +457,6 @@ public class DDPullListView extends ListView {
                             onPullDownListener.onPullDown(newHeaderHeight - headerHeight);
                         }
                         ev.setAction(MotionEvent.ACTION_CANCEL);
-                        super.onTouchEvent(ev);
-                        return true;
                     } else if (deltaY < 0
                             && headerHeight > normalHeaderHeight) {
                         //上滑，且header已展开未恢复
@@ -470,8 +473,6 @@ public class DDPullListView extends ListView {
                             return super.onTouchEvent(ev);
                         }
                         ev.setAction(MotionEvent.ACTION_CANCEL);
-                        super.onTouchEvent(ev);
-                        return true;
                     }
                 }
 
@@ -590,6 +591,104 @@ public class DDPullListView extends ListView {
             if (onPullUpListener != null) {
                 onPullUpListener.onStateChange(state);
             }
+        }
+    }
+
+    @Override
+    public void setAdapter(ListAdapter adapter) {
+        super.setAdapter(new WrapAdapter(adapter));
+    }
+
+    public class WrapAdapter extends BaseAdapter {
+
+        private ListAdapter adapter;
+        public static final int TYPE_EMPTY = 1;
+
+        public WrapAdapter(ListAdapter listAdapter) {
+            this.adapter = listAdapter;
+            if (adapter != null) {
+                adapter.registerDataSetObserver(emptyObserver);
+            }
+        }
+
+        private DataSetObserver emptyObserver = new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                if (isNoData()) {
+                    removeFooterView(pullFooter);
+                } else {
+                    addFooterView(pullFooter);
+                }
+            }
+        };
+
+        @Override
+        public int getCount() {
+            return isNoData() ?
+                    1 : adapter.getCount();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return adapter.getItem(position);
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (isNoData()) {
+                return TYPE_EMPTY;
+            }
+            return adapter.getItemViewType(position);
+        }
+
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        private boolean isNoData() {
+            return adapter == null
+                    || adapter.getCount() == 0;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return adapter.getViewTypeCount() + 1;
+        }
+
+        @Override
+        public void unregisterDataSetObserver(DataSetObserver observer) {
+            if (adapter != null) {
+                adapter.unregisterDataSetObserver(observer);
+            }
+        }
+
+        @Override
+        public void registerDataSetObserver(DataSetObserver observer) {
+            if (adapter != null) {
+                adapter.registerDataSetObserver(observer);
+            }
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return isNoData();
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (isNoData()) {
+                TextView textView = new TextView(getContext());
+                textView.setGravity(Gravity.CENTER);
+                textView.setText("没有数据");
+                textView.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        getResources().getDimensionPixelSize(R.dimen.pull_list_footer_default_height)));
+                convertView = textView;
+            } else {
+                return adapter.getView(position, convertView, parent);
+            }
+            return convertView;
         }
     }
 }

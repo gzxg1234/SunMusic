@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.IBinder;
 import android.view.View;
@@ -14,8 +15,6 @@ import com.sanron.music.db.DataProvider;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.service.PlayerService;
 import com.sanron.music.utils.MyLog;
-
-import java.lang.reflect.Field;
 
 /**
  * Created by Administrator on 2015/12/25.
@@ -36,10 +35,9 @@ public class AppContext extends Application {
         DataProvider.instance().init(this);
     }
 
-
     public void closeApp() {
         AppManager.instance().finishAllActivity();
-        if(connection!=null) {
+        if (connection != null) {
             unbindService(connection);
             connection = null;
         }
@@ -92,14 +90,11 @@ public class AppContext extends Application {
             statusBarHeight = 0;
             return;
         }
-        try {
-            Class<?> clazz = Class.forName("com.android.internal.R$dimen");
-            Object obj = clazz.newInstance();
-            Field field = clazz.getField("status_bar_height");
-            int resId = Integer.parseInt(field.get(obj).toString());
-            statusBarHeight = getResources().getDimensionPixelSize(resId);
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        int resId = Resources.getSystem().getIdentifier("status_bar_height", "dimen", "android");
+        if (resId > 0) {
+            statusBarHeight = Resources.getSystem().getDimensionPixelSize(resId);
+        } else {
             statusBarHeight = getResources().getDimensionPixelSize(R.dimen.status_height);
         }
     }

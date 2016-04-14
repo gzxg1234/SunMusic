@@ -9,9 +9,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.sanron.music.R;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.PlayList;
@@ -25,17 +23,12 @@ public class ListItemAdapter extends RecyclerView.Adapter {
     private List<Object> items;
     private Context context;
     private ImageLoader imageLoader;
-    private DisplayImageOptions imageOptions;
     private OnItemClickListener onItemClickListener;
     private OnItemMenuClickListener onItemMenuClickListener;
 
     public ListItemAdapter(Context context) {
         this.context = context;
         imageLoader = ImageLoader.getInstance();
-        imageOptions = new DisplayImageOptions.Builder()
-                .cacheOnDisk(true)
-                .imageScaleType(ImageScaleType.EXACTLY)
-                .build();
     }
 
     public void setData(List<PlayList> data) {
@@ -110,7 +103,7 @@ public class ListItemAdapter extends RecyclerView.Adapter {
                 itemHolder.ivPicture.setImageResource(R.mipmap.icon_normal_list);
             } else {
                 imageLoader.displayImage(playList.getIcon(),
-                        itemHolder.ivPicture, imageOptions);
+                        itemHolder.ivPicture);
             }
             itemHolder.tvName.setText(playList.getTitle());
             itemHolder.tvMusicNum.setText(playList.getSongNum() + "首");
