@@ -22,6 +22,6 @@ public class InScrollListView extends ListView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(0x3FFFFFFF, MeasureSpec.AT_MOST));
+        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(Integer.MAX_VALUE, MeasureSpec.AT_MOST));
     }
 }

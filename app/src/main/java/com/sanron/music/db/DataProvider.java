@@ -37,12 +37,10 @@ public class DataProvider extends Observable {
         private String mTableName;
         private List<Cursor> mCursors;
         private boolean changed;
-        private List<Integer> changedIds;
 
         private Access(String table) {
             mTableName = table;
             mCursors = new LinkedList<>();
-            changedIds = new LinkedList<>();
         }
 
         public Cursor rawQuery(String sql, String... selectionArgs) {

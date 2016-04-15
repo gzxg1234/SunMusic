@@ -60,7 +60,6 @@
             android:id="@+id/player_frag_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
     <android.support.design.widget.NavigationView
@@ -72,5 +71,4 @@
         app:itemIconTint="@drawable/selector_color_left_menu_item"
         app:itemTextColor="@drawable/selector_color_left_menu_item"
         app:menu="@menu/left_drawer_menu" />
-
 </android.support.v4.widget.DrawerLayout>

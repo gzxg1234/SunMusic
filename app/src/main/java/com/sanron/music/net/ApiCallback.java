@@ -32,14 +32,14 @@ public abstract class ApiCallback<T> implements Callback {
             Type superClass = this.getClass().getGenericSuperclass();
             Class<T> clazz = (Class<T>) ((ParameterizedType) superClass).getActualTypeArguments()[0];
             data = JSON.parseObject(json, clazz, Feature.IgnoreNotMatch);
-            onSuccess(call, data);
+            onSuccess(data);
         } catch (JSONException e) {
             MyLog.d("MusicApi", "error json:" + json);
             e.printStackTrace();
-            onSuccess(call, null);
+            onSuccess(null);
         }
     }
 
 
-    public abstract void onSuccess(Call call, T data);
+    public abstract void onSuccess(T data);
 }

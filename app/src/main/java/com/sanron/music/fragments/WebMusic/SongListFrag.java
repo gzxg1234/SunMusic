@@ -43,7 +43,6 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
 
     public static final String ARG_LIST_ID = "list_id";
 
-    private Call requestCall;
     private String listId;
     private SongList data;
     private boolean isCollected;
@@ -129,8 +128,8 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
     }
 
     @Override
-    protected Call loadData() {
-        return MusicApi.songListInfo(listId, new ApiCallback<SongList>() {
+    protected void onEnterAnimationEnd() {
+        Call call = MusicApi.songListInfo(listId, new ApiCallback<SongList>() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (!call.isCanceled()) {
@@ -144,7 +143,7 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
             }
 
             @Override
-            public void onSuccess(Call call, final SongList data) {
+            public void onSuccess(final SongList data) {
                 String pic = data.pic700;
                 if (TextUtils.isEmpty(pic)) {
                     pic = data.pic500;
@@ -164,6 +163,7 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
                 });
             }
         });
+        addCall(call);
     }
 
 
@@ -174,6 +174,7 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
         tvSongListTitle.setText(data.title);
         tvSongNum.setText("共" + data.songs.size() + "首歌");
         adapter.setData(data.songs);
+        pullListView.onLoadCompleted();
         setTitle(data.title);
         if (isCollected) {
             ibtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);

@@ -76,92 +76,46 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public static final String TAG_WEBMUSIC = "WebMusic";
     private Map<String, String> titles;
 
-    private BroadcastReceiver eventReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String from = intent.getStringExtra(BaseFragment.EXTRA_FROM);
-            int event = intent.getIntExtra(BaseFragment.EXTRA_EVENT, -1);
-            if (PlayListFrag.class.getName().equals(from)) {
-                //
-                switch (event) {
-                    case PlayListFrag.EVENT_CLICK_LIST: {
-                        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                        PlayList playList = (PlayList) intent.getSerializableExtra(PlayListFrag.EXTRA_PLAYLIST);
-                        showPlayListSongs(playList);
-                    }
-                    break;
-                }
 
-            } else if (PlayerFrag.class.getName().equals(from)) {
-                //
-                switch (event) {
-                    case PlayerFrag.EVENT_CLICK_BACK: {
-                        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                    }
-                    break;
-                }
-            } else if (RecmdFrag.class.getName().equals(from)) {
-                switch (event) {
-                    case RecmdFrag.EVENT_CLICK_SONGLIST: {
-                        String listId = intent.getStringExtra(RecmdFrag.EXTRA_SONGLIST_ID);
-                        fm.beginTransaction()
-                                .setCustomAnimations(R.anim.slide_in_right,
-                                        R.anim.slide_out_right,
-                                        R.anim.slide_in_right,
-                                        R.anim.slide_out_right)
-                                .add(R.id.fragment_container_1, SongListFrag.newInstance(listId),
-                                        SongListFrag.class.getName())
-                                .addToBackStack(SongListFrag.class.getName())
-                                .commit();
-                    }
-                    break;
+    public void collapseSldingPanel(){
+        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    }
 
-                    case RecmdFrag.EVENT_CLICK_TAG: {
-                        String tag = intent.getStringExtra(RecmdFrag.EXTRA_TAG_NAME);
-                        fm.beginTransaction()
-                                .setCustomAnimations(R.anim.slide_in_right,
-                                        R.anim.slide_out_right,
-                                        R.anim.slide_in_right,
-                                        R.anim.slide_out_right)
-                                .add(R.id.fragment_container_1, TagSongFrag.newInstance(tag),
-                                        TagSongFrag.class.getName())
-                                .addToBackStack(TagSongFrag.class.getName())
-                                .commit();
-                    }
-                    break;
+    public void showSongList(String listid){
+        fm.beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_right,
+                        R.anim.slide_out_right,
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_right)
+                .add(R.id.fragment_container_1, SongListFrag.newInstance(listid),
+                        SongListFrag.class.getName())
+                .addToBackStack(SongListFrag.class.getName())
+                .commit();
+    }
 
-                    case RecmdFrag.EVENT_CLICK_MORE_TAG: {
-                        fm.beginTransaction()
-                                .setCustomAnimations(R.anim.slide_in_right,
-                                        R.anim.slide_out_right,
-                                        R.anim.slide_in_right,
-                                        R.anim.slide_out_right)
-                                .add(R.id.fragment_container_1, AllTagFrag.newInstance(),
-                                        AllTagFrag.class.getName())
-                                .addToBackStack(AllTagFrag.class.getName())
-                                .commit();
-                    }
-                    break;
-                }
-            } else if (AllTagFrag.class.getName().equals(from)) {
-                switch (event) {
-                    case RecmdFrag.EVENT_CLICK_TAG: {
-                        String tag = intent.getStringExtra(RecmdFrag.EXTRA_TAG_NAME);
-                        fm.beginTransaction()
-                                .setCustomAnimations(R.anim.slide_in_right,
-                                        R.anim.slide_out_right,
-                                        R.anim.slide_in_right,
-                                        R.anim.slide_out_right)
-                                .add(R.id.fragment_container_1, TagSongFrag.newInstance(tag),
-                                        TagSongFrag.class.getName())
-                                .addToBackStack(TagSongFrag.class.getName())
-                                .commit();
-                    }
-                    break;
-                }
-            }
-        }
-    };
+    public void showTagSong(String tag){
+        fm.beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_right,
+                        R.anim.slide_out_right,
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_right)
+                .add(R.id.fragment_container_1, TagSongFrag.newInstance(tag),
+                        TagSongFrag.class.getName())
+                .addToBackStack(TagSongFrag.class.getName())
+                .commit();
+    }
+
+    public void showAllTag(){
+        fm.beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_right,
+                        R.anim.slide_out_right,
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_right)
+                .add(R.id.fragment_container_1, AllTagFrag.newInstance(),
+                        AllTagFrag.class.getName())
+                .addToBackStack(AllTagFrag.class.getName())
+                .commit();
+    }
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -273,8 +227,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         });
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(eventReceiver,
-                new IntentFilter(BaseFragment.ACTION_FRAG_EVENT));
     }
 
     /**
@@ -364,7 +316,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(eventReceiver);
+//        LocalBroadcastManager.getInstance(this).unregisterReceiver(eventReceiver);
     }
 
     @Override

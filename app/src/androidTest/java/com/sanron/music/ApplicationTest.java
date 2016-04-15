@@ -29,18 +29,6 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
 
 
     public void testApi() {
-        MusicApi.allTag(new ApiCallback<AllTag>() {
-            @Override
-            public void onSuccess(Call call, AllTag data) {
-
-            }
-
-            @Override
-            public void onFailure(Call call, IOException e) {
-
-            }
-        });
-
         SystemClock.sleep(100000);
     }
 }

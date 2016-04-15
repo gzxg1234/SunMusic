@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.sanron.music.view.SlideFinishLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<com.sanron.music.view.SlideBackLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/slide_finish_layout"
     android:layout_width="match_parent"
@@ -13,7 +12,7 @@
         android:background="@android:color/white"
         android:orientation="vertical">
 
-        <include layout="@layout/layout_top_bar" />
+        <include layout="@layout/layout_top_bar"/>
 
         <ScrollView
             android:layout_width="match_parent"
@@ -22,95 +21,94 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="8dp">
+                android:orientation="vertical">
 
-                <com.github.mmin18.widget.FlexLayout
+                <LinearLayout
+                    android:id="@+id/hot_tag_group1"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:id="@+id/hot_tag_group1"
-                        android:orientation="horizontal"
-                        app:layout_height="(parent.width-24dp)/4"
-                        app:layout_width="parent.width">
+                    <TextView
+                        style="@style/HotTagText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@mipmap/ic_classify_img01"
+                        tools:text="伤感" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:background="@mipmap/ic_classify_img01"
-                            android:gravity="center"
-                            android:textColor="@color/textColorPrimaryInverse"
-                            android:textSize="12dp" />
+                    <TextView
+                        style="@style/HotTagText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@mipmap/ic_classify_img02" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginLeft="8dp"
-                            android:layout_weight="1"
-                            android:background="@mipmap/ic_classify_img02" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginLeft="8dp"
-                            android:layout_weight="1"
-                            android:background="@mipmap/ic_classify_img03" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginLeft="8dp"
-                            android:layout_weight="1"
-                            android:background="@mipmap/ic_classify_img04" />
-                    </LinearLayout>
+                    <TextView
+                        style="@style/HotTagText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_margin="4dp"
+                        android:layout_weight="1"
+                        android:background="@mipmap/ic_classify_img03" />
 
 
-                    <LinearLayout
-                        android:id="@+id/hot_tag_group2"
-                        android:orientation="horizontal"
-                        app:layout_height="(parent.width-24dp)/4"
-                        app:layout_top="prev.bottom + 8dp"
-                        app:layout_width="parent.width">
+                    <TextView
+                        style="@style/HotTagText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@mipmap/ic_classify_img05" />
+                </LinearLayout>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:background="@mipmap/ic_classify_img05" />
+                <LinearLayout
+                    android:id="@+id/hot_tag_group2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginLeft="8dp"
-                            android:layout_weight="1"
-                            android:background="@mipmap/ic_classify_img06" />
+                    <TextView
+                        style="@style/HotTagText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@mipmap/ic_classify_img05" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginLeft="8dp"
-                            android:layout_weight="1"
-                            android:background="@mipmap/ic_classify_img07" />
+                    <TextView
+                        style="@style/HotTagText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@mipmap/ic_classify_img06" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginLeft="8dp"
-                            android:layout_weight="1"
-                            android:background="@mipmap/ic_classify_img08" />
-                    </LinearLayout>
-                </com.github.mmin18.widget.FlexLayout>
+                    <TextView
+                        style="@style/HotTagText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@mipmap/ic_classify_img07" />
+
+                    <TextView
+                        style="@style/HotTagText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@mipmap/ic_classify_img08" />
+                </LinearLayout>
 
                 <com.sanron.music.view.InScrollListView
                     android:id="@+id/lv_tag"
-                    android:scrollbars="none"
-                    android:dividerHeight="16dp"
-                    android:divider="@null"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="16dp" />
+                    android:layout_marginTop="16dp"
+                    android:divider="@null"
+                    android:padding="8dp"
+                    android:dividerHeight="16dp"
+                    android:scrollbars="none" />
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
@@ -122,6 +120,6 @@
     <include
         layout="@layout/layout_load_failed"
         android:visibility="gone" />
-</com.sanron.music.view.SlideFinishLayout>
+</com.sanron.music.view.SlideBackLayout>
 
 

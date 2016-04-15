@@ -21,7 +21,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.sanron.music.R;
-import com.sanron.music.fragments.BaseFragment;
+import com.sanron.music.activities.MainActivity;
 import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.FocusPic;
@@ -42,13 +42,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
 /**
  * Created by Administrator on 2016/3/10.
  */
-public class RecmdFrag extends BaseFragment implements View.OnClickListener {
+public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
 
     /**
      * 是否已经获取过数据
@@ -79,7 +77,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
 
     public static final int EVENT_CLICK_TAG = 1;
-    public static final int EVENT_CLICK_SONGLIST = 2 ;
+    public static final int EVENT_CLICK_SONGLIST = 2;
     public static final int EVENT_CLICK_MORE_TAG = 3;
 
     public static final String EXTRA_SONGLIST_ID = "list_id";
@@ -159,7 +157,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
                 @Override
                 public void onGlobalLayout() {
                     getView().getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                    refreshData();
+                    getData();
                 }
             });
             hasLoadData = true;
@@ -177,9 +175,9 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
         super.onDestroyView();
     }
 
-    public void refreshData() {
+    public void getData() {
         //获取轮播信息
-        MusicApi.focusPic(10 , new ApiCallback<FocusPicData>() {
+        Call call1 = MusicApi.focusPic(10, new ApiCallback<FocusPicData>() {
 
             @Override
             public void onFailure(Call call, IOException e) {
@@ -187,14 +185,14 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
             }
 
             @Override
-            public void onSuccess(Call call, FocusPicData data) {
+            public void onSuccess(FocusPicData data) {
                 List<FocusPic> focusPics = data.pics;
                 final List<FocusPic> result = new LinkedList<>();
                 if (focusPics != null) {
                     for (int i = 0; i < focusPics.size() && result.size() < 6; i++) {
                         FocusPic focusPic = focusPics.get(i);
                         if (focusPic.type == FocusPic.TYPE_ALBUM
-                                || focusPic.type == FocusPic.TYPE_GEDAN) {
+                                || focusPic.type == FocusPic.TYPE_SONG_LIST) {
                             result.add(focusPic);
                         }
                     }
@@ -209,7 +207,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
         });
 
         //热门标签
-        MusicApi.hotTag(tvHotTags.size(), new ApiCallback<HotTagData>() {
+        Call call2 = MusicApi.hotTag(tvHotTags.size(), new ApiCallback<HotTagData>() {
 
             @Override
             public void onFailure(Call call, IOException e) {
@@ -217,7 +215,7 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
             }
 
             @Override
-            public void onSuccess(Call call, final HotTagData data) {
+            public void onSuccess(final HotTagData data) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -229,14 +227,14 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
 
 
         //获取热门歌单
-        MusicApi.hotSongList(6, new ApiCallback<HotSongListData>() {
+        Call call3 = MusicApi.hotSongList(6, new ApiCallback<HotSongListData>() {
             @Override
             public void onFailure(Call call, IOException e) {
             }
 
 
             @Override
-            public void onSuccess(Call call, final HotSongListData data) {
+            public void onSuccess(final HotSongListData data) {
                 if (data != null
                         && data.content != null) {
                     handler.post(new Runnable() {
@@ -250,14 +248,14 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
         });
 
         //获取推荐歌曲
-        MusicApi.recmdSongs(6, new ApiCallback<RecmdSongData>() {
+        Call call4 = MusicApi.recmdSongs(6, new ApiCallback<RecmdSongData>() {
 
             @Override
             public void onFailure(Call call, IOException e) {
             }
 
             @Override
-            public void onSuccess(Call call, final RecmdSongData data) {
+            public void onSuccess(final RecmdSongData data) {
                 if (data.content != null
                         && data.content.size() > 0) {
                     handler.post(new Runnable() {
@@ -270,6 +268,10 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
             }
         });
 
+        addCall(call1);
+        addCall(call2);
+        addCall(call3);
+        addCall(call4);
     }
 
     private void setRecmdSongs(List<RecommendSong> recmdSongs) {
@@ -301,12 +303,9 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
                 hotSongListView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(ACTION_FRAG_EVENT);
-                        intent.putExtra(EXTRA_FROM, RecmdFrag.class.getName());
-                        intent.putExtra(EXTRA_EVENT, EVENT_CLICK_SONGLIST);
-                        intent.putExtra(EXTRA_SONGLIST_ID, songList.listId);
-                        LocalBroadcastManager.getInstance(getContext())
-                                .sendBroadcast(intent);
+                        if(getActivity() instanceof MainActivity){
+                            ((MainActivity)getActivity()).showSongList(songList.listId);
+                        }
                     }
                 });
                 imageLoader.displayImage(songList.pic, hotSongListView.getImageView(), imageOptions);
@@ -326,12 +325,9 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
                 tvTag.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                            Intent intent = new Intent(ACTION_FRAG_EVENT);
-                            intent.putExtra(EXTRA_FROM, RecmdFrag.class.getName());
-                            intent.putExtra(EXTRA_EVENT, EVENT_CLICK_TAG);
-                            intent.putExtra(EXTRA_TAG_NAME, title);
-                            LocalBroadcastManager.getInstance(getContext())
-                                    .sendBroadcast(intent);
+                        if(getActivity() instanceof MainActivity){
+                            ((MainActivity)getActivity()).showTagSong(title);
+                        }
                     }
                 });
             }
@@ -339,16 +335,13 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
         }
     }
 
-
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tv_more_tag: {
-                Intent intent = new Intent(ACTION_FRAG_EVENT);
-                intent.putExtra(EXTRA_FROM, RecmdFrag.class.getName());
-                intent.putExtra(EXTRA_EVENT, EVENT_CLICK_MORE_TAG);
-                LocalBroadcastManager.getInstance(getContext())
-                        .sendBroadcast(intent);
+                if(getActivity() instanceof MainActivity){
+                    ((MainActivity)getActivity()).showAllTag();
+                }
             }
             break;
         }
@@ -366,13 +359,24 @@ public class RecmdFrag extends BaseFragment implements View.OnClickListener {
             views = new ArrayList<>();
             if (data != null) {
                 for (int i = 0; i < data.size(); i++) {
+                    final FocusPic focusPic = data.get(i);
                     ImageView view = new ImageView(getContext());
                     ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewPager.LayoutParams.MATCH_PARENT,
                             ViewPager.LayoutParams.WRAP_CONTENT);
                     view.setLayoutParams(lp);
                     view.setAdjustViewBounds(true);
                     views.add(view);
-                    imageLoader.displayImage(data.get(i).picUrl, view, imageOptions);
+                    view.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (focusPic.type == FocusPic.TYPE_SONG_LIST) {
+                                if(getActivity() instanceof MainActivity){
+                                    ((MainActivity)getActivity()).showSongList(focusPic.code);
+                                }
+                            }
+                        }
+                    });
+                    imageLoader.displayImage(focusPic.picUrl, view, imageOptions);
                 }
             }
         }

@@ -2,22 +2,19 @@ package com.sanron.music.fragments.WebMusic;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.TextView;
 
 import com.nineoldandroids.view.ViewHelper;
 import com.sanron.music.R;
 import com.sanron.music.view.DDPullListView;
-import com.sanron.music.view.SlideFinishLayout;
+import com.sanron.music.view.SlideBackLayout;
 
 /**
  * Created by sanron on 16-3-30.
  */
-public abstract class PullFrag extends BaseWebFrag implements SlideFinishLayout.SlideFinishCallback {
+public abstract class PullFrag extends BaseSlideWebFrag implements SlideBackLayout.SlideBackCallback {
 
     protected DDPullListView pullListView;
     protected View viewInfo;

@@ -274,7 +274,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
                     2,
                     new ApiCallback<LrcPicResult>() {
                         @Override
-                        public void onSuccess(Call call, LrcPicResult data) {
+                        public void onSuccess(LrcPicResult data) {
                             List<LrcPicResult.LrcPic> lrcPics = data.getLrcPics();
                             String avatar = "";
                             if (lrcPics == null) {

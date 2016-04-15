@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.nineoldandroids.animation.ArgbEvaluator;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.sanron.music.R;
+import com.sanron.music.activities.MainActivity;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.utils.T;
@@ -453,10 +454,9 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
             break;
 
             case R.id.view_back: {
-                Intent intent = new Intent(ACTION_FRAG_EVENT);
-                intent.putExtra(EXTRA_FROM, getClass().getName());
-                intent.putExtra(EXTRA_EVENT, EVENT_CLICK_BACK);
-                LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+                if(getActivity() instanceof MainActivity){
+                    ((MainActivity)getActivity()).collapseSldingPanel();
+                }
             }
             break;
         }

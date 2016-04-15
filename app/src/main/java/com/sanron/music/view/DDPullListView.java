@@ -1,9 +1,9 @@
 package com.sanron.music.view;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v4.widget.ListViewCompat;
 import android.support.v4.widget.Space;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -13,8 +13,10 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.AbsListView;
-import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -55,19 +57,17 @@ public class DDPullListView extends ListView {
 
     private String normalLabel = "加载更多";
     private String releaseLabel = "松开加载";
-    private String loaddingLable = "正在加载";
-    private String nomoreLable = "没有更多";
+    private String loaddingLabel = "正在加载";
+    private String nomoreLabel = "没有更多";
+    private String emptyLabel = "没有数据";
 
     private int state = STATE_NORMAL;
 
-
     private boolean hasMore = true;
 
-    /**
-     * 回退动画
-     */
     private ValueAnimator upBackAnimator;
     private ValueAnimator downBackAnimator;
+    private RotateAnimation rotateAnimation;
 
     private int activePointerId = -1;
 
@@ -75,29 +75,16 @@ public class DDPullListView extends ListView {
      * 上次触摸y位置
      */
     private float lastY;
-
-
-    /**
-     * 最小滑动距离
-     */
     private int touchSlop;
-
-
-    /**
-     * 回退动画时间
-     */
     private int animDuration = 300;
-
-    /**
-     * 是否到顶部了
-     */
     private boolean readyPullDown;
     private boolean readyPullUp;
 
     private OnPullDownListener onPullDownListener;
     private OnScrollListener onScrollListener;
+    private OnLoadListener onLoadListener;
 
-    public static final int STATE_NO_DATA = -1;
+
     /**
      * 正常状态
      */
@@ -111,7 +98,7 @@ public class DDPullListView extends ListView {
     /**
      * 上拉状态
      */
-    public static final int STATE_PULLING_UP = 2;
+    public static final int STATE_PULL_TO_LOAD = 2;
 
     /**
      * 松开加载
@@ -123,8 +110,11 @@ public class DDPullListView extends ListView {
      */
     public static final int STATE_LOADING = 4;
 
-
     private static final int INVALID_POINTER_ID = -1;
+
+    public static final int DEFAULT_LABEL_SIZE = 14;//
+    public static final int DEFAULT_FOOTER_HEIGHT = 56;
+    public static final int DEFAULT_LABEL_COLOR = 0x99000000;
 
     private OnScrollListener internalScrollListener = new OnScrollListener() {
         @Override
@@ -143,9 +133,7 @@ public class DDPullListView extends ListView {
                 readyPullDown = (pullHeader.getTop() - getPaddingTop() == 0);
             }
             if (firstVisibleItem + visibleItemCount == totalItemCount) {
-                if (DDPullListView.this == pullFooter.getParent()) {
-                    readyPullUp = (pullFooter.getBottom() + getPaddingBottom() == getMeasuredHeight());
-                }
+                readyPullUp = (pullFooter.getBottom() + getPaddingBottom() == getMeasuredHeight());
             }
             if (onScrollListener != null) {
                 onScrollListener.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
@@ -162,12 +150,82 @@ public class DDPullListView extends ListView {
         super.setOnScrollListener(internalScrollListener);
     }
 
-    public String getNomoreLable() {
-        return nomoreLable;
+    private void initHeader() {
+        pullHeader = new Space(getContext());
+        AbsListView.LayoutParams lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        pullHeader.setLayoutParams(lp);
+        addHeaderView(pullHeader);
     }
 
-    public void setNomoreLable(String nomoreLable) {
-        this.nomoreLable = nomoreLable;
+    private void initFooter() {
+        int defaultTextColor = DEFAULT_LABEL_COLOR;
+        int defaultTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                DEFAULT_LABEL_SIZE,
+                getResources().getDisplayMetrics());
+        int defaultFooterHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                DEFAULT_FOOTER_HEIGHT,
+                getResources().getDisplayMetrics());
+        LinearLayout footerContent = new LinearLayout(getContext());
+        LayoutParams lp = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                defaultFooterHeight);
+        footerContent.setLayoutParams(lp);
+        footerContent.setOrientation(LinearLayout.HORIZONTAL);
+        footerContent.setGravity(Gravity.CENTER);
+
+        icon = new ImageView(getContext());
+        icon.setScaleType(ImageView.ScaleType.CENTER);
+        icon.setImageResource(R.mipmap.ic_refresh_black_alpha_90_24dp);
+        LinearLayout.LayoutParams lpIcon = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        icon.setLayoutParams(lpIcon);
+
+        label = new TextView(getContext());
+        label.setTextColor(defaultTextColor);
+        label.setText(emptyLabel);
+        label.setTextSize(TypedValue.COMPLEX_UNIT_PX, defaultTextSize);
+        LinearLayout.LayoutParams lpText = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpText.setMargins(20, 0, 0, 0);
+        label.setLayoutParams(lpText);
+
+        footerContent.addView(icon);
+        footerContent.addView(label);
+
+        pullFooter = new FrameLayout(getContext());
+        pullFooter.addView(footerContent, lp);
+        addFooterView(pullFooter);
+        pullFooter.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onLoadListener != null
+                        && state == STATE_NORMAL
+                        && hasMore) {
+                    changePullUpState(STATE_LOADING);
+                }
+            }
+        });
+
+        rotateAnimation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f);
+        rotateAnimation.setDuration(500);
+        rotateAnimation.setInterpolator(new LinearInterpolator());
+        rotateAnimation.setRepeatCount(Animation.INFINITE);
+        rotateAnimation.setRepeatMode(Animation.RESTART);
+    }
+
+    public String getEmptyLabel() {
+        return emptyLabel;
+    }
+
+    public void setEmptyLabel(String emptyLabel) {
+        this.emptyLabel = emptyLabel;
+    }
+
+    public String getNomoreLabel() {
+        return nomoreLabel;
+    }
+
+    public void setNomoreLabel(String nomoreLabel) {
+        this.nomoreLabel = nomoreLabel;
     }
 
 
@@ -187,52 +245,12 @@ public class DDPullListView extends ListView {
         this.normalLabel = normalLabel;
     }
 
-    public String getLoaddingLable() {
-        return loaddingLable;
+    public String getLoaddingLabel() {
+        return loaddingLabel;
     }
 
-    public void setLoaddingLable(String loaddingLable) {
-        this.loaddingLable = loaddingLable;
-    }
-
-    private void initHeader() {
-        pullHeader = new Space(getContext());
-        AbsListView.LayoutParams lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        pullHeader.setLayoutParams(lp);
-        addHeaderView(pullHeader);
-    }
-
-    private void initFooter() {
-        Resources resources = getContext().getResources();
-        int defaultTextColor = resources.getColor(R.color.pull_list_footer_default_label_color);
-        int defaultTextSize = (int) resources.getDimension(R.dimen.pull_list_footer_default_label_size);
-        int defaultFooterHeight = (int) resources.getDimension(R.dimen.pull_list_footer_default_height);
-        LinearLayout footerContent = new LinearLayout(getContext());
-        LayoutParams lp = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                defaultFooterHeight);
-        footerContent.setLayoutParams(lp);
-        footerContent.setOrientation(LinearLayout.HORIZONTAL);
-        footerContent.setGravity(Gravity.CENTER);
-
-        icon = new ImageView(getContext());
-        icon.setImageResource(R.mipmap.ic_refresh_black_alpha_90_24dp);
-        LinearLayout.LayoutParams lpIcon = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        icon.setLayoutParams(lpIcon);
-
-        label = new TextView(getContext());
-        label.setTextColor(defaultTextColor);
-        label.setText(normalLabel);
-        label.setTextSize(TypedValue.COMPLEX_UNIT_PX, defaultTextSize);
-        LinearLayout.LayoutParams lpText = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lpText.setMargins(20, 0, 0, 0);
-        label.setLayoutParams(lpText);
-
-        footerContent.addView(icon);
-        footerContent.addView(label);
-
-        pullFooter = new FrameLayout(getContext());
-        pullFooter.addView(footerContent, lp);
+    public void setLoaddingLabel(String loaddingLabel) {
+        this.loaddingLabel = loaddingLabel;
     }
 
     public int getState() {
@@ -289,17 +307,21 @@ public class DDPullListView extends ListView {
     }
 
     public void setHasMore(boolean hasMore) {
+        if (this.hasMore == hasMore) {
+            return;
+        }
+
         this.hasMore = hasMore;
         if (!hasMore) {
-            label.setText(nomoreLable);
+            label.setText(nomoreLabel);
         } else {
             label.setText(normalLabel);
         }
     }
 
-    public void setFooterContent(int resid) {
-        pullFooter.removeAllViews();
-        inflate(getContext(), resid, pullFooter);
+    private boolean isNoData() {
+        return getAdapter() == null
+                || getAdapter().isEmpty();
     }
 
     /**
@@ -335,7 +357,7 @@ public class DDPullListView extends ListView {
             downBackAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
-                    pullFooter.setPadding(0, 0, 0, (Integer) animation.getAnimatedValue());
+                    updateFooterPaddingBottom((Integer) animation.getAnimatedValue());
                 }
             });
         } else if (downBackAnimator.isRunning()) {
@@ -347,7 +369,7 @@ public class DDPullListView extends ListView {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if ((state == STATE_PULLING_UP
+        if ((state == STATE_PULL_TO_LOAD
                 || state == STATE_PULLING_DOWN)
                 && ev.getActionMasked() == MotionEvent.ACTION_MOVE) {
             return true;
@@ -377,7 +399,7 @@ public class DDPullListView extends ListView {
                             && readyPullUp
                             && hasMore
                             && pullFooter.getParent() == this) {
-                        state = STATE_PULLING_UP;
+                        state = STATE_PULL_TO_LOAD;
                     }
                     return true;
                 }
@@ -393,6 +415,11 @@ public class DDPullListView extends ListView {
     }
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent ev) {
         final int action = ev.getActionMasked();
         switch (action) {
@@ -404,15 +431,13 @@ public class DDPullListView extends ListView {
                         && downBackAnimator.isRunning()
                         && state == STATE_NORMAL) {
                     downBackAnimator.cancel();
-                    state = STATE_PULLING_UP;
-                    return super.onTouchEvent(ev);
+                    state = STATE_PULL_TO_LOAD;
                 }
                 if (upBackAnimator != null
                         && upBackAnimator.isRunning()) {
                     //按下停止动画
                     upBackAnimator.cancel();
                     state = STATE_PULLING_DOWN;
-                    return super.onTouchEvent(ev);
                 }
             }
             break;
@@ -435,7 +460,7 @@ public class DDPullListView extends ListView {
                     } else if (deltaY < 0
                             && readyPullUp
                             && hasMore) {
-                        state = STATE_PULLING_UP;
+                        state = STATE_PULL_TO_LOAD;
                         deltaY += touchSlop;
                     }
                 }
@@ -476,7 +501,7 @@ public class DDPullListView extends ListView {
                     }
                 }
 
-                if (state == STATE_PULLING_UP
+                if (state == STATE_PULL_TO_LOAD
                         || state == STATE_RELEASE_TO_LOAD) {
                     lastY = y;
                     //释放加载需要达到的拉动距离
@@ -489,24 +514,27 @@ public class DDPullListView extends ListView {
                         //上滑
                         deltaY *= (1 - paddingBottom
                                 / (float) maxPaddingBottom);
-                        int setPaddingBottom = (int) (paddingBottom - Math.ceil(deltaY));
-                        setPaddingBottom = Math.min(setPaddingBottom, maxPaddingBottom);
-                        if (setPaddingBottom >= readyPaddingBottom) {
+                        int newPaddingBottom = (int) (paddingBottom - Math.ceil(deltaY));
+                        newPaddingBottom = Math.min(newPaddingBottom, maxPaddingBottom);
+                        int paddingBottomDiff = paddingBottom - newPaddingBottom;
+                        if (newPaddingBottom >= readyPaddingBottom) {
                             changePullUpState(STATE_RELEASE_TO_LOAD);
                         }
-                        pullFooter.setPadding(0, 0, 0, setPaddingBottom);
-                        return super.onTouchEvent(ev);
+                        updateFooterPaddingBottom(newPaddingBottom);
+                        ListViewCompat.scrollListBy(this, -paddingBottomDiff);
+                        ev.setAction(MotionEvent.ACTION_CANCEL);
                     } else if (deltaY > 0
                             && paddingBottom > 0) {
-                        int setPaddingBottom = (int) (paddingBottom - Math.ceil(deltaY));
-                        setPaddingBottom = Math.max(setPaddingBottom, 0);
+                        int newPaddingBottom = (int) (paddingBottom - Math.ceil(deltaY));
+                        newPaddingBottom = Math.max(newPaddingBottom, 0);
                         if (paddingBottom < readyPaddingBottom) {
-                            changePullUpState(STATE_PULLING_UP);
+                            changePullUpState(STATE_PULL_TO_LOAD);
                         }
-                        pullFooter.setPadding(0, 0, 0, setPaddingBottom);
-                        if (setPaddingBottom == 0) {
+                        updateFooterPaddingBottom(newPaddingBottom);
+                        if (newPaddingBottom == 0) {
                             state = STATE_NORMAL;
                         }
+                        ev.setAction(MotionEvent.ACTION_CANCEL);
                     }
                 }
             }
@@ -517,7 +545,7 @@ public class DDPullListView extends ListView {
                 if (state == STATE_PULLING_DOWN) {
                     upBackAnim();
                     state = STATE_NORMAL;
-                } else if (state == STATE_PULLING_UP) {
+                } else if (state == STATE_PULL_TO_LOAD) {
                     downBackAnim();
                     state = STATE_NORMAL;
                 } else if (state == STATE_RELEASE_TO_LOAD) {
@@ -550,7 +578,16 @@ public class DDPullListView extends ListView {
         return super.onTouchEvent(ev);
     }
 
+    private void updateFooterPaddingBottom(int paddingBottom) {
+        final int maxPaddingBottom = pullFooter.getChildAt(0).getHeight() * 2;
+        pullFooter.setPadding(0, 0, 0, paddingBottom);
+        icon.setPivotX(icon.getWidth() / 2);
+        icon.setPivotY(icon.getHeight() / 2);
+        icon.setRotation(360f * paddingBottom / maxPaddingBottom);
+    }
+
     public void onLoadCompleted() {
+        rotateAnimation.cancel();
         changePullUpState(STATE_NORMAL);
     }
 
@@ -558,137 +595,61 @@ public class DDPullListView extends ListView {
         void onPullDown(int pullOffset);
     }
 
-    public interface OnPullUpListener {
-        void onStateChange(int state);
+    public interface OnLoadListener {
+        void onLoad();
     }
 
-    private OnPullUpListener onPullUpListener;
 
-    public void setOnPullUpListener(OnPullUpListener onPullUpListener) {
-        this.onPullUpListener = onPullUpListener;
+    public void setOnLoadListener(OnLoadListener onLoadListener) {
+        this.onLoadListener = onLoadListener;
     }
 
     private void changePullUpState(int state) {
-        if (this.state != state) {
-            this.state = state;
-            switch (state) {
-                case STATE_LOADING: {
-                    label.setText(loaddingLable);
+        this.state = state;
+        switch (state) {
+            case STATE_LOADING: {
+                icon.setAnimation(rotateAnimation);
+                rotateAnimation.start();
+                label.setText(loaddingLabel);
+                if (onLoadListener != null) {
+                    onLoadListener.onLoad();
                 }
-                break;
+            }
+            break;
 
-                case STATE_PULLING_UP:
-                case STATE_NORMAL: {
+            case STATE_PULL_TO_LOAD:
+            case STATE_NORMAL: {
+                if (isNoData()) {
+                    label.setText(emptyLabel);
+                } else if (!hasMore) {
+                    label.setText(nomoreLabel);
+                } else {
                     label.setText(normalLabel);
                 }
-                break;
+            }
+            break;
 
-                case STATE_RELEASE_TO_LOAD: {
-                    label.setText(releaseLabel);
-                }
-                break;
+            case STATE_RELEASE_TO_LOAD: {
+                label.setText(releaseLabel);
             }
-            if (onPullUpListener != null) {
-                onPullUpListener.onStateChange(state);
-            }
+            break;
+
         }
     }
+
 
     @Override
-    public void setAdapter(ListAdapter adapter) {
-        super.setAdapter(new WrapAdapter(adapter));
-    }
-
-    public class WrapAdapter extends BaseAdapter {
-
-        private ListAdapter adapter;
-        public static final int TYPE_EMPTY = 1;
-
-        public WrapAdapter(ListAdapter listAdapter) {
-            this.adapter = listAdapter;
-            if (adapter != null) {
-                adapter.registerDataSetObserver(emptyObserver);
-            }
-        }
-
-        private DataSetObserver emptyObserver = new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                if (isNoData()) {
-                    removeFooterView(pullFooter);
-                } else {
-                    addFooterView(pullFooter);
+    public void setAdapter(final ListAdapter adapter) {
+        super.setAdapter(adapter);
+        if (adapter != null) {
+            final DataSetObserver emptyDataObserver = new DataSetObserver() {
+                @Override
+                public void onChanged() {
+                    changePullUpState(STATE_NORMAL);
                 }
-            }
-        };
-
-        @Override
-        public int getCount() {
-            return isNoData() ?
-                    1 : adapter.getCount();
+            };
+            adapter.registerDataSetObserver(emptyDataObserver);
         }
-
-        @Override
-        public Object getItem(int position) {
-            return adapter.getItem(position);
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            if (isNoData()) {
-                return TYPE_EMPTY;
-            }
-            return adapter.getItemViewType(position);
-        }
-
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        private boolean isNoData() {
-            return adapter == null
-                    || adapter.getCount() == 0;
-        }
-
-        @Override
-        public int getViewTypeCount() {
-            return adapter.getViewTypeCount() + 1;
-        }
-
-        @Override
-        public void unregisterDataSetObserver(DataSetObserver observer) {
-            if (adapter != null) {
-                adapter.unregisterDataSetObserver(observer);
-            }
-        }
-
-        @Override
-        public void registerDataSetObserver(DataSetObserver observer) {
-            if (adapter != null) {
-                adapter.registerDataSetObserver(observer);
-            }
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return isNoData();
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (isNoData()) {
-                TextView textView = new TextView(getContext());
-                textView.setGravity(Gravity.CENTER);
-                textView.setText("没有数据");
-                textView.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        getResources().getDimensionPixelSize(R.dimen.pull_list_footer_default_height)));
-                convertView = textView;
-            } else {
-                return adapter.getView(position, convertView, parent);
-            }
-            return convertView;
-        }
+        changePullUpState(STATE_NORMAL);
     }
 }

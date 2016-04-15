@@ -25,7 +25,6 @@ public class AppContext extends Application {
     private ServiceConnection connection;
     private int statusBarHeight = -1;
 
-
     public static final String TAG = AppContext.class.getSimpleName();
 
     @Override

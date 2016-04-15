@@ -24,9 +24,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.sanron.music.AppContext;
 import com.sanron.music.AppManager;
 import com.sanron.music.R;
@@ -498,7 +496,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 }
 
                 @Override
-                public void onSuccess(Call call, SongUrlInfo data) {
+                public void onSuccess(SongUrlInfo data) {
                     SongUrlInfo.SongUrl.Url url = null;
                     if (data != null
                             && data.songUrl != null) {
@@ -730,7 +728,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                         final int requestIndex = currentIndex;
 
                         @Override
-                        public void onSuccess(Call call, LrcPicResult data) {
+                        public void onSuccess(LrcPicResult data) {
                             List<LrcPicResult.LrcPic> lrcPics = data.getLrcPics();
                             Bitmap loadedImage = null;
                             String pic = null;

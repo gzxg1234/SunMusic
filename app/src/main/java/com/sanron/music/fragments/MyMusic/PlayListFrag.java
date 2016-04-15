@@ -3,10 +3,8 @@ package com.sanron.music.fragments.MyMusic;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -23,6 +21,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.sanron.music.R;
+import com.sanron.music.activities.MainActivity;
 import com.sanron.music.adapter.ListItemAdapter;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
@@ -40,12 +39,15 @@ import java.util.List;
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItemClickListener, ListItemAdapter.OnItemMenuClickListener {
+public class PlayListFrag extends BaseDataFragment implements ListItemAdapter.OnItemClickListener, ListItemAdapter.OnItemMenuClickListener {
 
 
     public static final String TAG = "PlayListFrag";
+
+
     public static final int EVENT_CLICK_LIST = 1;
     public static final String EXTRA_PLAYLIST = "playlist";
+
     public static final int MENU_NEW_LIST = 1;
 
     private RecyclerView lvPlayList;
@@ -87,12 +89,10 @@ public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItem
 
     @Override
     public void onItemClick(View itemView, int position) {
-        PlayList playList = adapter.getItem(position);
-        Intent intent = new Intent(ACTION_FRAG_EVENT);
-        intent.putExtra(EXTRA_FROM, getClass().getName());
-        intent.putExtra(EXTRA_EVENT, EVENT_CLICK_LIST);
-        intent.putExtra(EXTRA_PLAYLIST, playList);
-        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+        PlayList playList = (PlayList) adapter.getItem(position);
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).showPlayListSongs(playList);
+        }
     }
 
     @Override
@@ -100,7 +100,7 @@ public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItem
         PopupMenu popupMenu = new PopupMenu(getContext(), view);
         Menu menu = popupMenu.getMenu();
         popupMenu.getMenuInflater().inflate(R.menu.popup_menu_playlist, menu);
-        int type = adapter.getItem(position).getType();
+        int type = ((PlayList) adapter.getItem(position)).getType();
         if (type == DBHelper.List.TYPE_FAVORITE) {
             //不是用户创建的列表，不能重命名和删除
             menu.removeItem(R.id.menu_delete_list);
@@ -120,7 +120,7 @@ public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItem
     }
 
     public void onPopupItemSelected(MenuItem item, int position) {
-        PlayList playList = adapter.getItem(position);
+        PlayList playList = (PlayList) adapter.getItem(position);
         switch (item.getItemId()) {
             case R.id.menu_play_list: {
                 playListMusics(playList);
@@ -184,7 +184,7 @@ public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItem
         dlg.setOnOkClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String input = dlg.getInput();
+                final String input = dlg.getInput();
                 if (dlg.getInput().trim().equals("")) {
                     dlg.setInputError("输入为空");
                     return;
@@ -210,7 +210,6 @@ public class PlayListFrag extends DataFragment implements ListItemAdapter.OnItem
                             case SUCCESS: {
                                 T.show(getContext(), "修改成功");
                                 dlg.dismiss();
-
                             }
                             break;
                             case EXISTS: {

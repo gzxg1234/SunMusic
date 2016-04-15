@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.sanron.music.R;
 import com.sanron.music.db.DataProvider;
@@ -16,11 +17,12 @@ import java.util.Observer;
 /**
  * Created by sanron on 16-3-28.
  */
-public abstract class DataFragment extends BaseFragment implements Observer {
+public abstract class BaseDataFragment extends BaseFragment implements Observer {
 
 
     public static final int ALTERNATIVE_GROUP_ID = 1;
     private String[] observeTables;
+    private boolean hasLoadData;
 
     protected abstract void refreshData();
 
@@ -29,7 +31,15 @@ public abstract class DataFragment extends BaseFragment implements Observer {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         DataProvider.instance().addObserver(this);
-        refreshData();
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (!hasLoadData) {
+            refreshData();
+            hasLoadData = true;
+        }
     }
 
     protected void setObserveTable(String... table) {

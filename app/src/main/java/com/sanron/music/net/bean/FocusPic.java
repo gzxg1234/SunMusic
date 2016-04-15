@@ -5,7 +5,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 public class FocusPic {
 
     public static final int TYPE_ALBUM = 2;
-    public static final int TYPE_GEDAN = 7;
+    public static final int TYPE_SONG_LIST = 7;
 
     /**
      * 图片URL

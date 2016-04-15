@@ -71,8 +71,8 @@ public class ListItemAdapter extends RecyclerView.Adapter {
         return TYPE_ITEM;
     }
 
-    public PlayList getItem(int position) {
-        return (PlayList) items.get(position);
+    public Object getItem(int position) {
+        return items.get(position);
     }
 
     @Override

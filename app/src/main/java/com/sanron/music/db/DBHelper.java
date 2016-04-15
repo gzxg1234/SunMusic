@@ -7,15 +7,17 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import okhttp3.Cache;
+import okhttp3.OkHttpClient;
+
 /**
  * Created by Administrator on 2015/12/20.
  */
 public class DBHelper extends SQLiteOpenHelper {
 
 
-    public static final String DBNAME = "SunMusicDB.db";
-    public static final int DBVERSION = 1;
-
+    public static final String DB_NAME = "SunMusicDB.db";
+    public static final int DB_VERSION = 1;
 
     public static final String ID = "_id";
 
@@ -85,9 +87,14 @@ public class DBHelper extends SQLiteOpenHelper {
         public static final String LIST_ID = "list_id";
     }
 
+    public static class Avatar{
+        public static final String TABLE = "avatar";
+        public static final String SEARCH = "word";
+        public static final String ADD_TIME = "add_time";
+    }
 
     public DBHelper(Context context) {
-        super(context, DBNAME, null, DBVERSION);
+        super(context, DB_NAME, null, DB_VERSION);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package com.sanron.music.net;
 
-import android.content.ContentValues;
-
 import com.sanron.music.net.bean.AllTag;
 import com.sanron.music.net.bean.FocusPicData;
 import com.sanron.music.net.bean.HotSongListData;
@@ -14,9 +12,11 @@ import com.sanron.music.net.bean.TagData;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Set;
 
 import okhttp3.Call;
+
 
 /**
  * Created by sanron on 16-3-18.
@@ -32,7 +32,7 @@ public class MusicApi {
      * @param apiCallback
      */
     public static Call focusPic(int num, ApiCallback<FocusPicData> apiCallback) {
-        ContentValues params = new ContentValues();
+        HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.plaza.getFocusPic");
         params.put("num", num);
         return ApiHttpClient.get(url(params), 600, apiCallback);
@@ -45,7 +45,7 @@ public class MusicApi {
      * @param apiCallback
      */
     public static Call recmdSongs(int num, final ApiCallback<RecmdSongData> apiCallback) {
-        ContentValues params = new ContentValues();
+        HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.song.getEditorRecommend");
         params.put("num", num);
         return ApiHttpClient.get(url(params), 600, apiCallback);
@@ -58,7 +58,7 @@ public class MusicApi {
      * @param apiCallback
      */
     public static Call hotSongList(int num, final ApiCallback<HotSongListData> apiCallback) {
-        ContentValues params = new ContentValues();
+        HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.diy.getHotGeDanAndOfficial");
         params.put("num", num);
         return ApiHttpClient.get(url(params), 600, apiCallback);
@@ -71,7 +71,7 @@ public class MusicApi {
      * @param apiCallback
      */
     public static Call hotTag(int num, ApiCallback<HotTagData> apiCallback) {
-        ContentValues params = new ContentValues();
+        HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.tag.getHotTag");
         params.put("nums", num);
         return ApiHttpClient.get(url(params), 21600, apiCallback);
@@ -83,7 +83,7 @@ public class MusicApi {
      * @param apiCallback
      */
     public static Call allTag(ApiCallback<AllTag> apiCallback) {
-        ContentValues params = new ContentValues();
+        HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.tag.getAllTag");
         return ApiHttpClient.get(url(params), 21600, apiCallback);
     }
@@ -97,7 +97,7 @@ public class MusicApi {
      * @param apiCallback
      */
     public static Call tagInfo(String tagName, int limit, int offset, ApiCallback<TagData> apiCallback) {
-        ContentValues params = new ContentValues();
+        HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.tag.songlist");
         params.put("tagname", tagName);
         params.put("limit", limit);
@@ -112,7 +112,7 @@ public class MusicApi {
      * @param apiCallback
      */
     public static Call songListInfo(String listId, ApiCallback<SongList> apiCallback) {
-        ContentValues params = new ContentValues();
+        HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.diy.gedanInfo");
         params.put("listid", listId);
         return ApiHttpClient.get(url(params), 3600, apiCallback);
@@ -126,7 +126,7 @@ public class MusicApi {
      * @return
      */
     public static Call songLink(String songid, ApiCallback<SongUrlInfo> callback) {
-        ContentValues params = new ContentValues();
+        HashMap<String, Object> params = new HashMap<String, Object>();
         long currentTimeMillis = System.currentTimeMillis();
         String str = "songid=" + songid + "&ts=" + currentTimeMillis;
         String e = EncrptyTool.encrpty(str);
@@ -147,7 +147,7 @@ public class MusicApi {
      * @return
      */
     public static Call searchLrcPic(String word, String artist, int type, ApiCallback<LrcPicResult> callback) {
-        ContentValues params = new ContentValues();
+        HashMap<String, Object> params = new HashMap<>();
         String ts = Long.toString(System.currentTimeMillis());
         String query = word + "$$" + artist;
         String e = com.sanron.music.bdmusic.AESTools.encrpty("query=" + query + "&ts=" + ts);
@@ -159,7 +159,8 @@ public class MusicApi {
         return ApiHttpClient.get(url(params), 10, callback);
     }
 
-    private static String url(ContentValues params) {
+
+    private static String url(HashMap<String, Object> params) {
         StringBuffer sb = new StringBuffer(BASE);
         Set<String> keys = params.keySet();
         for (String name : keys) {

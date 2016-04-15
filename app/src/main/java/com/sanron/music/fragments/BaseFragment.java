@@ -21,10 +21,6 @@ public class BaseFragment extends Fragment implements MainActivity.BackPressedHa
     protected AppContext appContext;
     protected MainActivity mainActivity;
 
-    public static final String ACTION_FRAG_EVENT = "com.sanron.FragmentEvent";
-    public static final String EXTRA_FROM = "from";
-    public static final String EXTRA_EVENT = "event";
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

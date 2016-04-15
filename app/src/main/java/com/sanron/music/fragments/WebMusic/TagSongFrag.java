@@ -76,12 +76,10 @@ public class TagSongFrag extends PullFrag implements IPlayer.OnPlayStateChangeLi
         player.addPlayStateChangeListener(this);
         adapter = new SongItemAdapter(getContext(), player);
         pullListView.setAdapter(adapter);
-        pullListView.setOnPullUpListener(new DDPullListView.OnPullUpListener() {
+        pullListView.setOnLoadListener(new DDPullListView.OnLoadListener() {
             @Override
-            public void onStateChange(int state) {
-                if (state == DDPullListView.STATE_LOADING) {
-                    loadData();
-                }
+            public void onLoad() {
+                getData();
             }
         });
         topBoard.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -89,7 +87,7 @@ public class TagSongFrag extends PullFrag implements IPlayer.OnPlayStateChangeLi
             public void onGlobalLayout() {
                 topBoard.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 int height = topBoard.getHeight();
-                pullListView.setMaxHeaderHeight(height+200);
+                pullListView.setMaxHeaderHeight(height + 200);
                 pullListView.setNormalHeaderHeight(height);
             }
         });
@@ -101,16 +99,15 @@ public class TagSongFrag extends PullFrag implements IPlayer.OnPlayStateChangeLi
         player.removePlayStateChangeListener(this);
     }
 
-    @Override
-    protected Call loadData() {
-        return MusicApi.tagInfo(tag, LOAD_LIMIT, adapter == null ? 0 : adapter.getCount(), new ApiCallback<TagData>() {
+    private void getData() {
+        Call call = MusicApi.tagInfo(tag, LOAD_LIMIT, adapter == null ? 0 : adapter.getCount(), new ApiCallback<TagData>() {
             @Override
-            public void onSuccess(Call call, final TagData data) {
+            public void onSuccess(final TagData data) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        pullListView.onLoadCompleted();
                         setData(data);
+                        pullListView.onLoadCompleted();
                     }
                 });
             }
@@ -127,6 +124,12 @@ public class TagSongFrag extends PullFrag implements IPlayer.OnPlayStateChangeLi
                 }
             }
         });
+        addCall(call);
+    }
+
+    @Override
+    protected void onEnterAnimationEnd() {
+        getData();
     }
 
 

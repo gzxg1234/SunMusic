@@ -1,6 +1,5 @@
 package com.sanron.music.net;
 
-import android.content.Context;
 import android.os.Environment;
 
 import com.sanron.music.AppConfig;
@@ -9,7 +8,6 @@ import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
-import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -22,7 +20,7 @@ public class ApiHttpClient {
 
     private static OkHttpClient httpClient;
 
-    static{
+    static {
         File cacheDir = new File(Environment.getExternalStorageDirectory(),
                 AppConfig.HTTP_CACHE_PATH);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
@@ -40,9 +38,15 @@ public class ApiHttpClient {
         Request.Builder builder = new Request.Builder();
         builder.url(url);
         if (cacheAge != 0) {
-            builder.header("Cache-Control", "max-stale=" + cacheAge).cacheControl(CacheControl.FORCE_NETWORK);
+            builder.header("Cache-Control", "max-stale=" + cacheAge);
         }
         Call call = httpClient.newCall(builder.build());
+        call.enqueue(callback);
+        return call;
+    }
+
+    public static Call enqueue(Request request, Callback callback) {
+        Call call = httpClient.newCall(request);
         call.enqueue(callback);
         return call;
     }

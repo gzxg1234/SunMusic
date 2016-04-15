@@ -21,9 +21,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sanron.music.R;
+import com.sanron.music.activities.MainActivity;
 import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.AllTag;
+import com.sanron.music.net.bean.HotTagData;
 import com.sanron.music.net.bean.Tag;
 
 import java.io.IOException;
@@ -36,7 +38,7 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-14.
  */
-public class AllTagFrag extends BaseWebFrag {
+public class AllTagFrag extends BaseSlideWebFrag {
 
     private List<TextView> tvHotTags;
     private ListView lvTag;
@@ -82,10 +84,10 @@ public class AllTagFrag extends BaseWebFrag {
     }
 
     @Override
-    protected Call loadData() {
-        return MusicApi.allTag(new ApiCallback<AllTag>() {
+    protected void onEnterAnimationEnd() {
+        Call call1 = MusicApi.allTag(new ApiCallback<AllTag>() {
             @Override
-            public void onSuccess(Call call, final AllTag data) {
+            public void onSuccess(final AllTag data) {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -106,6 +108,43 @@ public class AllTagFrag extends BaseWebFrag {
                 }
             }
         });
+
+        Call call2 = MusicApi.hotTag(8, new ApiCallback<HotTagData>() {
+            @Override
+            public void onSuccess(final HotTagData data) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        setUpHotTag(data);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+            }
+        });
+        addCall(call1);
+        addCall(call2);
+    }
+
+    private void setUpHotTag(final HotTagData data) {
+        if (data != null
+                && data.tags != null) {
+            for (int i = 0; i < tvHotTags.size() && i < data.tags.size(); i++) {
+                final String tag = data.tags.get(i).title;
+                TextView tvHotTag = tvHotTags.get(i);
+                tvHotTag.setText(tag);
+                tvHotTag.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(getActivity() instanceof MainActivity){
+                            ((MainActivity)getActivity()).showTagSong(tag);
+                        }
+                    }
+                });
+            }
+        }
     }
 
     private void setData(AllTag data) {
@@ -194,7 +233,7 @@ public class AllTagFrag extends BaseWebFrag {
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            TextView tvTag;
+            final TextView tvTag;
             if (convertView == null) {
                 tvTag = new TextView(getContext());
                 AbsListView.LayoutParams lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -213,12 +252,9 @@ public class AllTagFrag extends BaseWebFrag {
             tvTag.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(ACTION_FRAG_EVENT);
-                    intent.putExtra(EXTRA_FROM, AllTagFrag.class.getName());
-                    intent.putExtra(EXTRA_EVENT, EVENT_CLICK_TAG);
-                    intent.putExtra(EXTRA_TAG_NAME, tags.get(position).title);
-                    LocalBroadcastManager.getInstance(getContext())
-                            .sendBroadcast(intent);
+                    if(getActivity() instanceof MainActivity){
+                        ((MainActivity)getActivity()).showTagSong(tags.get(position).title);
+                    }
                 }
             });
             return tvTag;

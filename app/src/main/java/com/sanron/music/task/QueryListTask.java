@@ -1,13 +1,7 @@
 package com.sanron.music.task;
 
-import android.content.ContentValues;
-import android.database.ContentObserver;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Looper;
-import android.support.v4.widget.CursorAdapter;
 
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;

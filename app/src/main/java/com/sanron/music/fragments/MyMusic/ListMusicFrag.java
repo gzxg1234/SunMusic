@@ -1,5 +1,8 @@
 package com.sanron.music.fragments.MyMusic;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -38,7 +41,7 @@ import java.util.Observer;
 /**
  * Created by sanron on 16-3-28.
  */
-public class ListMusicFrag extends DataFragment implements Observer, CompoundButton.OnCheckedChangeListener, IPlayer.OnPlayStateChangeListener {
+public class ListMusicFrag extends BaseDataFragment implements Observer, CompoundButton.OnCheckedChangeListener, IPlayer.OnPlayStateChangeListener {
 
 
     protected MusicItemAdapter adapter;
@@ -181,13 +184,6 @@ public class ListMusicFrag extends DataFragment implements Observer, CompoundBut
 
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putSerializable(ARG_PLAY_LIST, playList);
-    }
-
-
-    @Override
     public void refreshData() {
         new QueryListMemberDatasTask(playList.getId()) {
             @Override
@@ -233,7 +229,7 @@ public class ListMusicFrag extends DataFragment implements Observer, CompoundBut
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.menu_add_to_list: {
-                        showAddToListWindow();
+                        showAddToListWindow(musics);
                     }
                     break;
 
@@ -277,7 +273,7 @@ public class ListMusicFrag extends DataFragment implements Observer, CompoundBut
         opAddToList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAddToListWindow();
+                showAddToListWindow(getCheckedMusics());
                 endMultiMode();
             }
         });
@@ -299,8 +295,8 @@ public class ListMusicFrag extends DataFragment implements Observer, CompoundBut
     /**
      * 显示添加歌曲到列表的窗口
      */
-    private void showAddToListWindow() {
-        final List<Music> checkedMusics = getCheckedMusics();
+    private void showAddToListWindow(List<Music> musics) {
+        final List<Music> checkedMusics = musics;
         new QueryTask()
                 .table(DBHelper.List.TABLE)
                 .selection(DBHelper.List.TYPE + "=? or " + DBHelper.List.TYPE + "=?")

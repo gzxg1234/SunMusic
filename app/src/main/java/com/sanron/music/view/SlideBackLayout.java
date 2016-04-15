@@ -12,9 +12,9 @@ import android.widget.Scroller;
 /**
  * Created by sanron on 16-4-5.
  */
-public class SlideFinishLayout extends FrameLayout {
+public class SlideBackLayout extends FrameLayout {
 
-    public static final int INVALID_POINTERID = -1;
+    public static final int INVALID_POINTER_ID = -1;
     public static final float FINISH_X_VELOCITY = 6000;
 
     private int scrollDuration = 300;
@@ -26,30 +26,26 @@ public class SlideFinishLayout extends FrameLayout {
     private VelocityTracker velocityTracker;
 
     private boolean isBeingDrag;
-    /**
-     * 是否在滑动
-     */
-    private boolean isSlding;
 
     private int touchSlop;
 
-    private int activePointerId = INVALID_POINTERID;
+    private int activePointerId = INVALID_POINTER_ID;
 
     private Scroller scroller;
 
     private int scrimColor = 0x99000000;
 
-    private SlideFinishCallback slideFinishCallback;
+    private SlideBackCallback slideBackCallback;
 
-    public SlideFinishCallback getSlideFinishCallback() {
-        return slideFinishCallback;
+    public SlideBackCallback getSlideBackCallback() {
+        return slideBackCallback;
     }
 
-    public void setSlideFinishCallback(SlideFinishCallback slideFinishCallback) {
-        this.slideFinishCallback = slideFinishCallback;
+    public void setSlideBackCallback(SlideBackCallback slideBackCallback) {
+        this.slideBackCallback = slideBackCallback;
     }
 
-    public SlideFinishLayout(Context context, AttributeSet attrs) {
+    public SlideBackLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         scroller = new Scroller(context);
@@ -97,7 +93,7 @@ public class SlideFinishLayout extends FrameLayout {
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
                 isBeingDrag = false;
-                activePointerId = INVALID_POINTERID;
+                activePointerId = INVALID_POINTER_ID;
             }
             break;
         }
@@ -213,21 +209,21 @@ public class SlideFinishLayout extends FrameLayout {
         super.onScrollChanged(l, t, oldl, oldt);
         updateBackgroundColor();
         if (l == -getWidth()
-                && slideFinishCallback != null) {
+                && slideBackCallback != null) {
             //已经滑出
-            slideFinishCallback.onSlideFinish();
+            slideBackCallback.onSlideBack();
         }
     }
 
     private void updateBackgroundColor() {
         final int baseAlpha = (scrimColor & 0xff000000) >>> 24;
         final float opacity = 1 - Math.abs(getScrollX() / (float) getWidth());
-        final int imag = (int) (baseAlpha * opacity);
-        final int color = imag << 24 | (scrimColor & 0xffffff);
+        final int img = (int) (baseAlpha * opacity);
+        final int color = img << 24 | (scrimColor & 0xffffff);
         setBackgroundColor(color);
     }
 
-    public interface SlideFinishCallback {
-        void onSlideFinish();
+    public interface SlideBackCallback {
+        void onSlideBack();
     }
 }

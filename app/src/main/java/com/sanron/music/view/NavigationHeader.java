@@ -101,7 +101,7 @@ public class NavigationHeader extends FrameLayout implements IPlayer.OnPlayState
                             final int requestIndex = currentIndex;
 
                             @Override
-                            public void onSuccess(Call call, LrcPicResult data) {
+                            public void onSuccess(LrcPicResult data) {
                                 List<LrcPicResult.LrcPic> lrcPics = data.getLrcPics();
                                 Bitmap loadedImage = null;
                                 String avatar = null;
