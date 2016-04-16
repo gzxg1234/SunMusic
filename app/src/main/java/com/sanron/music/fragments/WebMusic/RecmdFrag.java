@@ -1,10 +1,8 @@
 package com.sanron.music.fragments.WebMusic;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
@@ -36,7 +34,6 @@ import com.sanron.music.view.HotSongListView;
 import com.sanron.music.view.RecmdSongView;
 import com.viewpagerindicator.CirclePageIndicator;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -180,7 +177,7 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
         Call call1 = MusicApi.focusPic(10, new ApiCallback<FocusPicData>() {
 
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(Exception e) {
 
             }
 
@@ -197,12 +194,7 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
                         }
                     }
                 }
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setFocusPics(result);
-                    }
-                });
+                setFocusPics(result);
             }
         });
 
@@ -210,39 +202,30 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
         Call call2 = MusicApi.hotTag(tvHotTags.size(), new ApiCallback<HotTagData>() {
 
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(Exception e) {
 
             }
 
             @Override
             public void onSuccess(final HotTagData data) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setHogTags(data.tags);
-                    }
-                });
+                setHogTags(data.tags);
             }
         });
 
 
         //获取热门歌单
         Call call3 = MusicApi.hotSongList(6, new ApiCallback<HotSongListData>() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-            }
 
+            @Override
+            public void onFailure(Exception e) {
+
+            }
 
             @Override
             public void onSuccess(final HotSongListData data) {
                 if (data != null
                         && data.content != null) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            setHotSongList(data.content.songLists);
-                        }
-                    });
+                    setHotSongList(data.content.songLists);
                 }
             }
         });
@@ -251,20 +234,13 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
         Call call4 = MusicApi.recmdSongs(6, new ApiCallback<RecmdSongData>() {
 
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(Exception e) {
+
             }
 
             @Override
             public void onSuccess(final RecmdSongData data) {
-                if (data.content != null
-                        && data.content.size() > 0) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            setRecmdSongs(data.content.get(0).songs);
-                        }
-                    });
-                }
+                setRecmdSongs(data.content.get(0).songs);
             }
         });
 
@@ -303,8 +279,8 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
                 hotSongListView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(getActivity() instanceof MainActivity){
-                            ((MainActivity)getActivity()).showSongList(songList.listId);
+                        if (getActivity() instanceof MainActivity) {
+                            ((MainActivity) getActivity()).showSongList(songList.listId);
                         }
                     }
                 });
@@ -325,8 +301,8 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
                 tvTag.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(getActivity() instanceof MainActivity){
-                            ((MainActivity)getActivity()).showTagSong(title);
+                        if (getActivity() instanceof MainActivity) {
+                            ((MainActivity) getActivity()).showTagSong(title);
                         }
                     }
                 });
@@ -339,8 +315,8 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tv_more_tag: {
-                if(getActivity() instanceof MainActivity){
-                    ((MainActivity)getActivity()).showAllTag();
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).showAllTag();
                 }
             }
             break;
@@ -370,8 +346,8 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
                         @Override
                         public void onClick(View v) {
                             if (focusPic.type == FocusPic.TYPE_SONG_LIST) {
-                                if(getActivity() instanceof MainActivity){
-                                    ((MainActivity)getActivity()).showSongList(focusPic.code);
+                                if (getActivity() instanceof MainActivity) {
+                                    ((MainActivity) getActivity()).showSongList(focusPic.code);
                                 }
                             }
                         }

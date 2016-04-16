@@ -22,7 +22,7 @@ import android.widget.TextView;
 
 import com.sanron.music.R;
 import com.sanron.music.activities.MainActivity;
-import com.sanron.music.adapter.ListItemAdapter;
+import com.sanron.music.adapter.PlayListItemAdapter;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.db.model.PlayList;
@@ -39,11 +39,10 @@ import java.util.List;
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class PlayListFrag extends BaseDataFragment implements ListItemAdapter.OnItemClickListener, ListItemAdapter.OnItemMenuClickListener {
+public class PlayListFrag extends BaseDataFragment implements PlayListItemAdapter.OnItemClickListener, PlayListItemAdapter.OnItemMenuClickListener {
 
 
     public static final String TAG = "PlayListFrag";
-
 
     public static final int EVENT_CLICK_LIST = 1;
     public static final String EXTRA_PLAYLIST = "playlist";
@@ -51,11 +50,11 @@ public class PlayListFrag extends BaseDataFragment implements ListItemAdapter.On
     public static final int MENU_NEW_LIST = 1;
 
     private RecyclerView lvPlayList;
-    private ListItemAdapter adapter;
+    private PlayListItemAdapter adapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        adapter = new ListItemAdapter(getContext());
+        adapter = new PlayListItemAdapter(getContext());
         setObserveTable(DBHelper.List.TABLE, DBHelper.ListMember.TABLE);
         super.onCreate(savedInstanceState);
     }

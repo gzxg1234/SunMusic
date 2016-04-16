@@ -1,10 +1,7 @@
 package com.sanron.music.fragments.WebMusic;
 
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -31,7 +28,6 @@ import com.sanron.music.service.IPlayer;
 import com.sanron.music.task.AddOnlineSongListTask;
 import com.sanron.music.utils.T;
 
-import java.io.IOException;
 import java.util.List;
 
 import okhttp3.Call;
@@ -59,8 +55,6 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
     private SongItemAdapter adapter;
     private ImageLoader imageLoader = ImageLoader.getInstance();
     private DisplayImageOptions imageOptions;
-
-    private Handler handler = new Handler(Looper.getMainLooper());
 
 
     public static SongListFrag newInstance(String songListId) {
@@ -131,51 +125,39 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
     protected void onEnterAnimationEnd() {
         Call call = MusicApi.songListInfo(listId, new ApiCallback<SongList>() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                if (!call.isCanceled()) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            showLoadFailedView();
-                        }
-                    });
-                }
+            public void onFailure(Exception e) {
+                showLoadFailedView();
             }
 
             @Override
             public void onSuccess(final SongList data) {
-                String pic = data.pic700;
-                if (TextUtils.isEmpty(pic)) {
-                    pic = data.pic500;
-                    if (TextUtils.isEmpty(pic)) {
-                        pic = data.pic500;
-                    }
-                }
-                //加载图片
-                final Bitmap image = imageLoader.loadImageSync(pic, imageOptions);
-                //检查是否已收藏
-                isCollected = checkIsCollected(listId);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setData(data, image);
-                    }
-                });
+                setData(data);
+                pullListView.onLoadCompleted();
             }
         });
         addCall(call);
     }
 
 
-    private void setData(SongList data, Bitmap image) {
+    private void setData(SongList data) {
         this.data = data;
-        ivPicture.setImageBitmap(image);
+        if (data == null) {
+            return;
+        }
+        String pic = data.pic700;
+        if (TextUtils.isEmpty(pic)) {
+            pic = data.pic500;
+            if (TextUtils.isEmpty(pic)) {
+                pic = data.pic500;
+            }
+        }
+        imageLoader.displayImage(pic, ivPicture, imageOptions);
         tvSongListTag.setText(data.tag);
         tvSongListTitle.setText(data.title);
         tvSongNum.setText("共" + data.songs.size() + "首歌");
         adapter.setData(data.songs);
-        pullListView.onLoadCompleted();
         setTitle(data.title);
+        isCollected = checkIsCollected(listId);
         if (isCollected) {
             ibtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
         }

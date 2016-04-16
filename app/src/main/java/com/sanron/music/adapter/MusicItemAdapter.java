@@ -16,9 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.cache.memory.MemoryCache;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 import com.sanron.music.R;
@@ -120,7 +118,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         }
 
         this.data = data;
-        if (data != null) {
+        if (avatarUrls == null) {
             avatarUrls = new HashMap<>(data.size());
         }
         setFirstBindView(true);
@@ -266,6 +264,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         final Music music = data.get(position);
         String artist = music.getArtist();
         String avatar = avatarUrls.get(music.getId());
+        System.out.println(music.getId() + " " + music.getTitle() + " " + avatar);
         if (avatar == null) {
             //搜索头像
             MyLog.d("LazyLoad", music.getTitle() + " search pic");
@@ -304,18 +303,14 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
                         }
 
                         @Override
-                        public void onFailure(Call call, IOException e) {
-                            holder.ivPicture.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    holder.ivPicture.setImageResource(R.mipmap.default_small_song_pic);
-                                }
-                            });
+                        public void onFailure(Exception e) {
+                            holder.ivPicture.setImageResource(R.mipmap.default_small_song_pic);
                         }
                     });
-
         } else if (!avatar.isEmpty()) {
             imageLoader.displayImage(avatar, holder.ivPicture);
+        } else {
+            holder.ivPicture.setImageResource(R.mipmap.default_small_song_pic);
         }
     }
 

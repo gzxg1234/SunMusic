@@ -1,8 +1,6 @@
 package com.sanron.music.fragments.WebMusic;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +19,6 @@ import com.sanron.music.net.bean.TagData;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.view.DDPullListView;
 
-import java.io.IOException;
 import java.util.List;
 
 import okhttp3.Call;
@@ -38,7 +35,6 @@ public class TagSongFrag extends PullFrag implements IPlayer.OnPlayStateChangeLi
     private TagData tagData;
     private TextView tvTagName;
     private SongItemAdapter adapter;
-    private Handler handler = new Handler(Looper.getMainLooper());
     public static final int LOAD_LIMIT = 100;
 
     public static TagSongFrag newInstance(String tag) {
@@ -103,25 +99,13 @@ public class TagSongFrag extends PullFrag implements IPlayer.OnPlayStateChangeLi
         Call call = MusicApi.tagInfo(tag, LOAD_LIMIT, adapter == null ? 0 : adapter.getCount(), new ApiCallback<TagData>() {
             @Override
             public void onSuccess(final TagData data) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setData(data);
-                        pullListView.onLoadCompleted();
-                    }
-                });
+                setData(data);
+                pullListView.onLoadCompleted();
             }
 
             @Override
-            public void onFailure(Call call, IOException e) {
-                if (!call.isCanceled()) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            showLoadFailedView();
-                        }
-                    });
-                }
+            public void onFailure(Exception e) {
+                showLoadFailedView();
             }
         });
         addCall(call);

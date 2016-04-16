@@ -7,9 +7,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import okhttp3.Cache;
-import okhttp3.OkHttpClient;
-
 /**
  * Created by Administrator on 2015/12/20.
  */
@@ -87,10 +84,12 @@ public class DBHelper extends SQLiteOpenHelper {
         public static final String LIST_ID = "list_id";
     }
 
-    public static class Avatar{
-        public static final String TABLE = "avatar";
-        public static final String SEARCH = "word";
+    public static class LyricCache {
+        public static final String TABLE = "lyric_cache";
+        public static final String QUERY = "query";
+        public static final String DATA = "data";
         public static final String ADD_TIME = "add_time";
+        public static final String MAX_AGE = "max_age";
     }
 
     public DBHelper(Context context) {
@@ -105,6 +104,7 @@ public class DBHelper extends SQLiteOpenHelper {
         createTableArtist(db);
         createTableAlbum(db);
         createTrigger(db);
+        createLyricCache(db);
     }
 
     public void createTableMusicInfo(SQLiteDatabase db) {
@@ -134,6 +134,15 @@ public class DBHelper extends SQLiteOpenHelper {
                 .toString();
     }
 
+    public void createLyricCache(SQLiteDatabase db) {
+        Map<String, String> columnTypes = new LinkedHashMap<>();
+        columnTypes.put(LyricCache.QUERY, "text");
+        columnTypes.put(LyricCache.DATA, "text");
+        columnTypes.put(LyricCache.ADD_TIME, "integer");
+        columnTypes.put(LyricCache.MAX_AGE, "integer");
+        String sql = buildCreateSql(List.TABLE, columnTypes);
+        db.execSQL(sql);
+    }
 
     public void createTablePlayList(SQLiteDatabase db) {
         Map<String, String> columnTypes = new LinkedHashMap<>();

@@ -24,6 +24,7 @@ import okhttp3.Call;
 public class MusicApi {
 
     public static final String BASE = "http://tingapi.ting.baidu.com/v1/restserver/ting?from=android&version=5.6.5.6&format=json";
+    public static boolean isNetAvailable = true;
 
     /**
      * 轮播图片
@@ -127,14 +128,14 @@ public class MusicApi {
      */
     public static Call songLink(String songid, ApiCallback<SongUrlInfo> callback) {
         HashMap<String, Object> params = new HashMap<String, Object>();
-        long currentTimeMillis = System.currentTimeMillis();
-        String str = "songid=" + songid + "&ts=" + currentTimeMillis;
-        String e = EncrptyTool.encrpty(str);
+//        long currentTimeMillis = System.currentTimeMillis();
+        long ts = 88888888;
+        String e = EncrptyTool.encrpty("songid=" + songid + "&ts=" + ts);
         params.put("method", "baidu.ting.song.getInfos");
         params.put("songid", songid);
-        params.put("ts", currentTimeMillis);
+        params.put("ts", ts);
         params.put("e", e);
-        return ApiHttpClient.get(url(params), callback);
+        return ApiHttpClient.get(url(params), 60, callback);
     }
 
     /**
@@ -146,19 +147,21 @@ public class MusicApi {
      * @param callback
      * @return
      */
-    public static Call searchLrcPic(String word, String artist, int type, ApiCallback<LrcPicResult> callback) {
+    public static Call searchLrcPic(String word, String artist, int type, final ApiCallback<LrcPicResult> callback) {
         HashMap<String, Object> params = new HashMap<>();
-        String ts = Long.toString(System.currentTimeMillis());
+        //正确的姿势应该是要当前时间的,为了缓存，设置固定的值,不过没有什么影响，貌似只是为了加密检验
+//        long currentTimeMillis = System.currentTimeMillis();
+        long ts = 88888888;
         String query = word + "$$" + artist;
-        String e = com.sanron.music.bdmusic.AESTools.encrpty("query=" + query + "&ts=" + ts);
+        String e = EncrptyTool.encrpty("query=" + query + "&ts=" + ts);
         params.put("method", "baidu.ting.search.lrcpic");
         params.put("query", query);
         params.put("ts", ts);
         params.put("type", type);
         params.put("e", e);
-        return ApiHttpClient.get(url(params), 10, callback);
+        return ApiHttpClient.get(url(params), 10,
+                isNetAvailable ? 0 : Integer.MAX_VALUE, callback);
     }
-
 
     private static String url(HashMap<String, Object> params) {
         StringBuffer sb = new StringBuffer(BASE);

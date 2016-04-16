@@ -118,6 +118,14 @@ public class DataProvider extends Observable {
         }
     }
 
+    public SQLiteDatabase getDatabase() {
+        if (mDatabase == null
+                || !mDatabase.isOpen()) {
+            mDatabase = mDbHelper.getWritableDatabase();
+        }
+        return mDatabase;
+    }
+
     public void beginTransaction() {
         mDatabase.beginTransaction();
     }

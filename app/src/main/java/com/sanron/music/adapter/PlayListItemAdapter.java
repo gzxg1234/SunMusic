@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ListItemAdapter extends RecyclerView.Adapter {
+public class PlayListItemAdapter extends RecyclerView.Adapter {
     private List<PlayList> data;
     private List<Object> items;
     private Context context;
@@ -26,10 +26,13 @@ public class ListItemAdapter extends RecyclerView.Adapter {
     private OnItemClickListener onItemClickListener;
     private OnItemMenuClickListener onItemMenuClickListener;
 
-    public ListItemAdapter(Context context) {
+    public PlayListItemAdapter(Context context) {
         this.context = context;
         imageLoader = ImageLoader.getInstance();
     }
+
+    private static final int TYPE_ITEM = 0;
+    private static final int TYPE_GROUP_ITEM = 1;
 
     public void setData(List<PlayList> data) {
         if (this.data == data) {
@@ -60,13 +63,11 @@ public class ListItemAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
-    private static final int TYPE_ITEM = 0;
-    private static final int TYPE_GROUP = 1;
 
     @Override
     public int getItemViewType(int position) {
         if (items.get(position) instanceof String) {
-            return TYPE_GROUP;
+            return TYPE_GROUP_ITEM;
         }
         return TYPE_ITEM;
     }
@@ -79,7 +80,7 @@ public class ListItemAdapter extends RecyclerView.Adapter {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
 
-            case TYPE_GROUP: {
+            case TYPE_GROUP_ITEM: {
                 View view = LayoutInflater.from(context).inflate(R.layout.layout_playlist_type_header, parent, false);
                 return new GroupHolder(view);
             }
@@ -107,7 +108,7 @@ public class ListItemAdapter extends RecyclerView.Adapter {
             }
             itemHolder.tvName.setText(playList.getTitle());
             itemHolder.tvMusicNum.setText(playList.getSongNum() + "首");
-        } else if (holderType == TYPE_GROUP) {
+        } else if (holderType == TYPE_GROUP_ITEM) {
             GroupHolder groupHolder = (GroupHolder) holder;
             groupHolder.tvText.setText((String) items.get(position));
         }

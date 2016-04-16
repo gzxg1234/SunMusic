@@ -5,13 +5,17 @@ import android.os.Environment;
 import com.sanron.music.AppConfig;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
+import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by sanron on 16-3-18.
@@ -20,6 +24,18 @@ public class ApiHttpClient {
 
     private static OkHttpClient httpClient;
 
+    public static Interceptor CACHE_CONTROL_INTERCEPTOR = new Interceptor() {
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            Request request = chain.request();
+            String cacheControl = request.cacheControl().toString();
+            return chain.proceed(request)
+                    .newBuilder()
+                    .addHeader("Cache-Control", cacheControl)
+                    .build();
+        }
+    };
+
     static {
         File cacheDir = new File(Environment.getExternalStorageDirectory(),
                 AppConfig.HTTP_CACHE_PATH);
@@ -27,6 +43,8 @@ public class ApiHttpClient {
         builder.connectTimeout(AppConfig.HTTP_CONNECT_TIMEOUT, TimeUnit.SECONDS);
         builder.readTimeout(AppConfig.HTTP_READ_TIMEOUT, TimeUnit.SECONDS);
         builder.cache(new Cache(cacheDir, AppConfig.HTTP_CACHE_MAX_SIZE));
+        builder.addInterceptor(CACHE_CONTROL_INTERCEPTOR);
+        builder.addNetworkInterceptor(CACHE_CONTROL_INTERCEPTOR);
         httpClient = builder.build();
     }
 
@@ -34,15 +52,25 @@ public class ApiHttpClient {
         return get(url, 0, callback);
     }
 
-    public static Call get(String url, int cacheAge, Callback callback) {
-        Request.Builder builder = new Request.Builder();
-        builder.url(url);
-        if (cacheAge != 0) {
-            builder.header("Cache-Control", "max-stale=" + cacheAge);
+    public static Call get(String url, int maxAge, int maxStale, Callback callback) {
+        CacheControl.Builder cacheControl = new CacheControl.Builder();
+        if (maxAge != 0) {
+            cacheControl.maxAge(maxAge, TimeUnit.SECONDS);
         }
-        Call call = httpClient.newCall(builder.build());
+        if (maxStale != 0) {
+            cacheControl.maxStale(maxStale, TimeUnit.SECONDS);
+        }
+        Request request = new Request.Builder()
+                .url(url)
+                .cacheControl(cacheControl.build())
+                .build();
+        Call call = httpClient.newCall(request);
         call.enqueue(callback);
         return call;
+    }
+
+    public static Call get(String url, int maxAge, Callback callback) {
+        return get(url, maxAge, 0, callback);
     }
 
     public static Call enqueue(Request request, Callback callback) {

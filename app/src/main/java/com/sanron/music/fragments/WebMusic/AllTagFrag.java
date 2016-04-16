@@ -1,13 +1,11 @@
 package com.sanron.music.fragments.WebMusic;
 
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -28,7 +26,6 @@ import com.sanron.music.net.bean.AllTag;
 import com.sanron.music.net.bean.HotTagData;
 import com.sanron.music.net.bean.Tag;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -97,15 +94,8 @@ public class AllTagFrag extends BaseSlideWebFrag {
             }
 
             @Override
-            public void onFailure(Call call, IOException e) {
-                if (!call.isCanceled()) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            showLoadFailedView();
-                        }
-                    });
-                }
+            public void onFailure(Exception e) {
+                showLoadFailedView();
             }
         });
 
@@ -121,7 +111,7 @@ public class AllTagFrag extends BaseSlideWebFrag {
             }
 
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(Exception e) {
             }
         });
         addCall(call1);
@@ -138,8 +128,8 @@ public class AllTagFrag extends BaseSlideWebFrag {
                 tvHotTag.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(getActivity() instanceof MainActivity){
-                            ((MainActivity)getActivity()).showTagSong(tag);
+                        if (getActivity() instanceof MainActivity) {
+                            ((MainActivity) getActivity()).showTagSong(tag);
                         }
                     }
                 });
@@ -252,8 +242,8 @@ public class AllTagFrag extends BaseSlideWebFrag {
             tvTag.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(getActivity() instanceof MainActivity){
-                        ((MainActivity)getActivity()).showTagSong(tags.get(position).title);
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).showTagSong(tags.get(position).title);
                     }
                 }
             });

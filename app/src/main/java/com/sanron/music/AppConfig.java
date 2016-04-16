@@ -1,7 +1,5 @@
 package com.sanron.music;
 
-import android.os.Environment;
-
 /**
  * Created by sanron on 16-4-10.
  */
@@ -33,11 +31,13 @@ public class AppConfig {
 
 
     /**
-     * http配置
+     * okhttp配置
      */
     public static final String HTTP_CACHE_PATH = CACHE_PATH + "/http_cache";
-    public static final int HTTP_CACHE_MAX_SIZE = 20 * 1024 * 1024;//20MB
+
+    public static final int HTTP_CACHE_MAX_SIZE = 10 * 1024 * 1024;//10MB
 
     public static final int HTTP_READ_TIMEOUT = 10;
+
     public static final int HTTP_CONNECT_TIMEOUT = 10;
 }

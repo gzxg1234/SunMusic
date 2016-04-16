@@ -22,9 +22,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.sanron.music.AppContext;
 import com.sanron.music.AppManager;
 import com.sanron.music.R;
@@ -440,6 +443,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 initMediaPlayer();
             }
             mediaPlayer.reset();
+
             currentIndex = position;
             Music music = queue.get(currentIndex);
             changeState(STATE_PREPARING);
@@ -475,12 +479,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         private void handlerPlayError(final String errorMsg) {
             state = STATE_STOP;
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    T.show(PlayerService.this, errorMsg + ",3s后播放下一曲");
-                }
-            });
+            T.show(PlayerService.this, errorMsg + ",3s后播放下一曲");
             handler.sendEmptyMessageDelayed(WHAT_PLAY_ERROR, 3000);
         }
 
@@ -488,11 +487,8 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         private void playWebMusic(final String songid) {
             fileLinkCall = MusicApi.songLink(songid, new ApiCallback<SongUrlInfo>() {
                 @Override
-                public void onFailure(Call call, IOException e) {
-                    e.printStackTrace();
-                    if (!call.isCanceled()) {
-                        handlerPlayError("网络请求失败");
-                    }
+                public void onFailure(Exception e) {
+                    handlerPlayError("网络请求失败");
                 }
 
                 @Override
@@ -730,7 +726,6 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                         @Override
                         public void onSuccess(LrcPicResult data) {
                             List<LrcPicResult.LrcPic> lrcPics = data.getLrcPics();
-                            Bitmap loadedImage = null;
                             String pic = null;
                             if (lrcPics != null) {
                                 for (LrcPicResult.LrcPic lrcPic : lrcPics) {
@@ -744,27 +739,27 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                                 }
                             }
                             if (!TextUtils.isEmpty(pic)) {
-                                loadedImage = imageLoader.loadImageSync(pic);
-                            }
-                            if (requestIndex == getCurrentIndex()) {
-                                final Bitmap finalLoadedImage = loadedImage;
-                                handler.post(new Runnable() {
+                                imageLoader.loadImage(pic, new SimpleImageLoadingListener() {
                                     @Override
-                                    public void run() {
-                                        setCurMusicPic(finalLoadedImage);
+                                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                        if (requestIndex == getCurrentIndex()) {
+                                            setCurMusicPic(loadedImage);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                                        if (requestIndex == getCurrentIndex()) {
+                                            setCurMusicPic(null);
+                                        }
                                     }
                                 });
                             }
                         }
 
                         @Override
-                        public void onFailure(Call call, IOException e) {
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    setCurMusicPic(null);
-                                }
-                            });
+                        public void onFailure(Exception e) {
+                            setCurMusicPic(null);
                         }
                     });
         }

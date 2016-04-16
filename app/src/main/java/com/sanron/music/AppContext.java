@@ -1,9 +1,11 @@
 package com.sanron.music;
 
 import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.os.Build;
@@ -12,9 +14,11 @@ import android.view.View;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.db.DataProvider;
+import com.sanron.music.net.MusicApi;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.service.PlayerService;
 import com.sanron.music.utils.MyLog;
+import com.sanron.music.utils.NetTool;
 
 /**
  * Created by Administrator on 2015/12/25.
@@ -24,14 +28,33 @@ public class AppContext extends Application {
     private IPlayer musicPlayer;
     private ServiceConnection connection;
     private int statusBarHeight = -1;
+    private int netType;
 
     public static final String TAG = AppContext.class.getSimpleName();
+    private BroadcastReceiver netChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            netType = NetTool.checkNet(context);
+            MyLog.i(TAG, "network change to " + netType);
+            if (netType == -1) {
+                MusicApi.isNetAvailable = false;
+            } else {
+                MusicApi.isNetAvailable = true;
+            }
+        }
+    };
 
     @Override
     public void onCreate() {
         super.onCreate();
         MyLog.i(TAG, "app create");
+        registerReceiver(netChangeReceiver,
+                new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
         DataProvider.instance().init(this);
+    }
+
+    public int getNetType() {
+        return netType;
     }
 
     public void closeApp() {
@@ -42,6 +65,7 @@ public class AppContext extends Application {
         }
         stopService(new Intent(this, PlayerService.class));
         ImageLoader.getInstance().destroy();
+        unregisterReceiver(netChangeReceiver);
         android.os.Process.killProcess(android.os.Process.myPid());
     }
 
