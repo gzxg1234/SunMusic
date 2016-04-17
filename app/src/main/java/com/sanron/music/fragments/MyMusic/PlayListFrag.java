@@ -28,7 +28,7 @@ import com.sanron.music.db.model.Music;
 import com.sanron.music.db.model.PlayList;
 import com.sanron.music.task.AddPlayListTask;
 import com.sanron.music.task.DeleteTask;
-import com.sanron.music.task.QueryListMemberDatasTask;
+import com.sanron.music.task.QueryListMemberDataTask;
 import com.sanron.music.task.QueryListTask;
 import com.sanron.music.task.UpdateListNameTask;
 import com.sanron.music.utils.T;
@@ -142,11 +142,11 @@ public class PlayListFrag extends BaseDataFragment implements PlayListItemAdapte
      * 播放列表歌曲
      */
     private void playListMusics(final PlayList playList) {
-        new QueryListMemberDatasTask(playList.getId()) {
+        new QueryListMemberDataTask(playList.getId()) {
             @Override
             protected void onPostExecute(List<Music> musics) {
                 if (musics.size() == 0) {
-                    T.show(getContext(), "列表暂时没有歌曲");
+                    T.show("列表暂时没有歌曲");
                 } else {
                     player.clearQueue();
                     player.enqueue(musics);
@@ -202,12 +202,12 @@ public class PlayListFrag extends BaseDataFragment implements PlayListItemAdapte
                     protected void onPostExecute(Integer result) {
                         switch (result) {
                             case FAILED: {
-                                T.show(getContext(), "修改失败");
+                                T.show("修改失败");
                                 dlg.dismiss();
                             }
                             break;
                             case SUCCESS: {
-                                T.show(getContext(), "修改成功");
+                                T.show("修改成功");
                                 dlg.dismiss();
                             }
                             break;
@@ -243,13 +243,13 @@ public class PlayListFrag extends BaseDataFragment implements PlayListItemAdapte
 
                         switch (result) {
                             case FAILED: {
-                                T.show(getContext(), "新建列表失败");
+                                T.show("新建列表失败");
                                 dlg.dismiss();
                             }
                             break;
 
                             case SUCCESS: {
-                                T.show(getContext(), "新建列表成功");
+                                T.show("新建列表成功");
                                 dlg.dismiss();
                             }
                             break;
@@ -306,9 +306,9 @@ public class PlayListFrag extends BaseDataFragment implements PlayListItemAdapte
         @Override
         public void onDeleteFinish(int deleteCount) {
             if (deleteCount == 0) {
-                T.show(getContext(), "删除失败");
+                T.show("删除失败");
             } else {
-                T.show(getContext(), "删除歌单成功");
+                T.show("删除歌单成功");
             }
         }
     }

@@ -17,7 +17,7 @@ import com.sanron.music.R;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.LrcPicResult;
+import com.sanron.music.net.bean.LrcPicData;
 import com.sanron.music.service.IPlayer;
 
 import java.util.List;
@@ -29,32 +29,32 @@ import okhttp3.Call;
  */
 public class NavigationHeader extends FrameLayout implements IPlayer.OnPlayStateChangeListener {
 
-    private IPlayer player;
-    private LinearLayout linearLayout;
-    private ImageView ivMusicPic;
-    private TextView tvMusicTitle;
-    private TextView tvMusicArtist;
-    private Call getAvatarCall;
+    private IPlayer mPlayer;
+    private LinearLayout mLinearLayout;
+    private ImageView mIvMusicPic;
+    private TextView mTvMusicTitle;
+    private TextView mTvMusicArtist;
+    private Call mGetAvatarCall;
 
     public NavigationHeader(Context context, IPlayer player) {
         super(context, null);
-        this.player = player;
+        this.mPlayer = player;
         LayoutInflater.from(context).inflate(R.layout.navigation_header, this);
-        linearLayout = (LinearLayout) getChildAt(0);
-        ivMusicPic = (ImageView) findViewById(R.id.civ_music_pic);
-        tvMusicTitle = (TextView) findViewById(R.id.tv_music_title);
-        tvMusicArtist = (TextView) findViewById(R.id.tv_music_artist);
-        ((AppContext) context.getApplicationContext()).setViewFitsStatusBar(linearLayout);
+        mLinearLayout = (LinearLayout) getChildAt(0);
+        mIvMusicPic = (ImageView) findViewById(R.id.civ_music_pic);
+        mTvMusicTitle = (TextView) findViewById(R.id.tv_music_title);
+        mTvMusicArtist = (TextView) findViewById(R.id.tv_music_artist);
+        ((AppContext) context.getApplicationContext()).setViewFitsStatusBar(mLinearLayout);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        player.addPlayStateChangeListener(this);
-        if (player.getState() != player.STATE_STOP) {
+        mPlayer.addPlayStateChangeListener(this);
+        if (mPlayer.getState() != mPlayer.STATE_STOP) {
             onPlayStateChange(IPlayer.STATE_PREPARING);
         }
-        if (player.getState() >= IPlayer.STATE_PREPARED) {
+        if (mPlayer.getState() >= IPlayer.STATE_PREPARED) {
             onPlayStateChange(IPlayer.STATE_PREPARED);
         }
     }
@@ -62,7 +62,7 @@ public class NavigationHeader extends FrameLayout implements IPlayer.OnPlayState
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        player.removePlayStateChangeListener(this);
+        mPlayer.removePlayStateChangeListener(this);
     }
 
     @Override
@@ -70,34 +70,34 @@ public class NavigationHeader extends FrameLayout implements IPlayer.OnPlayState
     public void onPlayStateChange(int state) {
         switch (state) {
             case IPlayer.STATE_STOP: {
-                tvMusicTitle.setText("叮咚音乐");
-                tvMusicArtist.setText("");
+                mTvMusicTitle.setText("叮咚音乐");
+                mTvMusicArtist.setText("");
             }
             break;
 
             case IPlayer.STATE_PREPARING: {
-                Music music = player.getCurrentMusic();
-                tvMusicTitle.setText(music.getTitle());
+                Music music = mPlayer.getCurrentMusic();
+                mTvMusicTitle.setText(music.getTitle());
                 String artist = music.getArtist();
                 if ("<unknown>".equals(artist)) {
                     artist = "未知歌手";
                 }
-                tvMusicArtist.setText(artist);
+                mTvMusicArtist.setText(artist);
             }
             break;
 
             case IPlayer.STATE_PREPARED: {
-                ivMusicPic.setImageResource(R.mipmap.default_small_song_pic);
-                Music music = player.getCurrentMusic();
-                final int currentIndex = player.getCurrentIndex();
+                mIvMusicPic.setImageResource(R.mipmap.default_small_song_pic);
+                Music music = mPlayer.getCurrentMusic();
+                final int currentIndex = mPlayer.getCurrentIndex();
                 String artist = music.getArtist();
-                if (getAvatarCall != null) {
-                    getAvatarCall.cancel();
+                if (mGetAvatarCall != null) {
+                    mGetAvatarCall.cancel();
                 }
-                getAvatarCall = MusicApi.searchLrcPic(music.getTitle(),
+                mGetAvatarCall = MusicApi.searchLrcPic(music.getTitle(),
                         "<unknown>".equals(artist) ? "" : artist,
                         2,
-                        new ApiCallback<LrcPicResult>() {
+                        new ApiCallback<LrcPicData>() {
                             final int requestIndex = currentIndex;
 
                             @Override
@@ -105,14 +105,14 @@ public class NavigationHeader extends FrameLayout implements IPlayer.OnPlayState
                             }
 
                             @Override
-                            public void onSuccess(LrcPicResult data) {
-                                List<LrcPicResult.LrcPic> lrcPics = data.getLrcPics();
+                            public void onSuccess(LrcPicData data) {
+                                List<LrcPicData.LrcPic> lrcPics = data.lrcPics;
                                 String avatar = null;
                                 if (lrcPics != null) {
-                                    for (LrcPicResult.LrcPic lrcPic : lrcPics) {
-                                        avatar = lrcPic.getAvatar500x500();
+                                    for (LrcPicData.LrcPic lrcPic : lrcPics) {
+                                        avatar = lrcPic.avatar180x180;
                                         if (TextUtils.isEmpty(avatar)) {
-                                            avatar = lrcPic.getAvatar180x180();
+                                            avatar = lrcPic.avatar500x500;
                                         }
                                         if (!TextUtils.isEmpty(avatar)) {
                                             break;
@@ -124,8 +124,8 @@ public class NavigationHeader extends FrameLayout implements IPlayer.OnPlayState
                                             .loadImage(avatar, new SimpleImageLoadingListener() {
                                                 @Override
                                                 public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                                                    if(player.getCurrentIndex()==requestIndex){
-                                                        ivMusicPic.setImageBitmap(loadedImage);
+                                                    if (mPlayer.getCurrentIndex() == requestIndex) {
+                                                        mIvMusicPic.setImageBitmap(loadedImage);
                                                     }
                                                 }
                                             });

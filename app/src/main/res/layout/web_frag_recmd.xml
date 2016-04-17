@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:overScrollMode="never"
@@ -10,12 +9,18 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
 
         <!--轮播-->
         <com.sanron.music.view.RatioLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginLeft="-16dp"
+            android:layout_marginRight="-16dp"
             app:ratio="0.4"
             app:type="height">
 
@@ -44,64 +49,20 @@
         </com.sanron.music.view.RatioLayout>
 
         <!-- 分类 -->
-        <com.sanron.music.view.RatioLayout
+        <com.sanron.music.view.NoScrollGridView
+            android:id="@+id/gv_hot_tag"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginLeft="12dp"
-            android:layout_marginRight="12dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            app:ratio="0.25"
-            app:type="height">
+            android:horizontalSpacing="8dp"
+            android:numColumns="4"
+            android:verticalSpacing="8dp" />
 
-            <LinearLayout
-                android:id="@+id/hot_tag_group"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <TextView
-                    style="@style/HotTagText"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@mipmap/ic_classify_img01"
-                    tools:text="伤感" />
-
-                <TextView
-                    style="@style/HotTagText"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@mipmap/ic_classify_img02"
-                    tools:text="情歌" />
-
-                <TextView
-                    style="@style/HotTagText"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_margin="4dp"
-                    android:layout_weight="1"
-                    android:background="@mipmap/ic_classify_img03"
-                    tools:text="红歌" />
-
-
-                <TextView
-                    android:id="@+id/tv_more_tag"
-                    style="@style/HotTagText"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@mipmap/ic_classify_img05"
-                    android:text="更多" />
-            </LinearLayout>
-        </com.sanron.music.view.RatioLayout>
 
         <!--热门歌单-->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
             android:layout_marginTop="24dp"
             android:gravity="center_vertical">
 
@@ -118,88 +79,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:singleLine="true"
-                android:text="更多" />
+                android:text="更多"
+                android:textColor="@color/textColorSecondary" />
         </RelativeLayout>
 
-        <LinearLayout
-            android:id="@+id/hot_songlist_group1"
+        <com.sanron.music.view.NoScrollGridView
+            android:id="@+id/gv_hot_song_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal">
-
-            <com.sanron.music.view.HotSongListView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="4dp"
-                android:layout_weight="1"
-                app:cardCornerRadius="2dp"
-                app:cardElevation="2dp" />
-
-            <com.sanron.music.view.HotSongListView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="4dp"
-                android:layout_marginLeft="8dp"
-                android:layout_weight="1"
-                app:cardCornerRadius="2dp"
-                app:cardElevation="2dp" />
-
-            <com.sanron.music.view.HotSongListView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="4dp"
-                android:layout_marginLeft="8dp"
-                android:layout_weight="1"
-                app:cardCornerRadius="2dp"
-                app:cardElevation="2dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/hot_songlist_group2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
             android:layout_marginTop="8dp"
-            android:orientation="horizontal">
-
-            <com.sanron.music.view.HotSongListView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="4dp"
-                android:layout_weight="1"
-                app:cardCornerRadius="2dp"
-                app:cardElevation="2dp" />
-
-            <com.sanron.music.view.HotSongListView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="4dp"
-                android:layout_marginLeft="8dp"
-                android:layout_weight="1"
-                app:cardCornerRadius="2dp"
-                app:cardElevation="2dp" />
-
-            <com.sanron.music.view.HotSongListView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="4dp"
-                android:layout_marginLeft="8dp"
-                android:layout_weight="1"
-                app:cardCornerRadius="2dp"
-                app:cardElevation="2dp" />
-        </LinearLayout>
+            android:numColumns="3" />
 
         <!--歌曲推荐-->
         <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
             android:layout_marginTop="24dp"
             android:gravity="center_vertical">
 
@@ -217,43 +113,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:singleLine="true"
-                android:text="更多" />
+                android:text="更多"
+                android:textColor="@color/textColorSecondary" />
         </RelativeLayout>
 
-        <LinearLayout
-            android:id="@+id/recmd_song_group"
+        <com.sanron.music.view.NoScrollListView
+            android:id="@+id/lv_recmd_song"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginTop="16dp"
-            android:orientation="vertical">
+            android:layout_marginTop="8dp"
+            android:divider="@null"
+            android:dividerHeight="8dp" />
 
-            <com.sanron.music.view.RecmdSongView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <com.sanron.music.view.RecmdSongView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-
-            <com.sanron.music.view.RecmdSongView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-
-            <com.sanron.music.view.RecmdSongView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-
-            <com.sanron.music.view.RecmdSongView
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:layout_marginTop="8dp" />
-        </LinearLayout>
 
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

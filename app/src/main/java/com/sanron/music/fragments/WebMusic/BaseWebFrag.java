@@ -30,4 +30,5 @@ public abstract class BaseWebFrag extends BaseFragment {
             httpCalls.clear();
         }
     }
+
 }

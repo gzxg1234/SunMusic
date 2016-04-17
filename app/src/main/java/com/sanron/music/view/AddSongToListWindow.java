@@ -29,18 +29,18 @@ import java.util.List;
  * 添加歌曲到列表窗口
  */
 public class AddSongToListWindow extends PopupWindow {
-    private View contentView;
-    private ListView playLists;
-    private Button btnCancel;
-    private Activity activity;
-    private float oldAlpha;
+    private View mContentView;
+    private ListView mPlayLists;
+    private Button mBtnCancel;
+    private Activity mActivity;
+    private float mOldAlpha;
 
     public AddSongToListWindow(final Activity activity, final List<PlayList> playLists, final List<Music> musics) {
         super(activity);
-        this.activity = activity;
-        this.contentView = LayoutInflater.from(activity).inflate(R.layout.window_add_to_playlist, null);
-        this.playLists = (ListView) contentView.findViewById(R.id.list_playlist);
-        this.btnCancel = (Button) contentView.findViewById(R.id.btn_cancel);
+        this.mActivity = activity;
+        this.mContentView = LayoutInflater.from(activity).inflate(R.layout.window_add_to_playlist, null);
+        this.mPlayLists = (ListView) mContentView.findViewById(R.id.list_playlist);
+        this.mBtnCancel = (Button) mContentView.findViewById(R.id.btn_cancel);
         int screenHeight = activity.getResources().getDisplayMetrics().heightPixels;
         setFocusable(true);
         setTouchable(true);
@@ -48,14 +48,14 @@ public class AddSongToListWindow extends PopupWindow {
         setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
         setHeight(screenHeight / 2);
         setAnimationStyle(R.style.MyWindowAnim);
-        setContentView(contentView);
+        setContentView(mContentView);
 
         List<String> playListNames = new ArrayList<>();
         for (PlayList playList : playLists) {
             playListNames.add(playList.getTitle());
         }
-        this.playLists.setAdapter(new ArrayAdapter<>(this.activity, android.R.layout.simple_list_item_1, playListNames));
-        this.playLists.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        this.mPlayLists.setAdapter(new ArrayAdapter<>(this.mActivity, android.R.layout.simple_list_item_1, playListNames));
+        this.mPlayLists.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 new AddMusicToListTask(playLists.get(position), musics) {
@@ -71,7 +71,7 @@ public class AddSongToListWindow extends PopupWindow {
                     @Override
                     protected void onPostExecute(Integer addNum) {
                         String msg = addNum + "首歌曲添加成功,";
-                        T.show(AddSongToListWindow.this.activity, msg);
+                        T.show(msg);
                         AddSongToListWindow.this.dismiss();
                         progressDialog.dismiss();
                     }
@@ -79,7 +79,7 @@ public class AddSongToListWindow extends PopupWindow {
             }
         });
 
-        btnCancel.setOnClickListener(new View.OnClickListener() {
+        mBtnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dismiss();
@@ -94,14 +94,14 @@ public class AddSongToListWindow extends PopupWindow {
 
     //activity背景恢复动画
     private void animateDismiss() {
-        final WindowManager.LayoutParams attr = activity.getWindow().getAttributes();
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0.7f, oldAlpha);
+        final WindowManager.LayoutParams attr = mActivity.getWindow().getAttributes();
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0.7f, mOldAlpha);
         valueAnimator.setDuration(300);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 attr.alpha = (float) animation.getAnimatedValue();
-                activity.getWindow().setAttributes(attr);
+                mActivity.getWindow().setAttributes(attr);
             }
         });
         valueAnimator.start();
@@ -109,15 +109,15 @@ public class AddSongToListWindow extends PopupWindow {
 
     //activity背景变暗动画
     private void animateShow() {
-        final WindowManager.LayoutParams attr = activity.getWindow().getAttributes();
-        oldAlpha = attr.alpha;
+        final WindowManager.LayoutParams attr = mActivity.getWindow().getAttributes();
+        mOldAlpha = attr.alpha;
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(attr.alpha, 0.7f);
         valueAnimator.setDuration(300);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 attr.alpha = (float) animation.getAnimatedValue();
-                activity.getWindow().setAttributes(attr);
+                mActivity.getWindow().setAttributes(attr);
             }
         });
         valueAnimator.start();

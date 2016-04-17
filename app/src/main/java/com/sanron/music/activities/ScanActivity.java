@@ -222,7 +222,7 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                 String text = ((TextView) view).getText().toString();
                 if (TEXT_START_SCAN.equals(text)) {
                     if (scanner.isScanning()) {
-                        T.show(this, "正在扫描，请稍后操作");
+                        T.show( "正在扫描，请稍后操作");
                     } else {
                         MyLog.d(TAG, "开始扫描");
                         scanner.scan(listener, Environment.getExternalStorageDirectory().getAbsolutePath());

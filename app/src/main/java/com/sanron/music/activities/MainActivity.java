@@ -1,10 +1,6 @@
 package com.sanron.music.activities;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -15,7 +11,6 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
@@ -26,7 +21,6 @@ import android.view.View;
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.sanron.music.R;
 import com.sanron.music.db.model.PlayList;
-import com.sanron.music.fragments.BaseFragment;
 import com.sanron.music.fragments.MyMusic.AlbumFrag;
 import com.sanron.music.fragments.MyMusic.ArtistFrag;
 import com.sanron.music.fragments.MyMusic.ListMusicFrag;
@@ -77,11 +71,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private Map<String, String> titles;
 
 
-    public void collapseSldingPanel(){
+    public void collapseSldingPanel() {
         slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
 
-    public void showSongList(String listid){
+    public void showSongList(String listid) {
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_right,
                         R.anim.slide_out_right,
@@ -93,7 +87,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .commit();
     }
 
-    public void showTagSong(String tag){
+    public void showTagSong(String tag) {
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_right,
                         R.anim.slide_out_right,
@@ -105,7 +99,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .commit();
     }
 
-    public void showAllTag(){
+    public void showAllTag() {
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_right,
                         R.anim.slide_out_right,
@@ -333,16 +327,25 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public boolean onNavigationItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_my_music: {
-                changeToFragment(TAG_MYMUSIC);
-                navigationView.setCheckedItem(item.getItemId());
                 drawerLayout.closeDrawer(GravityCompat.START);
+                //延迟加载,使关闭菜单动画流畅
+                drawerLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        changeToFragment(TAG_MYMUSIC);
+                    }
+                }, 400);
             }
             break;
 
             case R.id.menu_web_music: {
-                changeToFragment(TAG_WEBMUSIC);
-                navigationView.setCheckedItem(item.getItemId());
                 drawerLayout.closeDrawer(GravityCompat.START);
+                drawerLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        changeToFragment(TAG_WEBMUSIC);
+                    }
+                }, 400);
             }
             break;
 

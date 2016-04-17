@@ -23,10 +23,9 @@ import com.sanron.music.R;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.LrcPicResult;
+import com.sanron.music.net.bean.LrcPicData;
 import com.sanron.music.utils.MyLog;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -271,20 +270,20 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
             holder.call = MusicApi.searchLrcPic(music.getTitle(),
                     "<unknown>".equals(artist) ? "" : artist,
                     2,
-                    new ApiCallback<LrcPicResult>() {
+                    new ApiCallback<LrcPicData>() {
                         @Override
-                        public void onSuccess(LrcPicResult data) {
-                            List<LrcPicResult.LrcPic> lrcPics = data.getLrcPics();
+                        public void onSuccess(LrcPicData data) {
+                            List<LrcPicData.LrcPic> lrcPics = data.lrcPics;
                             String avatar = "";
                             if (lrcPics == null) {
                                 avatarUrls.put(music.getId(), avatar);
                                 return;
                             }
 
-                            for (LrcPicResult.LrcPic lrcPic : lrcPics) {
-                                avatar = lrcPic.getAvatar180x180();
+                            for (LrcPicData.LrcPic lrcPic : lrcPics) {
+                                avatar = lrcPic.avatar180x180;
                                 if (avatar == null) {
-                                    avatar = lrcPic.getAvatar500x500();
+                                    avatar = lrcPic.avatar500x500;
                                 }
                                 if (avatar != null) {
                                     break;

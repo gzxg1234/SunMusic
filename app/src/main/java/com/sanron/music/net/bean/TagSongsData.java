@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by sanron on 16-4-12.
  */
-public class TagData {
+public class TagSongsData {
 
     @JSONField(name = "taginfo")
     public Taginfo taginfo;

@@ -25,7 +25,7 @@ import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.Song;
 import com.sanron.music.net.bean.SongList;
 import com.sanron.music.service.IPlayer;
-import com.sanron.music.task.AddOnlineSongListTask;
+import com.sanron.music.task.AddCollectSongListTask;
 import com.sanron.music.utils.T;
 
 import java.util.List;
@@ -109,7 +109,7 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
                 ivPicture.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 int width = ivPicture.getWidth();
                 int normalHeaderHeight = ivPicture.getHeight() + viewOperator.getHeight();
-                pullListView.setMaxHeaderHeight(width + viewOperator.getHeight());
+                pullListView.setmMaxHeaderHeight(width + viewOperator.getHeight());
                 pullListView.setNormalHeaderHeight(normalHeaderHeight);
             }
         });
@@ -174,22 +174,22 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
 
             case R.id.ibtn_favorite: {
                 if (isCollected) {
-                    T.show(getContext(), "已收藏过此歌单");
+                    T.show("已收藏过此歌单");
                 } else {
-                    new AddOnlineSongListTask(data) {
+                    new AddCollectSongListTask(data) {
                         @Override
                         protected void onPostExecute(Integer result) {
                             switch (result) {
 
                                 case SUCCESS: {
-                                    T.show(getContext(), "收藏成功");
+                                    T.show("收藏成功");
                                     isCollected = true;
                                     ibtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
                                 }
                                 break;
 
                                 case FAILED: {
-                                    T.show(getContext(), "收藏歌单失败");
+                                    T.show("收藏歌单失败");
                                 }
                                 break;
                             }

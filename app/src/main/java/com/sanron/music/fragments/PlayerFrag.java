@@ -1,6 +1,5 @@
 package com.sanron.music.fragments;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -9,7 +8,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -30,7 +28,7 @@ import com.sanron.music.activities.MainActivity;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.utils.T;
-import com.sanron.music.view.ShowQueueMusicWindow;
+import com.sanron.music.view.ShowPlayQueueWindow;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -67,7 +65,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
     private ImageButton ibtnPlayPause;
     private ImageButton ibtnForward;
     private ImageButton ibtnPlayQuque;
-    private ShowQueueMusicWindow showQueueMusicWindow;
+    private ShowPlayQueueWindow showPlayQueueWindow;
     private Handler handler = new Handler(Looper.getMainLooper());
 
     /**
@@ -309,12 +307,13 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        updateProgressThread.running();
         updateProgressThread.end();
         player.removePlayStateChangeListener(this);
         player.removeBufferListener(this);
         player.removeOnLoadedPictureListener(this);
-        if (showQueueMusicWindow != null && showQueueMusicWindow.isShowing()) {
-            showQueueMusicWindow.dismiss();
+        if (showPlayQueueWindow != null && showPlayQueueWindow.isShowing()) {
+            showPlayQueueWindow.dismiss();
         }
     }
 
@@ -433,7 +432,7 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
                     if (player.getQueue().size() > 0) {
                         player.play(0);
                     } else {
-                        T.show(getContext(), "播放列表为空");
+                        T.show("播放列表为空");
                     }
                     return;
                 }
@@ -448,14 +447,14 @@ public class PlayerFrag extends BaseFragment implements View.OnClickListener, Vi
             break;
 
             case R.id.ibtn_play_quque: {
-                showQueueMusicWindow = new ShowQueueMusicWindow(getActivity(), player);
-                showQueueMusicWindow.show();
+                showPlayQueueWindow = new ShowPlayQueueWindow(getActivity(), player);
+                showPlayQueueWindow.show();
             }
             break;
 
             case R.id.view_back: {
-                if(getActivity() instanceof MainActivity){
-                    ((MainActivity)getActivity()).collapseSldingPanel();
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).collapseSldingPanel();
                 }
             }
             break;

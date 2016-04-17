@@ -8,15 +8,15 @@ import java.io.File;
 
 public class MusicScanner {
 
-    private Context context;
-    private MediaScannerConnection connection;
-    private MediaScannerConnection.MediaScannerConnectionClient client;
+    private Context mContext;
+    private MediaScannerConnection mScannerConnection;
+    private MediaScannerConnection.MediaScannerConnectionClient mScannerClient;
 
-    private boolean isScanning = false;
+    private boolean mIsScanning = false;
 
-    private TraverseThread traverseThread;
+    private TraverseThread mTraverseThread;
 
-    private final Object lock = new Object();
+    private final Object mLock = new Object();
 
     public static final String TAG = MusicScanner.class.getSimpleName();
 
@@ -44,48 +44,48 @@ public class MusicScanner {
     }
 
     public MusicScanner(Context context) {
-        this.context = context;
+        this.mContext = context;
     }
 
     public boolean isScanning() {
-        return isScanning;
+        return mIsScanning;
     }
 
 
-    public void scan(final OnScanMediaListener listener,String... paths) {
-        if (isScanning) {
+    public void scan(final OnScanMediaListener listener, String... paths) {
+        if (mIsScanning) {
             return;
         }
 
         if (listener == null) {
-            throw new IllegalArgumentException("must set listenr");
+            throw new IllegalArgumentException("listener is null");
         }
 
-        isScanning = true;
-        traverseThread = new TraverseThread(listener,paths);
-        client = new MediaScannerConnection.MediaScannerConnectionClient() {
+        mIsScanning = true;
+        mTraverseThread = new TraverseThread(listener, paths);
+        mScannerClient = new MediaScannerConnection.MediaScannerConnectionClient() {
 
             @Override
             public void onMediaScannerConnected() {
-                traverseThread.start();
+                mTraverseThread.start();
                 listener.onStart();
             }
 
             @Override
             public void onScanCompleted(String path, Uri uri) {
                 listener.onProgress(path, uri);
-                synchronized (lock) {
-                    lock.notify();
+                synchronized (mLock) {
+                    mLock.notify();
                 }
             }
         };
-        connection = new MediaScannerConnection(context, client);
-        connection.connect();
+        mScannerConnection = new MediaScannerConnection(mContext, mScannerClient);
+        mScannerConnection.connect();
     }
 
     public void stopScan() {
-        if (traverseThread != null) {
-            traverseThread.stopRun();
+        if (mTraverseThread != null) {
+            mTraverseThread.stopRun();
         }
     }
 
@@ -94,32 +94,32 @@ public class MusicScanner {
      */
     private class TraverseThread extends Thread {
 
-        private String[] paths;
-        private boolean flagStop = false;
-        private OnScanMediaListener listener;
+        private String[] mPaths;
+        private boolean mFlagStop = false;
+        private OnScanMediaListener mListener;
 
-        public TraverseThread(OnScanMediaListener listener,String... paths) {
-            this.paths = paths;
-            this.listener = listener;
+        public TraverseThread(OnScanMediaListener listener, String... paths) {
+            this.mPaths = paths;
+            this.mListener = listener;
         }
 
         public void stopRun() {
-            flagStop = true;
+            mFlagStop = true;
         }
 
         @Override
         public void run() {
-            traversePaths(paths);
-            connection.disconnect();
-            listener.onCompleted(flagStop);
-            isScanning = false;
-            traverseThread = null;
-            listener = null;
+            traversePaths(mPaths);
+            mScannerConnection.disconnect();
+            mListener.onCompleted(mFlagStop);
+            mIsScanning = false;
+            mTraverseThread = null;
+            mListener = null;
             MyLog.d(TAG, "scan completed");
         }
 
-        public void traversePaths(String[] paths){
-            for(int i=0 ;i<paths.length; i++){
+        public void traversePaths(String[] paths) {
+            for (int i = 0; i < paths.length; i++) {
                 traverse(paths[i]);
             }
         }
@@ -130,7 +130,7 @@ public class MusicScanner {
          * @param path
          */
         private void traverse(String path) {
-            if (flagStop) {
+            if (mFlagStop) {
                 return;
             }
 
@@ -138,7 +138,7 @@ public class MusicScanner {
             if (file.isDirectory()) {
                 File[] childs = file.listFiles();
                 for (File child : childs) {
-                    if (flagStop) {
+                    if (mFlagStop) {
                         return;
                     }
                     traverse(child.getAbsolutePath());
@@ -149,10 +149,10 @@ public class MusicScanner {
                     return;
                 }
                 if (judgeExtension(path)) {
-                    synchronized (lock) {
-                        connection.scanFile(path, "audio/*");
+                    synchronized (mLock) {
+                        mScannerConnection.scanFile(path, "audio/*");
                         try {
-                            lock.wait();
+                            mLock.wait();
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }

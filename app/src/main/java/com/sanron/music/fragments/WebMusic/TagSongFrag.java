@@ -15,7 +15,7 @@ import com.sanron.music.db.model.Music;
 import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.Song;
-import com.sanron.music.net.bean.TagData;
+import com.sanron.music.net.bean.TagSongsData;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.view.DDPullListView;
 
@@ -32,7 +32,7 @@ public class TagSongFrag extends PullFrag implements IPlayer.OnPlayStateChangeLi
     private String tag;
     private TextView tvPlay;
     private ImageButton ibtnDownload;
-    private TagData tagData;
+    private TagSongsData tagSongsData;
     private TextView tvTagName;
     private SongItemAdapter adapter;
     public static final int LOAD_LIMIT = 100;
@@ -83,7 +83,7 @@ public class TagSongFrag extends PullFrag implements IPlayer.OnPlayStateChangeLi
             public void onGlobalLayout() {
                 topBoard.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 int height = topBoard.getHeight();
-                pullListView.setMaxHeaderHeight(height + 200);
+                pullListView.setmMaxHeaderHeight(height + 200);
                 pullListView.setNormalHeaderHeight(height);
             }
         });
@@ -96,9 +96,9 @@ public class TagSongFrag extends PullFrag implements IPlayer.OnPlayStateChangeLi
     }
 
     private void getData() {
-        Call call = MusicApi.tagInfo(tag, LOAD_LIMIT, adapter == null ? 0 : adapter.getCount(), new ApiCallback<TagData>() {
+        Call call = MusicApi.tagInfo(tag, LOAD_LIMIT, adapter == null ? 0 : adapter.getCount(), new ApiCallback<TagSongsData>() {
             @Override
-            public void onSuccess(final TagData data) {
+            public void onSuccess(final TagSongsData data) {
                 setData(data);
                 pullListView.onLoadCompleted();
             }
@@ -117,12 +117,12 @@ public class TagSongFrag extends PullFrag implements IPlayer.OnPlayStateChangeLi
     }
 
 
-    private void setData(TagData tagData) {
-        this.tagData = tagData;
-        if (tagData != null
-                && tagData.taginfo != null) {
-            adapter.addData(tagData.taginfo.songs);
-            if (tagData.taginfo.havemore == 0) {
+    private void setData(TagSongsData tagSongsData) {
+        this.tagSongsData = tagSongsData;
+        if (tagSongsData != null
+                && tagSongsData.taginfo != null) {
+            adapter.addData(tagSongsData.taginfo.songs);
+            if (tagSongsData.taginfo.havemore == 0) {
                 pullListView.setHasMore(false);
             }
         }

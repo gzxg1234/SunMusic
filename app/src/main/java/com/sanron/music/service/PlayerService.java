@@ -34,7 +34,7 @@ import com.sanron.music.R;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.LrcPicResult;
+import com.sanron.music.net.bean.LrcPicData;
 import com.sanron.music.net.bean.SongUrlInfo;
 import com.sanron.music.utils.MyLog;
 import com.sanron.music.utils.T;
@@ -97,7 +97,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
                 case WHAT_BUFFER_TIMEOUT: {
                     player.next();
-                    T.show(getApplicationContext(), "缓冲超时,自动播放下一曲");
+                    T.show("缓冲超时,自动播放下一曲");
                 }
                 break;
             }
@@ -479,7 +479,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         private void handlerPlayError(final String errorMsg) {
             state = STATE_STOP;
-            T.show(PlayerService.this, errorMsg + ",3s后播放下一曲");
+            T.show(errorMsg + ",3s后播放下一曲");
             handler.sendEmptyMessageDelayed(WHAT_PLAY_ERROR, 3000);
         }
 
@@ -720,18 +720,18 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             searchPicCall = MusicApi.searchLrcPic(music.getTitle(),
                     "<unknown>".equals(artist) ? "" : artist,
                     2,
-                    new ApiCallback<LrcPicResult>() {
+                    new ApiCallback<LrcPicData>() {
                         final int requestIndex = currentIndex;
 
                         @Override
-                        public void onSuccess(LrcPicResult data) {
-                            List<LrcPicResult.LrcPic> lrcPics = data.getLrcPics();
+                        public void onSuccess(LrcPicData data) {
+                            List<LrcPicData.LrcPic> lrcPics = data.lrcPics;
                             String pic = null;
                             if (lrcPics != null) {
-                                for (LrcPicResult.LrcPic lrcPic : lrcPics) {
-                                    pic = lrcPic.getPic1000x1000();
+                                for (LrcPicData.LrcPic lrcPic : lrcPics) {
+                                    pic = lrcPic.pic1000x1000;
                                     if (TextUtils.isEmpty(pic)) {
-                                        pic = lrcPic.getPic500x500();
+                                        pic = lrcPic.pic500x500;
                                     }
                                     if (!TextUtils.isEmpty(pic)) {
                                         break;

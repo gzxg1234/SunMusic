@@ -36,7 +36,7 @@ public class DataProvider extends Observable {
     public class Access {
         private String mTableName;
         private List<Cursor> mCursors;
-        private boolean changed;
+        private boolean mHasChanged;
 
         private Access(String table) {
             mTableName = table;
@@ -76,7 +76,7 @@ public class DataProvider extends Observable {
                 }
             }
             if (num != 0) {
-                changed = true;
+                mHasChanged = true;
             }
             return num;
         }
@@ -84,7 +84,7 @@ public class DataProvider extends Observable {
         public long insert(String nullColumnHack, ContentValues values) {
             long id = mDatabase.insert(mTableName, null, values);
             if (id != -1) {
-                changed = true;
+                mHasChanged = true;
             }
             return id;
         }
@@ -92,7 +92,7 @@ public class DataProvider extends Observable {
         public int delete(String where, String... whereArgs) {
             int num = mDatabase.delete(mTableName, where, whereArgs);
             if (num > 0) {
-                changed = true;
+                mHasChanged = true;
             }
             return num;
         }
@@ -100,7 +100,7 @@ public class DataProvider extends Observable {
         public int update(ContentValues contentValues, String where, String... whereArgs) {
             int num = mDatabase.update(mTableName, contentValues, where, whereArgs);
             if (num > 0) {
-                changed = true;
+                mHasChanged = true;
             }
             return num;
         }
@@ -110,7 +110,7 @@ public class DataProvider extends Observable {
                 mCursors.get(i).close();
             }
             synchronized (DataProvider.this) {
-                if (changed) {
+                if (mHasChanged) {
                     setChanged();
                     notifyObservers(mTableName);
                 }

@@ -74,7 +74,12 @@ public abstract class BaseDataFragment extends BaseFragment implements Observer 
         if (observeTables != null && data != null) {
             for (String table : observeTables) {
                 if (table.equals(data)) {
-                    refreshData();
+                    if (isVisible()) {
+                        //可见时刷新
+                        refreshData();
+                    } else {
+                        hasLoadData = false;
+                    }
                     break;
                 }
             }

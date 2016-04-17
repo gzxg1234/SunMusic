@@ -102,10 +102,10 @@ public class CirclePageIndicator extends View implements PageIndicator {
         mPaintFill.setColor(a.getColor(R.styleable.CirclePageIndicator_fillColor, defaultFillColor));
         mRadius = a.getDimension(R.styleable.CirclePageIndicator_radius, defaultRadius);
         mSnap = a.getBoolean(R.styleable.CirclePageIndicator_snap, defaultSnap);
-        mCirclePadding = a.getDimension(R.styleable.CirclePageIndicator_padding,mRadius);
+        mCirclePadding = a.getDimension(R.styleable.CirclePageIndicator_padding, mRadius);
         Drawable background = a.getDrawable(R.styleable.CirclePageIndicator_android_background);
         if (background != null) {
-          setBackgroundDrawable(background);
+            setBackgroundDrawable(background);
         }
 
         a.recycle();
@@ -229,12 +229,15 @@ public class CirclePageIndicator extends View implements PageIndicator {
         }
 
         //修改间隔
-        final float centreOfCirclePadding = mRadius * 2 + mCirclePadding +mPaintStroke.getStrokeWidth() * 2;
+        final float centreOfCirclePadding = mRadius * 2 + mCirclePadding + mPaintStroke.getStrokeWidth() * 2;
 
         final float shortOffset = shortPaddingBefore + mRadius;
         float longOffset = longPaddingBefore + mRadius;
         if (mCentered) {
-            longOffset += ((longSize - longPaddingBefore - longPaddingAfter) / 2.0f) - ((count * centreOfCirclePadding) / 2.0f);
+            //算出画出的圆点从第一个到最后一个的总长度
+            float length = (mRadius * 2 + mPaintStroke.getStrokeWidth() * 2) * count + (count - 1) * mCirclePadding;
+            longOffset += ((longSize - longPaddingBefore - longPaddingAfter) / 2.0f)
+                    - length / 2.0f;
         }
 
         float dX;
@@ -256,7 +259,7 @@ public class CirclePageIndicator extends View implements PageIndicator {
             }
 
             // Only paint stroke if a stroke width was non-zero
-            if(mPaintStroke.getStrokeWidth() > 0) {
+            if (mPaintStroke.getStrokeWidth() > 0) {
                 canvas.drawCircle(dX, dY, mRadius + mPaintStroke.getStrokeWidth() / 2.0f, mPaintStroke);
             }
         }
@@ -451,8 +454,7 @@ public class CirclePageIndicator extends View implements PageIndicator {
     /**
      * Determines the width of this view
      *
-     * @param measureSpec
-     *            A measureSpec packed into an int
+     * @param measureSpec A measureSpec packed into an int
      * @return The width of the view, honoring constraints from measureSpec
      */
     private int measureLong(int measureSpec) {
@@ -466,7 +468,7 @@ public class CirclePageIndicator extends View implements PageIndicator {
         } else {
             //Calculate the width according the views count
             final int count = mViewPager.getAdapter().getCount();
-            result = (int)(getPaddingLeft() + getPaddingRight()
+            result = (int) (getPaddingLeft() + getPaddingRight()
                     + (count * 2 * mRadius) + (count - 1) * mRadius + 1);
             //Respect AT_MOST value if that was what is called for by measureSpec
             if (specMode == MeasureSpec.AT_MOST) {
@@ -479,8 +481,7 @@ public class CirclePageIndicator extends View implements PageIndicator {
     /**
      * Determines the height of this view
      *
-     * @param measureSpec
-     *            A measureSpec packed into an int
+     * @param measureSpec A measureSpec packed into an int
      * @return The height of the view, honoring constraints from measureSpec
      */
     private int measureShort(int measureSpec) {
@@ -493,7 +494,7 @@ public class CirclePageIndicator extends View implements PageIndicator {
             result = specSize;
         } else {
             //Measure the height
-            result = (int)(2 * mRadius + getPaddingTop() + getPaddingBottom() + 1);
+            result = (int) (2 * mRadius + getPaddingTop() + getPaddingBottom() + 1);
             //Respect AT_MOST value if that was what is called for by measureSpec
             if (specMode == MeasureSpec.AT_MOST) {
                 result = Math.min(result, specSize);
@@ -504,7 +505,7 @@ public class CirclePageIndicator extends View implements PageIndicator {
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        SavedState savedState = (SavedState)state;
+        SavedState savedState = (SavedState) state;
         super.onRestoreInstanceState(savedState.getSuperState());
         mCurrentPage = savedState.currentPage;
         mSnapPage = savedState.currentPage;

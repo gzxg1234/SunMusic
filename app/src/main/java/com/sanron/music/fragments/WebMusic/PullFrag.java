@@ -26,7 +26,7 @@ public abstract class PullFrag extends BaseSlideWebFrag implements SlideBackLayo
     private DDPullListView.OnPullDownListener pullListener = new DDPullListView.OnPullDownListener() {
         @Override
         public void onPullDown(int pullOffset) {
-            int headerHeight = pullListView.getPullHeader().getHeight() + pullOffset;
+            int headerHeight = pullListView.getmPullHeader().getHeight() + pullOffset;
             updateBoardHeight(topBoard.getHeight() + pullOffset);
             ViewHelper.setTranslationY(viewInfo,
                     -viewInfo.getHeight() + headerHeight - viewOperator.getHeight());
@@ -50,11 +50,11 @@ public abstract class PullFrag extends BaseSlideWebFrag implements SlideBackLayo
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             if (visibleItemCount > 0
                     &&
-                    pullListView.getPullHeader().getHeight() == pullListView.getNormalHeaderHeight()) {
+                    pullListView.getmPullHeader().getHeight() == pullListView.getNormalHeaderHeight()) {
                 int scrollY;
-                int topbarHeight = topBar.getHeight();
+                int topBarHeight = topBar.getHeight();
                 int normalHeaderHeight = pullListView.getNormalHeaderHeight();
-                final int maxScrollY = normalHeaderHeight - topbarHeight - viewOperator.getHeight();
+                final int maxScrollY = normalHeaderHeight - topBarHeight - viewOperator.getHeight();
                 if (firstVisibleItem == 0) {
                     View header = pullListView.getChildAt(0);
                     scrollY = header.getHeight() - header.getBottom();

@@ -8,49 +8,49 @@ import java.util.Stack;
  * Created by Administrator on 2016/3/15.
  */
 public class AppManager {
-    private Stack<Activity> activities;
-    private static AppManager instance;
+    private Stack<Activity> mActivities;
+    private static AppManager mInstance;
 
     public static AppManager instance(){
-        if(instance == null){
+        if(mInstance == null){
             synchronized (AppManager.class){
-                if(instance == null){
-                    instance = new AppManager();
+                if(mInstance == null){
+                    mInstance = new AppManager();
                 }
             }
         }
-        return instance;
+        return mInstance;
     }
 
     private AppManager(){
-        activities = new Stack<>();
+        mActivities = new Stack<>();
     }
 
     public void addActivity(Activity activity){
-        activities.add(activity);
+        mActivities.add(activity);
     }
 
     public void removeActivity(Activity activity){
-        activities.remove(activity);
+        mActivities.remove(activity);
     }
 
     public void finishActivity(Activity activity){
-        activities.remove(activity);
+        mActivities.remove(activity);
         activity.finish();
     }
 
     public Activity currentActivity(){
-        if(activities.size() > 0){
-            return activities.peek();
+        if(mActivities.size() > 0){
+            return mActivities.peek();
         }
         return null;
     }
 
     public void finishAllActivity(){
-        for(Activity activity:activities){
+        for(Activity activity: mActivities){
             activity.finish();
         }
-        activities.clear();
+        mActivities.clear();
     }
 
 }

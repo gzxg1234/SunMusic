@@ -1,14 +1,17 @@
 package com.sanron.music.net;
 
+import android.text.TextUtils;
+
 import com.sanron.music.net.bean.AllTag;
 import com.sanron.music.net.bean.FocusPicData;
 import com.sanron.music.net.bean.HotSongListData;
 import com.sanron.music.net.bean.HotTagData;
-import com.sanron.music.net.bean.LrcPicResult;
+import com.sanron.music.net.bean.LrcPicData;
 import com.sanron.music.net.bean.RecmdSongData;
+import com.sanron.music.net.bean.SingerList;
 import com.sanron.music.net.bean.SongList;
 import com.sanron.music.net.bean.SongUrlInfo;
-import com.sanron.music.net.bean.TagData;
+import com.sanron.music.net.bean.TagSongsData;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -97,7 +100,7 @@ public class MusicApi {
      * @param offset      偏移量
      * @param apiCallback
      */
-    public static Call tagInfo(String tagName, int limit, int offset, ApiCallback<TagData> apiCallback) {
+    public static Call tagInfo(String tagName, int limit, int offset, ApiCallback<TagSongsData> apiCallback) {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.tag.songlist");
         params.put("tagname", tagName);
@@ -147,7 +150,7 @@ public class MusicApi {
      * @param callback
      * @return
      */
-    public static Call searchLrcPic(String word, String artist, int type, final ApiCallback<LrcPicResult> callback) {
+    public static Call searchLrcPic(String word, String artist, int type, final ApiCallback<LrcPicData> callback) {
         HashMap<String, Object> params = new HashMap<>();
         //正确的姿势应该是要当前时间的,为了缓存，设置固定的值,不过没有什么影响，貌似只是为了加密检验
 //        long currentTimeMillis = System.currentTimeMillis();
@@ -159,8 +162,45 @@ public class MusicApi {
         params.put("ts", ts);
         params.put("type", type);
         params.put("e", e);
-        return ApiHttpClient.get(url(params), 10,
+        return ApiHttpClient.get(url(params), 600,
                 isNetAvailable ? 0 : Integer.MAX_VALUE, callback);
+    }
+
+    /**
+     * 获取歌手列表
+     *
+     * @param offset 偏移
+     * @param limit  数量
+     * @param area   地区：0不分,6华语,3欧美,7韩国,60日本,5其他
+     * @param sex    性别：0不分,1男,2女,3组合
+     * @param order  排序：1按热门，2按艺术家id(atrist_id)
+     * @param abc    艺术家名首字母：a-z,other其他
+     * @return
+     */
+    public static Call singerList(int offset, int limit, int area, int sex,
+                                  int order, String abc, ApiCallback<SingerList> callback) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("method", "baidu.ting.artist.getList");
+        params.put("offset", offset);
+        params.put("limit", limit);
+        params.put("area", area);
+        params.put("sex", sex);
+        params.put("order", order);
+        if (!TextUtils.isEmpty(abc)) {
+            params.put("abc", abc);
+        }
+        return ApiHttpClient.get(url(params), 21600, callback);
+    }
+
+    /**
+     * 热门艺术家
+     *
+     * @param offset 偏移量
+     * @param limit  获取数量
+     * @return
+     */
+    public static Call hotSinger(int offset, int limit, ApiCallback<SingerList> callback) {
+        return singerList(offset, limit, 0, 0, 1, null, callback);
     }
 
     private static String url(HashMap<String, Object> params) {

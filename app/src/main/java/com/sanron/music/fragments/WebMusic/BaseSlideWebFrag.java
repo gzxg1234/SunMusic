@@ -60,27 +60,33 @@ public abstract class BaseSlideWebFrag extends BaseWebFrag implements SlideBackL
     @Override
     public Animation onCreateAnimation(int transit, boolean enter, int nextAnim) {
         if (enter) {
+            Animation enterAnim = null;
             try {
-                Animation enterAnim = AnimationUtils.loadAnimation(getContext(), nextAnim);
+                enterAnim = AnimationUtils.loadAnimation(getContext(), nextAnim);
+            } catch (Resources.NotFoundException e) {
+            }
+            if (enterAnim == null) {
+                onEnterAnimationEnd();
+            } else {
                 enterAnim.setAnimationListener(new Animation.AnimationListener() {
                     @Override
                     public void onAnimationStart(Animation animation) {
+
                     }
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
+                        //动画完成再加载数据,使动画流畅
                         onEnterAnimationEnd();
                     }
 
                     @Override
                     public void onAnimationRepeat(Animation animation) {
+
                     }
                 });
-                return enterAnim;
-            } catch (Resources.NotFoundException e) {
-                onEnterAnimationEnd();
             }
-
+            return enterAnim;
         }
         return super.onCreateAnimation(transit, enter, nextAnim);
     }

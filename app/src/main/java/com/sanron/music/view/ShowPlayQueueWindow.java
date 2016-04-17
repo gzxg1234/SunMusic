@@ -2,7 +2,6 @@ package com.sanron.music.view;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,25 +24,25 @@ import java.util.List;
 /**
  * 播放队列窗口
  */
-public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.OnPlayStateChangeListener, View.OnClickListener {
+public class ShowPlayQueueWindow extends PopupWindow implements IPlayer.OnPlayStateChangeListener, View.OnClickListener {
 
     private Activity mActivity;
     private float mOldAlpha;
-    private IPlayer player;
-    private List<Music> queue;
+    private IPlayer mPlayer;
+    private List<Music> mQueue;
 
     private View mContentView;
-    private TextView tvTitle;
-    private ImageButton ibtnRemoveAll;
-    private RecyclerView lvQueue;
-    private QueueItemAdapter adapter;
+    private TextView mTvTitle;
+    private ImageButton mIbtnRemoveAll;
+    private RecyclerView mLvQueue;
+    private QueueItemAdapter mAdapter;
 
-    public ShowQueueMusicWindow(final Activity activity, final IPlayer player) {
+    public ShowPlayQueueWindow(final Activity activity, final IPlayer player) {
         super(activity);
-        this.player = player;
+        this.mPlayer = player;
         this.mActivity = activity;
         this.mContentView = LayoutInflater.from(activity).inflate(R.layout.window_queue_music, null);
-        this.queue = player.getQueue();
+        this.mQueue = player.getQueue();
         player.addPlayStateChangeListener(this);
         int screenHeight = activity.getResources().getDisplayMetrics().heightPixels;
         setFocusable(true);
@@ -54,23 +53,23 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.OnPlayS
         setAnimationStyle(R.style.MyWindowAnim);
         setContentView(mContentView);
 
-        tvTitle = (TextView) mContentView.findViewById(R.id.tv_title);
-        ibtnRemoveAll = (ImageButton) mContentView.findViewById(R.id.ibtn_remove_all);
-        lvQueue = (RecyclerView) mContentView.findViewById(R.id.lv_queue_music);
+        mTvTitle = (TextView) mContentView.findViewById(R.id.tv_title);
+        mIbtnRemoveAll = (ImageButton) mContentView.findViewById(R.id.ibtn_remove_all);
+        mLvQueue = (RecyclerView) mContentView.findViewById(R.id.lv_queue_music);
 
-        tvTitle.setText("播放队列(" + queue.size() + ")");
+        mTvTitle.setText("播放队列(" + mQueue.size() + ")");
 
-        adapter = new QueueItemAdapter();
-        lvQueue.setLayoutManager(new LinearLayoutManager(mActivity));
-        lvQueue.setAdapter(adapter);
-        lvQueue.post(new Runnable() {
+        mAdapter = new QueueItemAdapter();
+        mLvQueue.setLayoutManager(new LinearLayoutManager(mActivity));
+        mLvQueue.setAdapter(mAdapter);
+        mLvQueue.post(new Runnable() {
             @Override
             public void run() {
-                lvQueue.scrollToPosition(player.getCurrentIndex());
+                mLvQueue.scrollToPosition(player.getCurrentIndex());
             }
         });
 
-        ibtnRemoveAll.setOnClickListener(this);
+        mIbtnRemoveAll.setOnClickListener(this);
     }
 
     public void show() {
@@ -113,15 +112,15 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.OnPlayS
     public void dismiss() {
         animateDismiss();
         super.dismiss();
-        player.removePlayStateChangeListener(this);
+        mPlayer.removePlayStateChangeListener(this);
     }
 
 
     @Override
     public void onPlayStateChange(int state) {
         if (state == IPlayer.STATE_PREPARING) {
-            adapter.notifyDataSetChanged();
-            lvQueue.scrollToPosition(player.getCurrentIndex());
+            mAdapter.notifyDataSetChanged();
+            mLvQueue.scrollToPosition(mPlayer.getCurrentIndex());
         }
     }
 
@@ -131,10 +130,10 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.OnPlayS
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.ibtn_remove_all: {
-                player.clearQueue();
-                queue.clear();
-                tvTitle.setText("播放队列(0)");
-                adapter.notifyDataSetChanged();
+                mPlayer.clearQueue();
+                mQueue.clear();
+                mTvTitle.setText("播放队列(0)");
+                mAdapter.notifyDataSetChanged();
             }
             break;
         }
@@ -155,14 +154,14 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.OnPlayS
         }
 
         public Music getItem(int position) {
-            return queue.get(position);
+            return mQueue.get(position);
         }
 
         @Override
         public void onBindViewHolder(QueueItemHolder holder, final int position) {
             Music music = getItem(position);
 
-            if (position == player.getCurrentIndex()) {
+            if (position == mPlayer.getCurrentIndex()) {
                 holder.tvArtist.setTextColor(PLAY_TEXT_COLOR);
                 holder.tvTitle.setTextColor(PLAY_TEXT_COLOR);
                 holder.sign.setVisibility(View.VISIBLE);
@@ -179,9 +178,9 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.OnPlayS
             holder.ibtnRemove.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    player.dequeue(position);
-                    queue.remove(position);
-                    tvTitle.setText("播放队列(" + queue.size() + ")");
+                    mPlayer.dequeue(position);
+                    mQueue.remove(position);
+                    mTvTitle.setText("播放队列(" + mQueue.size() + ")");
                     notifyDataSetChanged();
                 }
             });
@@ -189,7 +188,7 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.OnPlayS
 
         @Override
         public int getItemCount() {
-            return queue == null ? 0 : queue.size();
+            return mQueue == null ? 0 : mQueue.size();
         }
 
         class QueueItemHolder extends RecyclerView.ViewHolder {
@@ -208,11 +207,11 @@ public class ShowQueueMusicWindow extends PopupWindow implements IPlayer.OnPlayS
                     @Override
                     public void onClick(View v) {
                         int adapterPos = getAdapterPosition();
-                        if (player.getCurrentIndex() == adapterPos) {
-                            player.togglePlayPause();
+                        if (mPlayer.getCurrentIndex() == adapterPos) {
+                            mPlayer.togglePlayPause();
                             return;
                         }
-                        player.play(adapterPos);
+                        mPlayer.play(adapterPos);
                     }
                 });
             }

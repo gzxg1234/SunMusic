@@ -14,17 +14,18 @@ import com.sanron.music.net.bean.SongList;
 import java.util.List;
 
 /**
+ * 添加收藏歌单
  * Created by sanron on 16-4-8.
  */
-public class AddOnlineSongListTask extends AsyncTask<Void, Void, Integer> {
+public class AddCollectSongListTask extends AsyncTask<Void, Void, Integer> {
 
     public static final int FAILED = 0;
     public static final int SUCCESS = 1;
 
-    private SongList songList;
+    private SongList mSongList;
 
-    public AddOnlineSongListTask(SongList songList) {
-        this.songList = songList;
+    public AddCollectSongListTask(SongList songList) {
+        this.mSongList = songList;
     }
 
     @Override
@@ -37,12 +38,12 @@ public class AddOnlineSongListTask extends AsyncTask<Void, Void, Integer> {
 
         try {
             PlayList playList = new PlayList();
-            playList.setIcon(songList.pic300);
-            playList.setTitle(songList.title);
-            playList.setListId(songList.listId);
+            playList.setIcon(mSongList.pic300);
+            playList.setTitle(mSongList.title);
+            playList.setListId(mSongList.listId);
             playList.setType(DBHelper.List.TYPE_COLLECTION);
             playList.setAddTime(System.currentTimeMillis());
-            List<Song> songs = songList.songs;
+            List<Song> songs = mSongList.songs;
 
             //插入歌单信息
             long listid = listAccess.insert(null, playList.toContentValues());

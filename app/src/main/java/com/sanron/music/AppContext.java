@@ -19,6 +19,8 @@ import com.sanron.music.service.IPlayer;
 import com.sanron.music.service.PlayerService;
 import com.sanron.music.utils.MyLog;
 import com.sanron.music.utils.NetTool;
+import com.sanron.music.utils.T;
+import com.squareup.leakcanary.LeakCanary;
 
 /**
  * Created by Administrator on 2015/12/25.
@@ -48,6 +50,8 @@ public class AppContext extends Application {
     public void onCreate() {
         super.onCreate();
         MyLog.i(TAG, "app create");
+        LeakCanary.install(this);
+        T.init(this);
         registerReceiver(netChangeReceiver,
                 new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
         DataProvider.instance().init(this);

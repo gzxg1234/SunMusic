@@ -3,9 +3,9 @@ package com.sanron.music.fragments.WebMusic;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -25,6 +24,8 @@ import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.AllTag;
 import com.sanron.music.net.bean.HotTagData;
 import com.sanron.music.net.bean.Tag;
+import com.sanron.music.view.NoScrollGridView;
+import com.sanron.music.view.RatioLayout;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -37,11 +38,10 @@ import okhttp3.Call;
  */
 public class AllTagFrag extends BaseSlideWebFrag {
 
-    private List<TextView> tvHotTags;
-    private ListView lvTag;
-    private CategoryTagAdapter adapter;
-    private Handler handler = new Handler();
+    private ListView lvTags;
+    private CategoryAdapter adapter;
     private AllTag data;
+    private HotTagData hotTagData;
 
     public static final int EVENT_CLICK_TAG = 1;
 
@@ -61,23 +61,11 @@ public class AllTagFrag extends BaseSlideWebFrag {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        LinearLayout hotTagGroup1 = $(R.id.hot_tag_group1);
-        LinearLayout hotTagGroup2 = $(R.id.hot_tag_group2);
-        lvTag = $(R.id.lv_tag);
-
+        lvTags = $(R.id.lv_tags);
         setTitle("歌曲分类");
         topBar.setBackgroundColor(Color.BLACK);
-        adapter = new CategoryTagAdapter();
-        lvTag.setAdapter(adapter);
-
-        tvHotTags = new LinkedList<>();
-        for (int i = 0; i < hotTagGroup1.getChildCount(); i++) {
-            tvHotTags.add((TextView) hotTagGroup1.getChildAt(i));
-        }
-        for (int i = 0; i < hotTagGroup2.getChildCount(); i++) {
-            tvHotTags.add((TextView) hotTagGroup2.getChildAt(i));
-        }
-
+        adapter = new CategoryAdapter();
+        lvTags.setAdapter(adapter);
     }
 
     @Override
@@ -85,12 +73,7 @@ public class AllTagFrag extends BaseSlideWebFrag {
         Call call1 = MusicApi.allTag(new ApiCallback<AllTag>() {
             @Override
             public void onSuccess(final AllTag data) {
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        setData(data);
-                    }
-                }, 500);
+                setData(data);
             }
 
             @Override
@@ -102,12 +85,7 @@ public class AllTagFrag extends BaseSlideWebFrag {
         Call call2 = MusicApi.hotTag(8, new ApiCallback<HotTagData>() {
             @Override
             public void onSuccess(final HotTagData data) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setUpHotTag(data);
-                    }
-                });
+                setUpHotTag(data);
             }
 
             @Override
@@ -119,22 +97,8 @@ public class AllTagFrag extends BaseSlideWebFrag {
     }
 
     private void setUpHotTag(final HotTagData data) {
-        if (data != null
-                && data.tags != null) {
-            for (int i = 0; i < tvHotTags.size() && i < data.tags.size(); i++) {
-                final String tag = data.tags.get(i).title;
-                TextView tvHotTag = tvHotTags.get(i);
-                tvHotTag.setText(tag);
-                tvHotTag.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (getActivity() instanceof MainActivity) {
-                            ((MainActivity) getActivity()).showTagSong(tag);
-                        }
-                    }
-                });
-            }
-        }
+        this.hotTagData = data;
+        adapter.setHotTagData(data);
     }
 
     private void setData(AllTag data) {
@@ -145,33 +109,38 @@ public class AllTagFrag extends BaseSlideWebFrag {
                 for (Map.Entry<String, List<Tag>> entry : data.tagList.entrySet()) {
                     items.add(entry);
                 }
-                adapter.setData(items);
+                adapter.setCategories(items);
             }
         }
         hideLoadingView();
     }
 
+    public class CategoryAdapter extends BaseAdapter {
 
-    public class CategoryTagAdapter extends BaseAdapter {
+        private HotTagData mHotTagData;
+        private List<Map.Entry<String, List<Tag>>> mCategories;
 
-        private List<Map.Entry<String, List<Tag>>> data;
+        public static final int HOT_TAG_HEADER = 0;
+        public static final int CATEGORY_ITEM = 1;
 
-        public void setData(List<Map.Entry<String, List<Tag>>> data) {
-            if (this.data == data) {
-                return;
-            }
-            this.data = data;
+        public void setCategories(List<Map.Entry<String, List<Tag>>> data) {
+            this.mCategories = data;
+            notifyDataSetChanged();
+        }
+
+        public void setHotTagData(HotTagData mHotTagData) {
+            this.mHotTagData = mHotTagData;
             notifyDataSetChanged();
         }
 
         @Override
         public int getCount() {
-            return data == null ? 0 : data.size();
+            return 1 + (mCategories == null ? 0 : +mCategories.size());
         }
 
         @Override
         public Object getItem(int position) {
-            return data.get(position);
+            return null;
         }
 
         @Override
@@ -179,30 +148,134 @@ public class AllTagFrag extends BaseSlideWebFrag {
             return position;
         }
 
-
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            Map.Entry<String, List<Tag>> entry = (Map.Entry<String, List<Tag>>) getItem(position);
-            String category = entry.getKey();
-            List<Tag> tags = entry.getValue();
-            if (convertView == null) {
-                convertView = LayoutInflater.from(getContext())
-                        .inflate(R.layout.list_tag_category_item, parent, false);
+            if (getItemViewType(position) == CATEGORY_ITEM) {
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_tag_category_item, parent, false);
+                }
+                TextView tvCategory = (TextView) convertView.findViewById(R.id.tv_category);
+                GridView gvTags = (GridView) convertView.findViewById(R.id.gv_tags);
+                String category = mCategories.get(position - 1).getKey();
+                List<Tag> tags = mCategories.get(position - 1).getValue();
+                tvCategory.setText(category);
+                gvTags.setAdapter(new TagAdapter(tags));
+            } else {
+                if (convertView == null) {
+                    convertView = createHotTagHeaderView();
+                }
+                GridView gv = (GridView) convertView;
+                HotTagAdapter hotTagAdapter =
+                        (HotTagAdapter) gv.getAdapter();
+                if (hotTagAdapter != null
+                        && mHotTagData != null) {
+                    hotTagAdapter.setData(mHotTagData.tags);
+                }
             }
-            TextView tvCategory = (TextView) convertView.findViewById(R.id.tv_category);
-            GridView gvTags = (GridView) convertView.findViewById(R.id.grid_view);
-            tvCategory.setText(category);
-            gvTags.setAdapter(new TagItemAdapter(tags));
             return convertView;
         }
 
+        private GridView createHotTagHeaderView() {
+            final int spacing = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
+            NoScrollGridView gv = new NoScrollGridView(getContext());
+            gv.setNumColumns(4);
+            gv.setHorizontalSpacing(spacing);
+            gv.setVerticalSpacing(spacing);
+            gv.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            gv.setAdapter(new HotTagAdapter());
+            return gv;
+        }
+
+
+        @Override
+        public int getViewTypeCount() {
+            return 2;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (position == 0) {
+                return HOT_TAG_HEADER;
+            } else {
+                return CATEGORY_ITEM;
+            }
+        }
     }
 
-    private class TagItemAdapter extends BaseAdapter {
+    private class HotTagAdapter extends BaseAdapter {
+        private List<Tag> tags;
+        public final int[] ICONS = new int[]{
+                R.mipmap.ic_classify_img01,
+                R.mipmap.ic_classify_img02,
+                R.mipmap.ic_classify_img03,
+                R.mipmap.ic_classify_img04,
+                R.mipmap.ic_classify_img05,
+                R.mipmap.ic_classify_img06,
+                R.mipmap.ic_classify_img07,
+                R.mipmap.ic_classify_img08,
+        };
+
+        @Override
+        public int getCount() {
+            return 8;
+        }
+
+        public void setData(List<Tag> data) {
+            this.tags = data;
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return tags.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            TextView tvTag = null;
+            if (convertView == null) {
+                RatioLayout ratioLayout = new RatioLayout(getContext(), null);
+                ratioLayout.setType(RatioLayout.TYPE_HEIGHT);
+                ratioLayout.setRatio(1f);
+                ratioLayout.setBackgroundResource(ICONS[position]);
+
+                tvTag = new TextView(getContext());
+                tvTag.setTextColor(Color.WHITE);
+                tvTag.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
+                tvTag.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                tvTag.setGravity(Gravity.CENTER);
+                ratioLayout.addView(tvTag);
+                convertView = ratioLayout;
+            } else {
+                tvTag = (TextView) ((ViewGroup) convertView).getChildAt(0);
+            }
+            if (tags != null
+                    && position < tags.size()) {
+                String tag = tags.get(position).title;
+                tvTag.setText(tag);
+            }
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).showTagSong(tags.get(position).title);
+                    }
+                }
+            });
+            return convertView;
+        }
+    }
+
+    private class TagAdapter extends BaseAdapter {
 
         private List<Tag> tags;
 
-        public TagItemAdapter(List<Tag> tags) {
+        public TagAdapter(List<Tag> tags) {
             this.tags = tags;
         }
 
@@ -221,23 +294,26 @@ public class AllTagFrag extends BaseSlideWebFrag {
             return position;
         }
 
+        private View createView() {
+            TextView tvTag = new TextView(getContext());
+            AbsListView.LayoutParams lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            tvTag.setGravity(Gravity.CENTER);
+            tvTag.setPadding(10, 10, 10, 10);
+            tvTag.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
+            tvTag.setTextColor(getResources().getColor(R.color.textColorSecondary));
+            tvTag.setLayoutParams(lp);
+            tvTag.setBackgroundResource(R.drawable.tv_tag_bg);
+            ColorStateList csl = getResources().getColorStateList(R.drawable.tv_tag_bg);
+            tvTag.setTextColor(csl);
+            return tvTag;
+        }
+
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            final TextView tvTag;
             if (convertView == null) {
-                tvTag = new TextView(getContext());
-                AbsListView.LayoutParams lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                tvTag.setGravity(Gravity.CENTER);
-                tvTag.setPadding(10, 10, 10, 10);
-                tvTag.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
-                tvTag.setTextColor(getResources().getColor(R.color.textColorSecondary));
-                tvTag.setLayoutParams(lp);
-                tvTag.setBackgroundResource(R.drawable.tv_tag_bg);
-                ColorStateList csl = getResources().getColorStateList(R.drawable.tv_tag_bg);
-                tvTag.setTextColor(csl);
-            } else {
-                tvTag = (TextView) convertView;
+                convertView = createView();
             }
+            TextView tvTag = (TextView) convertView;
             tvTag.setText(tags.get(position).title);
             tvTag.setOnClickListener(new View.OnClickListener() {
                 @Override

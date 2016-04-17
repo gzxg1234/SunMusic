@@ -1,8 +1,9 @@
 package com.sanron.music.fragments.MyMusic;
 
-import android.content.BroadcastReceiver;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -28,11 +29,11 @@ import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.model.Music;
 import com.sanron.music.db.model.PlayList;
 import com.sanron.music.service.IPlayer;
-import com.sanron.music.task.QueryListMemberDatasTask;
+import com.sanron.music.task.DeleteTask;
+import com.sanron.music.task.QueryListMemberDataTask;
 import com.sanron.music.task.QueryTask;
 import com.sanron.music.utils.T;
 import com.sanron.music.view.AddSongToListWindow;
-import com.sanron.music.view.RemoveListSongDialogBuilder;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -185,7 +186,7 @@ public class ListMusicFrag extends BaseDataFragment implements Observer, Compoun
 
     @Override
     public void refreshData() {
-        new QueryListMemberDatasTask(playList.getId()) {
+        new QueryListMemberDataTask(playList.getId()) {
             @Override
             protected void onPostExecute(List<Music> musics) {
                 adapter.setData(musics);
@@ -235,7 +236,7 @@ public class ListMusicFrag extends BaseDataFragment implements Observer, Compoun
 
                     case R.id.menu_add_to_quque: {
                         player.enqueue(musics);
-                        T.show(getContext(), musics.size() + "首歌曲加入队列");
+                        T.show(musics.size() + "首歌曲加入队列");
                     }
                     break;
 
@@ -284,7 +285,7 @@ public class ListMusicFrag extends BaseDataFragment implements Observer, Compoun
                 List<Music> checkedMusics = getCheckedMusics();
                 player.enqueue(checkedMusics);
                 endMultiMode();
-                T.show(getContext(), checkedMusics.size() + "首歌曲加入队列");
+                T.show(checkedMusics.size() + "首歌曲加入队列");
             }
         });
 
@@ -375,6 +376,79 @@ public class ListMusicFrag extends BaseDataFragment implements Observer, Compoun
                 }
             }
             break;
+        }
+    }
+
+
+    /**
+     * 移除歌曲对话框
+     */
+    public class RemoveListSongDialogBuilder extends AlertDialog.Builder implements DialogInterface.OnClickListener, DeleteTask.DeleteCallback {
+        private PlayList mPlayList;
+        private List<Music> mRemoveMusics;
+        private ProgressDialog mProgressDialog;
+
+        public RemoveListSongDialogBuilder(Context context, final PlayList playList, List<Music> removeSongs) {
+            super(context);
+            this.mPlayList = playList;
+            this.mRemoveMusics = removeSongs;
+            this.mProgressDialog = new ProgressDialog(context);
+
+            setTitle(playList.getTitle());
+            if (mRemoveMusics.size() == 1) {
+                setMessage("移除歌曲 \"" + mRemoveMusics.get(0).getTitle() + "\"?");
+            } else {
+                setMessage("移除" + mRemoveMusics.size() + "首歌曲?");
+            }
+            setPositiveButton("确定", this);
+            setNegativeButton("取消", this);
+        }
+
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which) {
+                case DialogInterface.BUTTON_NEGATIVE: {
+                    dialog.cancel();
+                }
+                break;
+
+                case DialogInterface.BUTTON_POSITIVE: {
+                    String in = createIn();
+                    new DeleteTask()
+                            .table(DBHelper.ListMember.TABLE)
+                            .where(DBHelper.ListMember.LIST_ID + "=" + mPlayList.getId()
+                                    + " and " + DBHelper.ListMember.MUSIC_ID + " in(" + in + ")")
+                            .execute(this);
+                }
+                break;
+            }
+        }
+
+        private String createIn() {
+            StringBuilder in = new StringBuilder();
+            for (Music music : mRemoveMusics) {
+                in.append(music.getId()).append(",");
+            }
+            if (in.length() > 0) {
+                in.deleteCharAt(in.length() - 1);
+            }
+            return in.toString();
+        }
+
+        @Override
+        public void onPreDelete() {
+            mProgressDialog.show();
+        }
+
+        @Override
+        public void onDeleteFinish(int deleteCount) {
+            if (deleteCount > 0) {
+                T.show("移除" + deleteCount + "首歌曲");
+            } else {
+                T.show("移除失败");
+            }
+            mProgressDialog.dismiss();
         }
     }
 }

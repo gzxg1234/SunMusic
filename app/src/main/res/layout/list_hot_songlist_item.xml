@@ -1,0 +1,49 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="4dp"
+    android:clipToPadding="false"
+    android:clipChildren="false">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="2dp"
+        app:cardElevation="2dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <com.sanron.music.view.RatioLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:ratio="1"
+                app:type="height">
+
+                <ImageView
+                    android:id="@+id/iv_songlist_pic"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@mipmap/default_artist_album_pic" />
+            </com.sanron.music.view.RatioLayout>
+
+            <TextView
+                android:id="@+id/tv_songlist_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="2"
+                android:padding="4dp"
+                android:textColor="@color/textColorPrimary"
+                android:textSize="12dp"
+                tools:text="Love Yourself" />
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+</FrameLayout>

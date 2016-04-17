@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <!--热门歌单-->
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/recmd_title_draw_left"
+        android:drawablePadding="4dp"
+        android:singleLine="true"
+        android:text="热门歌手"
+        android:textSize="16dp" />
+
+    <com.sanron.music.view.WrapContentPager
+        android:id="@+id/pager_hot_singer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/label"
+        android:layout_marginTop="8dp" />
+
+    <com.viewpagerindicator.CirclePageIndicator
+        android:id="@+id/page_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/pager_hot_singer"
+        android:layout_marginTop="8dp"
+        app:centered="true"
+        app:fillColor="@color/colorAccent"
+        app:padding="8dp"
+        app:pageColor="#22000000"
+        app:radius="2dp"
+        app:strokeWidth="0dp" />
+</RelativeLayout>

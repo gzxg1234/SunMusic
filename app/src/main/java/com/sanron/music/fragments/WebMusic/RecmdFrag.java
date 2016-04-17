@@ -1,17 +1,20 @@
 package com.sanron.music.fragments.WebMusic;
 
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.text.TextUtils;
+import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -20,6 +23,7 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.sanron.music.R;
 import com.sanron.music.activities.MainActivity;
+import com.sanron.music.db.model.Music;
 import com.sanron.music.net.ApiCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.FocusPic;
@@ -28,10 +32,10 @@ import com.sanron.music.net.bean.HotSongListData;
 import com.sanron.music.net.bean.HotTagData;
 import com.sanron.music.net.bean.RecmdSongData;
 import com.sanron.music.net.bean.RecommendSong;
+import com.sanron.music.net.bean.Song;
 import com.sanron.music.net.bean.SongList;
 import com.sanron.music.net.bean.Tag;
-import com.sanron.music.view.HotSongListView;
-import com.sanron.music.view.RecmdSongView;
+import com.sanron.music.view.RatioLayout;
 import com.viewpagerindicator.CirclePageIndicator;
 
 import java.util.ArrayList;
@@ -48,7 +52,7 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
     /**
      * 是否已经获取过数据
      */
-    private boolean hasLoadData = false;
+    private boolean isLoaded = false;
     private ImageLoader imageLoader = ImageLoader.getInstance();
 
     //轮播
@@ -59,29 +63,23 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
 
     //分类
     private List<Tag> hotTags;
-    private List<TextView> tvHotTags;
-    private TextView tvMoreTag;
+    private GridView gvHotTag;
+    private HotTagAdapter hotTagAdapter;
+    private final int HOT_TAG_NUM = 3;
 
     //热门歌单
+    private GridView gvHotSongList;
     private List<SongList> hotSongLists;
-    private List<HotSongListView> hotSongListViews;
+    private HotSongListAdapter hotSongListAdapter;
+    private final int HOT_SONG_LIST_NUM = 6;
 
     //推荐歌曲
+    private ListView lvRecmdSong;
     private List<RecommendSong> recmdSongs;
-    private List<RecmdSongView> recmdSongViews;
+    private RecmdSongAdapter recmdSongAdapter;
+    private final int RECMD_SONG_NUM = 5;
 
     private DisplayImageOptions imageOptions;
-
-
-    public static final int EVENT_CLICK_TAG = 1;
-    public static final int EVENT_CLICK_SONGLIST = 2;
-    public static final int EVENT_CLICK_MORE_TAG = 3;
-
-    public static final String EXTRA_SONGLIST_ID = "list_id";
-    public static final String EXTRA_TAG_NAME = "tag";
-
-
-    private Handler handler = new Handler();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -92,6 +90,9 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
                 .displayer(new FadeInBitmapDisplayer(300))
                 .build();
         focusPicAdapter = new FocusPicAdapter();
+        hotTagAdapter = new HotTagAdapter();
+        hotSongListAdapter = new HotSongListAdapter();
+        recmdSongAdapter = new RecmdSongAdapter();
     }
 
     @Nullable
@@ -105,66 +106,31 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
         //轮播
         pagerFocusPic = $(R.id.pager_focus_pic);
         pageIndicator = $(R.id.page_indicator);
+        gvHotTag = $(R.id.gv_hot_tag);
+        gvHotSongList = $(R.id.gv_hot_song_list);
+        lvRecmdSong = $(R.id.lv_recmd_song);
 
         pagerFocusPic.setAdapter(focusPicAdapter);
         pageIndicator.setViewPager(pagerFocusPic);
+        gvHotTag.setAdapter(hotTagAdapter);
+        gvHotSongList.setAdapter(hotSongListAdapter);
+        lvRecmdSong.setAdapter(recmdSongAdapter);
 
-        //热门标签
-        tvHotTags = new LinkedList<>();
-        LinearLayout hotTagGroup = $(R.id.hot_tag_group);
-        for (int i = 0; i < hotTagGroup.getChildCount(); i++) {
-            TextView tv = (TextView) (hotTagGroup.getChildAt(i));
-            if (i == hotTagGroup.getChildCount() - 1) {
-                tvMoreTag = tv;
-                break;
-            }
-            tvHotTags.add(tv);
-            tv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    String tag = ((TextView) view).getText().toString();
-                    if (!TextUtils.isEmpty(tag)) {
-
-                    }
-                }
-            });
+        if (getUserVisibleHint()
+                && !isLoaded) {
+            getData();
         }
+    }
 
-        //热门歌单
-        hotSongListViews = new LinkedList<>();
-        LinearLayout songListGroup1 = $(R.id.hot_songlist_group1);
-        LinearLayout songListGroup2 = $(R.id.hot_songlist_group2);
-        for (int i = 0; i < songListGroup1.getChildCount(); i++) {
-            hotSongListViews.add((HotSongListView) songListGroup1.getChildAt(i));
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser
+                && !isLoaded
+                && getView() != null) {
+            getData();
+            isLoaded = true;
         }
-        for (int i = 0; i < songListGroup2.getChildCount(); i++) {
-            hotSongListViews.add((HotSongListView) songListGroup2.getChildAt(i));
-        }
-
-        //推荐歌曲
-        recmdSongViews = new ArrayList<>();
-        ViewGroup recmdSongGroup = $(R.id.recmd_song_group);
-        for (int i = 0; i < recmdSongGroup.getChildCount(); i++) {
-            recmdSongViews.add((RecmdSongView) recmdSongGroup.getChildAt(i));
-        }
-
-
-        if (!hasLoadData) {
-            getView().getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    getView().getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                    getData();
-                }
-            });
-            hasLoadData = true;
-        } else {
-            setFocusPics(focusPics);
-            setHogTags(hotTags);
-            setHotSongList(hotSongLists);
-            setRecmdSongs(recmdSongs);
-        }
-
     }
 
     @Override
@@ -173,6 +139,8 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
     }
 
     public void getData() {
+        System.out.println("getData");
+
         //获取轮播信息
         Call call1 = MusicApi.focusPic(10, new ApiCallback<FocusPicData>() {
 
@@ -199,7 +167,7 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
         });
 
         //热门标签
-        Call call2 = MusicApi.hotTag(tvHotTags.size(), new ApiCallback<HotTagData>() {
+        Call call2 = MusicApi.hotTag(HOT_TAG_NUM, new ApiCallback<HotTagData>() {
 
             @Override
             public void onFailure(Exception e) {
@@ -214,7 +182,7 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
 
 
         //获取热门歌单
-        Call call3 = MusicApi.hotSongList(6, new ApiCallback<HotSongListData>() {
+        Call call3 = MusicApi.hotSongList(HOT_SONG_LIST_NUM, new ApiCallback<HotSongListData>() {
 
             @Override
             public void onFailure(Exception e) {
@@ -226,12 +194,14 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
                 if (data != null
                         && data.content != null) {
                     setHotSongList(data.content.songLists);
+                } else {
+                    setHotSongList(null);
                 }
             }
         });
 
         //获取推荐歌曲
-        Call call4 = MusicApi.recmdSongs(6, new ApiCallback<RecmdSongData>() {
+        Call call4 = MusicApi.recmdSongs(RECMD_SONG_NUM, new ApiCallback<RecmdSongData>() {
 
             @Override
             public void onFailure(Exception e) {
@@ -240,7 +210,13 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
 
             @Override
             public void onSuccess(final RecmdSongData data) {
-                setRecmdSongs(data.content.get(0).songs);
+                if (data != null
+                        && data.content != null
+                        && data.content.size() > 0) {
+                    setRecmdSongs(data.content.get(0).songs);
+                } else {
+                    setRecmdSongs(null);
+                }
             }
         });
 
@@ -252,16 +228,7 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
 
     private void setRecmdSongs(List<RecommendSong> recmdSongs) {
         this.recmdSongs = recmdSongs;
-        if (recmdSongs != null) {
-            for (int i = 0; i < recmdSongs.size() && i < recmdSongViews.size(); i++) {
-                RecommendSong recommendSong = recmdSongs.get(i);
-                RecmdSongView recmdSongView = recmdSongViews.get(i);
-                String artists = recommendSong.author;
-                imageLoader.displayImage(recommendSong.bigPic, recmdSongView.getPicView(), imageOptions);
-                recmdSongView.getTitleView().setText(recommendSong.title + "-" + artists);
-                recmdSongView.getReasonView().setText(recommendSong.recommendReason);
-            }
-        }
+        ((RecmdSongAdapter) lvRecmdSong.getAdapter()).setData(recmdSongs);
     }
 
     private void setFocusPics(List<FocusPic> focusPics) {
@@ -271,12 +238,113 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
 
     private void setHotSongList(List<SongList> hotSongLists) {
         this.hotSongLists = hotSongLists;
-        if (hotSongLists != null) {
-            for (int i = 0; i < hotSongLists.size() && i < hotSongListViews.size(); i++) {
-                final SongList songList = hotSongLists.get(i);
-                HotSongListView hotSongListView = hotSongListViews.get(i);
-                hotSongListView.getTitleView().setText(songList.title);
-                hotSongListView.setOnClickListener(new View.OnClickListener() {
+        ((HotSongListAdapter) gvHotSongList.getAdapter()).setData(hotSongLists);
+    }
+
+    private void setHogTags(List<Tag> hotTags) {
+        this.hotTags = hotTags;
+        ((HotTagAdapter) gvHotTag.getAdapter()).setData(hotTags);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+        }
+    }
+
+
+    private class RecmdSongAdapter extends BaseAdapter {
+        private List<RecommendSong> data;
+
+        public void setData(List<RecommendSong> data) {
+            this.data = data;
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public int getCount() {
+            return HOT_SONG_LIST_NUM;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return data.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext())
+                        .inflate(R.layout.list_recmd_song_item, parent, false);
+            }
+            ImageView ivPic = (ImageView) convertView.findViewById(R.id.iv_recmd_pic);
+            TextView tvTitle = (TextView) convertView.findViewById(R.id.tv_recmd_name);
+            TextView tvReason = (TextView) convertView.findViewById(R.id.tv_recmd_reason);
+            if (data != null
+                    && position < data.size()) {
+                final RecommendSong recommendSong = data.get(position);
+                tvTitle.setText(recommendSong.title);
+                tvReason.setText(recommendSong.recommendReason);
+                imageLoader.displayImage(recommendSong.bigPic, ivPic);
+                convertView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        player.clearQueue();
+                        List<Music> musics = new ArrayList<>();
+                        for (Song song : data) {
+                            musics.add(song.toMusic());
+                        }
+                        player.enqueue(musics);
+                        player.play(position);
+                    }
+                });
+            }
+            return convertView;
+        }
+    }
+
+    private class HotSongListAdapter extends BaseAdapter {
+        private List<SongList> data;
+
+        public void setData(List<SongList> data) {
+            this.data = data;
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public int getCount() {
+            return HOT_SONG_LIST_NUM;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return data.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext())
+                        .inflate(R.layout.list_hot_songlist_item, parent, false);
+            }
+            ImageView pic = (ImageView) convertView.findViewById(R.id.iv_songlist_pic);
+            TextView title = (TextView) convertView.findViewById(R.id.tv_songlist_title);
+            if (data != null
+                    && position < data.size()) {
+                final SongList songList = data.get(position);
+                title.setText(songList.title);
+                imageLoader.displayImage(songList.pic, pic);
+                convertView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if (getActivity() instanceof MainActivity) {
@@ -284,42 +352,87 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
                         }
                     }
                 });
-                imageLoader.displayImage(songList.pic, hotSongListView.getImageView(), imageOptions);
             }
+            return convertView;
         }
     }
 
-    private void setHogTags(List<Tag> hotTags) {
-        this.hotTags = hotTags;
-        int vs = tvHotTags.size();
-        if (hotTags != null) {
-            int ts = hotTags.size();
-            for (int i = 0; i < vs && i < ts; i++) {
-                final TextView tvTag = tvHotTags.get(i);
-                final String title = hotTags.get(i).title;
-                tvTag.setText(title);
-                tvTag.setOnClickListener(new View.OnClickListener() {
+    /**
+     * 热门分类
+     */
+    private class HotTagAdapter extends BaseAdapter {
+        private List<Tag> data;
+        public final int[] ICONS = new int[]{
+                R.mipmap.ic_classify_img01,
+                R.mipmap.ic_classify_img02,
+                R.mipmap.ic_classify_img03,
+                R.mipmap.ic_classify_img04,
+        };
+
+        @Override
+        public int getCount() {
+            return HOT_TAG_NUM + 1;
+        }
+
+        public void setData(List<Tag> data) {
+            this.data = data;
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return data.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            TextView tvTag = null;
+            if (convertView == null) {
+                RatioLayout ratioLayout = new RatioLayout(getContext(), null);
+                ratioLayout.setType(RatioLayout.TYPE_HEIGHT);
+                ratioLayout.setRatio(1f);
+                ratioLayout.setBackgroundResource(ICONS[position]);
+
+                tvTag = new TextView(getContext());
+                tvTag.setTextColor(Color.WHITE);
+                tvTag.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
+                tvTag.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                tvTag.setGravity(Gravity.CENTER);
+                ratioLayout.addView(tvTag);
+                convertView = ratioLayout;
+            } else {
+                tvTag = (TextView) ((ViewGroup) convertView).getChildAt(0);
+            }
+            if (position == getCount() - 1) {
+                tvTag.setText("更多");
+                convertView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if (getActivity() instanceof MainActivity) {
-                            ((MainActivity) getActivity()).showTagSong(title);
+                            ((MainActivity) getActivity()).showAllTag();
                         }
                     }
                 });
             }
-            tvMoreTag.setOnClickListener(this);
-        }
-    }
-
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.tv_more_tag: {
-                if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).showAllTag();
-                }
+            if (data != null
+                    && position < data.size()) {
+                String tag = data.get(position).title;
+                tvTag.setText(tag);
+                convertView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (getActivity() instanceof MainActivity) {
+                            ((MainActivity) getActivity()).showTagSong(data.get(position).title);
+                        }
+                    }
+                });
             }
-            break;
+            return convertView;
         }
     }
 
@@ -327,7 +440,7 @@ public class RecmdFrag extends BaseWebFrag implements View.OnClickListener {
     /**
      * 轮播pager适配
      */
-    public class FocusPicAdapter extends PagerAdapter {
+    private class FocusPicAdapter extends PagerAdapter {
         private List<FocusPic> data;
         private List<ImageView> views;
 

@@ -10,12 +10,12 @@ import com.sanron.music.db.model.Music;
 import java.util.LinkedList;
 import java.util.List;
 
-public class QueryListMemberDatasTask extends AsyncTask<Void, Void, List<Music>> {
+public class QueryListMemberDataTask extends AsyncTask<Void, Void, List<Music>> {
 
-    private long listid;
+    private long mListId;
 
-    public QueryListMemberDatasTask(long listid) {
-        this.listid = listid;
+    public QueryListMemberDataTask(long listid) {
+        this.mListId = listid;
     }
 
     @Override
@@ -24,7 +24,7 @@ public class QueryListMemberDatasTask extends AsyncTask<Void, Void, List<Music>>
         DataProvider.Access listMemberAccess = DataProvider.instance().getAccess(DBHelper.ListMember.TABLE);
         DataProvider.Access musicAccess = DataProvider.instance().getAccess(DBHelper.Music.TABLE);
         Cursor c1 = listMemberAccess.query(new String[]{DBHelper.ListMember.MUSIC_ID},
-                DBHelper.ListMember.LIST_ID + "=" + listid, null);
+                DBHelper.ListMember.LIST_ID + "=" + mListId, null);
         StringBuilder sb = new StringBuilder();
         while (c1.moveToNext()) {
             long musicId = c1.getLong(0);
