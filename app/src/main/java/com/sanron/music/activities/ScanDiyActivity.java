@@ -16,12 +16,12 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.utils.T;
+import com.sanron.music.common.T;
+import com.sanron.music.common.ViewTool;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -35,16 +35,16 @@ import java.util.List;
  */
 public class ScanDiyActivity extends BaseActivity implements View.OnClickListener {
 
-    private AppBarLayout appBar;
-    private Toolbar toolBar;
-    private ListView lvFileExplore;
-    private TextView tvCurDir;
-    private LinearLayout llDirBack;
-    private DirAdapter dirAdapter;
-    private Button btnOk;
-    private CheckBox cbSelectAll;
-    private File curDir;
-    private File storageDir;
+    private AppBarLayout mAppBar;
+    private Toolbar mToolbar;
+    private ListView mLvFileExplore;
+    private TextView mTvCurDir;
+    private View mViewBack;
+    private DirAdapter mDirAdapter;
+    private Button mBtnOk;
+    private CheckBox mCbSelectAll;
+    private File mCurDir;
+    private File mStorageDir;
 
     public static final String EXTRA_SELECT_PATHS = "select_paths";
 
@@ -53,45 +53,45 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_diy);
 
-        dirAdapter = new DirAdapter(this);
-        cbSelectAll = $(R.id.cb_select_all);
-        btnOk = $(R.id.btn_ok);
-        toolBar = $(R.id.toolbar);
-        lvFileExplore = $(R.id.lv_file_explore);
-        llDirBack = $(R.id.ll_directory_back);
-        tvCurDir = $(R.id.tv_cur_directory);
-        appBar = $(R.id.app_bar);
+        mDirAdapter = new DirAdapter(this);
+        mCbSelectAll = $(R.id.cb_select_all);
+        mBtnOk = $(R.id.btn_ok);
+        mToolbar = $(R.id.toolbar);
+        mLvFileExplore = $(R.id.lv_file_explore);
+        mViewBack = $(R.id.ll_directory_back);
+        mTvCurDir = $(R.id.tv_cur_directory);
+        mAppBar = $(R.id.app_bar);
 
-        appContext.setViewFitsStatusBar(appBar);
+        ViewTool.setViewFitsStatusBar(mAppBar);
 
-        lvFileExplore.setAdapter(dirAdapter);
+        mLvFileExplore.setAdapter(mDirAdapter);
 
-        llDirBack.setOnClickListener(this);
-        btnOk.setOnClickListener(this);
-        lvFileExplore.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mViewBack.setOnClickListener(this);
+        mBtnOk.setOnClickListener(this);
+        mLvFileExplore.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                File file = (File) dirAdapter.getItem(i);
+                File file = (File) mDirAdapter.getItem(i);
                 setCurDir(file);
             }
         });
-        toolBar.setNavigationOnClickListener(new View.OnClickListener() {
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 setResult(RESULT_CANCELED);
                 finish();
             }
         });
-        cbSelectAll.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mCbSelectAll.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-                dirAdapter.setAllChecked(checked);
+                mDirAdapter.setAllChecked(checked);
             }
         });
 
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            storageDir = Environment.getExternalStorageDirectory();
-            setCurDir(storageDir);
+            mStorageDir = Environment.getExternalStorageDirectory();
+            setCurDir(mStorageDir);
         }
     }
 
@@ -100,9 +100,9 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
             return;
         }
 
-        curDir = dir;
-        tvCurDir.setText(curDir.getAbsolutePath());
-        dirAdapter.setData(curDir.listFiles(new FileFilter() {
+        mCurDir = dir;
+        mTvCurDir.setText(mCurDir.getAbsolutePath());
+        mDirAdapter.setData(mCurDir.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
                 return file.isDirectory()
@@ -120,7 +120,7 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
             break;
 
             case R.id.btn_ok: {
-                List<File> selects = dirAdapter.getSelectFiles();
+                List<File> selects = mDirAdapter.getSelectFiles();
                 if (selects.size() == 0) {
                     T.show("您还未选择文件夹");
                     return;
@@ -144,8 +144,8 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
      * 返回上层目录
      */
     private boolean backDir() {
-        if (!curDir.equals(storageDir)) {
-            setCurDir(curDir.getParentFile());
+        if (!mCurDir.equals(mStorageDir)) {
+            setCurDir(mCurDir.getParentFile());
             return true;
         }
         return false;

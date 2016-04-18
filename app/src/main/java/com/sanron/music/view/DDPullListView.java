@@ -80,9 +80,9 @@ public class DDPullListView extends ListView {
     private boolean mReadyPullDown;
     private boolean mReadyPullUp;
 
-    private OnPullDownListener onPullDownListener;
-    private OnScrollListener onScrollListener;
-    private OnLoadListener onLoadListener;
+    private OnPullDownListener mOnPullDownListener;
+    private OnScrollListener mOnScrollListener;
+    private OnLoadListener mOnLoadListener;
 
 
     /**
@@ -116,11 +116,11 @@ public class DDPullListView extends ListView {
     public static final int DEFAULT_FOOTER_HEIGHT = 56;
     public static final int DEFAULT_LABEL_COLOR = 0x99000000;
 
-    private OnScrollListener internalScrollListener = new OnScrollListener() {
+    private OnScrollListener mInternalScrollListener = new OnScrollListener() {
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
-            if (onScrollListener != null) {
-                onScrollListener.onScrollStateChanged(view, scrollState);
+            if (mOnScrollListener != null) {
+                mOnScrollListener.onScrollStateChanged(view, scrollState);
             }
         }
 
@@ -135,8 +135,8 @@ public class DDPullListView extends ListView {
             if (firstVisibleItem + visibleItemCount == totalItemCount) {
                 mReadyPullUp = (mPullFooter.getBottom() + getPaddingBottom() == getMeasuredHeight());
             }
-            if (onScrollListener != null) {
-                onScrollListener.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
+            if (mOnScrollListener != null) {
+                mOnScrollListener.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
             }
         }
     };
@@ -147,7 +147,7 @@ public class DDPullListView extends ListView {
         initHeader();
         initFooter();
         setOverScrollMode(OVER_SCROLL_NEVER);
-        super.setOnScrollListener(internalScrollListener);
+        super.setOnScrollListener(mInternalScrollListener);
     }
 
     private void initHeader() {
@@ -196,7 +196,7 @@ public class DDPullListView extends ListView {
         mPullFooter.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (onLoadListener != null
+                if (mOnLoadListener != null
                         && mState == STATE_NORMAL
                         && mHasMore) {
                     changePullUpState(STATE_LOADING);
@@ -259,12 +259,12 @@ public class DDPullListView extends ListView {
 
     @Override
     public void setOnScrollListener(OnScrollListener l) {
-        this.onScrollListener = l;
+        this.mOnScrollListener = l;
     }
 
 
     public void setOnPullDownListener(OnPullDownListener onPullDownListener) {
-        this.onPullDownListener = onPullDownListener;
+        this.mOnPullDownListener = onPullDownListener;
     }
 
 
@@ -337,8 +337,8 @@ public class DDPullListView extends ListView {
                 public void onAnimationUpdate(ValueAnimator animation) {
                     int newHeaderHeight = (int) animation.getAnimatedValue();
                     updateHeaderHeight(newHeaderHeight);
-                    if (onPullDownListener != null) {
-                        onPullDownListener.onPullDown(newHeaderHeight - mPullHeader.getHeight());
+                    if (mOnPullDownListener != null) {
+                        mOnPullDownListener.onPullDown(newHeaderHeight - mPullHeader.getHeight());
                     }
                 }
             });
@@ -478,8 +478,8 @@ public class DDPullListView extends ListView {
                         int newHeaderHeight = (int) (headerHeight + Math.ceil(deltaY));
                         newHeaderHeight = Math.min(newHeaderHeight, mMaxHeaderHeight);
                         updateHeaderHeight(newHeaderHeight);
-                        if (onPullDownListener != null) {
-                            onPullDownListener.onPullDown(newHeaderHeight - headerHeight);
+                        if (mOnPullDownListener != null) {
+                            mOnPullDownListener.onPullDown(newHeaderHeight - headerHeight);
                         }
                         ev.setAction(MotionEvent.ACTION_CANCEL);
                     } else if (deltaY < 0
@@ -488,8 +488,8 @@ public class DDPullListView extends ListView {
                         int setHeight = (int) (headerHeight + Math.ceil(deltaY));
                         setHeight = Math.max(mNormalHeaderHeight, setHeight);
                         updateHeaderHeight(setHeight);
-                        if (onPullDownListener != null) {
-                            onPullDownListener.onPullDown(setHeight - headerHeight);
+                        if (mOnPullDownListener != null) {
+                            mOnPullDownListener.onPullDown(setHeight - headerHeight);
                         }
                         if (setHeight <= mNormalHeaderHeight) {
                             //listview从展开状态回到收缩状态后能够继续滑动，设置为点击事件
@@ -591,6 +591,12 @@ public class DDPullListView extends ListView {
         changePullUpState(STATE_NORMAL);
     }
 
+    public void load() {
+        if (mState != STATE_LOADING) {
+            changePullUpState(STATE_LOADING);
+        }
+    }
+
     public interface OnPullDownListener {
         void onPullDown(int pullOffset);
     }
@@ -601,7 +607,7 @@ public class DDPullListView extends ListView {
 
 
     public void setOnLoadListener(OnLoadListener onLoadListener) {
-        this.onLoadListener = onLoadListener;
+        this.mOnLoadListener = onLoadListener;
     }
 
     private void changePullUpState(int state) {
@@ -611,8 +617,8 @@ public class DDPullListView extends ListView {
                 mLoadIcon.setAnimation(mRotateAnimation);
                 mRotateAnimation.start();
                 mStateLabel.setText(mLoaddingLabel);
-                if (onLoadListener != null) {
-                    onLoadListener.onLoad();
+                if (mOnLoadListener != null) {
+                    mOnLoadListener.onLoad();
                 }
             }
             break;

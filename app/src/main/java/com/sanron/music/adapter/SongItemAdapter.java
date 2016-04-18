@@ -2,6 +2,7 @@ package com.sanron.music.adapter;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.DataSetObserver;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,63 +11,80 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.db.model.Music;
+import com.sanron.music.db.bean.Music;
 import com.sanron.music.net.bean.Song;
-import com.sanron.music.service.IPlayer;
+import com.sanron.music.service.PlayerUtil;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class SongItemAdapter extends BaseAdapter {
 
-    private Context context;
-    private IPlayer player;
-    private List<Song> data;
-    private int playingPosition = -1;//
-    private int playingTextColor;//播放中文字颜色
-    private int normalTitleTextColor;//正常title颜色
-    private int normalArtistTextColor;//正常artist颜色
+    private Context mContext;
+    private List<Song> mData;
+    private int mPlayingPosition = -1;//
+    private int mPlayingTextColor;//播放中文字颜色
+    private int mNormalTitleTextColor;//正常title颜色
+    private int mNormalArtistTextColor;//正常artist颜色
 
-    public SongItemAdapter(Context context, IPlayer player) {
-        this.context = context;
-        this.player = player;
+    public SongItemAdapter(Context context) {
+        this.mContext = context;
         Resources resources = context.getResources();
-        playingTextColor = resources.getColor(R.color.colorAccent);
-        normalTitleTextColor = resources.getColor(R.color.textColorPrimary);
-        normalArtistTextColor = resources.getColor(R.color.textColorSecondary);
+        mPlayingTextColor = resources.getColor(R.color.colorAccent);
+        mNormalTitleTextColor = resources.getColor(R.color.textColorPrimary);
+        mNormalArtistTextColor = resources.getColor(R.color.textColorSecondary);
+    }
+
+    @Override
+    public void registerDataSetObserver(DataSetObserver observer) {
+        super.registerDataSetObserver(observer);
+    }
+
+    @Override
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        super.unregisterDataSetObserver(observer);
     }
 
     public void setPlayingPosition(int position) {
-        playingPosition = position;
+        mPlayingPosition = position;
         notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        return data == null ? 0 : data.size();
+        return mData == null ? 0 : mData.size();
     }
 
     public void setData(List<Song> data) {
-        this.data = data;
+        this.mData = data;
         notifyDataSetChanged();
     }
 
     public List<Song> getData() {
-        return data;
+        return mData;
     }
 
     public void addData(List<Song> songs) {
-        if (data == null) {
-            data = songs;
+        if (mData == null) {
+            mData = songs;
         } else {
-            data.addAll(songs);
+            mData.addAll(songs);
         }
         notifyDataSetChanged();
     }
 
+    protected String onBindText1(Song song) {
+        return song.title;
+    }
+
+    protected String onBindText2(Song song) {
+        return song.author;
+    }
+
+
     @Override
     public Object getItem(int position) {
-        return data.get(position);
+        return mData.get(position);
     }
 
     @Override
@@ -76,31 +94,31 @@ public class SongItemAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        Song song = data.get(position);
+        Song song = mData.get(position);
         ViewHolder holder = null;
         if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.list_list_song_item, parent, false);
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.list_song_item, parent, false);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
         if (holder == null) {
             holder = new ViewHolder();
-            holder.tvTitle = (TextView) convertView.findViewById(R.id.tv_title);
-            holder.tvArtist = (TextView) convertView.findViewById(R.id.tv_artist);
+            holder.tvText1 = (TextView) convertView.findViewById(R.id.tv_text1);
+            holder.tvText2 = (TextView) convertView.findViewById(R.id.tv_text2);
             holder.ivMv = (ImageView) convertView.findViewById(R.id.iv_mv);
         }
 
 
-        if (position == playingPosition) {
-            holder.tvTitle.setTextColor(playingTextColor);
-            holder.tvArtist.setTextColor(playingTextColor);
+        if (position == mPlayingPosition) {
+            holder.tvText1.setTextColor(mPlayingTextColor);
+            holder.tvText2.setTextColor(mPlayingTextColor);
         } else {
-            holder.tvTitle.setTextColor(normalTitleTextColor);
-            holder.tvArtist.setTextColor(normalArtistTextColor);
+            holder.tvText1.setTextColor(mNormalTitleTextColor);
+            holder.tvText2.setTextColor(mNormalArtistTextColor);
         }
-        holder.tvTitle.setText(song.title);
-        holder.tvArtist.setText(song.author);
+        holder.tvText1.setText(onBindText1(song));
+        holder.tvText2.setText(onBindText2(song));
         if (song.hasMv == 1) {
             holder.ivMv.setVisibility(View.VISIBLE);
         } else {
@@ -110,22 +128,22 @@ public class SongItemAdapter extends BaseAdapter {
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<Song> songs = data;
+                List<Song> songs = mData;
                 List<Music> musics = new LinkedList<>();
                 for (Song song : songs) {
                     musics.add(song.toMusic());
                 }
-                player.clearQueue();
-                player.enqueue(musics);
-                player.play(position);
+                PlayerUtil.clearQueue();
+                PlayerUtil.enqueue(musics);
+                PlayerUtil.play(position);
             }
         });
         return convertView;
     }
 
     class ViewHolder {
-        TextView tvTitle;
-        TextView tvArtist;
+        TextView tvText1;
+        TextView tvText2;
         ImageView ivMv;
     }
 }

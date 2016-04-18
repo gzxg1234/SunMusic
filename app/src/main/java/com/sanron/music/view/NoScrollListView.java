@@ -9,15 +9,16 @@ import android.widget.ListView;
  */
 public class NoScrollListView extends ListView {
     public NoScrollListView(Context context) {
-        super(context);
+        this(context, null);
+    }
+
+    public NoScrollListView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
     public NoScrollListView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-    }
-
-    public NoScrollListView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        setVerticalScrollBarEnabled(false);
     }
 
     @Override

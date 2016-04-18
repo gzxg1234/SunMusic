@@ -20,7 +20,7 @@
             app:type="height">
 
             <ImageView
-                android:id="@+id/iv_picture"
+                android:id="@+id/iv_album_pic"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="fitXY" />
@@ -53,7 +53,7 @@
             app:type="height">
 
             <ImageView
-                android:id="@+id/iv_picture"
+                android:id="@+id/iv_album_pic"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="fitXY" />
@@ -86,7 +86,7 @@
             app:type="height">
 
             <ImageView
-                android:id="@+id/iv_picture"
+                android:id="@+id/iv_album_pic"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="fitXY" />

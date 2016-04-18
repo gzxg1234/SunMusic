@@ -2,7 +2,7 @@ package com.sanron.music.service;
 
 import android.graphics.Bitmap;
 
-import com.sanron.music.db.model.Music;
+import com.sanron.music.db.bean.Music;
 
 import java.util.List;
 

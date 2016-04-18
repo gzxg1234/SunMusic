@@ -1,9 +1,9 @@
 package com.sanron.music.net.bean;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.github.stuxuhai.jpinyin.PinyinFormat;
-import com.github.stuxuhai.jpinyin.PinyinHelper;
-import com.sanron.music.db.model.Music;
+import com.sanron.music.db.bean.Music;
+
+import java.util.Date;
 
 /**
  * Created by sanron on 16-3-19.
@@ -81,6 +81,44 @@ public class Song {
      */
     @JSONField(name = "pic_huge")
     public String hugePic;
+
+    /**
+     * 国家
+     */
+    @JSONField(name = "country")
+    public String country;
+
+    /**
+     * 地区
+     */
+    @JSONField(name = "area")
+    public String area;
+
+    /**
+     * 语言
+     */
+    @JSONField(name = "language")
+    public String language;
+
+    /**
+     * 发表时间
+     */
+    @JSONField(name = "publishtime")
+    public String publishtime;
+
+    /**
+     * 收听总数
+     */
+    @JSONField(name = "listen_total")
+    public String listenTotal;
+
+
+    /**
+     * 歌曲版本,已知有 "混音"
+     */
+    @JSONField(name = "versions")
+    public String versions;
+
 
     @Override
     public String toString() {

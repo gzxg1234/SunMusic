@@ -2,13 +2,17 @@ package com.sanron.music.net;
 
 import android.text.TextUtils;
 
+import com.sanron.music.common.ApiEncryptTool;
 import com.sanron.music.net.bean.AllTag;
 import com.sanron.music.net.bean.FocusPicData;
 import com.sanron.music.net.bean.HotSongListData;
 import com.sanron.music.net.bean.HotTagData;
 import com.sanron.music.net.bean.LrcPicData;
 import com.sanron.music.net.bean.RecmdSongData;
+import com.sanron.music.net.bean.Singer;
+import com.sanron.music.net.bean.SingerAlbums;
 import com.sanron.music.net.bean.SingerList;
+import com.sanron.music.net.bean.SingerSongs;
 import com.sanron.music.net.bean.SongList;
 import com.sanron.music.net.bean.SongUrlInfo;
 import com.sanron.music.net.bean.TagSongsData;
@@ -16,6 +20,7 @@ import com.sanron.music.net.bean.TagSongsData;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import okhttp3.Call;
@@ -27,99 +32,99 @@ import okhttp3.Call;
 public class MusicApi {
 
     public static final String BASE = "http://tingapi.ting.baidu.com/v1/restserver/ting?from=android&version=5.6.5.6&format=json";
-    public static boolean isNetAvailable = true;
+    public static boolean sIsNetAvailable = true;
 
     /**
      * 轮播图片
      *
      * @param num
-     * @param apiCallback
+     * @param jsonCallback
      */
-    public static Call focusPic(int num, ApiCallback<FocusPicData> apiCallback) {
+    public static Call focusPic(int num, JsonCallback<FocusPicData> jsonCallback) {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.plaza.getFocusPic");
         params.put("num", num);
-        return ApiHttpClient.get(url(params), 600, apiCallback);
+        return ApiHttpClient.get(url(params), 600, jsonCallback);
     }
 
     /**
      * 推荐歌曲
      *
-     * @param num         　数量
-     * @param apiCallback
+     * @param num          　数量
+     * @param jsonCallback
      */
-    public static Call recmdSongs(int num, final ApiCallback<RecmdSongData> apiCallback) {
+    public static Call recmdSongs(int num, final JsonCallback<RecmdSongData> jsonCallback) {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.song.getEditorRecommend");
         params.put("num", num);
-        return ApiHttpClient.get(url(params), 600, apiCallback);
+        return ApiHttpClient.get(url(params), 600, jsonCallback);
     }
 
     /**
      * 热门歌单
      *
      * @param num
-     * @param apiCallback
+     * @param jsonCallback
      */
-    public static Call hotSongList(int num, final ApiCallback<HotSongListData> apiCallback) {
+    public static Call hotSongList(int num, final JsonCallback<HotSongListData> jsonCallback) {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.diy.getHotGeDanAndOfficial");
         params.put("num", num);
-        return ApiHttpClient.get(url(params), 600, apiCallback);
+        return ApiHttpClient.get(url(params), 600, jsonCallback);
     }
 
     /**
      * 热门分类
      *
      * @param num
-     * @param apiCallback
+     * @param jsonCallback
      */
-    public static Call hotTag(int num, ApiCallback<HotTagData> apiCallback) {
+    public static Call hotTag(int num, JsonCallback<HotTagData> jsonCallback) {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.tag.getHotTag");
         params.put("nums", num);
-        return ApiHttpClient.get(url(params), 21600, apiCallback);
+        return ApiHttpClient.get(url(params), 21600, jsonCallback);
     }
 
     /**
      * 所有分类
      *
-     * @param apiCallback
+     * @param jsonCallback
      */
-    public static Call allTag(ApiCallback<AllTag> apiCallback) {
+    public static Call allTag(JsonCallback<AllTag> jsonCallback) {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.tag.getAllTag");
-        return ApiHttpClient.get(url(params), 21600, apiCallback);
+        return ApiHttpClient.get(url(params), 21600, jsonCallback);
     }
 
     /**
      * 分类信息（分类下的歌曲）
      *
-     * @param tagName     分类名
-     * @param limit       获取歌曲数量
-     * @param offset      偏移量
-     * @param apiCallback
+     * @param tagName      分类名
+     * @param limit        获取歌曲数量
+     * @param offset       偏移量
+     * @param jsonCallback
      */
-    public static Call tagInfo(String tagName, int limit, int offset, ApiCallback<TagSongsData> apiCallback) {
+    public static Call tagInfo(String tagName, int limit, int offset, JsonCallback<TagSongsData> jsonCallback) {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.tag.songlist");
         params.put("tagname", tagName);
         params.put("limit", limit);
         params.put("offset", offset);
-        return ApiHttpClient.get(url(params), 21600, apiCallback);
+        return ApiHttpClient.get(url(params), 21600, jsonCallback);
     }
 
     /**
      * 歌单信息
      *
      * @param listId
-     * @param apiCallback
+     * @param jsonCallback
      */
-    public static Call songListInfo(String listId, ApiCallback<SongList> apiCallback) {
+    public static Call songListInfo(String listId, JsonCallback<SongList> jsonCallback) {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.diy.gedanInfo");
         params.put("listid", listId);
-        return ApiHttpClient.get(url(params), 3600, apiCallback);
+        return ApiHttpClient.get(url(params), 3600, jsonCallback);
     }
 
     /**
@@ -129,11 +134,11 @@ public class MusicApi {
      * @param callback
      * @return
      */
-    public static Call songLink(String songid, ApiCallback<SongUrlInfo> callback) {
+    public static Call songLink(String songid, JsonCallback<SongUrlInfo> callback) {
         HashMap<String, Object> params = new HashMap<String, Object>();
 //        long currentTimeMillis = System.currentTimeMillis();
         long ts = 88888888;
-        String e = EncrptyTool.encrpty("songid=" + songid + "&ts=" + ts);
+        String e = ApiEncryptTool.encrypt("songid=" + songid + "&ts=" + ts);
         params.put("method", "baidu.ting.song.getInfos");
         params.put("songid", songid);
         params.put("ts", ts);
@@ -150,20 +155,20 @@ public class MusicApi {
      * @param callback
      * @return
      */
-    public static Call searchLrcPic(String word, String artist, int type, final ApiCallback<LrcPicData> callback) {
+    public static Call searchLrcPic(String word, String artist, int type, final JsonCallback<LrcPicData> callback) {
         HashMap<String, Object> params = new HashMap<>();
         //正确的姿势应该是要当前时间的,为了缓存，设置固定的值,不过没有什么影响，貌似只是为了加密检验
 //        long currentTimeMillis = System.currentTimeMillis();
         long ts = 88888888;
         String query = word + "$$" + artist;
-        String e = EncrptyTool.encrpty("query=" + query + "&ts=" + ts);
+        String e = ApiEncryptTool.encrypt("query=" + query + "&ts=" + ts);
         params.put("method", "baidu.ting.search.lrcpic");
         params.put("query", query);
         params.put("ts", ts);
         params.put("type", type);
         params.put("e", e);
         return ApiHttpClient.get(url(params), 600,
-                isNetAvailable ? 0 : Integer.MAX_VALUE, callback);
+                sIsNetAvailable ? 0 : Integer.MAX_VALUE, callback);
     }
 
     /**
@@ -178,7 +183,7 @@ public class MusicApi {
      * @return
      */
     public static Call singerList(int offset, int limit, int area, int sex,
-                                  int order, String abc, ApiCallback<SingerList> callback) {
+                                  int order, String abc, JsonCallback<SingerList> callback) {
         HashMap<String, Object> params = new HashMap<>();
         params.put("method", "baidu.ting.artist.getList");
         params.put("offset", offset);
@@ -189,7 +194,7 @@ public class MusicApi {
         if (!TextUtils.isEmpty(abc)) {
             params.put("abc", abc);
         }
-        return ApiHttpClient.get(url(params), 21600, callback);
+        return ApiHttpClient.get(url(params), 6 * 3600, callback);
     }
 
     /**
@@ -199,11 +204,62 @@ public class MusicApi {
      * @param limit  获取数量
      * @return
      */
-    public static Call hotSinger(int offset, int limit, ApiCallback<SingerList> callback) {
+    public static Call hotSinger(int offset, int limit, JsonCallback<SingerList> callback) {
         return singerList(offset, limit, 0, 0, 1, null, callback);
     }
 
-    private static String url(HashMap<String, Object> params) {
+    /**
+     * 歌手信息
+     *
+     * @param artistId id
+     * @param callback
+     * @return
+     */
+    public static Call singerInfo(String artistId, JsonCallback<Singer> callback) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("method", "baidu.ting.artist.getinfo");
+        params.put("artistid", artistId);
+        return ApiHttpClient.get(url(params), 2 * 3600, callback);
+    }
+
+    /**
+     * 艺术家专辑
+     *
+     * @param artistId id
+     * @param offset   偏移
+     * @param limits   数量
+     * @return
+     */
+    public static Call singerAlbums(String artistId, int offset, int limits,
+                                    JsonCallback<SingerAlbums> callback) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("method", "baidu.ting.artist.getAlbumList");
+        params.put("artistid", artistId);
+        params.put("offset", offset);
+        params.put("limits", limits);
+        params.put("order", 1);//按时间排序
+        return ApiHttpClient.get(url(params), 2 * 3600, callback);
+    }
+
+    /**
+     * 歌手歌曲
+     *
+     * @param artistId id
+     * @param offset   偏移
+     * @param limits   数量
+     * @return
+     */
+    public static Call singerSongs(String artistId, int offset, int limits,
+                                   JsonCallback<SingerSongs> callback) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("method", "baidu.ting.artist.getSongList");
+        params.put("artistid", artistId);
+        params.put("offset", offset);
+        params.put("limits", limits);
+        return ApiHttpClient.get(url(params), 2 * 3600, callback);
+    }
+
+    private static String url(Map<String, Object> params) {
         StringBuffer sb = new StringBuffer(BASE);
         Set<String> keys = params.keySet();
         for (String name : keys) {

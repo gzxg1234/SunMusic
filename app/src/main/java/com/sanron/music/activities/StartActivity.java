@@ -17,15 +17,10 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
 import com.sanron.music.AppConfig;
-import com.sanron.music.net.ApiCallback;
-import com.sanron.music.net.ApiHttpClient;
-import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.AllTag;
+import com.sanron.music.AppContext;
 
 import java.io.File;
 import java.io.IOException;
-
-import okhttp3.Call;
 
 /**
  * Created by Administrator on 2016/3/5.
@@ -92,7 +87,7 @@ public class StartActivity extends BaseActivity {
             builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
-                    appContext.closeApp();
+                    ((AppContext) getApplicationContext()).closeApp();
                 }
             });
             AlertDialog dialog = builder.create();

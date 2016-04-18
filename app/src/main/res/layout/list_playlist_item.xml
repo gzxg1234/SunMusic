@@ -13,13 +13,12 @@
 
 
     <ImageView
-        android:id="@+id/iv_picture"
+        android:id="@+id/iv_list_pic"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_alignParentLeft="true"
         android:scaleType="centerCrop"
         android:src="@mipmap/icon_favorite_list" />
-
 
     <ImageButton
         android:id="@+id/ibtn_item_menu"
@@ -37,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_toLeftOf="@+id/ibtn_item_menu"
-        android:layout_toRightOf="@+id/iv_picture"
+        android:layout_toRightOf="@+id/iv_list_pic"
         android:gravity="center_vertical"
         android:orientation="vertical"
         android:paddingLeft="16dp">
@@ -53,7 +52,7 @@
             tools:text="我喜欢" />
 
         <TextView
-            android:id="@+id/tv_music_num"
+            android:id="@+id/tv_list_song_num"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"

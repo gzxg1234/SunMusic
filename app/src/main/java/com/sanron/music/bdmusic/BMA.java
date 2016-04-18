@@ -354,6 +354,23 @@ public class BMA {
                     .append("&artistid=").append(artistid);
             return sb.toString();
         }
+
+        /**
+         * 获取专辑
+         * @param artistId
+         * @param offset
+         * @param limits
+         * @return
+         */
+        public static String artistAlbums(String artistId, int offset, int limits) {
+            StringBuffer sb = new StringBuffer(BASE);
+            sb.append("&method=").append("baidu.ting.artist.getAlbumList")
+                    .append("&artistid=").append(artistId)
+                    .append("&offset=").append(offset)
+                    .append("&order=").append(1)
+                    .append("&limits=").append(limits);
+            return sb.toString();
+        }
     }
 
     /**

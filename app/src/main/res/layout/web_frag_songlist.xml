@@ -41,7 +41,7 @@
                 android:singleLine="true"
                 android:text="我们相爱吧 在花开的季节"
                 android:textColor="@color/textColorPrimaryInverse"
-                android:textSize="18dp"
+                android:textSize="20dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -52,7 +52,7 @@
                 android:singleLine="true"
                 android:text="甜蜜，情侣，浪漫"
                 android:textColor="@color/textColorSecondaryInverse"
-                android:textSize="15dp" />
+                android:textSize="14dp" />
         </LinearLayout>
 
     </LinearLayout>
@@ -112,7 +112,7 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="1px"
+            android:layout_height="1dp"
             android:background="#D8D8D8" />
 
     </LinearLayout>

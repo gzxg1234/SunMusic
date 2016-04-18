@@ -1,6 +1,7 @@
 package com.sanron.music.net.bean;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import java.util.List;
 
@@ -30,8 +31,7 @@ public class TagSongsData {
         /**
          * 歌曲
          */
-        @JSONField(name = "songlist")
+        @JSONField(name = "songlist", serialzeFeatures = {SerializerFeature.WriteNullListAsEmpty})
         public List<Song> songs;
-
     }
 }

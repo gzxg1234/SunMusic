@@ -12,7 +12,7 @@
     android:padding="8dp">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/top_board"
+        android:id="@+id/iv_music_pic"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_alignParentLeft="true"
@@ -49,13 +49,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_toLeftOf="@+id/frame_layout"
-        android:layout_toRightOf="@+id/top_board"
+        android:layout_toRightOf="@+id/iv_music_pic"
         android:gravity="center_vertical"
         android:orientation="vertical"
         android:paddingLeft="16dp">
 
         <TextView
-            android:id="@+id/tv_title"
+            android:id="@+id/tv_music_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
@@ -65,7 +65,7 @@
             tools:text="Suger" />
 
         <TextView
-            android:id="@+id/tv_artist"
+            android:id="@+id/tv_music_artist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -77,11 +77,4 @@
     </LinearLayout>
 
 
-    <!--<View-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="1dp"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_marginBottom="-8dp"-->
-        <!--android:layout_toRightOf="@+id/top_image"-->
-        <!--android:background="@color/colorListDivider"/>-->
 </RelativeLayout>

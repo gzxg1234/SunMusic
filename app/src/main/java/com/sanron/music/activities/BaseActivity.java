@@ -2,11 +2,9 @@ package com.sanron.music.activities;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import com.sanron.music.AppContext;
 import com.sanron.music.AppManager;
 
 /**
@@ -14,13 +12,11 @@ import com.sanron.music.AppManager;
  */
 public class BaseActivity extends AppCompatActivity {
 
-    protected AppContext appContext;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AppManager.instance().addActivity(this);
-        appContext = (AppContext) getApplicationContext();
     }
 
     @Override

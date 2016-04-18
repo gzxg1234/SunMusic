@@ -6,7 +6,7 @@ import android.text.TextUtils;
 
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
-import com.sanron.music.db.model.Music;
+import com.sanron.music.db.bean.Music;
 
 import java.io.File;
 import java.util.List;

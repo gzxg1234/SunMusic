@@ -31,13 +31,13 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import com.sanron.music.AppContext;
 import com.sanron.music.AppManager;
 import com.sanron.music.R;
-import com.sanron.music.db.model.Music;
-import com.sanron.music.net.ApiCallback;
+import com.sanron.music.common.MyLog;
+import com.sanron.music.common.T;
+import com.sanron.music.db.bean.Music;
+import com.sanron.music.net.JsonCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.LrcPicData;
 import com.sanron.music.net.bean.SongUrlInfo;
-import com.sanron.music.utils.MyLog;
-import com.sanron.music.utils.T;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,7 +55,7 @@ import okhttp3.Call;
 public class PlayerService extends Service implements AudioManager.OnAudioFocusChangeListener {
 
     public static final String TAG = PlayerService.class.getSimpleName();
-    public static final int FORGROUND_ID = 0x88;
+    public static final int FOREGROUND_ID = 0x88;
 
     public static final String NOTIFY_ACTION = "com.sanron.music.PLAYBACK";
     public static final String EXTRA_CMD = "CMD";
@@ -69,34 +69,32 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
     public static final int WHAT_PLAY_ERROR = 1;
     public static final int WHAT_BUFFER_TIMEOUT = 2;
 
-    private AppContext appContext;
 
-    private PowerManager.WakeLock wakeLock;
+    private PowerManager.WakeLock mWakeLock;
 
-    private NotificationCompat.Builder builder;
+    private NotificationCompat.Builder mNotificationBuilder;
 
 
-    private AudioManager audioManager;
+    private AudioManager mAudioManager;
 
-    private Bitmap curMusicPic;
+    private Bitmap mCurMusicPic;
 
-    private Player player;
+    private Player mPlayer;
 
-    private boolean isLossAudioFocus;
+    private boolean mIsLossAudioFocus;
 
-    private ImageLoader imageLoader = ImageLoader.getInstance();
 
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case WHAT_PLAY_ERROR: {
-                    player.next();
+                    mPlayer.next();
                 }
                 break;
 
                 case WHAT_BUFFER_TIMEOUT: {
-                    player.next();
+                    mPlayer.next();
                     T.show("缓冲超时,自动播放下一曲");
                 }
                 break;
@@ -110,26 +108,26 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             String cmd = intent.getStringExtra(EXTRA_CMD);
             switch (cmd) {
                 case CMD_PREVIOUS: {
-                    player.previous();
+                    mPlayer.previous();
                 }
                 break;
 
                 case CMD_PLAY_PAUSE: {
-                    int state = player.getState();
+                    int state = mPlayer.getState();
                     if (state == IPlayer.STATE_PAUSE) {
-                        player.resume();
+                        mPlayer.resume();
                     } else if (state == IPlayer.STATE_PLAYING) {
-                        player.pause();
+                        mPlayer.pause();
                     } else if (state == IPlayer.STATE_STOP) {
-                        if (player.getQueue().size() > 0) {
-                            player.play(0);
+                        if (mPlayer.getQueue().size() > 0) {
+                            mPlayer.play(0);
                         }
                     }
                 }
                 break;
 
                 case CMD_NEXT: {
-                    player.next();
+                    mPlayer.next();
                 }
                 break;
 
@@ -139,7 +137,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 break;
 
                 case CMD_CLOSE: {
-                    appContext.closeApp();
+                    ((AppContext) getApplicationContext()).closeApp();
                 }
                 break;
 
@@ -164,19 +162,18 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
     public void onCreate() {
         super.onCreate();
         MyLog.i(TAG, "service create");
-        appContext = (AppContext) getApplicationContext();
-        player = new Player();
+        mPlayer = new Player();
         acquireWakeLock();
-        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
 
         IntentFilter intentFilter = new IntentFilter(NOTIFY_ACTION);
         registerReceiver(cmdReceiver, intentFilter);
 
-        builder = new NotificationCompat.Builder(this);
-        builder.setTicker("");
-        builder.setSmallIcon(R.mipmap.default_song_pic);
-        builder.setPriority(Notification.PRIORITY_MAX);
+        mNotificationBuilder = new NotificationCompat.Builder(this);
+        mNotificationBuilder.setTicker("");
+        mNotificationBuilder.setSmallIcon(R.mipmap.default_song_pic);
+        mNotificationBuilder.setPriority(Notification.PRIORITY_MAX);
         updateNotification();
 
     }
@@ -187,10 +184,10 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         MyLog.i(TAG, "service destroy");
         stopForeground(true);
         unregisterReceiver(cmdReceiver);
-        audioManager.abandonAudioFocus(this);
+        mAudioManager.abandonAudioFocus(this);
         releaseWakeLock();
-        player.release();
-        player = null;
+        mPlayer.release();
+        mPlayer = null;
     }
 
 
@@ -199,9 +196,9 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
      */
     private void acquireWakeLock() {
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SunMusic");
-        if (wakeLock != null) {
-            wakeLock.acquire();
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SunMusic");
+        if (mWakeLock != null) {
+            mWakeLock.acquire();
         }
     }
 
@@ -209,8 +206,8 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
      * 释放唤醒锁
      */
     private void releaseWakeLock() {
-        if (wakeLock != null) {
-            wakeLock.release();
+        if (mWakeLock != null) {
+            mWakeLock.release();
         }
     }
 
@@ -220,12 +217,12 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
     private void updateNotification() {
         RemoteViews bigContentView = new RemoteViews(getPackageName(), R.layout.notification_big_layout);
         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification_small_layout);
-        int state = player.getState();
+        int state = mPlayer.getState();
         switch (state) {
             case IPlayer.STATE_STOP: {
-                bigContentView.setImageViewResource(R.id.top_board, R.mipmap.default_song_pic);
+                bigContentView.setImageViewResource(R.id.iv_album_pic, R.mipmap.default_song_pic);
                 bigContentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_24dp);
-                contentView.setImageViewResource(R.id.top_board, R.mipmap.default_song_pic);
+                contentView.setImageViewResource(R.id.iv_album_pic, R.mipmap.default_song_pic);
                 contentView.setImageViewResource(R.id.ibtn_play_pause, R.mipmap.ic_play_arrow_black_36dp);
             }
             break;
@@ -241,28 +238,28 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             break;
         }
 
-        if (player.getCurrentIndex() != -1) {
-            Music music = player.getCurrentMusic();
+        if (mPlayer.getCurrentIndex() != -1) {
+            Music music = mPlayer.getCurrentMusic();
             String artist = music.getArtist();
             artist = artist.equals("<unknown>") ? "未知歌手" : artist;
             String musicInfo = music.getTitle() + "-" + artist;
 
             bigContentView.setTextViewText(R.id.tv_music_info, musicInfo);
-            contentView.setTextViewText(R.id.tv_title, music.getTitle());
-            contentView.setTextViewText(R.id.tv_artist, artist);
+            contentView.setTextViewText(R.id.tv_queue_item_title, music.getTitle());
+            contentView.setTextViewText(R.id.tv_text2, artist);
 
-            if (curMusicPic != null) {
-                bigContentView.setImageViewBitmap(R.id.top_board, curMusicPic);
-                contentView.setImageViewBitmap(R.id.top_board, curMusicPic);
+            if (mCurMusicPic != null) {
+                bigContentView.setImageViewBitmap(R.id.iv_album_pic, mCurMusicPic);
+                contentView.setImageViewBitmap(R.id.iv_album_pic, mCurMusicPic);
             } else {
-                bigContentView.setImageViewResource(R.id.top_board, R.mipmap.default_song_pic);
-                contentView.setImageViewResource(R.id.top_board, R.mipmap.default_song_pic);
+                bigContentView.setImageViewResource(R.id.iv_album_pic, R.mipmap.default_song_pic);
+                contentView.setImageViewResource(R.id.iv_album_pic, R.mipmap.default_song_pic);
             }
 
         } else {
             bigContentView.setTextViewText(R.id.tv_music_info, getText(R.string.app_name));
-            contentView.setTextViewText(R.id.tv_title, getText(R.string.app_name));
-            contentView.setTextViewText(R.id.tv_artist, "");
+            contentView.setTextViewText(R.id.tv_queue_item_title, getText(R.string.app_name));
+            contentView.setTextViewText(R.id.tv_text2, "");
         }
 
         bigContentView.setOnClickPendingIntent(R.id.ibtn_lrc, cmdIntent(CMD_LYRIC));
@@ -276,11 +273,11 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         contentView.setOnClickPendingIntent(R.id.ibtn_forward, cmdIntent(CMD_NEXT));
         contentView.setOnClickPendingIntent(R.id.ibtn_close, cmdIntent(CMD_CLOSE));
 
-        Notification notification = builder.build();
+        Notification notification = mNotificationBuilder.build();
         notification.contentIntent = cmdIntent(CMD_BACK_APP);
         notification.bigContentView = bigContentView;
         notification.contentView = contentView;
-        startForeground(FORGROUND_ID, notification);
+        startForeground(FOREGROUND_ID, notification);
     }
 
     private PendingIntent cmdIntent(String cmd) {
@@ -293,7 +290,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
     @Override
     public IBinder onBind(Intent intent) {
         MyLog.d(TAG, "service onBind");
-        return player;
+        return mPlayer;
     }
 
     @Override
@@ -308,18 +305,18 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             //暂时失去音频焦点，比如电话
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT: {
-                if (player.getState() == IPlayer.STATE_PLAYING) {
-                    player.pause();
-                    isLossAudioFocus = true;
+                if (mPlayer.getState() == IPlayer.STATE_PLAYING) {
+                    mPlayer.pause();
+                    mIsLossAudioFocus = true;
                 }
             }
             break;
 
             case AudioManager.AUDIOFOCUS_GAIN: {
-                if (player.getState() == IPlayer.STATE_PAUSE
-                        && isLossAudioFocus) {
-                    player.resume();
-                    isLossAudioFocus = false;
+                if (mPlayer.getState() == IPlayer.STATE_PAUSE
+                        && mIsLossAudioFocus) {
+                    mPlayer.resume();
+                    mIsLossAudioFocus = false;
                 }
             }
             break;
@@ -331,29 +328,28 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         /**
          * 播放队列
          */
-        private List<Music> queue;
+        private List<Music> mQueue;
         /**
          * 播放模式
          */
-        private int mode = MODE_IN_TURN;
+        private int mMode = MODE_IN_TURN;
         /**
          * 当前播放歌曲位置
          */
-        private int currentIndex;
+        private int mCurrentIndex;
         /**
          * 播放器状态
          */
-        private int state = STATE_STOP;
+        private int mState = STATE_STOP;
         /**
          * 音乐文件地址请求
          */
-        private Call fileLinkCall;
-        private Call searchPicCall;
-        private Set<OnLoadedPictureListener> onLoadedPictureListeners;
-        private Set<OnBufferListener> onBufferListeners;
-        private Set<OnPlayStateChangeListener> onPlayStateChangeListeners;
-        private MediaPlayer mediaPlayer;
-
+        private Call mFileLinkCall;
+        private Call mSearchPicCall;
+        private Set<OnLoadedPictureListener> mOnLoadedPictureListeners;
+        private Set<OnBufferListener> mOnBufferListeners;
+        private Set<OnPlayStateChangeListener> mOnPlayStateChangeListeners;
+        private MediaPlayer mMediaPlayer;
 
         /**
          * 超时时间
@@ -361,25 +357,25 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         public static final int BUFFER_TIMEOUT = 30 * 1000;
 
         public Player() {
-            onBufferListeners = new HashSet<>();
-            onPlayStateChangeListeners = new HashSet<>();
-            onLoadedPictureListeners = new HashSet<>();
-            queue = new ArrayList<>();
-            currentIndex = -1;
+            mOnBufferListeners = new HashSet<>();
+            mOnPlayStateChangeListeners = new HashSet<>();
+            mOnLoadedPictureListeners = new HashSet<>();
+            mQueue = new ArrayList<>();
+            mCurrentIndex = -1;
         }
 
         private void initMediaPlayer() {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setOnPreparedListener(this);
-            mediaPlayer.setOnCompletionListener(this);
-            mediaPlayer.setOnErrorListener(this);
-            mediaPlayer.setOnInfoListener(this);
-            mediaPlayer.setOnBufferingUpdateListener(this);
+            mMediaPlayer = new MediaPlayer();
+            mMediaPlayer.setOnPreparedListener(this);
+            mMediaPlayer.setOnCompletionListener(this);
+            mMediaPlayer.setOnErrorListener(this);
+            mMediaPlayer.setOnInfoListener(this);
+            mMediaPlayer.setOnBufferingUpdateListener(this);
         }
 
         @Override
         public List<Music> getQueue() {
-            return new ArrayList<>(queue);
+            return new ArrayList<>(mQueue);
         }
 
         /**
@@ -387,7 +383,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
          */
         @Override
         public void enqueue(List<Music> musics) {
-            queue.addAll(musics);
+            mQueue.addAll(musics);
             Log.d(TAG, "enqueue " + musics.size() + " songs");
         }
 
@@ -395,32 +391,32 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
          * 移出队列
          */
         public void dequeue(int position) {
-            queue.remove(position);
-            if (queue.size() == 0) {
+            mQueue.remove(position);
+            if (mQueue.size() == 0) {
                 //移除后，队列空了
                 clearQueue();
-            } else if (position < currentIndex) {
+            } else if (position < mCurrentIndex) {
                 //更正currentindex
-                currentIndex--;
-            } else if (position == currentIndex) {
+                mCurrentIndex--;
+            } else if (position == mCurrentIndex) {
                 //当移除的歌曲正在播放时
-                if (currentIndex == queue.size()) {
+                if (mCurrentIndex == mQueue.size()) {
                     //刚好播放最后一首歌，又需要移除他,将播放第一首歌曲
-                    currentIndex = 0;
+                    mCurrentIndex = 0;
                 }
-                play(currentIndex);
+                play(mCurrentIndex);
             }
         }
 
         @Override
         public void clearQueue() {
-            if (mediaPlayer == null) {
+            if (mMediaPlayer == null) {
                 return;
             }
 
-            queue.clear();
-            currentIndex = -1;
-            mediaPlayer.reset();
+            mQueue.clear();
+            mCurrentIndex = -1;
+            mMediaPlayer.reset();
             changeState(STATE_STOP);
             setCurMusicPic(null);
             updateNotification();
@@ -433,19 +429,19 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         public void play(int position) {
             handler.removeMessages(WHAT_PLAY_ERROR);
             handler.removeMessages(WHAT_BUFFER_TIMEOUT);
-            if (fileLinkCall != null) {
-                fileLinkCall.cancel();
+            if (mFileLinkCall != null) {
+                mFileLinkCall.cancel();
             }
-            if (searchPicCall != null) {
-                searchPicCall.cancel();
+            if (mSearchPicCall != null) {
+                mSearchPicCall.cancel();
             }
-            if (mediaPlayer == null) {
+            if (mMediaPlayer == null) {
                 initMediaPlayer();
             }
-            mediaPlayer.reset();
+            mMediaPlayer.reset();
 
-            currentIndex = position;
-            Music music = queue.get(currentIndex);
+            mCurrentIndex = position;
+            Music music = mQueue.get(mCurrentIndex);
             changeState(STATE_PREPARING);
             updateNotification();
             String dataPath = music.getData();
@@ -465,9 +461,9 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         private void prepare(Uri uri) {
             try {
-                mediaPlayer.setDataSource(PlayerService.this, uri);
-                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mediaPlayer.prepareAsync();
+                mMediaPlayer.setDataSource(PlayerService.this, uri);
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mMediaPlayer.prepareAsync();
             } catch (IllegalStateException e) {
                 MyLog.w(TAG, "IllegalState");
             } catch (IOException e) {
@@ -478,14 +474,14 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
 
         private void handlerPlayError(final String errorMsg) {
-            state = STATE_STOP;
+            mState = STATE_STOP;
             T.show(errorMsg + ",3s后播放下一曲");
             handler.sendEmptyMessageDelayed(WHAT_PLAY_ERROR, 3000);
         }
 
 
         private void playWebMusic(final String songid) {
-            fileLinkCall = MusicApi.songLink(songid, new ApiCallback<SongUrlInfo>() {
+            mFileLinkCall = MusicApi.songLink(songid, new JsonCallback<SongUrlInfo>() {
                 @Override
                 public void onFailure(Exception e) {
                     handlerPlayError("网络请求失败");
@@ -496,7 +492,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                     SongUrlInfo.SongUrl.Url url = null;
                     if (data != null
                             && data.songUrl != null) {
-                        url = PlayerHelper.selectFileUrl(getApplicationContext(), data.songUrl.urls);
+                        url = PlayerUtil.selectFileUrl(getApplicationContext(), data.songUrl.urls);
                     }
                     if (url == null) {
                         handlerPlayError("此歌曲暂无网络资源");
@@ -509,46 +505,46 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         @Override
         public int getCurrentIndex() {
-            return currentIndex;
+            return mCurrentIndex;
         }
 
         @Override
         public Music getCurrentMusic() {
-            if (currentIndex == -1) {
+            if (mCurrentIndex == -1) {
                 return null;
             }
-            return queue.get(currentIndex);
+            return mQueue.get(mCurrentIndex);
         }
 
         @Override
         public Bitmap getCurMusicPic() {
-            return curMusicPic;
+            return mCurMusicPic;
         }
 
         private void changeState(int newState) {
-            state = newState;
-            for (OnPlayStateChangeListener onPlayStateChangeListener : onPlayStateChangeListeners) {
-                onPlayStateChangeListener.onPlayStateChange(state);
+            mState = newState;
+            for (OnPlayStateChangeListener onPlayStateChangeListener : mOnPlayStateChangeListeners) {
+                onPlayStateChangeListener.onPlayStateChange(mState);
             }
         }
 
         void resume() {
-            mediaPlayer.start();
+            mMediaPlayer.start();
             changeState(STATE_PLAYING);
             updateNotification();
         }
 
         void pause() {
-            mediaPlayer.pause();
+            mMediaPlayer.pause();
             changeState(STATE_PAUSE);
             updateNotification();
         }
 
         @Override
         public void togglePlayPause() {
-            if (state == STATE_PAUSE) {
+            if (mState == STATE_PAUSE) {
                 resume();
-            } else if (state == STATE_PLAYING) {
+            } else if (mState == STATE_PLAYING) {
                 pause();
             }
         }
@@ -556,109 +552,109 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         @Override
         public void next() {
-            if (queue.size() == 0) {
+            if (mQueue.size() == 0) {
                 return;
             }
-            play((currentIndex + 1) % queue.size());
+            play((mCurrentIndex + 1) % mQueue.size());
         }
 
         @Override
         public void previous() {
-            if (queue.size() == 0) {
+            if (mQueue.size() == 0) {
                 return;
             }
-            int lastIndex = currentIndex;
-            if (currentIndex > 0) {
-                lastIndex = currentIndex - 1;
+            int lastIndex = mCurrentIndex;
+            if (mCurrentIndex > 0) {
+                lastIndex = mCurrentIndex - 1;
             }
             play(lastIndex);
         }
 
         @Override
         public int getState() {
-            return state;
+            return mState;
         }
 
         @Override
         public void setPlayMode(int mode) {
-            if (this.mode != mode) {
-                this.mode = mode;
+            if (this.mMode != mode) {
+                this.mMode = mode;
             }
         }
 
         @Override
         public int getPlayMode() {
-            return mode;
+            return mMode;
         }
 
         @Override
         public void addPlayStateChangeListener(OnPlayStateChangeListener onPlayStateChangeListener) {
-            onPlayStateChangeListeners.add(onPlayStateChangeListener);
+            mOnPlayStateChangeListeners.add(onPlayStateChangeListener);
         }
 
         @Override
         public void removePlayStateChangeListener(OnPlayStateChangeListener onPlayStateChangeListener) {
-            onPlayStateChangeListeners.remove(onPlayStateChangeListener);
+            mOnPlayStateChangeListeners.remove(onPlayStateChangeListener);
         }
 
         @Override
         public void addOnBufferListener(OnBufferListener onBufferListener) {
-            onBufferListeners.add(onBufferListener);
+            mOnBufferListeners.add(onBufferListener);
         }
 
         @Override
         public void removeBufferListener(OnBufferListener onBufferListener) {
-            onBufferListeners.remove(onBufferListener);
+            mOnBufferListeners.remove(onBufferListener);
         }
 
         @Override
         public void addOnLoadedPictureListener(OnLoadedPictureListener onLoadedPictureListener) {
-            onLoadedPictureListeners.add(onLoadedPictureListener);
+            mOnLoadedPictureListeners.add(onLoadedPictureListener);
         }
 
         @Override
         public void removeOnLoadedPictureListener(OnLoadedPictureListener onLoadedPictureListener) {
-            onLoadedPictureListeners.remove(onLoadedPictureListener);
+            mOnLoadedPictureListeners.remove(onLoadedPictureListener);
         }
 
         @Override
         public int getProgress() {
-            if (state >= IPlayer.STATE_PREPARED) {
-                return mediaPlayer.getCurrentPosition();
+            if (mState >= IPlayer.STATE_PREPARED) {
+                return mMediaPlayer.getCurrentPosition();
             }
             return -1;
         }
 
         @Override
         public int getDuration() {
-            if (state >= IPlayer.STATE_PREPARED) {
-                return mediaPlayer.getDuration();
+            if (mState >= IPlayer.STATE_PREPARED) {
+                return mMediaPlayer.getDuration();
             }
             return -1;
         }
 
         @Override
         public void seekTo(int msec) {
-            if (state >= STATE_PREPARED) {
-                mediaPlayer.seekTo(msec);
+            if (mState >= STATE_PREPARED) {
+                mMediaPlayer.seekTo(msec);
             }
         }
 
         @Override
         public void onCompletion(MediaPlayer mp) {
-            switch (mode) {
+            switch (mMode) {
                 case MODE_IN_TURN: {
                     next();
                 }
                 break;
 
                 case MODE_LOOP: {
-                    mediaPlayer.start();
+                    mMediaPlayer.start();
                 }
                 break;
 
                 case MODE_RANDOM: {
-                    play(new Random().nextInt(queue.size()));
+                    play(new Random().nextInt(mQueue.size()));
                 }
                 break;
             }
@@ -701,8 +697,8 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         }
 
         private void setCurMusicPic(Bitmap img) {
-            curMusicPic = img;
-            for (OnLoadedPictureListener listener : onLoadedPictureListeners) {
+            mCurMusicPic = img;
+            for (OnLoadedPictureListener listener : mOnLoadedPictureListeners) {
                 listener.onLoadedPicture(img);
             }
             updateNotification();
@@ -715,13 +711,13 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             changeState(STATE_PLAYING);
 
             //加载音乐图片
-            Music music = queue.get(currentIndex);
+            Music music = mQueue.get(mCurrentIndex);
             String artist = music.getArtist();
-            searchPicCall = MusicApi.searchLrcPic(music.getTitle(),
+            mSearchPicCall = MusicApi.searchLrcPic(music.getTitle(),
                     "<unknown>".equals(artist) ? "" : artist,
                     2,
-                    new ApiCallback<LrcPicData>() {
-                        final int requestIndex = currentIndex;
+                    new JsonCallback<LrcPicData>() {
+                        final int requestIndex = mCurrentIndex;
 
                         @Override
                         public void onSuccess(LrcPicData data) {
@@ -739,21 +735,22 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                                 }
                             }
                             if (!TextUtils.isEmpty(pic)) {
-                                imageLoader.loadImage(pic, new SimpleImageLoadingListener() {
-                                    @Override
-                                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                                        if (requestIndex == getCurrentIndex()) {
-                                            setCurMusicPic(loadedImage);
-                                        }
-                                    }
+                                ImageLoader.getInstance()
+                                        .loadImage(pic, new SimpleImageLoadingListener() {
+                                            @Override
+                                            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                                if (requestIndex == getCurrentIndex()) {
+                                                    setCurMusicPic(loadedImage);
+                                                }
+                                            }
 
-                                    @Override
-                                    public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                                        if (requestIndex == getCurrentIndex()) {
-                                            setCurMusicPic(null);
-                                        }
-                                    }
-                                });
+                                            @Override
+                                            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                                                if (requestIndex == getCurrentIndex()) {
+                                                    setCurMusicPic(null);
+                                                }
+                                            }
+                                        });
                             }
                         }
 
@@ -769,13 +766,13 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         public void onBufferingUpdate(MediaPlayer mp, int percent) {
             //percent是已缓冲的时间减去已播放的时间 占  未播放的时间 的百分百
             //比如歌曲时长300s,已播放20s,已缓冲50s,则percent=(50-20)/(300-50);
-            if (state >= STATE_PREPARED) {
+            if (mState >= STATE_PREPARED) {
                 int duration = mp.getDuration();
                 int currentPosition = mp.getCurrentPosition();
                 int remain = duration - currentPosition;
                 int buffedPosition = currentPosition + (int) Math.floor(remain * percent / 100f);
 
-                for (OnBufferListener listener : onBufferListeners) {
+                for (OnBufferListener listener : mOnBufferListeners) {
                     listener.onBufferingUpdate(buffedPosition);
                 }
             }
@@ -783,9 +780,9 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         void release() {
             changeState(STATE_STOP);
-            if (mediaPlayer != null) {
-                mediaPlayer.release();
-                mediaPlayer = null;
+            if (mMediaPlayer != null) {
+                mMediaPlayer.release();
+                mMediaPlayer = null;
             }
         }
 
@@ -794,7 +791,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             switch (what) {
                 case MediaPlayer.MEDIA_INFO_BUFFERING_START: {
                     handler.sendEmptyMessageDelayed(WHAT_BUFFER_TIMEOUT, BUFFER_TIMEOUT);
-                    for (OnBufferListener listener : onBufferListeners) {
+                    for (OnBufferListener listener : mOnBufferListeners) {
                         listener.onBufferStart();
                     }
                 }
@@ -802,7 +799,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
                 case MediaPlayer.MEDIA_INFO_BUFFERING_END: {
                     handler.removeMessages(WHAT_BUFFER_TIMEOUT);
-                    for (OnBufferListener listener : onBufferListeners) {
+                    for (OnBufferListener listener : mOnBufferListeners) {
                         listener.onBufferEnd();
                     }
                 }

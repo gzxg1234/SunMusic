@@ -1,6 +1,7 @@
 package com.sanron.music.net.bean;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 /**
  * Created by sanron on 16-4-17.
@@ -92,7 +93,7 @@ public class Singer {
      * mv数量
      */
     @JSONField(name = "mv_total")
-    public int mvTotal;
+    public String mvTotal;
 
     /**
      * 地区
@@ -134,12 +135,12 @@ public class Singer {
     /**
      * 专辑数
      */
-    @JSONField(name = "albums_total")
-    public String albumsTotal;
+    @JSONField(name = "albums_total", serialzeFeatures = {SerializerFeature.WriteNullNumberAsZero})
+    public int albumsTotal;
 
     /**
      * 歌曲数
      */
-    @JSONField(name = "songs_total")
-    public String songsTotal;
+    @JSONField(name = "songs_total", serialzeFeatures = {SerializerFeature.WriteNullNumberAsZero})
+    public int songsTotal;
 }

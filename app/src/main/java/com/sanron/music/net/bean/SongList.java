@@ -49,15 +49,15 @@ public class SongList {
     public String pic700;
 
     /**
-     * 音乐
-     */
-    @JSONField(name = "content")
-    public List<Song> songs;
-
-    /**
      * 链接
      */
     @JSONField(name = "url")
     public String url;
+
+    /**
+     * 音乐
+     */
+    @JSONField(name = "content")
+    public List<Song> songs;
 
 }

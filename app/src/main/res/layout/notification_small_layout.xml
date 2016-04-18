@@ -8,7 +8,7 @@
     android:orientation="horizontal">
 
     <ImageView
-        android:id="@+id/top_board"
+        android:id="@+id/iv_album_pic"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:scaleType="centerCrop"
@@ -24,7 +24,7 @@
         android:paddingLeft="8dp">
 
         <TextView
-            android:id="@+id/tv_title"
+            android:id="@+id/tv_queue_item_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -34,7 +34,7 @@
             tools:text="Love Yourself" />
 
         <TextView
-            android:id="@+id/tv_artist"
+            android:id="@+id/tv_text2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"

@@ -5,6 +5,7 @@
     android:background="@mipmap/bg_navigation_header"
     android:gravity="center_vertical"
     android:orientation="vertical"
+    android:id="@+id/navigation_header"
     android:paddingLeft="40dp">
 
     <de.hdodenhof.circleimageview.CircleImageView

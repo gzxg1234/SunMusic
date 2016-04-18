@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
-import com.sanron.music.db.model.PlayList;
+import com.sanron.music.db.bean.PlayList;
 
 /**
  * 修改播放列表名

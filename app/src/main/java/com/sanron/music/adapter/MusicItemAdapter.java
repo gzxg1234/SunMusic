@@ -20,11 +20,11 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 import com.sanron.music.R;
-import com.sanron.music.db.model.Music;
-import com.sanron.music.net.ApiCallback;
+import com.sanron.music.common.MyLog;
+import com.sanron.music.db.bean.Music;
+import com.sanron.music.net.JsonCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.LrcPicData;
-import com.sanron.music.utils.MyLog;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,28 +36,28 @@ import okhttp3.Call;
  */
 public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.MusicItemHolder> {
 
-    private List<Music> data;
-    private Context context;
-    private SparseBooleanArray checkStates;
-    private int checkedItemCount;
-    private boolean isMultiMode = false;
-    private boolean isFirstBindView = true;
-    private int playingPosition = -1;//
-    private ImageLoader imageLoader;
-    private MemoryCache memoryCache;
-    private int playingTextColor;//播放中文字颜色
-    private int normalTitleTextColor;//正常title颜色
-    private int normalArtistTextColor;//正常artist颜色
-    private HashMap<Long, String> avatarUrls;
+    private List<Music> mData;
+    private Context mContext;
+    private SparseBooleanArray mCheckStates;
+    private int mCheckedItemCount;
+    private boolean mIsMultiMode = false;
+    private boolean mIsFirstBindView = true;
+    private int mPlayingPosition = -1;//
+    private ImageLoader mImageLoader;
+    private MemoryCache mMemoryCache;
+    private int mPlayingTextColor;//播放中文字颜色
+    private int mNormalTitleTextColor;//正常title颜色
+    private int mNormalArtistTextColor;//正常artist颜色
+    private HashMap<Long, String> mAvatarUrlCache;
 
     public MusicItemAdapter(Context context) {
-        this.context = context;
-        imageLoader = ImageLoader.getInstance();
-        memoryCache = imageLoader.getMemoryCache();
+        this.mContext = context;
+        mImageLoader = ImageLoader.getInstance();
+        mMemoryCache = mImageLoader.getMemoryCache();
         Resources resources = context.getResources();
-        playingTextColor = resources.getColor(R.color.colorAccent);
-        normalTitleTextColor = resources.getColor(R.color.textColorPrimary);
-        normalArtistTextColor = resources.getColor(R.color.textColorSecondary);
+        mPlayingTextColor = resources.getColor(R.color.colorAccent);
+        mNormalTitleTextColor = resources.getColor(R.color.textColorPrimary);
+        mNormalArtistTextColor = resources.getColor(R.color.textColorSecondary);
     }
 
     private RecyclerView.OnScrollListener onScrollListener = new RecyclerView.OnScrollListener() {
@@ -85,61 +85,61 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
     };
 
     public boolean isMultiMode() {
-        return isMultiMode;
+        return mIsMultiMode;
     }
 
     public Music getItem(int position) {
-        if (data != null) {
-            return data.get(position);
+        if (mData != null) {
+            return mData.get(position);
         }
         return null;
     }
 
     public void setMultiMode(boolean multiMode) {
-        if (this.isMultiMode == multiMode) {
+        if (this.mIsMultiMode == multiMode) {
             return;
         }
 
         if (multiMode) {
-            if (checkStates == null) {
-                checkStates = new SparseBooleanArray();
+            if (mCheckStates == null) {
+                mCheckStates = new SparseBooleanArray();
             } else {
-                checkStates.clear();
-                checkedItemCount = 0;
+                mCheckStates.clear();
+                mCheckedItemCount = 0;
             }
         }
-        isMultiMode = multiMode;
+        mIsMultiMode = multiMode;
     }
 
     public void setData(List<Music> data) {
-        if (this.data == data) {
+        if (this.mData == data) {
             return;
         }
 
-        this.data = data;
-        if (avatarUrls == null) {
-            avatarUrls = new HashMap<>(data.size());
+        this.mData = data;
+        if (mAvatarUrlCache == null) {
+            mAvatarUrlCache = new HashMap<>(data.size());
         }
         setFirstBindView(true);
         notifyDataSetChanged();
     }
 
     public int getPlayingPosition() {
-        return playingPosition;
+        return mPlayingPosition;
     }
 
     public List<Music> getData() {
-        return data;
+        return mData;
     }
 
     public void setFirstBindView(boolean firstBindView) {
-        isFirstBindView = firstBindView;
+        mIsFirstBindView = firstBindView;
     }
 
     //查找缓存
     private Bitmap getMemoryBitmap(String uri, ImageView iv) {
         String key = MemoryCacheUtils.generateKey(uri, new ImageSize(iv.getWidth(), iv.getHeight()));
-        List<Bitmap> bmps = MemoryCacheUtils.findCachedBitmapsForImageUri(key, memoryCache);
+        List<Bitmap> bmps = MemoryCacheUtils.findCachedBitmapsForImageUri(key, mMemoryCache);
         if (bmps.size() > 0) {
             return bmps.get(0);
         }
@@ -147,22 +147,22 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
     }
 
     public boolean isItemChecked(int position) {
-        if (isMultiMode && checkStates != null) {
-            return checkStates.get(position);
+        if (mIsMultiMode && mCheckStates != null) {
+            return mCheckStates.get(position);
         }
         return false;
     }
 
 
     public void setItemChecked(int position, boolean checked) {
-        if (isMultiMode && checkStates != null) {
-            boolean oldChecked = checkStates.get(position);
+        if (mIsMultiMode && mCheckStates != null) {
+            boolean oldChecked = mCheckStates.get(position);
             if (checked != oldChecked) {
-                checkStates.put(position, checked);
+                mCheckStates.put(position, checked);
                 if (checked) {
-                    checkedItemCount++;
+                    mCheckedItemCount++;
                 } else {
-                    checkedItemCount--;
+                    mCheckedItemCount--;
                 }
                 if (onItemCheckedListener != null) {
                     onItemCheckedListener.onItemChecked(position, checked);
@@ -173,18 +173,18 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
 
     @Override
     public MusicItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.list_music_item, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.list_music_item, parent, false);
         return new MusicItemHolder(view);
     }
 
     public void setPlayingPosition(int position) {
-        final int oldPos = playingPosition;
-        playingPosition = position;
+        final int oldPos = mPlayingPosition;
+        mPlayingPosition = position;
         if (oldPos != -1) {
             notifyItemChanged(oldPos);
         }
-        if (playingPosition != -1) {
-            notifyItemChanged(playingPosition);
+        if (mPlayingPosition != -1) {
+            notifyItemChanged(mPlayingPosition);
         }
     }
 
@@ -202,22 +202,22 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
 
     @Override
     public void onBindViewHolder(final MusicItemHolder holder, final int position) {
-        final Music music = data.get(position);
+        final Music music = mData.get(position);
         String artist = music.getArtist();
         if ("<unknown>".equals(artist)) {
             artist = "未知歌手";
         }
         holder.tvTitle.setText(music.getTitle());
         holder.tvArtist.setText(artist);
-        if (position == playingPosition) {
-            holder.tvTitle.setTextColor(playingTextColor);
-            holder.tvArtist.setTextColor(playingTextColor);
+        if (position == mPlayingPosition) {
+            holder.tvTitle.setTextColor(mPlayingTextColor);
+            holder.tvArtist.setTextColor(mPlayingTextColor);
         } else {
-            holder.tvTitle.setTextColor(normalTitleTextColor);
-            holder.tvArtist.setTextColor(normalArtistTextColor);
+            holder.tvTitle.setTextColor(mNormalTitleTextColor);
+            holder.tvArtist.setTextColor(mNormalArtistTextColor);
         }
 
-        if (isMultiMode) {
+        if (mIsMultiMode) {
             holder.ibtnMenu.setVisibility(View.GONE);
             holder.cbSelect.setVisibility(View.VISIBLE);
             holder.cbSelect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -234,10 +234,10 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
 
         //加载图片
         holder.ivPicture.setTag(null);
-        if (isFirstBindView) {
+        if (mIsFirstBindView) {
             displayAvatar(holder, position);
         } else {
-            String avatar = avatarUrls.get(music.getId());
+            String avatar = mAvatarUrlCache.get(music.getId());
             if (!TextUtils.isEmpty(avatar)) {
                 //加载ram缓存图片
                 Bitmap cacheBmp = getMemoryBitmap(avatar, holder.ivPicture);
@@ -260,9 +260,9 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
     }
 
     private void displayAvatar(final MusicItemHolder holder, int position) {
-        final Music music = data.get(position);
+        final Music music = mData.get(position);
         String artist = music.getArtist();
-        String avatar = avatarUrls.get(music.getId());
+        String avatar = mAvatarUrlCache.get(music.getId());
         System.out.println(music.getId() + " " + music.getTitle() + " " + avatar);
         if (avatar == null) {
             //搜索头像
@@ -270,13 +270,13 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
             holder.call = MusicApi.searchLrcPic(music.getTitle(),
                     "<unknown>".equals(artist) ? "" : artist,
                     2,
-                    new ApiCallback<LrcPicData>() {
+                    new JsonCallback<LrcPicData>() {
                         @Override
                         public void onSuccess(LrcPicData data) {
                             List<LrcPicData.LrcPic> lrcPics = data.lrcPics;
                             String avatar = "";
                             if (lrcPics == null) {
-                                avatarUrls.put(music.getId(), avatar);
+                                mAvatarUrlCache.put(music.getId(), avatar);
                                 return;
                             }
 
@@ -289,13 +289,13 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
                                     break;
                                 }
                             }
-                            avatarUrls.put(music.getId(), avatar);
+                            mAvatarUrlCache.put(music.getId(), avatar);
                             if (!TextUtils.isEmpty(avatar)) {
                                 final String finalAvatar = avatar;
                                 holder.ivPicture.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        imageLoader.displayImage(finalAvatar, holder.ivPicture);
+                                        mImageLoader.displayImage(finalAvatar, holder.ivPicture);
                                     }
                                 });
                             }
@@ -307,19 +307,19 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
                         }
                     });
         } else if (!avatar.isEmpty()) {
-            imageLoader.displayImage(avatar, holder.ivPicture);
+            mImageLoader.displayImage(avatar, holder.ivPicture);
         } else {
             holder.ivPicture.setImageResource(R.mipmap.default_small_song_pic);
         }
     }
 
     public int getCheckedItemCount() {
-        return checkedItemCount;
+        return mCheckedItemCount;
     }
 
     @Override
     public int getItemCount() {
-        return data == null ? 0 : data.size();
+        return mData == null ? 0 : mData.size();
     }
 
     public class MusicItemHolder extends RecyclerView.ViewHolder {
@@ -333,9 +333,9 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
 
         public MusicItemHolder(final View itemView) {
             super(itemView);
-            ivPicture = (ImageView) itemView.findViewById(R.id.top_board);
-            tvTitle = (TextView) itemView.findViewById(R.id.tv_title);
-            tvArtist = (TextView) itemView.findViewById(R.id.tv_artist);
+            ivPicture = (ImageView) itemView.findViewById(R.id.iv_music_pic);
+            tvTitle = (TextView) itemView.findViewById(R.id.tv_music_title);
+            tvArtist = (TextView) itemView.findViewById(R.id.tv_music_artist);
             cbSelect = (CheckBox) itemView.findViewById(R.id.cb_select);
             ibtnMenu = (ImageButton) itemView.findViewById(R.id.ibtn_item_menu);
             itemView.setOnClickListener(new View.OnClickListener() {

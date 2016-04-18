@@ -5,222 +5,294 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
+import com.sanron.music.AppContext;
 import com.sanron.music.R;
-import com.sanron.music.db.model.PlayList;
-import com.sanron.music.fragments.MyMusic.AlbumFrag;
-import com.sanron.music.fragments.MyMusic.ArtistFrag;
-import com.sanron.music.fragments.MyMusic.ListMusicFrag;
-import com.sanron.music.fragments.MyMusic.LocalMusicFrag;
-import com.sanron.music.fragments.MyMusic.PlayListFrag;
-import com.sanron.music.fragments.MyMusic.RecentPlayFrag;
-import com.sanron.music.fragments.PagerFragment;
-import com.sanron.music.fragments.PlayerFrag;
-import com.sanron.music.fragments.WebMusic.AllTagFrag;
-import com.sanron.music.fragments.WebMusic.BillboardFrag;
-import com.sanron.music.fragments.WebMusic.GedanFrag;
-import com.sanron.music.fragments.WebMusic.RadioFrag;
-import com.sanron.music.fragments.WebMusic.RecmdFrag;
-import com.sanron.music.fragments.WebMusic.SingerFrag;
-import com.sanron.music.fragments.WebMusic.SongListFrag;
-import com.sanron.music.fragments.WebMusic.TagSongFrag;
-import com.sanron.music.utils.MyLog;
-import com.sanron.music.view.NavigationHeader;
+import com.sanron.music.common.ViewTool;
+import com.sanron.music.db.bean.PlayList;
+import com.sanron.music.service.PlayerUtil;
+import com.sanron.music.ui.PagerFragment;
+import com.sanron.music.ui.PlayerFrag;
+import com.sanron.music.ui.mymusic.AlbumFrag;
+import com.sanron.music.ui.mymusic.ArtistFrag;
+import com.sanron.music.ui.mymusic.ListMusicFrag;
+import com.sanron.music.ui.mymusic.LocalMusicFrag;
+import com.sanron.music.ui.mymusic.NavigationHeaderFrag;
+import com.sanron.music.ui.mymusic.PlayListFrag;
+import com.sanron.music.ui.mymusic.RecentPlayFrag;
+import com.sanron.music.ui.web.AllTagFrag;
+import com.sanron.music.ui.web.BillboardFrag;
+import com.sanron.music.ui.web.GedanFrag;
+import com.sanron.music.ui.web.RadioFrag;
+import com.sanron.music.ui.web.RecmdFrag;
+import com.sanron.music.ui.web.SingerFrag;
+import com.sanron.music.ui.web.SingerInfoFrag;
+import com.sanron.music.ui.web.SongListFrag;
+import com.sanron.music.ui.web.TagSongFrag;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 
-public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceConnection {
 
-    private AppBarLayout appBar;
-    private Toolbar toolbar;
-    private DrawerLayout drawerLayout;
-    private FragmentManager fm;
-    private MaterialMenuDrawable materialMenu;
-    private SlidingUpPanelLayout slidingUpPanelLayout;
-    private PlayerFrag playerFrag;
-    private String currentFragmentTag;//当前显示的fragment;
+    private AppBarLayout mAppBar;
+    private Toolbar mToolbar;
+    private DrawerLayout mDrawerLayout;
+    private FragmentManager mFm;
+    private MaterialMenuDrawable mMaterialMenu;
+    private SlidingUpPanelLayout mSlidingUpPanelLayout;
+    private PlayerFrag mPlayerFrag;
+    private NavigationView mNavigationView;
 
-    private List<BackPressedHandler> backPressedHandlers;
+    private Set<PlayerReadyCallback> mPlayerReadyCallbacks;
+    private Set<BackPressedHandler> mBackPressedHandlers;
 
-    private NavigationView navigationView;
+    private boolean mIsShowingPlayListSongsFrag = false;//是否在显示列表歌曲fragment
 
-    private boolean isShowingPlayListSongsFrag = false;//是否在显示列表歌曲fragment
+    private boolean mIsConnectedPlayer;
 
-    public static final String TAG = MainActivity.class.getName();
+    private int curPagerPosition = -1;
 
-    public static final String TAG_MYMUSIC = "MyMusic";
-    public static final String TAG_WEBMUSIC = "WebMusic";
-    private Map<String, String> titles;
+    public static final String[] PAGERS = new String[]{
+            "MyMusic", "WebMusic", "DownloadManager"
+    };
+    public static final String[] PAGER_TITLES = new String[]{
+            "我的音乐", "音乐库", "下载管理"
+    };
 
-
-    public void collapseSldingPanel() {
-        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-    }
-
-    public void showSongList(String listid) {
-        fm.beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_right,
-                        R.anim.slide_out_right,
-                        R.anim.slide_in_right,
-                        R.anim.slide_out_right)
-                .add(R.id.fragment_container_1, SongListFrag.newInstance(listid),
-                        SongListFrag.class.getName())
-                .addToBackStack(SongListFrag.class.getName())
-                .commit();
-    }
-
-    public void showTagSong(String tag) {
-        fm.beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_right,
-                        R.anim.slide_out_right,
-                        R.anim.slide_in_right,
-                        R.anim.slide_out_right)
-                .add(R.id.fragment_container_1, TagSongFrag.newInstance(tag),
-                        TagSongFrag.class.getName())
-                .addToBackStack(TagSongFrag.class.getName())
-                .commit();
-    }
-
-    public void showAllTag() {
-        fm.beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_right,
-                        R.anim.slide_out_right,
-                        R.anim.slide_in_right,
-                        R.anim.slide_out_right)
-                .add(R.id.fragment_container_1, AllTagFrag.newInstance(),
-                        AllTagFrag.class.getName())
-                .addToBackStack(AllTagFrag.class.getName())
-                .commit();
-    }
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ServiceConnection callback = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                initView(savedInstanceState);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                MyLog.e(TAG, "service disconnected!");
-                finish();
-            }
-        };
-
-        if (!appContext.bindService(callback)) {
-            MyLog.e(TAG, "can't bind service!");
-            finish();
-        }
+        init(savedInstanceState);
     }
 
-    public void addBackPressedHandler(BackPressedHandler handler) {
-        if (backPressedHandlers != null) {
-            backPressedHandlers.add(handler);
-        }
-    }
+    private void init(Bundle savedInstanceState) {
+        mSlidingUpPanelLayout = $(R.id.sliding_panel);
+        mNavigationView = $(R.id.navigation_view);
+        mDrawerLayout = $(R.id.drawer_layout);
+        mToolbar = $(R.id.toolbar);
+        mAppBar = $(R.id.app_bar);
 
-    public void removeBackPressedHandler(BackPressedHandler handler) {
-        if (backPressedHandlers != null) {
-            backPressedHandlers.remove(handler);
-        }
-    }
+        mPlayerReadyCallbacks = new HashSet<>();
+        mBackPressedHandlers = new HashSet<>();
+        mFm = getSupportFragmentManager();
 
-    private void initView(Bundle savedInstanceState) {
-        titles = new HashMap<>();
-        backPressedHandlers = new ArrayList<>();
-        NavigationHeader navigationHeader = new NavigationHeader(this, appContext.getMusicPlayer());
-        fm = getSupportFragmentManager();
-        slidingUpPanelLayout = $(R.id.sliding_panel);
-        navigationView = $(R.id.navigation_view);
-        drawerLayout = $(R.id.drawer_layout);
-        toolbar = $(R.id.toolbar);
-        appBar = $(R.id.app_bar);
-        materialMenu = new MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN);
-        navigationView.addHeaderView(navigationHeader);
-        setSupportActionBar(toolbar);
+        setSupportActionBar(mToolbar);
+        mMaterialMenu = new MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN);
+        mToolbar.setNavigationIcon(mMaterialMenu);
 
-        titles.put(TAG_MYMUSIC, "我的音乐");
-        titles.put(TAG_WEBMUSIC, "音乐库");
-        navigationView.setNavigationItemSelectedListener(this);
+        setUpHeader();
+        mNavigationView.setNavigationItemSelectedListener(this);
 
-        appContext.setViewFitsStatusBar(appBar);
-        toolbar.setNavigationIcon(materialMenu);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        ViewTool.setViewFitsStatusBar(mAppBar);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isShowingPlayListSongsFrag) {
+                if (mIsShowingPlayListSongsFrag) {
                     dismissPlayListSongs();
                 } else {
-                    if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                        drawerLayout.closeDrawer(GravityCompat.START);
+                    if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                        mDrawerLayout.closeDrawer(GravityCompat.START);
                     } else {
-                        drawerLayout.openDrawer(GravityCompat.START);
+                        mDrawerLayout.openDrawer(GravityCompat.START);
                     }
                 }
             }
         });
 
-        if (savedInstanceState == null) {
-            playerFrag = new PlayerFrag();
-            fm.beginTransaction()
-                    .add(R.id.player_frag_container, playerFrag, PlayerFrag.class.getName())
+        //正在播放UI
+        mPlayerFrag = (PlayerFrag) mFm.findFragmentByTag(PlayerFrag.class.getName());
+        if (mPlayerFrag == null) {
+            mPlayerFrag = new PlayerFrag();
+            mFm.beginTransaction()
+                    .add(R.id.player_frag_container, mPlayerFrag, PlayerFrag.class.getName())
                     .commit();
-            changeToFragment(TAG_MYMUSIC);
-        } else {
-            SaveState saveState = savedInstanceState.getParcelable("savestate");
-            currentFragmentTag = saveState.currentFragTag;
-            playerFrag = (PlayerFrag) fm.findFragmentByTag(PlayerFrag.class.getName());
-            isShowingPlayListSongsFrag = saveState.isShowingPlayListSongsFrag;
-            MaterialMenuDrawable.IconState iconState = saveState.menuState;
-            if (iconState != null) {
-                materialMenu.setIconState(iconState);
-            }
-            toolbar.setTitle(saveState.titleText);
         }
 
-        slidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+        int pagerPosition = 0;
+        if (savedInstanceState != null) {
+            pagerPosition = savedInstanceState.getInt("curPagerPosition");
+            String title = savedInstanceState.getString("title");
+            mToolbar.setTitle(title);
+
+            mIsShowingPlayListSongsFrag =
+                    savedInstanceState.getBoolean("isShowingPlayListSongsFrag");
+
+            String iconStateName = savedInstanceState.getString("iconState");
+            MaterialMenuDrawable.IconState iconState =
+                    MaterialMenuDrawable.IconState.valueOf(iconStateName);
+            if (iconState != null) {
+                mMaterialMenu.setIconState(iconState);
+            }
+        }
+        switchPager(pagerPosition);
+
+
+        mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
                 if (slideOffset == 0) {
-                    playerFrag.setSmallControllerVisibility(View.VISIBLE);
+                    mPlayerFrag.setSmallControllerVisibility(View.VISIBLE);
                 } else {
-                    playerFrag.setSmallControllerVisibility(View.INVISIBLE);
+                    mPlayerFrag.setSmallControllerVisibility(View.INVISIBLE);
                 }
             }
 
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-                    slidingUpPanelLayout.setTouchEnabled(true);
-                    drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    mSlidingUpPanelLayout.setTouchEnabled(true);
+                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                 } else if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                    slidingUpPanelLayout.setTouchEnabled(false);
-                    drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    mSlidingUpPanelLayout.setTouchEnabled(false);
+                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                 }
             }
         });
 
+        PlayerUtil.bindService(this, this);
+    }
+
+    private void setUpHeader() {
+        View navigationHeader = mNavigationView.getHeaderView(0);
+        ViewTool.setViewFitsStatusBar(navigationHeader);
+        NavigationHeaderFrag headerFrag = (NavigationHeaderFrag) mFm.findFragmentByTag(NavigationHeaderFrag.class.getName());
+        if (headerFrag == null) {
+            headerFrag = new NavigationHeaderFrag();
+            mFm.beginTransaction()
+                    .add(headerFrag, NavigationHeaderFrag.class.getName())
+                    .commit();
+        }
+        headerFrag.setHeader(navigationHeader);
+        addPlayerReadyCallback(headerFrag);
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        mIsConnectedPlayer = true;
+        for (PlayerReadyCallback callback : mPlayerReadyCallbacks) {
+            callback.onPlayerReady();
+        }
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        finish();
+    }
+
+    public void collapseSlidingPanel() {
+        mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    }
+
+    public void showSongList(String listId) {
+        addFragmentToFront(SongListFrag.newInstance(listId));
+    }
+
+    public void showTagSong(String tag) {
+        addFragmentToFront(TagSongFrag.newInstance(tag));
+    }
+
+    public void showAllTag() {
+        addFragmentToFront(AllTagFrag.newInstance());
+    }
+
+    public void showSinger(String artistId) {
+        addFragmentToFront(SingerInfoFrag.newInstance(artistId));
+    }
+
+    private void addFragmentToFront(Fragment fragment) {
+        mFm.beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_right,
+                        R.anim.slide_out_right,
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_right)
+                .add(R.id.fragment_container_1, fragment,
+                        fragment.getClass().getName())
+                .addToBackStack(fragment.getClass().getName())
+                .commit();
+    }
+
+    public void addBackPressedHandler(BackPressedHandler handler) {
+        mBackPressedHandlers.add(handler);
+    }
+
+    public void removeBackPressedHandler(BackPressedHandler handler) {
+        mBackPressedHandlers.remove(handler);
+    }
+
+    public void addPlayerReadyCallback(PlayerReadyCallback callback) {
+        if (mPlayerReadyCallbacks.add(callback)
+                && mIsConnectedPlayer) {
+            callback.onPlayerReady();
+        }
+    }
+
+    public void removePlayerReadyCallback(PlayerReadyCallback callback) {
+        mPlayerReadyCallbacks.remove(callback);
+    }
+
+
+    public void switchPager(int pos) {
+        if (pos == curPagerPosition) {
+            return;
+        }
+
+        FragmentTransaction ft = mFm.beginTransaction();
+        //隐藏当前显示fragment
+        System.out.println(pos);
+        System.out.println(curPagerPosition);
+        for (int i = 0; i < PAGERS.length; i++) {
+            if (i != pos) {
+                Fragment fragment = mFm.findFragmentByTag(PAGERS[i]);
+                if (fragment != null) {
+                    ft.hide(fragment);
+                }
+            }
+        }
+
+        Fragment toFragment = mFm.findFragmentByTag(PAGERS[pos]);
+        if (toFragment == null) {
+            //未添加,则添加
+            switch (pos) {
+                case 0: {
+                    String[] titles = new String[]{"我的歌单", "最近播放", "本地音乐", "艺术家", "专辑"};
+                    String[] fragments = new String[]{PlayListFrag.class.getName(), RecentPlayFrag.class.getName(),
+                            LocalMusicFrag.class.getName(), ArtistFrag.class.getName(), AlbumFrag.class.getName()};
+                    toFragment = PagerFragment.newInstance(titles, fragments);
+                }
+                break;
+
+                case 1: {
+                    String[] titles = new String[]{"推荐", "排行", "歌手", "歌单", "电台"};
+                    String[] fragments = new String[]{RecmdFrag.class.getName(), BillboardFrag.class.getName(),
+                            SingerFrag.class.getName(), GedanFrag.class.getName(), RadioFrag.class.getName()};
+                    toFragment = PagerFragment.newInstance(titles, fragments);
+                }
+                break;
+            }
+            ft.add(R.id.fragment_container_2, toFragment, PAGERS[pos]);
+        } else {
+            //否则显示
+            ft.show(toFragment);
+        }
+        curPagerPosition = pos;
+        mToolbar.setTitle(PAGER_TITLES[curPagerPosition]);
+        ft.commit();
     }
 
     /**
@@ -228,7 +300,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      */
     public void showPlayListSongs(PlayList playList) {
         ListMusicFrag listMusicFrag = ListMusicFrag.newInstance(playList);
-        fm.beginTransaction()
+        mFm.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_top,
                         R.anim.slide_out_bottom,
                         R.anim.slide_in_top,
@@ -236,114 +308,80 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .add(R.id.fragment_container_2, listMusicFrag, ListMusicFrag.TAG)
                 .addToBackStack(ListMusicFrag.class.getName())
                 .commit();
-        toolbar.setTitle(playList.getTitle());
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
-        isShowingPlayListSongsFrag = true;
+        mToolbar.setTitle(playList.getTitle());
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        mMaterialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
+        mIsShowingPlayListSongsFrag = true;
     }
 
     public void dismissPlayListSongs() {
-        if (fm.popBackStackImmediate(ListMusicFrag.class.getName(),
+        if (mFm.popBackStackImmediate(ListMusicFrag.class.getName(),
                 FragmentManager.POP_BACK_STACK_INCLUSIVE)) {
-            toolbar.setTitle("我的音乐");
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-            materialMenu.animateIconState(MaterialMenuDrawable.IconState.BURGER);
-            isShowingPlayListSongsFrag = false;
+            mToolbar.setTitle("我的音乐");
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            mMaterialMenu.animateIconState(MaterialMenuDrawable.IconState.BURGER);
+            mIsShowingPlayListSongsFrag = false;
         }
     }
 
     @Override
     public void onBackPressed() {
-        if (backPressedHandlers.size() > 0) {
-            for (int i = 0; i < backPressedHandlers.size(); i++) {
-                if (backPressedHandlers.get(i).onBackPressed()) {
-                    return;
-                }
+        for (BackPressedHandler handler : mBackPressedHandlers) {
+            if (handler.onBackPressed()) {
+                return;
             }
         }
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (slidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+        } else if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
             //收缩播放器面板
-            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        } else if (isShowingPlayListSongsFrag) {
+            mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        } else if (mIsShowingPlayListSongsFrag) {
             dismissPlayListSongs();
         } else {
             super.onBackPressed();
         }
     }
 
-    private void changeToFragment(String tag) {
-        if (tag.equals(currentFragmentTag)) {
-            return;
-        }
-
-        Fragment fragment = instanceFragment(tag);
-        fm.beginTransaction().replace(R.id.fragment_container_2, fragment, tag)
-                .commit();
-        toolbar.setTitle(titles.get(tag));
-        currentFragmentTag = tag;
-    }
-
-    private Fragment instanceFragment(String tag) {
-        Fragment fragment = null;
-        switch (tag) {
-            case TAG_MYMUSIC: {
-                String[] titles = new String[]{"我的歌单", "最近播放", "本地音乐", "艺术家", "专辑"};
-                String[] fragments = new String[]{PlayListFrag.class.getName(), RecentPlayFrag.class.getName(),
-                        LocalMusicFrag.class.getName(), ArtistFrag.class.getName(), AlbumFrag.class.getName()};
-                fragment = PagerFragment.newInstance(titles, fragments);
-            }
-            break;
-
-            case TAG_WEBMUSIC: {
-                String[] titles = new String[]{"推荐", "排行", "歌手", "歌单", "电台"};
-                String[] fragments = new String[]{RecmdFrag.class.getName(), BillboardFrag.class.getName(),
-                        SingerFrag.class.getName(), GedanFrag.class.getName(), RadioFrag.class.getName()};
-                fragment = PagerFragment.newInstance(titles, fragments);
-            }
-            break;
-        }
-        return fragment;
-    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        LocalBroadcastManager.getInstance(this).unregisterReceiver(eventReceiver);
+        mPlayerReadyCallbacks.clear();
+        mBackPressedHandlers.clear();
+        PlayerUtil.unbindService(this);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        SaveState saveState = new SaveState(currentFragmentTag,
-                isShowingPlayListSongsFrag,
-                toolbar != null ? toolbar.getTitle().toString() : null,
-                materialMenu != null ? materialMenu.getIconState() : null);
-        outState.putParcelable("savestate", saveState);
+        outState.putInt("curPagerPosition", curPagerPosition);
+        outState.putString("title", mToolbar.getTitle().toString());
+        outState.putString("iconState", mMaterialMenu.getIconState().name());
+        outState.putBoolean("mIsShowingPlayListSongsFrag", mIsShowingPlayListSongsFrag);
     }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_my_music: {
-                drawerLayout.closeDrawer(GravityCompat.START);
+                mDrawerLayout.closeDrawer(GravityCompat.START);
                 //延迟加载,使关闭菜单动画流畅
-                drawerLayout.postDelayed(new Runnable() {
+                mDrawerLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        changeToFragment(TAG_MYMUSIC);
+                        switchPager(0);
                     }
                 }, 400);
             }
             break;
 
             case R.id.menu_web_music: {
-                drawerLayout.closeDrawer(GravityCompat.START);
-                drawerLayout.postDelayed(new Runnable() {
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+                mDrawerLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        changeToFragment(TAG_WEBMUSIC);
+                        switchPager(1);
                     }
                 }, 400);
             }
@@ -360,7 +398,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             break;
 
             case R.id.menu_close_app: {
-                appContext.closeApp();
+                ((AppContext) getApplicationContext()).closeApp();
             }
             break;
         }
@@ -368,78 +406,33 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         return true;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        switch (currentFragmentTag) {
-            case TAG_WEBMUSIC: {
-                getMenuInflater().inflate(R.menu.option_menu_webmusicfrag, menu);
-            }
-            break;
-            case TAG_MYMUSIC: {
-                getMenuInflater().inflate(R.menu.option_menu_mymusicfrag, menu);
-            }
-            break;
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        switch (currentFragmentTag) {
+//            case TAG_WEBMUSIC: {
+//                getMenuInflater().inflate(R.menu.option_menu_webmusicfrag, menu);
+//            }
+//            break;
+//            case TAG_MYMUSIC: {
+//                getMenuInflater().inflate(R.menu.option_menu_mymusicfrag, menu);
+//            }
+//            break;
+//
+//        }
+//        return true;
+//    }
 
-        }
-        return true;
+
+    /**
+     * 绑定上服务监听
+     */
+    public interface PlayerReadyCallback {
+        void onPlayerReady();
     }
 
-    static class SaveState implements Parcelable {
-
-        boolean isShowingPlayListSongsFrag;
-        String titleText;
-        MaterialMenuDrawable.IconState menuState;
-        String currentFragTag;
-
-        public static final Creator<SaveState> CREATOR = new Creator<SaveState>() {
-            @Override
-            public SaveState createFromParcel(Parcel in) {
-                return new SaveState(in);
-            }
-
-            @Override
-            public SaveState[] newArray(int size) {
-                return new SaveState[size];
-            }
-        };
-
-        public SaveState(String currentFragTag, boolean isShowingPlayListSongsFrag, String titleText, MaterialMenuDrawable.IconState menuState) {
-            this.currentFragTag = currentFragTag;
-            this.isShowingPlayListSongsFrag = isShowingPlayListSongsFrag;
-            this.titleText = titleText;
-            this.menuState = menuState;
-        }
-
-        protected SaveState(Parcel in) {
-            isShowingPlayListSongsFrag = in.readByte() == 1;
-            titleText = in.readString();
-            currentFragTag = in.readString();
-            String stateString = in.readString();
-            try {
-                menuState = stateString != null ? Enum.valueOf(MaterialMenuDrawable.IconState.class,
-                        stateString) : MaterialMenuDrawable.IconState.BURGER;
-            } catch (IllegalArgumentException e) {
-                menuState = MaterialMenuDrawable.IconState.BURGER;
-            }
-        }
-
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeByte((byte) (isShowingPlayListSongsFrag ? 1 : 0));
-            dest.writeString(titleText);
-            dest.writeString(currentFragTag);
-            if (menuState != null) {
-                dest.writeString(menuState.toString());
-            }
-        }
-    }
-
+    /**
+     * 返回键监听
+     */
     public interface BackPressedHandler {
         boolean onBackPressed();
     }

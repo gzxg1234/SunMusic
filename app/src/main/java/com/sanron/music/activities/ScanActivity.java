@@ -21,12 +21,13 @@ import android.widget.TextView;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
 import com.sanron.music.R;
-import com.sanron.music.db.model.Music;
+import com.sanron.music.common.AudioTool;
+import com.sanron.music.common.MusicScanner;
+import com.sanron.music.common.MyLog;
+import com.sanron.music.common.T;
+import com.sanron.music.common.ViewTool;
+import com.sanron.music.db.bean.Music;
 import com.sanron.music.task.UpdateLocalMusicTask;
-import com.sanron.music.utils.AudioTool;
-import com.sanron.music.utils.MusicScanner;
-import com.sanron.music.utils.MyLog;
-import com.sanron.music.utils.T;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -37,17 +38,17 @@ import java.util.List;
 public class ScanActivity extends BaseActivity implements View.OnClickListener {
 
 
-    private MusicScanner scanner;
+    private MusicScanner mMusicScanner;
 
-    private AppBarLayout appBar;
-    private Toolbar toolBar;
-    private Button btnStart;
-    private LinearLayout llFindSongNum;
-    private TextView tvFindNum;
-    private TextView tvFileName;
-    private CheckBox cbIgnore;
-    private List<Music> scanResult;
-    private boolean isFullScan;
+    private AppBarLayout mAppBarLayout;
+    private Toolbar mToolbar;
+    private Button mBtnStart;
+    private LinearLayout mLayoutFindNumInfo;
+    private TextView mTvFindNum;
+    private TextView mTvFileName;
+    private CheckBox mCbIgnore;
+    private List<Music> mScanResult;
+    private boolean mIsFullScan;
 
     public static final String[] PROJECTIONS = new String[]{
             MediaStore.Audio.Media.TITLE,
@@ -58,7 +59,7 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
             MediaStore.Audio.Media.DATE_MODIFIED,
             MediaStore.Audio.Media.DISPLAY_NAME
     };
-    public static final String DURATION_SELECTION = MediaStore.Audio.Media.DURATION + ">60000";
+    public static final String DURATION_SELECTION = MediaStore.Audio.Media.DURATION + ">=60000";
 
     public static final int MENU_DIY_SCAN = 1;
     public static final int REQUEST_CODE_DIY = 1;
@@ -70,20 +71,20 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
     private MusicScanner.OnScanMediaListener listener = new MusicScanner.OnScanMediaListener() {
         @Override
         public void onStart() {
-            scanResult.clear();
-            tvFindNum.setText("0");
-            tvFileName.setVisibility(View.VISIBLE);
-            llFindSongNum.setVisibility(View.VISIBLE);
-            cbIgnore.setVisibility(View.INVISIBLE);
-            btnStart.setText(TEXT_STOP_SCAN);
-            tvFileName.setText("正在扫描...");
+            mScanResult.clear();
+            mTvFindNum.setText("0");
+            mTvFileName.setVisibility(View.VISIBLE);
+            mLayoutFindNumInfo.setVisibility(View.VISIBLE);
+            mCbIgnore.setVisibility(View.INVISIBLE);
+            mBtnStart.setText(TEXT_STOP_SCAN);
+            mTvFileName.setText("正在扫描...");
         }
 
         @Override
         public void onProgress(final String filePath, Uri uri) {
             Cursor cursor = getContentResolver().query(uri,
                     PROJECTIONS,
-                    cbIgnore.isChecked() ? DURATION_SELECTION : null,
+                    mCbIgnore.isChecked() ? DURATION_SELECTION : null,
                     null,
                     MediaStore.Audio.Media.TITLE_KEY);
 
@@ -109,14 +110,14 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                     music.setModifiedDate(modifiedDate);
                     music.setBitrate(bitrate);
                     music.setDuration(duration);
-                    scanResult.add(music);
+                    mScanResult.add(music);
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             MyLog.i(TAG, "扫描到:" + filePath);
-                            tvFileName.setText(filePath);
-                            tvFindNum.setText(String.valueOf(scanResult.size()));
+                            mTvFileName.setText(filePath);
+                            mTvFindNum.setText(String.valueOf(mScanResult.size()));
                         }
                     });
                 }
@@ -127,17 +128,17 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
         @Override
         public void onCompleted(final boolean fromUser) {
             MyLog.d(TAG, "停止扫描");
-            MyLog.d(TAG, "扫描到" + scanResult.size() + "首歌曲");
+            MyLog.d(TAG, "扫描到" + mScanResult.size() + "首歌曲");
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    tvFileName.setVisibility(View.INVISIBLE);
+                    mTvFileName.setVisibility(View.INVISIBLE);
                     if (fromUser) {
-                        btnStart.setText(TEXT_START_SCAN);
-                        cbIgnore.setVisibility(View.VISIBLE);
-                        llFindSongNum.setVisibility(View.INVISIBLE);
+                        mBtnStart.setText(TEXT_START_SCAN);
+                        mCbIgnore.setVisibility(View.VISIBLE);
+                        mLayoutFindNumInfo.setVisibility(View.INVISIBLE);
                     } else {
-                        btnStart.setText(TEXT_FINISH);
+                        mBtnStart.setText(TEXT_FINISH);
                     }
                 }
             });
@@ -152,29 +153,29 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void initView() {
-        toolBar = $(R.id.toolbar);
-        btnStart = $(R.id.btn_start_scan);
-        cbIgnore = $(R.id.cb_ignore_60);
-        tvFindNum = $(R.id.tv_find_song_num);
-        tvFileName = $(R.id.tv_filename);
-        llFindSongNum = $(R.id.linear1);
-        appBar = $(R.id.app_bar);
-        scanResult = new LinkedList<>();
-        scanner = new MusicScanner(this);
+        mToolbar = $(R.id.toolbar);
+        mBtnStart = $(R.id.btn_start_scan);
+        mCbIgnore = $(R.id.cb_ignore_60);
+        mTvFindNum = $(R.id.tv_find_song_num);
+        mTvFileName = $(R.id.tv_filename);
+        mLayoutFindNumInfo = $(R.id.linear1);
+        mAppBarLayout = $(R.id.app_bar);
+        mScanResult = new LinkedList<>();
+        mMusicScanner = new MusicScanner(this);
 
-        setSupportActionBar(toolBar);
+        setSupportActionBar(mToolbar);
 
-        appContext.setViewFitsStatusBar(appBar);
+        ViewTool.setViewFitsStatusBar(mAppBarLayout);
 
-        toolBar.setNavigationOnClickListener(new View.OnClickListener() {
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
             }
         });
 
-        btnStart.setTag("start");
-        btnStart.setOnClickListener(this);
+        mBtnStart.setTag("start");
+        mBtnStart.setOnClickListener(this);
     }
 
     @Override
@@ -204,8 +205,8 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                         String[] paths = data.getStringArrayExtra(ScanDiyActivity.EXTRA_SELECT_PATHS);
                         if (paths != null) {
                             //自定义扫描开始
-                            scanner.scan(listener, paths);
-                            isFullScan = false;
+                            mMusicScanner.scan(listener, paths);
+                            mIsFullScan = false;
                         }
                     }
                     break;
@@ -221,21 +222,21 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
             case R.id.btn_start_scan: {
                 String text = ((TextView) view).getText().toString();
                 if (TEXT_START_SCAN.equals(text)) {
-                    if (scanner.isScanning()) {
-                        T.show( "正在扫描，请稍后操作");
+                    if (mMusicScanner.isScanning()) {
+                        T.show("正在扫描，请稍后操作");
                     } else {
                         MyLog.d(TAG, "开始扫描");
-                        scanner.scan(listener, Environment.getExternalStorageDirectory().getAbsolutePath());
-                        isFullScan = true;
+                        mMusicScanner.scan(listener, Environment.getExternalStorageDirectory().getAbsolutePath());
+                        mIsFullScan = true;
                     }
                 } else if (TEXT_STOP_SCAN.equals(text)) {
-                    scanner.stopScan();
+                    mMusicScanner.stopScan();
                 } else if (TEXT_FINISH.equals(text)) {
                     //完成扫描，更新数据
                     final ProgressDialog progressDialog = new ProgressDialog(this);
                     progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                     progressDialog.setMessage("正在更新数据，请稍等");
-                    new UpdateLocalMusicTask(scanResult, isFullScan) {
+                    new UpdateLocalMusicTask(mScanResult, mIsFullScan) {
                         @Override
                         protected void onPreExecute() {
                             progressDialog.show();
@@ -256,6 +257,6 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        scanner.stopScan();
+        mMusicScanner.stopScan();
     }
 }

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.sanron.music.view.SlideBackLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/slide_finish_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.sanron.music.view.DDPullListView
+        android:id="@+id/pull_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white" />
+
+    <ImageView
+        android:id="@+id/top_board"
+        android:layout_width="match_parent"
+        android:layout_height="240dp"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:id="@+id/info"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@drawable/scrim_bottom"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
+
+        <TextView
+            android:id="@+id/tv_singer_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="邓丽君"
+            android:textColor="@color/textColorPrimaryInverse"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_singer_country"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:singleLine="true"
+            android:text="台湾歌手"
+            android:textColor="@color/textColorSecondaryInverse"
+            android:textSize="14dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/operator"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:background="@android:color/white"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp">
+
+            <RadioGroup
+                android:id="@+id/radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rb_singer_song"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:button="@null"
+                    android:checked="true"
+                    android:gravity="center"
+                    android:text="歌曲"
+                    android:textColor="@drawable/tv_singer_tab_text_color"
+                    android:textSize="16dp" />
+
+                <RadioButton
+                    android:id="@+id/rb_singer_album"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:text="专辑"
+                    android:textColor="@drawable/tv_singer_tab_text_color"
+                    android:textSize="16dp" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#D8D8D8" />
+
+    </LinearLayout>
+
+    <include
+        layout="@layout/layout_loading"
+        tools:visibility="gone" />
+
+    <include
+        layout="@layout/layout_load_failed"
+        android:visibility="gone" />
+
+    <include layout="@layout/layout_top_bar" />
+
+</com.sanron.music.view.SlideBackLayout>
