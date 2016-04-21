@@ -302,15 +302,20 @@ public class SingerInfoFrag extends PullFrag implements DDPullListView.OnLoadLis
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext())
-                        .inflate(R.layout.list_singer_album_item, parent, false);
+                        .inflate(R.layout.list_common_item, parent, false);
             }
             Album album = data.get(position);
-            ImageView ivPic = (ImageView) convertView.findViewById(R.id.iv_album_pic);
-            TextView tvTitle = (TextView) convertView.findViewById(R.id.tv_singer_album_title);
-            TextView tvDate = (TextView) convertView.findViewById(R.id.tv_singer_album_publish);
-            ivPic.setImageBitmap(null);
+            ImageView ivPicture = (ImageView) convertView.findViewById(R.id.iv_picture);
+            TextView tvTitle = (TextView) convertView.findViewById(R.id.tv_text1);
+            TextView tvDate = (TextView) convertView.findViewById(R.id.tv_text2);
+            ImageView ivMenu = (ImageView) convertView.findViewById(R.id.iv_menu);
+            //取消之前的加载任务
             ImageLoader.getInstance()
-                    .displayImage(album.picS180, ivPic);
+                    .cancelDisplayTask(ivPicture);
+            ivMenu.setImageResource(R.mipmap.ic_chevron_right_black_90_24dp);
+            ivPicture.setImageBitmap(null);
+            ImageLoader.getInstance()
+                    .displayImage(album.picS180, ivPicture);
             tvTitle.setText(album.title);
             tvDate.setText(album.publishtime);
             return convertView;

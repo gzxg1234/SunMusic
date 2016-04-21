@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.sanron.music.R;
 import com.sanron.music.adapter.PlayListItemAdapter;
+import com.sanron.music.common.T;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.db.bean.PlayList;
@@ -31,7 +32,6 @@ import com.sanron.music.task.DeleteTask;
 import com.sanron.music.task.QueryListMemberDataTask;
 import com.sanron.music.task.QueryListTask;
 import com.sanron.music.task.UpdateListNameTask;
-import com.sanron.music.common.T;
 
 import java.util.List;
 
@@ -42,11 +42,9 @@ import java.util.List;
 public class PlayListFrag extends BaseDataFragment implements PlayListItemAdapter.OnItemClickListener, PlayListItemAdapter.OnItemMenuClickListener {
 
 
-    public static final String TAG = "PlayListFrag";
-
     public static final int MENU_NEW_LIST = 1;
 
-    private RecyclerView mLvPlayList;
+    private RecyclerView mRecyclerView;
     private PlayListItemAdapter mAdapter;
 
     @Override
@@ -59,17 +57,17 @@ public class PlayListFrag extends BaseDataFragment implements PlayListItemAdapte
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.layout_playlist, null);
+        return inflater.inflate(R.layout.layout_recycler_view, null);
     }
 
     @Override
     public void initView(View view, @Nullable Bundle savedInstanceState) {
-        mLvPlayList = $(R.id.recycler_view);
-        mLvPlayList.setLayoutManager(new LinearLayoutManager(getContext()));
-        mLvPlayList.setItemAnimator(null);
-        mLvPlayList.setAdapter(mAdapter);
-        mAdapter.setOnItemClickListener(this);
+        mRecyclerView = (RecyclerView) view;
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView.setItemAnimator(null);
+        mRecyclerView.setAdapter(mAdapter);
         mAdapter.setOnItemMenuClickListener(this);
+        mAdapter.setOnItemClickListener(this);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.sanron.music.ui.web;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -93,7 +94,7 @@ public class RecmdFrag extends LazyLoadFragment implements View.OnClickListener 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.web_frag_recmd, null);
+        return inflater.inflate(R.layout.web_frag_recmd, container, false);
     }
 
     @Override
@@ -111,6 +112,7 @@ public class RecmdFrag extends LazyLoadFragment implements View.OnClickListener 
         mGvHotTag.setAdapter(mHotTagAdapter);
         mGvHotSongList.setAdapter(mHotSongListAdapter);
         mLvRecmdSong.setAdapter(mRecmdSongAdapter);
+
     }
 
     @Override
@@ -222,7 +224,7 @@ public class RecmdFrag extends LazyLoadFragment implements View.OnClickListener 
 
         @Override
         public int getCount() {
-            return HOT_SONG_LIST_NUM;
+            return RECMD_SONG_NUM;
         }
 
         @Override

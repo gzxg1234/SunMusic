@@ -59,7 +59,7 @@ public class TagSongFrag extends PullFrag implements IPlayer.OnPlayStateChangeLi
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.web_frag_tag_song, null);
+        return inflater.inflate(R.layout.web_frag_tag_song, container,false);
     }
 
     @Override

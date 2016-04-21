@@ -38,7 +38,8 @@ import com.sanron.music.ui.web.RadioFrag;
 import com.sanron.music.ui.web.RecmdFrag;
 import com.sanron.music.ui.web.SingerFrag;
 import com.sanron.music.ui.web.SingerInfoFrag;
-import com.sanron.music.ui.web.SongListFrag;
+import com.sanron.music.ui.web.SingerListFrag;
+import com.sanron.music.ui.web.SongListInfoFrag;
 import com.sanron.music.ui.web.TagSongFrag;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -115,7 +116,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         });
 
-        //正在播放UI
+
         mPlayerFrag = (PlayerFrag) mFm.findFragmentByTag(PlayerFrag.class.getName());
         if (mPlayerFrag == null) {
             mPlayerFrag = new PlayerFrag();
@@ -200,7 +201,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     public void showSongList(String listId) {
-        addFragmentToFront(SongListFrag.newInstance(listId));
+        addFragmentToFront(SongListInfoFrag.newInstance(listId));
+    }
+
+    public void showSingerList(String title, int area, int sex) {
+        addFragmentToFront(SingerListFrag.newInstance(title, area, sex));
     }
 
     public void showTagSong(String tag) {
@@ -211,7 +216,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         addFragmentToFront(AllTagFrag.newInstance());
     }
 
-    public void showSinger(String artistId) {
+    public void showSingerInfo(String artistId) {
         addFragmentToFront(SingerInfoFrag.newInstance(artistId));
     }
 
@@ -253,9 +258,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
 
         FragmentTransaction ft = mFm.beginTransaction();
-        //隐藏当前显示fragment
-        System.out.println(pos);
-        System.out.println(curPagerPosition);
         for (int i = 0; i < PAGERS.length; i++) {
             if (i != pos) {
                 Fragment fragment = mFm.findFragmentByTag(PAGERS[i]);
@@ -271,16 +273,22 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             switch (pos) {
                 case 0: {
                     String[] titles = new String[]{"我的歌单", "最近播放", "本地音乐", "艺术家", "专辑"};
-                    String[] fragments = new String[]{PlayListFrag.class.getName(), RecentPlayFrag.class.getName(),
-                            LocalMusicFrag.class.getName(), ArtistFrag.class.getName(), AlbumFrag.class.getName()};
+                    String[] fragments = new String[]{PlayListFrag.class.getName(),
+                            RecentPlayFrag.class.getName(),
+                            LocalMusicFrag.class.getName(),
+                            ArtistFrag.class.getName(),
+                            AlbumFrag.class.getName()};
                     toFragment = PagerFragment.newInstance(titles, fragments);
                 }
                 break;
 
                 case 1: {
-                    String[] titles = new String[]{"推荐", "排行", "歌手", "歌单", "电台"};
-                    String[] fragments = new String[]{RecmdFrag.class.getName(), BillboardFrag.class.getName(),
-                            SingerFrag.class.getName(), GedanFrag.class.getName(), RadioFrag.class.getName()};
+                    String[] titles = new String[]{"推荐", "歌手", "排行", "歌单", "电台"};
+                    String[] fragments = new String[]{RecmdFrag.class.getName(),
+                            SingerFrag.class.getName(),
+                            BillboardFrag.class.getName(),
+                            GedanFrag.class.getName(),
+                            RadioFrag.class.getName()};
                     toFragment = PagerFragment.newInstance(titles, fragments);
                 }
                 break;

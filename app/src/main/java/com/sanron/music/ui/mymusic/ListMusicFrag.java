@@ -83,7 +83,7 @@ public class ListMusicFrag extends BaseDataFragment implements Observer, Compoun
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.layout_list, null);
+        return inflater.inflate(R.layout.layout_list_music, container,false);
     }
 
     @Override

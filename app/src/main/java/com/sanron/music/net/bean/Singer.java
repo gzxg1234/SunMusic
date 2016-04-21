@@ -122,9 +122,9 @@ public class Singer {
     @JSONField(name = "avatar_small")
     public String avatarSmall;
     @JSONField(name = "avatar_middle")
-    public String avatarMiddle;
+    public String avatarMiddle;//120x120
     @JSONField(name = "avatar_big")
-    public String avatarBig;
+    public String avatarBig;//240x240
     @JSONField(name = "avatar_s180")
     public String avatarS180;
     @JSONField(name = "avatar_s500")

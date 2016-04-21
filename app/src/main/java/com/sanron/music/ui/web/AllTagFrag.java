@@ -18,7 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.activities.MainActivity;
+import com.sanron.music.common.ViewTool;
 import com.sanron.music.net.JsonCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.AllTag;
@@ -52,7 +52,7 @@ public class AllTagFrag extends BaseSlideWebFrag {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.web_frag_all_tag, null);
+        return inflater.inflate(R.layout.web_frag_all_tag, container, false);
     }
 
 
@@ -293,8 +293,9 @@ public class AllTagFrag extends BaseSlideWebFrag {
         private View createView() {
             TextView tvTag = new TextView(getContext());
             AbsListView.LayoutParams lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            final int padding = ViewTool.dpToPx(4);
             tvTag.setGravity(Gravity.CENTER);
-            tvTag.setPadding(10, 10, 10, 10);
+            tvTag.setPadding(padding, padding, padding, padding);
             tvTag.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
             tvTag.setTextColor(getResources().getColor(R.color.textColorSecondary));
             tvTag.setLayoutParams(lp);
@@ -314,9 +315,7 @@ public class AllTagFrag extends BaseSlideWebFrag {
             tvTag.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (getActivity() instanceof MainActivity) {
-                        ((MainActivity) getActivity()).showTagSong(tags.get(position).title);
-                    }
+                    getMainActivity().showTagSong(tags.get(position).title);
                 }
             });
             return tvTag;

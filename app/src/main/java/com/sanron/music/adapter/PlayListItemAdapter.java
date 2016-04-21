@@ -2,15 +2,16 @@ package com.sanron.music.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
+import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.bean.PlayList;
 
@@ -76,18 +77,32 @@ public class PlayListItemAdapter extends RecyclerView.Adapter {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        RecyclerView.ViewHolder holder = null;
         switch (viewType) {
 
             case TYPE_GROUP_ITEM: {
-                View view = LayoutInflater.from(mContext).inflate(R.layout.layout_playlist_type_header, parent, false);
-                return new GroupHolder(view);
+                TextView tvGroup = new TextView(mContext);
+                final int height = ViewTool.dpToPx(40);
+                final int paddingLeft = ViewTool.dpToPx(8);
+                final int textColor = mContext.getResources().getColor(R.color.colorAccent);
+                tvGroup.setLayoutParams(new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        height));
+                tvGroup.setPadding(paddingLeft, 0, 0, 0);
+                tvGroup.setGravity(Gravity.CENTER_VERTICAL);
+                tvGroup.setTextColor(textColor);
+                holder = new GroupHolder(tvGroup);
             }
+            break;
 
-            default: {
-                View view = LayoutInflater.from(mContext).inflate(R.layout.list_playlist_item, parent, false);
-                return new ListItemHolder(view);
+            case TYPE_ITEM: {
+                View view = LayoutInflater.from(mContext).inflate(R.layout.list_common_item, parent, false);
+                holder = new ListItemHolder(view);
+                ((ListItemHolder) holder).ivMenu.setImageResource(R.mipmap.ic_more_vert_black_24dp);
             }
+            break;
         }
+        return holder;
     }
 
     @Override
@@ -126,7 +141,7 @@ public class PlayListItemAdapter extends RecyclerView.Adapter {
 
         public GroupHolder(View itemView) {
             super(itemView);
-            tvText = (TextView) itemView.findViewById(R.id.tv_type);
+            tvText = (TextView) itemView;
         }
     }
 
@@ -134,14 +149,14 @@ public class PlayListItemAdapter extends RecyclerView.Adapter {
         ImageView ivPicture;
         TextView tvName;
         TextView tvMusicNum;
-        ImageButton ibtnMenu;
+        ImageView ivMenu;
 
         public ListItemHolder(final View itemView) {
             super(itemView);
-            ivPicture = (ImageView) itemView.findViewById(R.id.iv_list_pic);
-            tvMusicNum = (TextView) itemView.findViewById(R.id.tv_list_song_num);
-            tvName = (TextView) itemView.findViewById(R.id.tv_list_name);
-            ibtnMenu = (ImageButton) itemView.findViewById(R.id.ibtn_item_menu);
+            ivPicture = (ImageView) itemView.findViewById(R.id.iv_picture);
+            tvMusicNum = (TextView) itemView.findViewById(R.id.tv_text2);
+            tvName = (TextView) itemView.findViewById(R.id.tv_text1);
+            ivMenu = (ImageView) itemView.findViewById(R.id.iv_menu);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -150,11 +165,11 @@ public class PlayListItemAdapter extends RecyclerView.Adapter {
                     }
                 }
             });
-            ibtnMenu.setOnClickListener(new View.OnClickListener() {
+            ivMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mOnItemMenuClickListener != null) {
-                        mOnItemMenuClickListener.onItemMenuClick(ibtnMenu, getAdapterPosition());
+                        mOnItemMenuClickListener.onItemMenuClick(ivMenu, getAdapterPosition());
                     }
                 }
             });

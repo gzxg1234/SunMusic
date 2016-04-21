@@ -36,7 +36,7 @@ public abstract class BaseSlideWebFrag extends BaseFragment implements SlideBack
         super.onViewCreated(view, savedInstanceState);
         mTopBar = $(R.id.top_bar);
         mTvTitle = $(R.id.tv_queue_item_title);
-        mSlideBackLayout = $(R.id.slide_finish_layout);
+        mSlideBackLayout = $(R.id.slide_back_layout);
         mViewBack = $(R.id.view_back);
         mViewLoading = $(R.id.layout_loading);
         mViewLoadFailed = $(R.id.layout_load_failed);

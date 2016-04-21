@@ -37,7 +37,7 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-1.
  */
-public class SongListFrag extends PullFrag implements View.OnClickListener, IPlayer.OnPlayStateChangeListener {
+public class SongListInfoFrag extends PullFrag implements View.OnClickListener, IPlayer.OnPlayStateChangeListener {
 
     public static final String ARG_LIST_ID = "list_id";
 
@@ -58,12 +58,12 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
     private DisplayImageOptions mImageOptions;
 
 
-    public static SongListFrag newInstance(String songListId) {
-        SongListFrag songListFrag = new SongListFrag();
+    public static SongListInfoFrag newInstance(String songListId) {
+        SongListInfoFrag songListInfoFrag = new SongListInfoFrag();
         Bundle bundle = new Bundle();
         bundle.putString(ARG_LIST_ID, songListId);
-        songListFrag.setArguments(bundle);
-        return songListFrag;
+        songListInfoFrag.setArguments(bundle);
+        return songListInfoFrag;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class SongListFrag extends PullFrag implements View.OnClickListener, IPla
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.web_frag_songlist, null);
+        return inflater.inflate(R.layout.web_frag_songlist, container,false);
     }
 
     @Override

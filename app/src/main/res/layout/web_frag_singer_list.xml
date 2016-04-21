@@ -1,30 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.sanron.music.view.SlideBackLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/slide_back_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@android:color/white">
 
         <com.sanron.music.view.DDPullListView
+            android:id="@+id/pull_list_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_below="@+id/top_bar"
+            android:divider="@null"
+            android:dividerHeight="0dp"
+            android:padding="8dp">
         </com.sanron.music.view.DDPullListView>
 
         <include
             layout="@layout/layout_load_failed"
-            android:visibility="gone" />
+            android:visibility="gone"/>
 
         <include
             layout="@layout/layout_loading"
-            tools:visibility="gone" />
+            tools:visibility="gone"/>
 
-        <include
-            layout="@layout/layout_top_bar"
-            android:background="@color/colorPrimary" />
+
+        <FrameLayout
+            android:id="@+id/top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/view_back"
+                    android:layout_width="?attr/actionBarSize"
+                    android:layout_height="?attr/actionBarSize"
+                    android:scaleType="center"
+                    android:src="@mipmap/ic_arrow_back_white_24dp"/>
+
+                <TextView
+                    android:id="@+id/tv_queue_item_title"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:textColor="@color/textColorPrimaryInverse"
+                    android:textSize="@dimen/top_bar_title_text_size"/>
+
+                <ImageView
+                    android:id="@+id/view_sort"
+                    android:layout_width="?attr/actionBarSize"
+                    android:layout_height="?attr/actionBarSize"
+                    android:scaleType="center"
+                    android:src="@mipmap/ic_sort_by_alpha_white_24dp"/>
+            </LinearLayout>
+        </FrameLayout>
     </RelativeLayout>
 
-</com.sothree.slidinguppanel.SlidingUpPanelLayout>
+</com.sanron.music.view.SlideBackLayout>

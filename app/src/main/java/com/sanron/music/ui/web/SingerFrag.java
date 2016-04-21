@@ -4,23 +4,23 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
-import com.sanron.music.ui.LazyLoadFragment;
+import com.sanron.music.common.ViewTool;
 import com.sanron.music.net.JsonCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.Singer;
 import com.sanron.music.net.bean.SingerList;
+import com.sanron.music.ui.LazyLoadFragment;
 import com.viewpagerindicator.CirclePageIndicator;
 
 import java.util.ArrayList;
@@ -31,9 +31,7 @@ import java.util.List;
  */
 public class SingerFrag extends LazyLoadFragment {
 
-    private ViewPager mPagerHot;
-    private CirclePageIndicator mPageIndicator;
-    private ListView mListView;
+    private RecyclerView mRecyclerView;
     private SingerList mHotSingerData;
     public static final int HOT_SINGER_NUM = 12;
     public static final String[] CLASSES = new String[]{
@@ -44,6 +42,23 @@ public class SingerFrag extends LazyLoadFragment {
             "其他"
     };
 
+    public static final int[] AREAS = new int[]{
+            6, 6, 6,
+            3, 3, 3,
+            60, 60, 60,
+            7, 7, 7,
+            5
+    };
+
+    public static final int[] SEXS = new int[]{
+            1, 2, 3,
+            1, 2, 3,
+            1, 2, 3,
+            1, 2, 3,
+            0
+    };
+
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,38 +67,21 @@ public class SingerFrag extends LazyLoadFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mListView = new ListView(getContext());
-        final int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16,
-                getResources().getDisplayMetrics());
-        final int dividerHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8,
-                getResources().getDisplayMetrics());
-        mListView.setPadding(padding, padding, padding, padding);
-        mListView.setDivider(null);
-        mListView.setDividerHeight(dividerHeight);
-        mListView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        mListView.setVerticalScrollBarEnabled(false);
-        View header = inflater.inflate(R.layout.layout_hot_singer, null);
-        mPagerHot = (ViewPager) header.findViewById(R.id.pager_hot_singer);
-        mPageIndicator = (CirclePageIndicator) header.findViewById(R.id.page_indicator);
-        mListView.addHeaderView(header);
-        return mListView;
+        return inflater.inflate(R.layout.layout_recycler_view, container, false);
     }
 
     @Override
     protected void initView(View view, Bundle savedInstanceState) {
-        mPagerHot.setAdapter(new HotSingerPagerAdapter());
-        mListView.setAdapter(new SingerClassAdapter());
-        mPageIndicator.setViewPager(mPagerHot);
+        mRecyclerView = (RecyclerView) getView();
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView.setItemAnimator(null);
+        mRecyclerView.setAdapter(new SingerClassAdapter());
+        final int padding = ViewTool.dpToPx(16);
+        mRecyclerView.setPadding(padding, padding, padding, padding);
         if (mHotSingerData != null) {
-            ((HotSingerPagerAdapter) mPagerHot.getAdapter()).setData(mHotSingerData.singers);
+            ((SingerClassAdapter) mRecyclerView.getAdapter())
+                    .setHotSinger(mHotSingerData.singers);
         }
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-            }
-        });
     }
 
     @Override
@@ -93,9 +91,9 @@ public class SingerFrag extends LazyLoadFragment {
             public void onSuccess(SingerList data) {
                 mHotSingerData = data;
                 if (data != null) {
-                    ((HotSingerPagerAdapter) mPagerHot.getAdapter()).setData(data.singers);
+                    ((SingerClassAdapter) mRecyclerView.getAdapter()).setHotSinger(data.singers);
                 } else {
-                    ((HotSingerPagerAdapter) mPagerHot.getAdapter()).setData(null);
+                    ((SingerClassAdapter) mRecyclerView.getAdapter()).setHotSinger(null);
                 }
             }
 
@@ -174,14 +172,14 @@ public class SingerFrag extends LazyLoadFragment {
                     View child = view.getChildAt(i);
                     final Singer singer = subData.get(i);
                     TextView tvName = (TextView) child.findViewById(R.id.tv_name);
-                    ImageView ivPicture = (ImageView) child.findViewById(R.id.iv_album_pic);
+                    ImageView ivPicture = (ImageView) child.findViewById(R.id.iv_artist_pic);
                     tvName.setText(singer.name);
                     ImageLoader.getInstance()
                             .displayImage(singer.avatarBig, ivPicture);
                     child.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            getMainActivity().showSinger(singer.artistId);
+                            getMainActivity().showSingerInfo(singer.artistId);
                         }
                     });
                 }
@@ -197,16 +195,44 @@ public class SingerFrag extends LazyLoadFragment {
         }
     }
 
-    private class SingerClassAdapter extends BaseAdapter {
 
-        @Override
-        public int getCount() {
-            return CLASSES.length;
+    private class SingerClassAdapter extends RecyclerView.Adapter {
+
+        public static final int TYPE_HEADER = 0;
+        public static final int TYPE_CLASS = 1;
+        private List<Singer> mHotSingers;
+
+        public void setHotSinger(List<Singer> hotSingers) {
+            this.mHotSingers = hotSingers;
+            notifyItemChanged(0);
         }
 
         @Override
-        public Object getItem(int position) {
-            return CLASSES[position];
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            if (viewType == TYPE_HEADER) {
+                View view = LayoutInflater.from(getContext())
+                        .inflate(R.layout.layout_hot_singer, parent, false);
+                return new HotSingerHolder(view);
+            } else {
+                View view = LayoutInflater.from(getContext())
+                        .inflate(R.layout.list_singer_class_item, parent, false);
+                return new SingerClassHolder(view);
+            }
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            if (holder instanceof HotSingerHolder) {
+                HotSingerHolder hotSingerHolder = (HotSingerHolder) holder;
+                if (mHotSingers != null) {
+                    HotSingerPagerAdapter hotSingerPagerAdapter = new HotSingerPagerAdapter();
+                    hotSingerPagerAdapter.setData(mHotSingers);
+                    hotSingerHolder.mPagerHot.setAdapter(hotSingerPagerAdapter);
+                    hotSingerHolder.mIndicator.setViewPager(hotSingerHolder.mPagerHot);
+                }
+            } else if (holder instanceof SingerClassHolder) {
+                ((SingerClassHolder) holder).tvSingerClass.setText(CLASSES[position - 1]);
+            }
         }
 
         @Override
@@ -215,14 +241,47 @@ public class SingerFrag extends LazyLoadFragment {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(getContext())
-                        .inflate(R.layout.list_singer_class_item, parent, false);
+        public int getItemCount() {
+            return CLASSES.length + 1;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (position == 0) {
+                return TYPE_HEADER;
+            } else {
+                return TYPE_CLASS;
             }
-            TextView tvClass = (TextView) convertView.findViewById(R.id.tv_singer_class);
-            tvClass.setText(CLASSES[position]);
-            return convertView;
+        }
+
+        class HotSingerHolder extends RecyclerView.ViewHolder {
+            ViewPager mPagerHot;
+            CirclePageIndicator mIndicator;
+
+            public HotSingerHolder(View itemView) {
+                super(itemView);
+                mPagerHot = (ViewPager) itemView.findViewById(R.id.pager_hot_singer);
+                mIndicator = (CirclePageIndicator) itemView.findViewById(R.id.page_indicator);
+            }
+        }
+
+        class SingerClassHolder extends RecyclerView.ViewHolder {
+            private TextView tvSingerClass;
+
+            public SingerClassHolder(View itemView) {
+                super(itemView);
+                tvSingerClass = (TextView) itemView.findViewById(R.id.tv_singer_class);
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int i = getAdapterPosition() - 1;
+                        int area = AREAS[i];
+                        int sex = SEXS[i];
+                        String title = CLASSES[i];
+                        getMainActivity().showSingerList(title, area, sex);
+                    }
+                });
+            }
         }
     }
 }

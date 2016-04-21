@@ -36,17 +36,17 @@ public final class ApiEncryptTool {
             stringBuilder.append(CHARS[(stringBytes[i] & 0xF)]);
         }
         String str = stringBuilder.toString();
-        SecretKeySpec localSecretKeySpec = new SecretKeySpec(
+        SecretKeySpec keySpec = new SecretKeySpec(
                 str.substring(str.length() / 2)
                         .getBytes(), "AES");
-        Cipher localCipher;
+        Cipher cipher;
         try {
-            localCipher = Cipher
+            cipher = Cipher
                     .getInstance("AES/CBC/PKCS5Padding");
-            localCipher.init(1, localSecretKeySpec,
+            cipher.init(1, keySpec,
                     new IvParameterSpec(IV.getBytes()));
             return URLEncoder.encode(
-                    new String(BytesHandler.getChars(localCipher
+                    new String(BytesHandler.getChars(cipher
                             .doFinal(paramString.getBytes()))),
                     "utf-8");
         } catch (NoSuchAlgorithmException e) {
