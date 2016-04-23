@@ -12,7 +12,6 @@ public class LrcPicData {
     @JSONField(name = "songinfo")
     public List<LrcPic> lrcPics;
 
-
     public static class LrcPic {
         /**
          * 歌词

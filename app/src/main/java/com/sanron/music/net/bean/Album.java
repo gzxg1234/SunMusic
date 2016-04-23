@@ -97,13 +97,21 @@ public class Album {
     @JSONField(name = "pic_big")
     public String picBig;
     /**
-     * 180x180
-     */
-    @JSONField(name = "pic_s180")
-    public String picS180;
-    /**
      * 300x300
      */
     @JSONField(name = "pic_radio")
     public String picRadio;
+    /**
+     * 180x180
+     */
+    @JSONField(name = "pic_s180")
+    public String picS180;
+    @JSONField(name = "pic_300")
+    public String pic300;
+    @JSONField(name = "pic_s500")
+    public String picS500;
+    @JSONField(name = "pic_w700")
+    public String picW700;
+    @JSONField(name = "pic_s1000")
+    public String picS1000;
 }

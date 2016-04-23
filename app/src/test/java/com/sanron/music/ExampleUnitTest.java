@@ -1,16 +1,11 @@
 package com.sanron.music;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.annotation.JSONField;
-import com.alibaba.fastjson.parser.ParserConfig;
 import com.sanron.music.bdmusic.BMA;
 
 import org.junit.Test;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * To work on unit tests, switch the Test Artifact in the Build Variants view.
@@ -18,6 +13,7 @@ import java.util.Date;
 public class ExampleUnitTest {
     @Test
     public void testApi() throws Exception {
+        System.out.println(BMA.Album.albumInfo("257122561"));
         System.out.println(BMA.Artist.artistInfo("1746"));
         System.out.println(BMA.Artist.artistAlbums("1746",0,10));
         System.out.println(BMA.Artist.artistSongList("1746", 0, 100));

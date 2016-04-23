@@ -2,7 +2,7 @@ package com.sanron.music.net;
 
 import android.text.TextUtils;
 
-import com.sanron.music.common.ApiEncryptTool;
+import com.sanron.music.net.bean.AlbumSongs;
 import com.sanron.music.net.bean.AllTag;
 import com.sanron.music.net.bean.FocusPicData;
 import com.sanron.music.net.bean.HotSongListData;
@@ -15,7 +15,7 @@ import com.sanron.music.net.bean.SingerList;
 import com.sanron.music.net.bean.SingerSongs;
 import com.sanron.music.net.bean.SongList;
 import com.sanron.music.net.bean.SongUrlInfo;
-import com.sanron.music.net.bean.TagSongsData;
+import com.sanron.music.net.bean.TagSongs;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -105,7 +105,7 @@ public class MusicApi {
      * @param offset       偏移量
      * @param jsonCallback
      */
-    public static Call tagInfo(String tagName, int limit, int offset, JsonCallback<TagSongsData> jsonCallback) {
+    public static Call tagInfo(String tagName, int limit, int offset, JsonCallback<TagSongs> jsonCallback) {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.tag.songlist");
         params.put("tagname", tagName);
@@ -257,6 +257,13 @@ public class MusicApi {
         params.put("offset", offset);
         params.put("limits", limits);
         return ApiHttpClient.get(url(params), 2 * 3600, callback);
+    }
+
+    public static Call albumSongs(String albumId, JsonCallback<AlbumSongs> callback) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("method", "baidu.ting.album.getAlbumInfo");
+        params.put("album_id", albumId);
+        return ApiHttpClient.get(url(params), 6 * 3600, callback);
     }
 
     private static String url(Map<String, Object> params) {

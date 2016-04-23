@@ -105,6 +105,9 @@ public class MusicScanner {
 
         public void stopRun() {
             mFlagStop = true;
+            synchronized (mLock) {
+                mLock.notify();
+            }
         }
 
         @Override

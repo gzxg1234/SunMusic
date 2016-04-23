@@ -46,7 +46,7 @@ public class SongList {
     public String pic500;
 
     @JSONField(name = "pic_w700")
-    public String pic700;
+    public String picW700;
 
     /**
      * 链接

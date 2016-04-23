@@ -109,10 +109,12 @@ public class SongItemAdapter extends BaseAdapter {
             holder.ivMv = (ImageView) convertView.findViewById(R.id.iv_mv);
         }
 
-
-        if (position == mPlayingPosition) {
+        Music playingMusic = PlayerUtil.getCurrentMusic();
+        if (playingMusic != null
+                && song.songId.equals(playingMusic.getSongId())) {
             holder.tvText1.setTextColor(mPlayingTextColor);
             holder.tvText2.setTextColor(mPlayingTextColor);
+            mPlayingPosition = position;
         } else {
             holder.tvText1.setTextColor(mNormalTitleTextColor);
             holder.tvText2.setTextColor(mNormalArtistTextColor);
@@ -128,6 +130,11 @@ public class SongItemAdapter extends BaseAdapter {
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mPlayingPosition == position) {
+                    PlayerUtil.togglePlayPause();
+                    return;
+                }
+
                 List<Song> songs = mData;
                 List<Music> musics = new LinkedList<>();
                 for (Song song : songs) {

@@ -21,26 +21,27 @@ import com.sanron.music.AppContext;
 import com.sanron.music.R;
 import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.bean.PlayList;
+import com.sanron.music.fragments.web.AlbumInfoFragment;
 import com.sanron.music.service.PlayerUtil;
-import com.sanron.music.ui.PagerFragment;
-import com.sanron.music.ui.PlayerFrag;
-import com.sanron.music.ui.mymusic.AlbumFrag;
-import com.sanron.music.ui.mymusic.ArtistFrag;
-import com.sanron.music.ui.mymusic.ListMusicFrag;
-import com.sanron.music.ui.mymusic.LocalMusicFrag;
-import com.sanron.music.ui.mymusic.NavigationHeaderFrag;
-import com.sanron.music.ui.mymusic.PlayListFrag;
-import com.sanron.music.ui.mymusic.RecentPlayFrag;
-import com.sanron.music.ui.web.AllTagFrag;
-import com.sanron.music.ui.web.BillboardFrag;
-import com.sanron.music.ui.web.GedanFrag;
-import com.sanron.music.ui.web.RadioFrag;
-import com.sanron.music.ui.web.RecmdFrag;
-import com.sanron.music.ui.web.SingerFrag;
-import com.sanron.music.ui.web.SingerInfoFrag;
-import com.sanron.music.ui.web.SingerListFrag;
-import com.sanron.music.ui.web.SongListInfoFrag;
-import com.sanron.music.ui.web.TagSongFrag;
+import com.sanron.music.fragments.PagerFragment;
+import com.sanron.music.fragments.NowPlayingFragment;
+import com.sanron.music.fragments.pagermymusic.AlbumFragment;
+import com.sanron.music.fragments.pagermymusic.ArtistFragment;
+import com.sanron.music.fragments.pagermymusic.ListMusicFragment;
+import com.sanron.music.fragments.pagermymusic.LocalMusicFragment;
+import com.sanron.music.fragments.NavigationHeaderFrag;
+import com.sanron.music.fragments.pagermymusic.PlayListFragment;
+import com.sanron.music.fragments.pagermymusic.RecentPlayFragment;
+import com.sanron.music.fragments.web.AllTagFragment;
+import com.sanron.music.fragments.pagerwebmusic.BillboardFragment;
+import com.sanron.music.fragments.pagerwebmusic.GedanFragment;
+import com.sanron.music.fragments.pagerwebmusic.RadioFragment;
+import com.sanron.music.fragments.pagerwebmusic.RecommendFragment;
+import com.sanron.music.fragments.pagerwebmusic.SingerFragment;
+import com.sanron.music.fragments.web.SingerInfoFragment;
+import com.sanron.music.fragments.web.SingerListFragment;
+import com.sanron.music.fragments.web.SongListInfoFragment;
+import com.sanron.music.fragments.web.TagInfoFragment;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.HashSet;
@@ -55,7 +56,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private FragmentManager mFm;
     private MaterialMenuDrawable mMaterialMenu;
     private SlidingUpPanelLayout mSlidingUpPanelLayout;
-    private PlayerFrag mPlayerFrag;
+    private NowPlayingFragment mNowPlayingFragment;
     private NavigationView mNavigationView;
 
     private Set<PlayerReadyCallback> mPlayerReadyCallbacks;
@@ -89,6 +90,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mToolbar = $(R.id.toolbar);
         mAppBar = $(R.id.app_bar);
 
+        ViewTool.setViewFitsStatusBar(mAppBar);
+
         mPlayerReadyCallbacks = new HashSet<>();
         mBackPressedHandlers = new HashSet<>();
         mFm = getSupportFragmentManager();
@@ -100,7 +103,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         setUpHeader();
         mNavigationView.setNavigationItemSelectedListener(this);
 
-        ViewTool.setViewFitsStatusBar(mAppBar);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,11 +119,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         });
 
 
-        mPlayerFrag = (PlayerFrag) mFm.findFragmentByTag(PlayerFrag.class.getName());
-        if (mPlayerFrag == null) {
-            mPlayerFrag = new PlayerFrag();
+        mNowPlayingFragment = (NowPlayingFragment) mFm.findFragmentByTag(NowPlayingFragment.class.getName());
+        if (mNowPlayingFragment == null) {
+            mNowPlayingFragment = new NowPlayingFragment();
             mFm.beginTransaction()
-                    .add(R.id.player_frag_container, mPlayerFrag, PlayerFrag.class.getName())
+                    .add(R.id.player_frag_container, mNowPlayingFragment, NowPlayingFragment.class.getName())
                     .commit();
         }
 
@@ -148,9 +150,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
                 if (slideOffset == 0) {
-                    mPlayerFrag.setSmallControllerVisibility(View.VISIBLE);
+                    mNowPlayingFragment.setSmallControllerVisibility(View.VISIBLE);
                 } else {
-                    mPlayerFrag.setSmallControllerVisibility(View.INVISIBLE);
+                    mNowPlayingFragment.setSmallControllerVisibility(View.INVISIBLE);
                 }
             }
 
@@ -201,23 +203,27 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     public void showSongList(String listId) {
-        addFragmentToFront(SongListInfoFrag.newInstance(listId));
+        addFragmentToFront(SongListInfoFragment.newInstance(listId));
+    }
+
+    public void showAlbumSongs(String albumId){
+        addFragmentToFront(AlbumInfoFragment.newInstance(albumId));
     }
 
     public void showSingerList(String title, int area, int sex) {
-        addFragmentToFront(SingerListFrag.newInstance(title, area, sex));
+        addFragmentToFront(SingerListFragment.newInstance(title, area, sex));
     }
 
     public void showTagSong(String tag) {
-        addFragmentToFront(TagSongFrag.newInstance(tag));
+        addFragmentToFront(TagInfoFragment.newInstance(tag));
     }
 
     public void showAllTag() {
-        addFragmentToFront(AllTagFrag.newInstance());
+        addFragmentToFront(AllTagFragment.newInstance());
     }
 
     public void showSingerInfo(String artistId) {
-        addFragmentToFront(SingerInfoFrag.newInstance(artistId));
+        addFragmentToFront(SingerInfoFragment.newInstance(artistId));
     }
 
     private void addFragmentToFront(Fragment fragment) {
@@ -273,22 +279,22 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             switch (pos) {
                 case 0: {
                     String[] titles = new String[]{"我的歌单", "最近播放", "本地音乐", "艺术家", "专辑"};
-                    String[] fragments = new String[]{PlayListFrag.class.getName(),
-                            RecentPlayFrag.class.getName(),
-                            LocalMusicFrag.class.getName(),
-                            ArtistFrag.class.getName(),
-                            AlbumFrag.class.getName()};
+                    String[] fragments = new String[]{PlayListFragment.class.getName(),
+                            RecentPlayFragment.class.getName(),
+                            LocalMusicFragment.class.getName(),
+                            ArtistFragment.class.getName(),
+                            AlbumFragment.class.getName()};
                     toFragment = PagerFragment.newInstance(titles, fragments);
                 }
                 break;
 
                 case 1: {
                     String[] titles = new String[]{"推荐", "歌手", "排行", "歌单", "电台"};
-                    String[] fragments = new String[]{RecmdFrag.class.getName(),
-                            SingerFrag.class.getName(),
-                            BillboardFrag.class.getName(),
-                            GedanFrag.class.getName(),
-                            RadioFrag.class.getName()};
+                    String[] fragments = new String[]{RecommendFragment.class.getName(),
+                            SingerFragment.class.getName(),
+                            BillboardFragment.class.getName(),
+                            GedanFragment.class.getName(),
+                            RadioFragment.class.getName()};
                     toFragment = PagerFragment.newInstance(titles, fragments);
                 }
                 break;
@@ -307,14 +313,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      * 显示列表歌曲
      */
     public void showPlayListSongs(PlayList playList) {
-        ListMusicFrag listMusicFrag = ListMusicFrag.newInstance(playList);
+        ListMusicFragment listMusicFragment = ListMusicFragment.newInstance(playList);
         mFm.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_top,
                         R.anim.slide_out_bottom,
                         R.anim.slide_in_top,
                         R.anim.slide_out_bottom)
-                .add(R.id.fragment_container_2, listMusicFrag, ListMusicFrag.TAG)
-                .addToBackStack(ListMusicFrag.class.getName())
+                .add(R.id.fragment_container_2, listMusicFragment, ListMusicFragment.TAG)
+                .addToBackStack(ListMusicFragment.class.getName())
                 .commit();
         mToolbar.setTitle(playList.getTitle());
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -323,7 +329,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     public void dismissPlayListSongs() {
-        if (mFm.popBackStackImmediate(ListMusicFrag.class.getName(),
+        if (mFm.popBackStackImmediate(ListMusicFragment.class.getName(),
                 FragmentManager.POP_BACK_STACK_INCLUSIVE)) {
             mToolbar.setTitle("我的音乐");
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
@@ -366,7 +372,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         outState.putInt("curPagerPosition", curPagerPosition);
         outState.putString("title", mToolbar.getTitle().toString());
         outState.putString("iconState", mMaterialMenu.getIconState().name());
-        outState.putBoolean("mIsShowingPlayListSongsFrag", mIsShowingPlayListSongsFrag);
+        outState.putBoolean("isShowingPlayListSongsFrag", mIsShowingPlayListSongsFrag);
     }
 
     @Override

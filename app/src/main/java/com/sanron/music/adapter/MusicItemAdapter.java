@@ -17,14 +17,13 @@ import android.widget.TextView;
 
 import com.nostra13.universalimageloader.cache.memory.MemoryCache;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 import com.sanron.music.R;
-import com.sanron.music.common.MyLog;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.net.JsonCallback;
 import com.sanron.music.net.MusicApi;
 import com.sanron.music.net.bean.LrcPicData;
+import com.sanron.music.service.PlayerUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,27 +37,20 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
 
     private List<Music> mData;
     private Context mContext;
+
     private SparseBooleanArray mCheckStates;
     private int mCheckedItemCount;
     private boolean mIsMultiMode = false;
+
+    private int mPlayingPosition;
     private boolean mIsFirstBindView = true;
-    private int mPlayingPosition = -1;//
-    private ImageLoader mImageLoader;
     private MemoryCache mMemoryCache;
+
     private int mPlayingTextColor;//播放中文字颜色
     private int mNormalTitleTextColor;//正常title颜色
     private int mNormalArtistTextColor;//正常artist颜色
-    private HashMap<Long, String> mAvatarUrlCache;
 
-    public MusicItemAdapter(Context context) {
-        this.mContext = context;
-        mImageLoader = ImageLoader.getInstance();
-        mMemoryCache = mImageLoader.getMemoryCache();
-        Resources resources = context.getResources();
-        mPlayingTextColor = resources.getColor(R.color.colorAccent);
-        mNormalTitleTextColor = resources.getColor(R.color.textColorPrimary);
-        mNormalArtistTextColor = resources.getColor(R.color.textColorSecondary);
-    }
+    private HashMap<Long, String> mAvatarUrlCache;//缓存头像url
 
     private RecyclerView.OnScrollListener onScrollListener = new RecyclerView.OnScrollListener() {
         @Override
@@ -83,6 +75,17 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
             }
         }
     };
+
+    public MusicItemAdapter(Context context) {
+        this.mContext = context;
+        mMemoryCache = ImageLoader.getInstance()
+                .getMemoryCache();
+        Resources resources = context.getResources();
+        mPlayingTextColor = resources.getColor(R.color.colorAccent);
+        mNormalTitleTextColor = resources.getColor(R.color.textColorPrimary);
+        mNormalArtistTextColor = resources.getColor(R.color.textColorSecondary);
+    }
+
 
     public boolean isMultiMode() {
         return mIsMultiMode;
@@ -124,9 +127,6 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         notifyDataSetChanged();
     }
 
-    public int getPlayingPosition() {
-        return mPlayingPosition;
-    }
 
     public List<Music> getData() {
         return mData;
@@ -137,11 +137,13 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
     }
 
     //查找缓存
-    private Bitmap getMemoryBitmap(String uri, ImageView iv) {
-        String key = MemoryCacheUtils.generateKey(uri, new ImageSize(iv.getWidth(), iv.getHeight()));
-        List<Bitmap> bmps = MemoryCacheUtils.findCachedBitmapsForImageUri(key, mMemoryCache);
-        if (bmps.size() > 0) {
-            return bmps.get(0);
+    private Bitmap getMemoryBitmap(String uri) {
+        List<String> keys = MemoryCacheUtils.findCacheKeysForImageUri(uri, mMemoryCache);
+        for (String key : keys) {
+            List<Bitmap> bmps = MemoryCacheUtils.findCachedBitmapsForImageUri(key, mMemoryCache);
+            if (bmps.size() > 0) {
+                return bmps.get(0);
+            }
         }
         return null;
     }
@@ -177,17 +179,6 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         return new MusicItemHolder(view);
     }
 
-    public void setPlayingPosition(int position) {
-        final int oldPos = mPlayingPosition;
-        mPlayingPosition = position;
-        if (oldPos != -1) {
-            notifyItemChanged(oldPos);
-        }
-        if (mPlayingPosition != -1) {
-            notifyItemChanged(mPlayingPosition);
-        }
-    }
-
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
@@ -200,8 +191,12 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         recyclerView.removeOnScrollListener(onScrollListener);
     }
 
+    public int getPlayingPosition() {
+        return mPlayingPosition;
+    }
+
     @Override
-    public void onBindViewHolder(final MusicItemHolder holder, final int position) {
+    public void onBindViewHolder(final MusicItemHolder holder, int position) {
         final Music music = mData.get(position);
         String artist = music.getArtist();
         if ("<unknown>".equals(artist)) {
@@ -209,9 +204,12 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         }
         holder.tvTitle.setText(music.getTitle());
         holder.tvArtist.setText(artist);
-        if (position == mPlayingPosition) {
+        Music curMusic = PlayerUtil.getCurrentMusic();
+        if (curMusic != null
+                && (curMusic.getId() == music.getId())) {
             holder.tvTitle.setTextColor(mPlayingTextColor);
             holder.tvArtist.setTextColor(mPlayingTextColor);
+            mPlayingPosition = position;
         } else {
             holder.tvTitle.setTextColor(mNormalTitleTextColor);
             holder.tvArtist.setTextColor(mNormalArtistTextColor);
@@ -223,7 +221,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
             holder.cbSelect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    setItemChecked(position, isChecked);
+                    setItemChecked(holder.getAdapterPosition(), isChecked);
                 }
             });
             holder.cbSelect.setChecked(isItemChecked(position));
@@ -240,7 +238,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
             String avatar = mAvatarUrlCache.get(music.getId());
             if (!TextUtils.isEmpty(avatar)) {
                 //加载ram缓存图片
-                Bitmap cacheBmp = getMemoryBitmap(avatar, holder.ivPicture);
+                Bitmap cacheBmp = getMemoryBitmap(avatar);
                 if (cacheBmp != null) {
                     holder.ivPicture.setImageBitmap(cacheBmp);
                     return;
@@ -256,6 +254,8 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         if (holder.call != null) {
             holder.call.cancel();
         }
+        ImageLoader.getInstance()
+                .cancelDisplayTask(holder.ivPicture);
         super.onViewRecycled(holder);
     }
 
@@ -263,10 +263,8 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         final Music music = mData.get(position);
         String artist = music.getArtist();
         String avatar = mAvatarUrlCache.get(music.getId());
-        System.out.println(music.getId() + " " + music.getTitle() + " " + avatar);
         if (avatar == null) {
             //搜索头像
-            MyLog.d("LazyLoad", music.getTitle() + " search pic");
             holder.call = MusicApi.searchLrcPic(music.getTitle(),
                     "<unknown>".equals(artist) ? "" : artist,
                     2,
@@ -291,13 +289,8 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
                             }
                             mAvatarUrlCache.put(music.getId(), avatar);
                             if (!TextUtils.isEmpty(avatar)) {
-                                final String finalAvatar = avatar;
-                                holder.ivPicture.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mImageLoader.displayImage(finalAvatar, holder.ivPicture);
-                                    }
-                                });
+                                ImageLoader.getInstance()
+                                        .displayImage(avatar, holder.ivPicture);
                             }
                         }
 
@@ -307,7 +300,8 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
                         }
                     });
         } else if (!avatar.isEmpty()) {
-            mImageLoader.displayImage(avatar, holder.ivPicture);
+            ImageLoader.getInstance()
+                    .displayImage(avatar, holder.ivPicture);
         } else {
             holder.ivPicture.setImageResource(R.mipmap.default_small_song_pic);
         }
@@ -368,7 +362,6 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         }
 
     }
-
 
     private OnItemCheckedListener onItemCheckedListener;
     private OnItemClickListener onItemClickListener;

@@ -34,23 +34,23 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_list_title"
+                android:id="@+id/tv_text1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:text="我们相爱吧 在花开的季节"
+                tools:text="我们相爱吧 在花开的季节"
                 android:textColor="@color/textColorPrimaryInverse"
                 android:textSize="20dp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tv_list_tag"
+                android:id="@+id/tv_text2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:singleLine="true"
-                android:text="甜蜜，情侣，浪漫"
+                tools:text="甜蜜，情侣，浪漫"
                 android:textColor="@color/textColorSecondaryInverse"
                 android:textSize="14dp" />
         </LinearLayout>
@@ -79,7 +79,7 @@
                 android:layout_weight="1"
                 android:singleLine="true"
                 android:textColor="@color/textColorSecondary"
-                android:textSize="16dp"
+                tools:textSize="16dp"
                 tools:text="共18首歌" />
 
             <ImageButton
