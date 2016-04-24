@@ -1,4 +1,4 @@
-package com.sanron.music.net.bean;
+package com.sanron.music.api.bean;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -19,5 +19,13 @@ public class RecmdSongData {
         public String title;
         @JSONField(name = "song_list")
         public List<RecommendSong> songs;
+
+        public static class RecommendSong extends Song {
+            /**
+             * 推荐理由
+             */
+            @JSONField(name = "recommend_reason")
+            public String recommendReason;
+        }
     }
 }

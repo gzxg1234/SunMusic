@@ -11,7 +11,7 @@ import android.text.TextUtils;
 
 import com.sanron.music.AppContext;
 import com.sanron.music.db.bean.Music;
-import com.sanron.music.net.bean.SongUrlInfo;
+import com.sanron.music.api.bean.SongUrlInfo;
 
 import java.util.HashMap;
 import java.util.List;

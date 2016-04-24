@@ -10,7 +10,7 @@ import android.net.NetworkInfo;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.db.DataProvider;
-import com.sanron.music.net.MusicApi;
+import com.sanron.music.api.MusicApi;
 import com.sanron.music.service.PlayerService;
 import com.sanron.music.common.MyLog;
 import com.sanron.music.common.T;

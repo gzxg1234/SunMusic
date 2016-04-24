@@ -3,6 +3,9 @@ package com.sanron.music.adapter;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.DataSetObserver;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +14,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sanron.music.R;
+import com.sanron.music.api.bean.Song;
 import com.sanron.music.db.bean.Music;
-import com.sanron.music.net.bean.Song;
 import com.sanron.music.service.PlayerUtil;
 
 import java.util.LinkedList;
@@ -55,8 +58,13 @@ public class SongItemAdapter extends BaseAdapter {
         return mData == null ? 0 : mData.size();
     }
 
-    public void setData(List<Song> data) {
-        this.mData = data;
+    public void setData(List<? extends Song> data) {
+        if (mData == null) {
+            mData = new LinkedList<>();
+        } else {
+            mData.clear();
+        }
+        mData.addAll(data);
         notifyDataSetChanged();
     }
 
@@ -64,12 +72,11 @@ public class SongItemAdapter extends BaseAdapter {
         return mData;
     }
 
-    public void addData(List<Song> songs) {
+    public void addData(List<? extends Song> songs) {
         if (mData == null) {
-            mData = songs;
-        } else {
-            mData.addAll(songs);
+            mData = new LinkedList<>();
         }
+        mData.addAll(songs);
         notifyDataSetChanged();
     }
 
@@ -80,7 +87,6 @@ public class SongItemAdapter extends BaseAdapter {
     protected String onBindText2(Song song) {
         return song.author;
     }
-
 
     @Override
     public Object getItem(int position) {
@@ -95,20 +101,23 @@ public class SongItemAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         Song song = mData.get(position);
-        ViewHolder holder = null;
+        SongItemHolder holder = null;
         if (convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.list_song_item, parent, false);
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.list_common_item, parent, false);
         } else {
-            holder = (ViewHolder) convertView.getTag();
+            holder = (SongItemHolder) convertView.getTag();
         }
 
         if (holder == null) {
-            holder = new ViewHolder();
+            holder = new SongItemHolder();
+            holder.ivPicture = (ImageView) convertView.findViewById(R.id.iv_picture);
             holder.tvText1 = (TextView) convertView.findViewById(R.id.tv_text1);
             holder.tvText2 = (TextView) convertView.findViewById(R.id.tv_text2);
-            holder.ivMv = (ImageView) convertView.findViewById(R.id.iv_mv);
+            holder.ivMenu = (ImageView) convertView.findViewById(R.id.iv_menu);
+            holder.ivMenu.setImageResource(R.mipmap.ic_more_vert_black_24dp);
+            convertView.setTag(holder);
         }
-
+        holder.ivPicture.setVisibility(View.GONE);
         Music playingMusic = PlayerUtil.getCurrentMusic();
         if (playingMusic != null
                 && song.songId.equals(playingMusic.getSongId())) {
@@ -122,9 +131,10 @@ public class SongItemAdapter extends BaseAdapter {
         holder.tvText1.setText(onBindText1(song));
         holder.tvText2.setText(onBindText2(song));
         if (song.hasMv == 1) {
-            holder.ivMv.setVisibility(View.VISIBLE);
-        } else {
-            holder.ivMv.setVisibility(View.GONE);
+            SpannableStringBuilder ssb = new SpannableStringBuilder("  ");
+            ssb.setSpan(new ImageSpan(mContext, R.mipmap.ic_mv, ImageSpan.ALIGN_BASELINE),
+                    1, 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            holder.tvText1.append(ssb);
         }
 
         convertView.setOnClickListener(new View.OnClickListener() {
@@ -148,9 +158,10 @@ public class SongItemAdapter extends BaseAdapter {
         return convertView;
     }
 
-    class ViewHolder {
+    protected class SongItemHolder {
         TextView tvText1;
         TextView tvText2;
-        ImageView ivMv;
+        ImageView ivMenu;
+        ImageView ivPicture;
     }
 }

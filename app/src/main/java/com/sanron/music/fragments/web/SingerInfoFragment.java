@@ -15,14 +15,14 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
 import com.sanron.music.adapter.SongItemAdapter;
+import com.sanron.music.api.JsonCallback;
+import com.sanron.music.api.MusicApi;
+import com.sanron.music.api.bean.Album;
+import com.sanron.music.api.bean.Singer;
+import com.sanron.music.api.bean.SingerAlbums;
+import com.sanron.music.api.bean.SingerSongs;
+import com.sanron.music.api.bean.Song;
 import com.sanron.music.fragments.base.PullFragment;
-import com.sanron.music.net.JsonCallback;
-import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.Album;
-import com.sanron.music.net.bean.Singer;
-import com.sanron.music.net.bean.SingerAlbums;
-import com.sanron.music.net.bean.SingerSongs;
-import com.sanron.music.net.bean.Song;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.service.PlayerUtil;
 import com.sanron.music.view.DDPullListView;
@@ -117,7 +117,6 @@ public class SingerInfoFragment extends PullFragment implements DDPullListView.O
                 mPullListView.setNormalHeaderHeight(normalHeaderHeight);
             }
         });
-
     }
 
     @Override

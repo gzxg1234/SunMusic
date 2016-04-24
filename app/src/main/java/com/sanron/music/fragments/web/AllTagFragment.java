@@ -19,11 +19,11 @@ import android.widget.TextView;
 
 import com.sanron.music.R;
 import com.sanron.music.common.ViewTool;
-import com.sanron.music.net.JsonCallback;
-import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.AllTag;
-import com.sanron.music.net.bean.HotTagData;
-import com.sanron.music.net.bean.Tag;
+import com.sanron.music.api.JsonCallback;
+import com.sanron.music.api.MusicApi;
+import com.sanron.music.api.bean.AllTag;
+import com.sanron.music.api.bean.HotTagData;
+import com.sanron.music.api.bean.Tag;
 import com.sanron.music.fragments.base.SlideWebFragment;
 import com.sanron.music.view.NoScrollGridView;
 import com.sanron.music.view.RatioLayout;

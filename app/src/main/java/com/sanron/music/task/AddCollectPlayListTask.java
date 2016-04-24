@@ -8,7 +8,7 @@ import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.db.bean.PlayList;
-import com.sanron.music.net.bean.Song;
+import com.sanron.music.api.bean.Song;
 
 import java.util.List;
 

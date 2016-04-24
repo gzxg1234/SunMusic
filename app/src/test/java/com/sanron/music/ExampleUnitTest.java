@@ -13,6 +13,8 @@ import java.text.ParseException;
 public class ExampleUnitTest {
     @Test
     public void testApi() throws Exception {
+        System.out.println(BMA.Billboard.billSongList(1,0,10));
+        System.out.println(BMA.Billboard.billCategory());
         System.out.println(BMA.Album.albumInfo("257122561"));
         System.out.println(BMA.Artist.artistInfo("1746"));
         System.out.println(BMA.Artist.artistAlbums("1746",0,10));
@@ -46,8 +48,8 @@ public class ExampleUnitTest {
     @Test
     public void testJson() throws IOException, ParseException {
         String json = "{\"date\":\"2000-00-00\"}";
-//        String json = "{\"content\":\"\"}";
-//        String json = "{\"content\":}";
+//        String json = "{\"mBillCategory\":\"\"}";
+//        String json = "{\"mBillCategory\":}";
 //        JsonUtil.fromJson(json, RecommendSongResult.class);
     }
 }

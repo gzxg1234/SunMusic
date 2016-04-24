@@ -19,10 +19,10 @@ import com.nostra13.universalimageloader.cache.memory.MemoryCache;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 import com.sanron.music.R;
+import com.sanron.music.api.JsonCallback;
+import com.sanron.music.api.MusicApi;
+import com.sanron.music.api.bean.LrcPicData;
 import com.sanron.music.db.bean.Music;
-import com.sanron.music.net.JsonCallback;
-import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.LrcPicData;
 import com.sanron.music.service.PlayerUtil;
 
 import java.util.HashMap;

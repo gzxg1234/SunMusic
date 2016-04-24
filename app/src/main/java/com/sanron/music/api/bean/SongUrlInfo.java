@@ -1,4 +1,4 @@
-package com.sanron.music.net.bean;
+package com.sanron.music.api.bean;
 
 import com.alibaba.fastjson.annotation.JSONField;
 

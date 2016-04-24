@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.sanron.music.view.SlideBackLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/slide_back_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                                       xmlns:tools="http://schemas.android.com/tools"
+                                       android:id="@+id/slide_back_layout"
+                                       android:layout_width="match_parent"
+                                       android:layout_height="match_parent">
 
     <com.sanron.music.view.DDPullListView
         android:id="@+id/pull_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/white" />
+        android:background="@android:color/white"/>
 
-    <ImageView
+    <com.sanron.music.view.DDImageView
         android:id="@+id/top_board"
         android:layout_width="match_parent"
-        android:scaleType="centerCrop"
-        android:layout_height="240dp" />
+        android:layout_height="240dp"
+        android:background="@android:color/white"/>
 
     <LinearLayout
         android:id="@+id/info"
@@ -39,10 +39,10 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:singleLine="true"
-                tools:text="我们相爱吧 在花开的季节"
                 android:textColor="@color/textColorPrimaryInverse"
                 android:textSize="20dp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:text="我们相爱吧 在花开的季节"/>
 
             <TextView
                 android:id="@+id/tv_text2"
@@ -50,9 +50,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:singleLine="true"
-                tools:text="甜蜜，情侣，浪漫"
                 android:textColor="@color/textColorSecondaryInverse"
-                android:textSize="14dp" />
+                android:textSize="14dp"
+                tools:text="甜蜜，情侣，浪漫"/>
         </LinearLayout>
 
     </LinearLayout>
@@ -79,8 +79,8 @@
                 android:layout_weight="1"
                 android:singleLine="true"
                 android:textColor="@color/textColorSecondary"
-                tools:textSize="16dp"
-                tools:text="共18首歌" />
+                tools:text="共18首歌"
+                tools:textSize="18dp"/>
 
             <ImageButton
                 android:id="@+id/ibtn_favorite"
@@ -89,7 +89,7 @@
                 android:background="@android:color/transparent"
                 android:padding="12dp"
                 android:scaleType="fitXY"
-                android:src="@mipmap/ic_favorite_border_black_24dp" />
+                android:src="@mipmap/ic_favorite_border_black_24dp"/>
 
             <ImageButton
                 android:id="@+id/ibtn_download"
@@ -98,7 +98,7 @@
                 android:background="@android:color/transparent"
                 android:padding="12dp"
                 android:scaleType="fitXY"
-                android:src="@mipmap/ic_file_download_black_24dp" />
+                android:src="@mipmap/ic_file_download_black_24dp"/>
 
             <ImageButton
                 android:id="@+id/ibtn_share"
@@ -107,24 +107,25 @@
                 android:background="@android:color/transparent"
                 android:padding="12dp"
                 android:scaleType="fitXY"
-                android:src="@mipmap/ic_share_black_24dp" />
+                android:src="@mipmap/ic_share_black_24dp"/>
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#D8D8D8" />
+            android:background="#D8D8D8"/>
 
     </LinearLayout>
 
-    <include layout="@layout/layout_loading"
+    <include
+        layout="@layout/layout_loading"
         tools:visibility="gone"/>
 
     <include
         layout="@layout/layout_load_failed"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
-    <include layout="@layout/layout_top_bar" />
+    <include layout="@layout/layout_top_bar"/>
 
 
 </com.sanron.music.view.SlideBackLayout>

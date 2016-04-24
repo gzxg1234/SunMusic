@@ -22,6 +22,7 @@ import com.sanron.music.R;
 import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.bean.PlayList;
 import com.sanron.music.fragments.web.AlbumInfoFragment;
+import com.sanron.music.fragments.web.BillboardInfoFragment;
 import com.sanron.music.service.PlayerUtil;
 import com.sanron.music.fragments.PagerFragment;
 import com.sanron.music.fragments.NowPlayingFragment;
@@ -208,6 +209,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     public void showAlbumSongs(String albumId){
         addFragmentToFront(AlbumInfoFragment.newInstance(albumId));
+    }
+
+    public void showBillboardInfo(int type){
+        addFragmentToFront(BillboardInfoFragment.newInstance(type));
     }
 
     public void showSingerList(String title, int area, int sex) {

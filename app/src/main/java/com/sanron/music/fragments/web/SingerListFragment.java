@@ -21,10 +21,10 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
 import com.sanron.music.common.ViewTool;
 import com.sanron.music.fragments.base.SlideWebFragment;
-import com.sanron.music.net.JsonCallback;
-import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.Singer;
-import com.sanron.music.net.bean.SingerList;
+import com.sanron.music.api.JsonCallback;
+import com.sanron.music.api.MusicApi;
+import com.sanron.music.api.bean.Singer;
+import com.sanron.music.api.bean.SingerList;
 import com.sanron.music.view.DDPullListView;
 import com.sanron.music.view.ScrimPopupWindow;
 

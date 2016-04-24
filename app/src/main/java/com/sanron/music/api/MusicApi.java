@@ -1,21 +1,23 @@
-package com.sanron.music.net;
+package com.sanron.music.api;
 
 import android.text.TextUtils;
 
-import com.sanron.music.net.bean.AlbumSongs;
-import com.sanron.music.net.bean.AllTag;
-import com.sanron.music.net.bean.FocusPicData;
-import com.sanron.music.net.bean.HotSongListData;
-import com.sanron.music.net.bean.HotTagData;
-import com.sanron.music.net.bean.LrcPicData;
-import com.sanron.music.net.bean.RecmdSongData;
-import com.sanron.music.net.bean.Singer;
-import com.sanron.music.net.bean.SingerAlbums;
-import com.sanron.music.net.bean.SingerList;
-import com.sanron.music.net.bean.SingerSongs;
-import com.sanron.music.net.bean.SongList;
-import com.sanron.music.net.bean.SongUrlInfo;
-import com.sanron.music.net.bean.TagSongs;
+import com.sanron.music.api.bean.AlbumSongs;
+import com.sanron.music.api.bean.AllTag;
+import com.sanron.music.api.bean.BillCategoryData;
+import com.sanron.music.api.bean.BillSongList;
+import com.sanron.music.api.bean.FocusPicData;
+import com.sanron.music.api.bean.HotSongListData;
+import com.sanron.music.api.bean.HotTagData;
+import com.sanron.music.api.bean.LrcPicData;
+import com.sanron.music.api.bean.RecmdSongData;
+import com.sanron.music.api.bean.Singer;
+import com.sanron.music.api.bean.SingerAlbums;
+import com.sanron.music.api.bean.SingerList;
+import com.sanron.music.api.bean.SingerSongs;
+import com.sanron.music.api.bean.SongList;
+import com.sanron.music.api.bean.SongUrlInfo;
+import com.sanron.music.api.bean.TagSongs;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -259,11 +261,46 @@ public class MusicApi {
         return ApiHttpClient.get(url(params), 2 * 3600, callback);
     }
 
+    /**
+     * 专辑歌曲
+     * @param albumId
+     * @param callback
+     * @return
+     */
     public static Call albumSongs(String albumId, JsonCallback<AlbumSongs> callback) {
         Map<String, Object> params = new HashMap<>();
         params.put("method", "baidu.ting.album.getAlbumInfo");
         params.put("album_id", albumId);
         return ApiHttpClient.get(url(params), 6 * 3600, callback);
+    }
+
+    /**
+     * 排行榜
+     * @param callback
+     * @return
+     */
+    public static Call billCategory(JsonCallback<BillCategoryData> callback) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("method", "baidu.ting.billboard.billCategory");
+        params.put("kflag", 1);
+        return ApiHttpClient.get(url(params), 12 * 3600, callback);
+    }
+
+    /**
+     * 排行榜歌曲
+     * @param type
+     * @param offset
+     * @param limit
+     * @param callback
+     * @return
+     */
+    public static Call billSongList(int type, int offset, int limit, JsonCallback<BillSongList> callback) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("method", "baidu.ting.billboard.billList");
+        params.put("type", type);
+        params.put("offset", offset);
+//        params.put("fields", "song_id,title,author,album_title,pic_big,pic_small,havehigh,all_rate,charge,has_mv_mobile");
+        return ApiHttpClient.get(url(params), 12 * 3600, callback);
     }
 
     private static String url(Map<String, Object> params) {

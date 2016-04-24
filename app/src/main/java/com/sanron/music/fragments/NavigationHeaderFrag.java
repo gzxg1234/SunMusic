@@ -12,9 +12,9 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import com.sanron.music.R;
 import com.sanron.music.activities.MainActivity;
 import com.sanron.music.db.bean.Music;
-import com.sanron.music.net.JsonCallback;
-import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.LrcPicData;
+import com.sanron.music.api.JsonCallback;
+import com.sanron.music.api.MusicApi;
+import com.sanron.music.api.bean.LrcPicData;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.service.PlayerUtil;
 

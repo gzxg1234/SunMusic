@@ -31,13 +31,13 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import com.sanron.music.AppContext;
 import com.sanron.music.AppManager;
 import com.sanron.music.R;
+import com.sanron.music.api.JsonCallback;
+import com.sanron.music.api.MusicApi;
+import com.sanron.music.api.bean.LrcPicData;
+import com.sanron.music.api.bean.SongUrlInfo;
 import com.sanron.music.common.MyLog;
 import com.sanron.music.common.T;
 import com.sanron.music.db.bean.Music;
-import com.sanron.music.net.JsonCallback;
-import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.LrcPicData;
-import com.sanron.music.net.bean.SongUrlInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -454,7 +454,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 if (file.exists()) {
                     prepare(Uri.parse(dataPath));
                 } else {
-                    handlerPlayError("本地歌曲文件不存在");
+                    sendPlayError("本地歌曲文件不存在");
                 }
             }
         }
@@ -465,15 +465,20 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mMediaPlayer.prepareAsync();
             } catch (IllegalStateException e) {
+                // 当一曲歌曲在执行了prepareAsync异步准备资源中,
+                // 此时点击播放下一曲会reset就会出此异常
+                // 如果设置标记，比如在prepare时禁止播放下一曲可以避免此异常
+                // 但如果是播放网络歌曲，网络状态差，异步准备会花费较多时间,用户等待时间就较长
+                //
                 MyLog.w(TAG, "IllegalState");
             } catch (IOException e) {
                 e.printStackTrace();
-                handlerPlayError("播放出错");
+                sendPlayError("播放出错");
             }
         }
 
 
-        private void handlerPlayError(final String errorMsg) {
+        private void sendPlayError(final String errorMsg) {
             mState = STATE_STOP;
             T.show(errorMsg + ",3s后播放下一曲");
             handler.sendEmptyMessageDelayed(WHAT_PLAY_ERROR, 3000);
@@ -484,7 +489,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             mFileLinkCall = MusicApi.songLink(songid, new JsonCallback<SongUrlInfo>() {
                 @Override
                 public void onFailure(Exception e) {
-                    handlerPlayError("网络请求失败");
+                    sendPlayError("网络请求失败");
                 }
 
                 @Override
@@ -495,7 +500,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                         url = PlayerUtil.selectFileUrl(getApplicationContext(), data.songUrl.urls);
                     }
                     if (url == null) {
-                        handlerPlayError("此歌曲暂无网络资源");
+                        sendPlayError("此歌曲暂无网络资源");
                     } else {
                         prepare(Uri.parse(url.fileLink));
                     }
@@ -678,13 +683,13 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 case MediaPlayer.MEDIA_ERROR_UNSUPPORTED:
                 case MediaPlayer.MEDIA_ERROR_MALFORMED: {
                     MyLog.e(TAG, "不支持的音乐文件");
-                    handlerPlayError("无法播放此音乐");
+                    sendPlayError("无法播放此音乐");
                 }
                 break;
 
                 case MediaPlayer.MEDIA_ERROR_IO: {
                     MyLog.e(TAG, "读写文件错误");
-                    handlerPlayError("打开歌曲文件出错");
+                    sendPlayError("打开歌曲文件出错");
                 }
                 break;
 
@@ -790,6 +795,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         public boolean onInfo(MediaPlayer mp, int what, int extra) {
             switch (what) {
                 case MediaPlayer.MEDIA_INFO_BUFFERING_START: {
+                    //缓冲开始，发送一个延时消息，超时则到下一曲
                     handler.sendEmptyMessageDelayed(WHAT_BUFFER_TIMEOUT, BUFFER_TIMEOUT);
                     for (OnBufferListener listener : mOnBufferListeners) {
                         listener.onBufferStart();
@@ -798,6 +804,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                 break;
 
                 case MediaPlayer.MEDIA_INFO_BUFFERING_END: {
+                    //缓冲结束，取消上次缓冲发送的延时消息
                     handler.removeMessages(WHAT_BUFFER_TIMEOUT);
                     for (OnBufferListener listener : mOnBufferListeners) {
                         listener.onBufferEnd();

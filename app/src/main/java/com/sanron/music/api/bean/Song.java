@@ -1,9 +1,7 @@
-package com.sanron.music.net.bean;
+package com.sanron.music.api.bean;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.sanron.music.db.bean.Music;
-
-import java.util.Date;
 
 /**
  * Created by sanron on 16-3-19.
@@ -62,25 +60,25 @@ public class Song {
      * 小图,90x90
      */
     @JSONField(name = "pic_small")
-    public String smallPic;
+    public String picSmall;
 
     /**
      * 大图,150x150
      */
     @JSONField(name = "pic_big")
-    public String bigPic;
+    public String picBig;
 
     /**
      * 更大图,500x500
      */
     @JSONField(name = "pic_premium")
-    public String premiumPic;
+    public String picPremium;
 
     /**
      * 巨大图,1000x1000
      */
     @JSONField(name = "pic_huge")
-    public String hugePic;
+    public String picHuge;
 
     /**
      * 国家
@@ -129,7 +127,7 @@ public class Song {
                 + " artist:" + albumId
                 + " artistId:" + artistId
                 + " artistIds:" + allArtistId
-                + " picUrl:" + bigPic;
+                + " picUrl:" + picBig;
     }
 
 

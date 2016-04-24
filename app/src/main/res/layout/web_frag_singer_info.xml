@@ -12,6 +12,7 @@
         android:background="@android:color/white" />
 
     <ImageView
+        android:background="@android:color/white"
         android:id="@+id/top_board"
         android:layout_width="match_parent"
         android:layout_height="240dp"

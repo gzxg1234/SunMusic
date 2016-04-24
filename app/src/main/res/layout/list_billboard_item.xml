@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="116dp"
+    android:background="?attr/selectableItemBackground"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/iv_picture"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        tools:src="@mipmap/default_artist_album_pic"/>
+
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/tv_billcategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="16dp"
+            tools:text="新歌榜"/>
+
+        <TextView
+            android:id="@+id/tv_top1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:singleLine="true"
+            android:textColor="@color/textColorSecondary"
+            android:textSize="12dp"
+            tools:text="1 千年一般若-韩磊"/>
+
+        <TextView
+            android:id="@+id/tv_top2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:singleLine="true"
+            android:textColor="@color/textColorSecondary"
+            android:textSize="12dp"
+            tools:text="2 千年一般若-韩磊"/>
+
+        <TextView
+            android:id="@+id/tv_top3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:singleLine="true"
+            android:textColor="@color/textColorSecondary"
+            android:textSize="12dp"
+            tools:text="3 千年一般若-韩磊"/>
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="match_parent"
+        android:scaleType="center"
+        android:src="@mipmap/ic_chevron_right_black_90_24dp"/>
+</LinearLayout>

@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.net.bean.Singer;
+import com.sanron.music.api.bean.Singer;
 
 /**
  * Created by sanron on 16-4-19.

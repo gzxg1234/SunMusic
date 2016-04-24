@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 
 /**
+ * 直接从图片左上角画图
  * Created by sanron on 16-3-30.
  */
 public class DDImageView extends ImageView {

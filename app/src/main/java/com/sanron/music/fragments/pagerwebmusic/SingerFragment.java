@@ -15,11 +15,11 @@ import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
+import com.sanron.music.api.JsonCallback;
+import com.sanron.music.api.MusicApi;
+import com.sanron.music.api.bean.SingerList;
 import com.sanron.music.common.ViewTool;
 import com.sanron.music.fragments.base.LazyLoadFragment;
-import com.sanron.music.net.JsonCallback;
-import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.SingerList;
 import com.viewpagerindicator.CirclePageIndicator;
 
 import java.util.ArrayList;
@@ -107,7 +107,7 @@ public class SingerFragment extends LazyLoadFragment {
     private class HotSingerPagerAdapter extends PagerAdapter {
 
         private List<View> views;
-        private List<com.sanron.music.net.bean.Singer> data;
+        private List<com.sanron.music.api.bean.Singer> data;
         private boolean needUpdate;
         public final int COLUMN_NUM = 3;
         final int VERTICAL_SPACING;
@@ -130,7 +130,7 @@ public class SingerFragment extends LazyLoadFragment {
             return needUpdate ? POSITION_NONE : POSITION_UNCHANGED;
         }
 
-        public void setData(List<com.sanron.music.net.bean.Singer> data) {
+        public void setData(List<com.sanron.music.api.bean.Singer> data) {
             if (this.data == data) {
                 return;
             }
@@ -166,10 +166,10 @@ public class SingerFragment extends LazyLoadFragment {
             if (view.getTag() == null) {
                 int end = (position + 1) * COLUMN_NUM;
                 end = Math.min(end, data.size());
-                final List<com.sanron.music.net.bean.Singer> subData = data.subList(position * COLUMN_NUM, end);
+                final List<com.sanron.music.api.bean.Singer> subData = data.subList(position * COLUMN_NUM, end);
                 for (int i = 0; i < view.getChildCount() && i < subData.size(); i++) {
                     View child = view.getChildAt(i);
-                    final com.sanron.music.net.bean.Singer singer = subData.get(i);
+                    final com.sanron.music.api.bean.Singer singer = subData.get(i);
                     TextView tvName = (TextView) child.findViewById(R.id.tv_name);
                     ImageView ivPicture = (ImageView) child.findViewById(R.id.iv_artist_pic);
                     tvName.setText(singer.name);
@@ -199,9 +199,9 @@ public class SingerFragment extends LazyLoadFragment {
 
         public static final int TYPE_HEADER = 0;
         public static final int TYPE_CLASS = 1;
-        private List<com.sanron.music.net.bean.Singer> mHotSingers;
+        private List<com.sanron.music.api.bean.Singer> mHotSingers;
 
-        public void setHotSinger(List<com.sanron.music.net.bean.Singer> hotSingers) {
+        public void setHotSinger(List<com.sanron.music.api.bean.Singer> hotSingers) {
             this.mHotSingers = hotSingers;
             notifyItemChanged(0);
         }
@@ -214,7 +214,7 @@ public class SingerFragment extends LazyLoadFragment {
                 return new HotSingerHolder(view);
             } else {
                 View view = LayoutInflater.from(getContext())
-                        .inflate(R.layout.list_singer_class_item, parent, false);
+                        .inflate(R.layout.list_common_item, parent, false);
                 return new SingerClassHolder(view);
             }
         }
@@ -269,7 +269,12 @@ public class SingerFragment extends LazyLoadFragment {
 
             public SingerClassHolder(View itemView) {
                 super(itemView);
-                tvSingerClass = (TextView) itemView.findViewById(R.id.tv_singer_class);
+                tvSingerClass = (TextView) itemView.findViewById(R.id.tv_text1);
+                tvSingerClass.setTextColor(getResources().getColor(R.color.textColorSecondary));
+                itemView.findViewById(R.id.tv_text2).setVisibility(View.GONE);
+                itemView.findViewById(R.id.iv_picture).setVisibility(View.GONE);
+                ((ImageView) itemView.findViewById(R.id.iv_menu))
+                        .setImageResource(R.mipmap.ic_chevron_right_black_90_24dp);
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

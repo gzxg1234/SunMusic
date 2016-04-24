@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.sanron.music.view.SlideBackLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/slide_back_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                                       xmlns:tools="http://schemas.android.com/tools"
+                                       android:id="@+id/slide_back_layout"
+                                       android:layout_width="match_parent"
+                                       android:layout_height="match_parent">
 
     <com.sanron.music.view.DDPullListView
         android:id="@+id/pull_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/white" />
+        android:background="@android:color/white"/>
 
 
     <RelativeLayout
@@ -41,7 +41,7 @@
             android:textColor="@color/textColorPrimaryInverse"
             android:textSize="18dp"
             android:textStyle="bold"
-            tools:text="伤感" />
+            tools:text="伤感"/>
 
     </LinearLayout>
 
@@ -61,7 +61,7 @@
             android:drawableLeft="@mipmap/ic_play_arrow_black_24dp"
             android:gravity="center"
             android:text="播放全部"
-            android:textSize="15dp" />
+            android:textSize="15dp"/>
 
         <ImageButton
             android:id="@+id/ibtn_download"
@@ -71,23 +71,23 @@
             android:background="@android:color/transparent"
             android:padding="12dp"
             android:scaleType="fitXY"
-            android:src="@mipmap/ic_file_download_black_24dp" />
+            android:src="@mipmap/ic_file_download_black_24dp"/>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_alignParentBottom="true"
-            android:background="#D8D8D8" />
+            android:background="#D8D8D8"/>
     </RelativeLayout>
 
     <include
         layout="@layout/layout_loading"
-        tools:visibility="gone" />
+        tools:visibility="gone"/>
 
     <include
         layout="@layout/layout_load_failed"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
-    <include layout="@layout/layout_top_bar" />
+    <include layout="@layout/layout_top_bar"/>
 
 </com.sanron.music.view.SlideBackLayout>

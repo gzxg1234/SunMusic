@@ -1,11 +1,16 @@
 package com.sanron.music.fragments.pagerwebmusic;
 
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ImageSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -17,25 +22,25 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.sanron.music.R;
 import com.sanron.music.activities.MainActivity;
+import com.sanron.music.api.JsonCallback;
+import com.sanron.music.api.MusicApi;
+import com.sanron.music.api.bean.FocusPic;
+import com.sanron.music.api.bean.FocusPicData;
+import com.sanron.music.api.bean.HotSongListData;
+import com.sanron.music.api.bean.HotTagData;
+import com.sanron.music.api.bean.RecmdSongData;
+import com.sanron.music.api.bean.Song;
+import com.sanron.music.api.bean.SongList;
+import com.sanron.music.api.bean.Tag;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.fragments.base.LazyLoadFragment;
-import com.sanron.music.net.JsonCallback;
-import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.FocusPic;
-import com.sanron.music.net.bean.FocusPicData;
-import com.sanron.music.net.bean.HotSongListData;
-import com.sanron.music.net.bean.HotTagData;
-import com.sanron.music.net.bean.RecmdSongData;
-import com.sanron.music.net.bean.RecommendSong;
-import com.sanron.music.net.bean.Song;
-import com.sanron.music.net.bean.SongList;
-import com.sanron.music.net.bean.Tag;
 import com.sanron.music.service.PlayerUtil;
 import com.sanron.music.view.RatioLayout;
 import com.viewpagerindicator.CirclePageIndicator;
@@ -214,9 +219,9 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
 
 
     private class RecmdSongAdapter extends BaseAdapter {
-        private List<RecommendSong> data;
+        private List<RecmdSongData.Content.RecommendSong> data;
 
-        public void setData(List<RecommendSong> data) {
+        public void setData(List<RecmdSongData.Content.RecommendSong> data) {
             this.data = data;
             notifyDataSetChanged();
         }
@@ -240,17 +245,31 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
         public View getView(final int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext())
-                        .inflate(R.layout.list_recmd_song_item, parent, false);
+                        .inflate(R.layout.list_common_item, parent, false);
+                convertView.setPadding(0, 0, 0, 0);
             }
-            ImageView ivPic = (ImageView) convertView.findViewById(R.id.iv_recmd_pic);
-            TextView tvTitle = (TextView) convertView.findViewById(R.id.tv_recmd_name);
-            TextView tvReason = (TextView) convertView.findViewById(R.id.tv_recmd_reason);
+            convertView.findViewById(R.id.iv_menu).setVisibility(View.GONE);
+            RoundedImageView ivPic = (RoundedImageView) convertView.findViewById(R.id.iv_picture);
+            ivPic.setOval(true);
+            TextView tvTitle = (TextView) convertView.findViewById(R.id.tv_text1);
+            TextView tvReason = (TextView) convertView.findViewById(R.id.tv_text2);
             if (data != null
                     && position < data.size()) {
-                final RecommendSong recommendSong = data.get(position);
+                final RecmdSongData.Content.RecommendSong recommendSong = data.get(position);
                 tvTitle.setText(recommendSong.title);
-                tvReason.setText(recommendSong.recommendReason);
-                ImageLoader.getInstance().displayImage(recommendSong.bigPic, ivPic);
+
+                //设置小图标和文字一样大小
+                Rect bounds = new Rect();
+                tvReason.getPaint().getTextBounds(recommendSong.recommendReason, 0,
+                        recommendSong.recommendReason.length(), bounds);
+                SpannableStringBuilder ssb = new SpannableStringBuilder(" ");
+                Drawable drawable = getResources().getDrawable(R.mipmap.ic_love_heart);
+                drawable.setBounds(0, 0, bounds.height(), bounds.height());
+
+                ssb.setSpan(new ImageSpan(drawable, ImageSpan.ALIGN_BASELINE), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.append(recommendSong.recommendReason);
+                tvReason.setText(ssb);
+                ImageLoader.getInstance().displayImage(recommendSong.picBig, ivPic);
                 convertView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

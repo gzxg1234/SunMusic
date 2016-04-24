@@ -8,9 +8,9 @@ import android.view.View;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
 import com.sanron.music.common.T;
-import com.sanron.music.net.JsonCallback;
-import com.sanron.music.net.MusicApi;
-import com.sanron.music.net.bean.AlbumSongs;
+import com.sanron.music.api.JsonCallback;
+import com.sanron.music.api.MusicApi;
+import com.sanron.music.api.bean.AlbumSongs;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.task.AddCollectPlayListTask;
 
@@ -75,6 +75,7 @@ public class AlbumInfoFragment extends SongListInfoFragment implements View.OnCl
             }
         }
         ImageLoader.getInstance().displayImage(pic, mIvPicture);
+
         setTitle(data.albumInfo.title);
         mTvText1.setText(data.albumInfo.title);
         mTvText2.setText(data.albumInfo.author);
