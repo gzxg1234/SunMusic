@@ -60,13 +60,13 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
     }
 
     public static SingerListFragment newInstance(String title, int area, int sex) {
-        SingerListFragment singerListFragment = new SingerListFragment();
+        SingerListFragment fragment = new SingerListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_TITLE, title);
         args.putInt(ARG_AREA, area);
         args.putInt(ARG_SEX, sex);
-        singerListFragment.setArguments(args);
-        return singerListFragment;
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override

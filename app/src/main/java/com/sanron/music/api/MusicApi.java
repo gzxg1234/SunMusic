@@ -313,14 +313,4 @@ public class MusicApi {
         return sb.toString();
     }
 
-    public static String encode(String str) {
-        if (str == null) return "";
-
-        try {
-            return URLEncoder.encode(str, "utf-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return str;
-    }
 }

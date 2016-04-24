@@ -40,11 +40,11 @@ public class TagInfoFragment extends PullFragment implements IPlayer.OnPlayState
     public static final int LOAD_LIMIT = 50;
 
     public static TagInfoFragment newInstance(String tag) {
+        TagInfoFragment fragment = new TagInfoFragment();
         Bundle args = new Bundle();
         args.putString("tag", tag);
-        TagInfoFragment tagSongFrag = new TagInfoFragment();
-        tagSongFrag.setArguments(args);
-        return tagSongFrag;
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override

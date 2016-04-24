@@ -44,7 +44,6 @@ public class AllTagFragment extends SlideWebFragment {
     private AllTag mData;
     private HotTagData mHotTagData;
 
-
     public static Fragment newInstance() {
         return new AllTagFragment();
     }
@@ -83,7 +82,8 @@ public class AllTagFragment extends SlideWebFragment {
         Call call2 = MusicApi.hotTag(8, new JsonCallback<HotTagData>() {
             @Override
             public void onSuccess(final HotTagData data) {
-                setUpHotTag(data);
+                mHotTagData = data;
+                mAdapter.setHotTagData(data);
             }
 
             @Override
@@ -92,11 +92,6 @@ public class AllTagFragment extends SlideWebFragment {
         });
         addCall(call1);
         addCall(call2);
-    }
-
-    private void setUpHotTag(final HotTagData data) {
-        this.mHotTagData = data;
-        mAdapter.setHotTagData(data);
     }
 
     private void setData(AllTag data) {
@@ -113,7 +108,7 @@ public class AllTagFragment extends SlideWebFragment {
         hideLoadingView();
     }
 
-    public class CategoryAdapter extends BaseAdapter {
+    private class CategoryAdapter extends BaseAdapter {
 
         private HotTagData mHotTagData;
         private List<Map.Entry<String, List<Tag>>> mCategories;

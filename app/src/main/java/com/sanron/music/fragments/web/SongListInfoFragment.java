@@ -4,26 +4,17 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
 import com.sanron.music.adapter.SongItemAdapter;
-import com.sanron.music.common.T;
-import com.sanron.music.db.DBHelper;
-import com.sanron.music.db.DataProvider;
-import com.sanron.music.fragments.base.PullFragment;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.SongList;
-import com.sanron.music.service.IPlayer;
-import com.sanron.music.service.PlayerUtil;
+import com.sanron.music.common.T;
+import com.sanron.music.db.DBHelper;
+import com.sanron.music.db.DataProvider;
 import com.sanron.music.task.AddCollectPlayListTask;
 
 import okhttp3.Call;
@@ -31,7 +22,7 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-1.
  */
-public class SongListInfoFragment extends PullFragment implements View.OnClickListener, IPlayer.OnPlayStateChangeListener {
+public class SongListInfoFragment extends CommonSongPullFragment implements View.OnClickListener {
 
     public static final String ARG_LIST_ID = "list_id";
 
@@ -39,82 +30,38 @@ public class SongListInfoFragment extends PullFragment implements View.OnClickLi
     private SongList mData;
     protected boolean mIsCollected;
 
-    protected TextView mTvText1;
-    protected TextView mTvText2;
-
-    protected TextView mTvSongNum;
-    protected ImageButton mIbtnFavorite;
-    protected ImageButton mIbtnDownload;
-    protected ImageButton mIbtnShare;
-    protected ImageView mIvPicture;
-
-    protected SongItemAdapter mAdapter;
-
     public static SongListInfoFragment newInstance(String songListId) {
-        SongListInfoFragment songListInfoFrag = new SongListInfoFragment();
+        SongListInfoFragment fragment = new SongListInfoFragment();
         Bundle bundle = new Bundle();
         bundle.putString(ARG_LIST_ID, songListId);
-        songListInfoFrag.setArguments(bundle);
-        return songListInfoFrag;
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAdapter = new SongItemAdapter(getContext());
         Bundle args = getArguments();
         if (args != null) {
             mListId = args.getString(ARG_LIST_ID);
         }
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.web_frag_songlist, container, false);
+    protected SongItemAdapter createAdapter() {
+        return new SongItemAdapter(getContext());
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mTvSongNum = $(R.id.tv_song_num);
-        mIbtnDownload = $(R.id.ibtn_download);
-        mIbtnFavorite = $(R.id.ibtn_favorite);
-        mIbtnShare = $(R.id.ibtn_share);
-        mTvText2 = $(R.id.tv_text2);
-        mTvText1 = $(R.id.tv_text1);
-        mIvPicture = (ImageView) mTopBoard;
 
-        mPullListView.setAdapter(mAdapter);
         mIbtnDownload.setOnClickListener(this);
         mIbtnShare.setOnClickListener(this);
         mIbtnFavorite.setOnClickListener(this);
         mPullListView.setHasMore(false);
-
-        mIvPicture.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                mIvPicture.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                int width = mIvPicture.getWidth();
-                int normalHeaderHeight = mIvPicture.getHeight() + mViewOperator.getHeight();
-                mPullListView.setmMaxHeaderHeight(width + mViewOperator.getHeight());
-                mPullListView.setNormalHeaderHeight(normalHeaderHeight);
-            }
-        });
-
     }
 
-    @Override
-    public void onPlayerReady() {
-        PlayerUtil.addPlayStateChangeListener(this);
-        mAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        PlayerUtil.removePlayStateChangeListener(this);
-    }
 
     @Override
     protected void loadData() {
@@ -126,7 +73,7 @@ public class SongListInfoFragment extends PullFragment implements View.OnClickLi
 
             @Override
             public void onSuccess(SongList data) {
-                setData(data);
+                updatUI(data);
                 hideLoadingView();
             }
         });
@@ -134,7 +81,7 @@ public class SongListInfoFragment extends PullFragment implements View.OnClickLi
     }
 
 
-    private void setData(SongList data) {
+    private void updatUI(SongList data) {
         this.mData = data;
         if (data == null) {
             return;
@@ -223,11 +170,4 @@ public class SongListInfoFragment extends PullFragment implements View.OnClickLi
         return result;
     }
 
-    @Override
-    public void onPlayStateChange(int state) {
-        if (state == IPlayer.STATE_PREPARING
-                || state == IPlayer.STATE_STOP) {
-            mAdapter.notifyDataSetChanged();
-        }
-    }
 }

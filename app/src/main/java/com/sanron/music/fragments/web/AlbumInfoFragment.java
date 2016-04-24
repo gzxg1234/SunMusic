@@ -1,5 +1,6 @@
 package com.sanron.music.fragments.web;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -7,10 +8,13 @@ import android.view.View;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
-import com.sanron.music.common.T;
+import com.sanron.music.adapter.SongItemAdapter;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.AlbumSongs;
+import com.sanron.music.common.T;
+import com.sanron.music.db.DBHelper;
+import com.sanron.music.db.DataProvider;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.task.AddCollectPlayListTask;
 
@@ -19,19 +23,20 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-23.
  */
-public class AlbumInfoFragment extends SongListInfoFragment implements View.OnClickListener, IPlayer.OnPlayStateChangeListener {
+public class AlbumInfoFragment extends CommonSongPullFragment implements View.OnClickListener, IPlayer.OnPlayStateChangeListener {
 
     private String mAlbumId;
     private AlbumSongs mData;
+    private boolean mIsCollected;
 
     public static final String ARG_ALBUM_ID = "album_id";
 
     public static AlbumInfoFragment newInstance(String albumId) {
-        AlbumInfoFragment albumInfoFragment = new AlbumInfoFragment();
+        AlbumInfoFragment fragment = new AlbumInfoFragment();
         Bundle bundle = new Bundle();
         bundle.putString(ARG_ALBUM_ID, albumId);
-        albumInfoFragment.setArguments(bundle);
-        return albumInfoFragment;
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Override
@@ -43,13 +48,17 @@ public class AlbumInfoFragment extends SongListInfoFragment implements View.OnCl
         }
     }
 
+    @Override
+    protected SongItemAdapter createAdapter() {
+        return new SongItemAdapter(getContext());
+    }
 
     @Override
     protected void loadData() {
         Call call = MusicApi.albumSongs(mAlbumId, new JsonCallback<AlbumSongs>() {
             @Override
             public void onSuccess(AlbumSongs albumSongs) {
-                setData(albumSongs);
+                updateUI(albumSongs);
                 hideLoadingView();
             }
 
@@ -61,7 +70,7 @@ public class AlbumInfoFragment extends SongListInfoFragment implements View.OnCl
         addCall(call);
     }
 
-    private void setData(AlbumSongs data) {
+    private void updateUI(AlbumSongs data) {
         this.mData = data;
         if (data == null) {
             return;
@@ -89,6 +98,15 @@ public class AlbumInfoFragment extends SongListInfoFragment implements View.OnCl
         }
     }
 
+    protected boolean checkIsCollected(String listId) {
+        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.List.TABLE);
+        Cursor c = access.query(new String[]{DBHelper.ID},
+                DBHelper.List.LIST_ID + "=?",
+                new String[]{listId});
+        boolean result = c.moveToFirst();
+        access.close();
+        return result;
+    }
 
     @Override
     public void onClick(View v) {

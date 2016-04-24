@@ -52,11 +52,11 @@ public class SingerInfoFragment extends PullFragment implements DDPullListView.O
     public static final String ARG_ARTIST_ID = "artist_id";
 
     public static SingerInfoFragment newInstance(String artistId) {
-        SingerInfoFragment frag = new SingerInfoFragment();
+        SingerInfoFragment fragment = new SingerInfoFragment();
         Bundle args = new Bundle();
         args.putString(ARG_ARTIST_ID, artistId);
-        frag.setArguments(args);
-        return frag;
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
