@@ -219,10 +219,11 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
 
 
     private class RecmdSongAdapter extends BaseAdapter {
-        private List<RecmdSongData.Content.RecommendSong> data;
+        private List<RecmdSongData.Content.RecommendSong> mData = new ArrayList<>();
 
         public void setData(List<RecmdSongData.Content.RecommendSong> data) {
-            this.data = data;
+            mData.clear();
+            mData.addAll(data);
             notifyDataSetChanged();
         }
 
@@ -233,7 +234,7 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
 
         @Override
         public Object getItem(int position) {
-            return data.get(position);
+            return mData.get(position);
         }
 
         @Override
@@ -253,9 +254,8 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
             ivPic.setOval(true);
             TextView tvTitle = (TextView) convertView.findViewById(R.id.tv_text1);
             TextView tvReason = (TextView) convertView.findViewById(R.id.tv_text2);
-            if (data != null
-                    && position < data.size()) {
-                final RecmdSongData.Content.RecommendSong recommendSong = data.get(position);
+            if (position < mData.size()) {
+                final RecmdSongData.Content.RecommendSong recommendSong = mData.get(position);
                 tvTitle.setText(recommendSong.title);
 
                 //设置小图标和文字一样大小
@@ -275,7 +275,7 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
                     public void onClick(View v) {
                         PlayerUtil.clearQueue();
                         List<Music> musics = new ArrayList<>();
-                        for (Song song : data) {
+                        for (Song song : mData) {
                             musics.add(song.toMusic());
                         }
                         PlayerUtil.enqueue(musics);
@@ -288,10 +288,11 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
     }
 
     private class HotSongListAdapter extends BaseAdapter {
-        private List<SongList> data;
+        private List<SongList> mData = new ArrayList<>();
 
         public void setData(List<SongList> data) {
-            this.data = data;
+            mData.clear();
+            mData.addAll(data);
             notifyDataSetChanged();
         }
 
@@ -302,7 +303,7 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
 
         @Override
         public Object getItem(int position) {
-            return data.get(position);
+            return mData.get(position);
         }
 
         @Override
@@ -318,9 +319,8 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
             }
             ImageView pic = (ImageView) convertView.findViewById(R.id.iv_songlist_pic);
             TextView title = (TextView) convertView.findViewById(R.id.tv_songlist_title);
-            if (data != null
-                    && position < data.size()) {
-                final SongList songList = data.get(position);
+            if (position < mData.size()) {
+                final SongList songList = mData.get(position);
                 title.setText(songList.title);
                 ImageLoader.getInstance().displayImage(songList.pic, pic);
                 convertView.setOnClickListener(new View.OnClickListener() {
@@ -340,7 +340,7 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
      * 热门分类
      */
     private class HotTagAdapter extends BaseAdapter {
-        private List<Tag> data;
+        private List<Tag> mData = new ArrayList<>();
         public final int[] ICONS = new int[]{
                 R.mipmap.ic_classify_img01,
                 R.mipmap.ic_classify_img02,
@@ -354,13 +354,14 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
         }
 
         public void setData(List<Tag> data) {
-            this.data = data;
+            mData.clear();
+            mData.addAll(data);
             notifyDataSetChanged();
         }
 
         @Override
         public Object getItem(int position) {
-            return data.get(position);
+            return mData.get(position);
         }
 
         @Override
@@ -398,15 +399,14 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
                     }
                 });
             }
-            if (data != null
-                    && position < data.size()) {
-                String tag = data.get(position).title;
+            if (position < mData.size()) {
+                String tag = mData.get(position).title;
                 tvTag.setText(tag);
                 convertView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if (getActivity() instanceof MainActivity) {
-                            ((MainActivity) getActivity()).showTagSong(data.get(position).title);
+                            ((MainActivity) getActivity()).showTagSong(mData.get(position).title);
                         }
                     }
                 });
@@ -420,24 +420,20 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
      * 轮播pager适配
      */
     private class FocusPicAdapter extends PagerAdapter {
-        private List<FocusPic> data;
-        private List<ImageView> views;
+        private List<FocusPic> mData = new ArrayList<>();
+        private List<ImageView> mViews = new ArrayList<>();
         private boolean needUpdate;
 
         private void createViews() {
-            if (data == null) {
-                return;
-            }
-
-            views = new ArrayList<>();
-            for (int i = 0; i < data.size(); i++) {
-                final FocusPic focusPic = data.get(i);
+            mViews.clear();
+            for (int i = 0; i < mData.size(); i++) {
+                final FocusPic focusPic = mData.get(i);
                 ImageView view = new ImageView(getContext());
                 ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewPager.LayoutParams.MATCH_PARENT,
                         ViewPager.LayoutParams.WRAP_CONTENT);
                 view.setLayoutParams(lp);
                 view.setAdjustViewBounds(true);
-                views.add(view);
+                mViews.add(view);
                 view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -454,15 +450,12 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
         }
 
         public List<FocusPic> getData() {
-            return data;
+            return mData;
         }
 
         public void setData(List<FocusPic> data) {
-            if (this.data == data) {
-                return;
-            }
-
-            this.data = data;
+            mData.clear();
+            mData.addAll(data);
             createViews();
             notifyDataSetChanged();
         }
@@ -481,7 +474,7 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
 
         @Override
         public int getCount() {
-            return data == null ? 0 : data.size();
+            return mData.size();
         }
 
         @Override
@@ -491,14 +484,14 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            View view = views.get(position);
+            View view = mViews.get(position);
             container.addView(view);
             return view;
         }
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
-            container.removeView(views.get(position));
+            container.removeView(mViews.get(position));
         }
     }
 

@@ -12,7 +12,7 @@ import com.sanron.music.adapter.SongItemAdapter;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.SongList;
-import com.sanron.music.common.T;
+import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
 import com.sanron.music.task.AddCollectPlayListTask;
@@ -73,7 +73,7 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
 
             @Override
             public void onSuccess(SongList data) {
-                updatUI(data);
+                updateUI(data);
                 hideLoadingView();
             }
         });
@@ -81,7 +81,7 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
     }
 
 
-    private void updatUI(SongList data) {
+    private void updateUI(SongList data) {
         this.mData = data;
         if (data == null) {
             return;
@@ -118,7 +118,7 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
 
             case R.id.ibtn_favorite: {
                 if (mIsCollected) {
-                    T.show("已收藏过此歌单");
+                    ViewTool.show("已收藏过此歌单");
                 } else {
                     String pic = mData.pic300;
                     if (TextUtils.isEmpty(pic)) {
@@ -136,14 +136,14 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
                             switch (result) {
 
                                 case SUCCESS: {
-                                    T.show("收藏成功");
+                                    ViewTool.show("收藏成功");
                                     mIsCollected = true;
                                     mIbtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
                                 }
                                 break;
 
                                 case FAILED: {
-                                    T.show("收藏失败");
+                                    ViewTool.show("收藏失败");
                                 }
                                 break;
                             }

@@ -20,6 +20,7 @@ import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.BillCategoryData;
 import com.sanron.music.fragments.base.LazyLoadFragment;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -79,13 +80,14 @@ public class BillboardFragment extends LazyLoadFragment {
 
     private class BillCategoryAdapter extends RecyclerView.Adapter<BillCategoryAdapter.BillCategoryHolder> {
 
-        private List<BillCategoryData.BillCategory> mData;
+        private List<BillCategoryData.BillCategory> mData = new ArrayList<>();
         private final int[] TOP_TEXT_COLORS = new int[]{
                 0xFFF50000, 0xFFF77722, 0xFFFFC505
         };
 
         public void setData(List<BillCategoryData.BillCategory> data) {
-            mData = data;
+            mData.clear();
+            mData.addAll(data);
             notifyDataSetChanged();
         }
 
@@ -128,7 +130,7 @@ public class BillboardFragment extends LazyLoadFragment {
 
         @Override
         public int getItemCount() {
-            return mData == null ? 0 : mData.size();
+            return mData.size();
         }
 
         class BillCategoryHolder extends RecyclerView.ViewHolder {

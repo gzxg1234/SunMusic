@@ -87,6 +87,9 @@ public class MusicScanner {
         if (mTraverseThread != null) {
             mTraverseThread.stopRun();
         }
+        if (mScannerConnection != null) {
+            mScannerConnection.disconnect();
+        }
     }
 
     /**

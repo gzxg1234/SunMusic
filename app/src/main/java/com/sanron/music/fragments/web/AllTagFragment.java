@@ -1,6 +1,5 @@
 package com.sanron.music.fragments.web;
 
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,14 +10,12 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.common.ViewTool;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.AllTag;
@@ -148,7 +145,7 @@ public class AllTagFragment extends SlideWebFragment {
                     convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_tag_category_item, parent, false);
                 }
                 TextView tvCategory = (TextView) convertView.findViewById(R.id.tv_category);
-                GridView gvTags = (GridView) convertView.findViewById(R.id.gv_tags);
+                GridView gvTags = (GridView) convertView.findViewById(R.id.grid_view);
                 String category = mCategories.get(position - 1).getKey();
                 List<Tag> tags = mCategories.get(position - 1).getValue();
                 tvCategory.setText(category);
@@ -285,25 +282,12 @@ public class AllTagFragment extends SlideWebFragment {
             return position;
         }
 
-        private View createView() {
-            TextView tvTag = new TextView(getContext());
-            AbsListView.LayoutParams lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            final int padding = ViewTool.dpToPx(4);
-            tvTag.setGravity(Gravity.CENTER);
-            tvTag.setPadding(padding, padding, padding, padding);
-            tvTag.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
-            tvTag.setTextColor(getResources().getColor(R.color.textColorSecondary));
-            tvTag.setLayoutParams(lp);
-            tvTag.setBackgroundResource(R.drawable.tv_tag_bg);
-            ColorStateList csl = getResources().getColorStateList(R.drawable.tv_tag_bg);
-            tvTag.setTextColor(csl);
-            return tvTag;
-        }
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = createView();
+                convertView = LayoutInflater.from(getContext())
+                        .inflate(R.layout.tag_text_view, parent, false);
             }
             TextView tvTag = (TextView) convertView;
             tvTag.setText(tags.get(position).title);

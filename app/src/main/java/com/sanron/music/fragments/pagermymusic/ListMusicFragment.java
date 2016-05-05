@@ -24,7 +24,7 @@ import android.widget.TextView;
 
 import com.sanron.music.R;
 import com.sanron.music.adapter.MusicItemAdapter;
-import com.sanron.music.common.T;
+import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.db.bean.PlayList;
@@ -230,7 +230,7 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
 
                     case R.id.menu_add_to_quque: {
                         PlayerUtil.enqueue(musics);
-                        T.show(musics.size() + "首歌曲加入队列");
+                        ViewTool.show(musics.size() + "首歌曲加入队列");
                     }
                     break;
 
@@ -279,7 +279,7 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
                 List<Music> checkedMusics = getCheckedMusics();
                 PlayerUtil.enqueue(checkedMusics);
                 endMultiMode();
-                T.show(checkedMusics.size() + "首歌曲加入队列");
+                ViewTool.show(checkedMusics.size() + "首歌曲加入队列");
             }
         });
 
@@ -438,9 +438,9 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
         @Override
         public void onDeleteFinish(int deleteCount) {
             if (deleteCount > 0) {
-                T.show("移除" + deleteCount + "首歌曲");
+                ViewTool.show("移除" + deleteCount + "首歌曲");
             } else {
-                T.show("移除失败");
+                ViewTool.show("移除失败");
             }
             mProgressDialog.dismiss();
         }

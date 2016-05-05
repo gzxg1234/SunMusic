@@ -14,7 +14,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.sanron.music.R;
-import com.sanron.music.common.T;
+import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.db.bean.PlayList;
 import com.sanron.music.task.AddMusicToListTask;
@@ -66,7 +66,7 @@ public class AddSongToListWindow extends ScrimPopupWindow {
                     @Override
                     protected void onPostExecute(Integer addNum) {
                         String msg = addNum + "首歌曲添加成功,";
-                        T.show(msg);
+                        ViewTool.show(msg);
                         AddSongToListWindow.this.dismiss();
                         progressDialog.dismiss();
                     }

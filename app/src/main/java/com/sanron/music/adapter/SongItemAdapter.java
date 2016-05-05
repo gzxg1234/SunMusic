@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,18 +14,21 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
 import com.sanron.music.api.bean.Song;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.service.PlayerUtil;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class SongItemAdapter extends BaseAdapter {
 
     private Context mContext;
-    private List<Song> mData;
+    private List<Song> mData = new ArrayList<>();
+    private boolean mIsShowPicture;
     private int mPlayingPosition = -1;//
     private int mPlayingTextColor;//播放中文字颜色
     private int mNormalTitleTextColor;//正常title颜色
@@ -55,15 +59,11 @@ public class SongItemAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return mData == null ? 0 : mData.size();
+        return mData.size();
     }
 
     public void setData(List<? extends Song> data) {
-        if (mData == null) {
-            mData = new LinkedList<>();
-        } else {
-            mData.clear();
-        }
+        mData.clear();
         mData.addAll(data);
         notifyDataSetChanged();
     }
@@ -73,9 +73,6 @@ public class SongItemAdapter extends BaseAdapter {
     }
 
     public void addData(List<? extends Song> songs) {
-        if (mData == null) {
-            mData = new LinkedList<>();
-        }
         mData.addAll(songs);
         notifyDataSetChanged();
     }
@@ -98,26 +95,38 @@ public class SongItemAdapter extends BaseAdapter {
         return position;
     }
 
+    public void setShowPicture(boolean showPicture) {
+        mIsShowPicture = showPicture;
+        notifyDataSetChanged();
+    }
+
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         Song song = mData.get(position);
         SongItemHolder holder = null;
         if (convertView == null) {
             convertView = LayoutInflater.from(mContext).inflate(R.layout.list_common_item, parent, false);
+            holder = new SongItemHolder(convertView);
+            convertView.setTag(holder);
         } else {
             holder = (SongItemHolder) convertView.getTag();
         }
 
-        if (holder == null) {
-            holder = new SongItemHolder();
-            holder.ivPicture = (ImageView) convertView.findViewById(R.id.iv_picture);
-            holder.tvText1 = (TextView) convertView.findViewById(R.id.tv_text1);
-            holder.tvText2 = (TextView) convertView.findViewById(R.id.tv_text2);
-            holder.ivMenu = (ImageView) convertView.findViewById(R.id.iv_menu);
-            holder.ivMenu.setImageResource(R.mipmap.ic_more_vert_black_24dp);
-            convertView.setTag(holder);
+        if (mIsShowPicture) {
+            holder.ivPicture.setVisibility(View.VISIBLE);
+            holder.ivPicture.setImageBitmap(null);
+            ImageLoader.getInstance()
+                    .cancelDisplayTask(holder.ivPicture);
+            String pic = song.picBig;
+            if (TextUtils.isEmpty(pic)) {
+                pic = song.picSmall;
+            }
+            ImageLoader.getInstance()
+                    .displayImage(pic, holder.ivPicture);
+        } else {
+            holder.ivPicture.setVisibility(View.GONE);
         }
-        holder.ivPicture.setVisibility(View.GONE);
+
         Music playingMusic = PlayerUtil.getCurrentMusic();
         if (playingMusic != null
                 && song.songId.equals(playingMusic.getSongId())) {
@@ -163,5 +172,13 @@ public class SongItemAdapter extends BaseAdapter {
         TextView tvText2;
         ImageView ivMenu;
         ImageView ivPicture;
+
+        public SongItemHolder(View itemView) {
+            ivPicture = (ImageView) itemView.findViewById(R.id.iv_picture);
+            tvText1 = (TextView) itemView.findViewById(R.id.tv_text1);
+            tvText2 = (TextView) itemView.findViewById(R.id.tv_text2);
+            ivMenu = (ImageView) itemView.findViewById(R.id.iv_menu);
+            ivMenu.setImageResource(R.mipmap.ic_more_vert_black_24dp);
+        }
     }
 }

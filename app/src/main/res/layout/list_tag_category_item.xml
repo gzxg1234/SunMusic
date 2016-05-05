@@ -16,7 +16,7 @@
         tools:text="风格" />
 
     <com.sanron.music.view.NoScrollGridView
-        android:id="@+id/gv_tags"
+        android:id="@+id/grid_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"

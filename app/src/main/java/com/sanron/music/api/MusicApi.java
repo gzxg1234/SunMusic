@@ -10,17 +10,20 @@ import com.sanron.music.api.bean.FocusPicData;
 import com.sanron.music.api.bean.HotSongListData;
 import com.sanron.music.api.bean.HotTagData;
 import com.sanron.music.api.bean.LrcPicData;
+import com.sanron.music.api.bean.OfficialSongListData;
+import com.sanron.music.api.bean.OfficialSongListSongs;
 import com.sanron.music.api.bean.RecmdSongData;
 import com.sanron.music.api.bean.Singer;
 import com.sanron.music.api.bean.SingerAlbums;
 import com.sanron.music.api.bean.SingerList;
 import com.sanron.music.api.bean.SingerSongs;
 import com.sanron.music.api.bean.SongList;
+import com.sanron.music.api.bean.SongListCategory;
+import com.sanron.music.api.bean.SongListData;
 import com.sanron.music.api.bean.SongUrlInfo;
+import com.sanron.music.api.bean.TagSongListData;
 import com.sanron.music.api.bean.TagSongs;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -263,6 +266,7 @@ public class MusicApi {
 
     /**
      * 专辑歌曲
+     *
      * @param albumId
      * @param callback
      * @return
@@ -276,6 +280,7 @@ public class MusicApi {
 
     /**
      * 排行榜
+     *
      * @param callback
      * @return
      */
@@ -288,6 +293,7 @@ public class MusicApi {
 
     /**
      * 排行榜歌曲
+     *
      * @param type
      * @param offset
      * @param limit
@@ -301,6 +307,81 @@ public class MusicApi {
         params.put("offset", offset);
 //        params.put("fields", "song_id,title,author,album_title,pic_big,pic_small,havehigh,all_rate,charge,has_mv_mobile");
         return ApiHttpClient.get(url(params), 12 * 3600, callback);
+    }
+
+    /**
+     * 所有歌单
+     *
+     * @param pageNo
+     * @param pageSize
+     * @param callback
+     * @return
+     */
+    public static Call songList(int pageNo, int pageSize, JsonCallback<SongListData> callback) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("method", "baidu.ting.diy.gedan");
+        params.put("page_size", pageSize);
+        params.put("page_no", pageNo);
+        return ApiHttpClient.get(url(params), 2 * 3600, callback);
+    }
+
+    /**
+     * 歌单分类
+     *
+     * @param callback
+     * @return
+     */
+    public static Call songListCategory(JsonCallback<SongListCategory> callback) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("method", "baidu.ting.diy.gedanCategory");
+        return ApiHttpClient.get(url(params), 24 * 3600, callback);
+    }
+
+    /**
+     * 标签下的歌单
+     *
+     * @param tag
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    public static Call songListByTag(String tag, int page, int pageSize, JsonCallback<TagSongListData> callback) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("method", "baidu.ting.diy.search");
+        params.put("page_no", page);
+        params.put("page_size", pageSize);
+        params.put("query", tag);
+        return ApiHttpClient.get(url(params), 2 * 3600, callback);
+    }
+
+    /**
+     * 官方歌单
+     *
+     * @param page     页码，从0开始
+     * @param pageSize 每页数量
+     * @param callback
+     * @return
+     */
+    public static Call officialSongList(int page, int pageSize, JsonCallback<OfficialSongListData> callback) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("method", "baidu.ting.diy.getOfficialDiyList");
+        params.put("pn", page);
+        params.put("rn", pageSize);
+        params.put("type", 1);
+        return ApiHttpClient.get(url(params), 6 * 3600, callback);
+    }
+
+    /**
+     * 官方歌单歌曲
+     *
+     * @param code 歌单代码
+     * @return
+     */
+    public static Call officialSongListSongs(String code, JsonCallback<OfficialSongListSongs> callback) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("method", "baidu.ting.diy.getSongFromOfficalList");
+        params.put("code", code);
+        return ApiHttpClient.get(url(params), 2 * 3600, callback);
     }
 
     private static String url(Map<String, Object> params) {

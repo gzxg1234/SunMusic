@@ -9,12 +9,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.sanron.music.db.DataProvider;
 import com.sanron.music.api.MusicApi;
-import com.sanron.music.service.PlayerService;
 import com.sanron.music.common.MyLog;
-import com.sanron.music.common.T;
 import com.sanron.music.common.ViewTool;
+import com.sanron.music.db.DataProvider;
+import com.sanron.music.service.PlayerService;
 import com.squareup.leakcanary.LeakCanary;
 
 /**
@@ -41,7 +40,6 @@ public class AppContext extends Application {
     public void onCreate() {
         super.onCreate();
         LeakCanary.install(this);
-        T.init(this);
         ViewTool.init(this);
         DataProvider.instance().init(this);
         registerReceiver(netChangeReceiver,

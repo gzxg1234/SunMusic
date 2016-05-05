@@ -36,7 +36,7 @@ import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.LrcPicData;
 import com.sanron.music.api.bean.SongUrlInfo;
 import com.sanron.music.common.MyLog;
-import com.sanron.music.common.T;
+import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.bean.Music;
 
 import java.io.File;
@@ -95,7 +95,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
                 case WHAT_BUFFER_TIMEOUT: {
                     mPlayer.next();
-                    T.show("缓冲超时,自动播放下一曲");
+                    ViewTool.show("缓冲超时,自动播放下一曲");
                 }
                 break;
             }
@@ -480,7 +480,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
         private void sendPlayError(final String errorMsg) {
             mState = STATE_STOP;
-            T.show(errorMsg + ",3s后播放下一曲");
+            ViewTool.show(errorMsg + ",3s后播放下一曲");
             handler.sendEmptyMessageDelayed(WHAT_PLAY_ERROR, 3000);
         }
 

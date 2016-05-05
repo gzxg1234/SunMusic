@@ -20,8 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class PlayListItemAdapter extends RecyclerView.Adapter {
-    private List<PlayList> mData;
-    private List<Object> mItems;
+    private List<PlayList> mData = new ArrayList<>();
+    private List<Object> mItems = new ArrayList<>();
     private Context mContext;
     private OnItemClickListener mOnItemClickListener;
     private OnItemMenuClickListener mOnItemMenuClickListener;
@@ -34,30 +34,25 @@ public class PlayListItemAdapter extends RecyclerView.Adapter {
     private static final int TYPE_GROUP_ITEM = 1;
 
     public void setData(List<PlayList> data) {
-        if (this.mData == data) {
-            return;
+        mData.clear();
+        mData.addAll(data);
+        mItems.clear();
+        List<PlayList> selfList = new LinkedList<>();
+        List<PlayList> onlineList = new LinkedList<>();
+        for (PlayList playList : data) {
+            if (playList.getType() == DBHelper.List.TYPE_COLLECTION) {
+                onlineList.add(playList);
+            } else {
+                selfList.add(playList);
+            }
         }
-
-        this.mData = data;
-        if (data != null) {
-            mItems = new ArrayList<>();
-            List<PlayList> selfList = new LinkedList<>();
-            List<PlayList> onlineList = new LinkedList<>();
-            for (PlayList playList : data) {
-                if (playList.getType() == DBHelper.List.TYPE_COLLECTION) {
-                    onlineList.add(playList);
-                } else {
-                    selfList.add(playList);
-                }
-            }
-            if (selfList.size() > 0) {
-                mItems.add("自建歌单");
-                mItems.addAll(selfList);
-            }
-            if (onlineList.size() > 0) {
-                mItems.add("收藏歌单");
-                mItems.addAll(onlineList);
-            }
+        if (selfList.size() > 0) {
+            mItems.add("自建歌单");
+            mItems.addAll(selfList);
+        }
+        if (onlineList.size() > 0) {
+            mItems.add("收藏歌单");
+            mItems.addAll(onlineList);
         }
         notifyDataSetChanged();
     }
@@ -129,7 +124,7 @@ public class PlayListItemAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        return mItems == null ? 0 : mItems.size();
+        return mItems.size();
     }
 
     public List<PlayList> getData() {

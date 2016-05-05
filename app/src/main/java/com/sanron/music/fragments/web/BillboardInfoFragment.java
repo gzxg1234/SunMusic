@@ -19,7 +19,7 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-24.
  */
-public class BillboardInfoFragment extends CommonSongPullFragment implements View.OnClickListener, DDPullListView.OnLoadListener, IPlayer.OnPlayStateChangeListener {
+public class BillboardInfoFragment extends CommonSongPullFragment implements View.OnClickListener, DDPullListView.OnLoadMoreListener, IPlayer.OnPlayStateChangeListener {
 
     private int mBillType;
 
@@ -56,7 +56,7 @@ public class BillboardInfoFragment extends CommonSongPullFragment implements Vie
         mIbtnDownload.setOnClickListener(this);
         mIbtnShare.setOnClickListener(this);
 
-        mPullListView.setOnLoadListener(this);
+        mPullListView.setOnLoadMoreListener(this);
     }
 
 
@@ -66,7 +66,7 @@ public class BillboardInfoFragment extends CommonSongPullFragment implements Vie
     }
 
     @Override
-    public void onLoad() {
+    public void onLoadMore() {
         loadMore(false);
     }
 

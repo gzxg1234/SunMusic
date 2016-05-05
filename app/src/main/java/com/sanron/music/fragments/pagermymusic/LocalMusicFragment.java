@@ -11,13 +11,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
 
+import com.sanron.music.R;
 import com.sanron.music.activities.MainActivity;
 import com.sanron.music.activities.ScanActivity;
+import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.db.bean.PlayList;
 import com.sanron.music.task.DeleteLocalMusicTask;
-import com.sanron.music.common.T;
 
 import java.util.List;
 import java.util.Observer;
@@ -64,7 +65,7 @@ public class LocalMusicFragment extends ListMusicFragment implements MainActivit
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        menu.add(ALTERNATIVE_GROUP_ID, MENU_UPDATE_LOCAL_MUSIC, Menu.NONE, "扫描歌曲");
+        menu.add(R.id.alternative_group, MENU_UPDATE_LOCAL_MUSIC, Menu.NONE, "扫描歌曲");
     }
 
     @Override
@@ -129,9 +130,9 @@ public class LocalMusicFragment extends ListMusicFragment implements MainActivit
                         @Override
                         protected void onPostExecute(Integer deleteNum) {
                             if (deleteNum > 0) {
-                                T.show("删除" + deleteNum + "首歌曲");
+                                ViewTool.show("删除" + deleteNum + "首歌曲");
                             } else {
-                                T.show("删除失败");
+                                ViewTool.show("删除失败");
                             }
                             mProgressDialog.dismiss();
                         }

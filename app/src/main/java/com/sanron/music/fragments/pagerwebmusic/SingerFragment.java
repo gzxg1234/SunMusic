@@ -106,9 +106,9 @@ public class SingerFragment extends LazyLoadFragment {
 
     private class HotSingerPagerAdapter extends PagerAdapter {
 
-        private List<View> views;
-        private List<com.sanron.music.api.bean.Singer> data;
-        private boolean needUpdate;
+        private List<View> mViews = new ArrayList<>();
+        private List<com.sanron.music.api.bean.Singer> mData = new ArrayList<>();
+        private boolean mNeedUpdate;
         public final int COLUMN_NUM = 3;
         final int VERTICAL_SPACING;
 
@@ -120,39 +120,33 @@ public class SingerFragment extends LazyLoadFragment {
 
         @Override
         public void notifyDataSetChanged() {
-            needUpdate = true;
+            mNeedUpdate = true;
             super.notifyDataSetChanged();
-            needUpdate = false;
+            mNeedUpdate = false;
         }
 
         @Override
         public int getItemPosition(Object object) {
-            return needUpdate ? POSITION_NONE : POSITION_UNCHANGED;
+            return mNeedUpdate ? POSITION_NONE : POSITION_UNCHANGED;
         }
 
         public void setData(List<com.sanron.music.api.bean.Singer> data) {
-            if (this.data == data) {
-                return;
-            }
-            this.data = data;
-            if (data != null) {
-                views = new ArrayList<>();
-                //计算页数
-                final int pageCount = (int) Math.ceil(data.size() / (float) COLUMN_NUM);
-                for (int i = 0; i < pageCount; i++) {
-                    View view = LayoutInflater.from(getContext())
-                            .inflate(R.layout.pager_hot_singer_item, null);
-                    views.add(view);
-                }
-            } else {
-                views.clear();
+            mData.clear();
+            mData.addAll(data);
+            mViews.clear();
+            //计算页数
+            final int pageCount = (int) Math.ceil(data.size() / (float) COLUMN_NUM);
+            for (int i = 0; i < pageCount; i++) {
+                View view = LayoutInflater.from(getContext())
+                        .inflate(R.layout.pager_hot_singer_item, null);
+                mViews.add(view);
             }
             notifyDataSetChanged();
         }
 
         @Override
         public int getCount() {
-            return views == null ? 0 : views.size();
+            return mViews.size();
         }
 
         @Override
@@ -162,11 +156,11 @@ public class SingerFragment extends LazyLoadFragment {
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            ViewGroup view = (ViewGroup) views.get(position);
+            ViewGroup view = (ViewGroup) mViews.get(position);
             if (view.getTag() == null) {
                 int end = (position + 1) * COLUMN_NUM;
-                end = Math.min(end, data.size());
-                final List<com.sanron.music.api.bean.Singer> subData = data.subList(position * COLUMN_NUM, end);
+                end = Math.min(end, mData.size());
+                final List<com.sanron.music.api.bean.Singer> subData = mData.subList(position * COLUMN_NUM, end);
                 for (int i = 0; i < view.getChildCount() && i < subData.size(); i++) {
                     View child = view.getChildAt(i);
                     final com.sanron.music.api.bean.Singer singer = subData.get(i);
@@ -190,7 +184,7 @@ public class SingerFragment extends LazyLoadFragment {
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
-            container.removeView(views.get(position));
+            container.removeView(mViews.get(position));
         }
     }
 
@@ -199,10 +193,11 @@ public class SingerFragment extends LazyLoadFragment {
 
         public static final int TYPE_HEADER = 0;
         public static final int TYPE_CLASS = 1;
-        private List<com.sanron.music.api.bean.Singer> mHotSingers;
+        private List<com.sanron.music.api.bean.Singer> mData = new ArrayList<>();
 
         public void setHotSinger(List<com.sanron.music.api.bean.Singer> hotSingers) {
-            this.mHotSingers = hotSingers;
+            mData.clear();
+            mData.addAll(hotSingers);
             notifyItemChanged(0);
         }
 
@@ -223,12 +218,10 @@ public class SingerFragment extends LazyLoadFragment {
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof HotSingerHolder) {
                 HotSingerHolder hotSingerHolder = (HotSingerHolder) holder;
-                if (mHotSingers != null) {
-                    HotSingerPagerAdapter hotSingerPagerAdapter = new HotSingerPagerAdapter();
-                    hotSingerPagerAdapter.setData(mHotSingers);
-                    hotSingerHolder.mPagerHot.setAdapter(hotSingerPagerAdapter);
-                    hotSingerHolder.mIndicator.setViewPager(hotSingerHolder.mPagerHot);
-                }
+                HotSingerPagerAdapter hotSingerPagerAdapter = new HotSingerPagerAdapter();
+                hotSingerPagerAdapter.setData(mData);
+                hotSingerHolder.pagerHot.setAdapter(hotSingerPagerAdapter);
+                hotSingerHolder.indicator.setViewPager(hotSingerHolder.pagerHot);
             } else if (holder instanceof SingerClassHolder) {
                 ((SingerClassHolder) holder).tvSingerClass.setText(CLASSES[position - 1]);
             }
@@ -254,13 +247,13 @@ public class SingerFragment extends LazyLoadFragment {
         }
 
         class HotSingerHolder extends RecyclerView.ViewHolder {
-            ViewPager mPagerHot;
-            CirclePageIndicator mIndicator;
+            ViewPager pagerHot;
+            CirclePageIndicator indicator;
 
             public HotSingerHolder(View itemView) {
                 super(itemView);
-                mPagerHot = (ViewPager) itemView.findViewById(R.id.pager_hot_singer);
-                mIndicator = (CirclePageIndicator) itemView.findViewById(R.id.page_indicator);
+                pagerHot = (ViewPager) itemView.findViewById(R.id.pager_hot_singer);
+                indicator = (CirclePageIndicator) itemView.findViewById(R.id.page_indicator);
             }
         }
 

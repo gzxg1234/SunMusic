@@ -25,6 +25,7 @@ import com.sanron.music.api.bean.LrcPicData;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.service.PlayerUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,7 +36,7 @@ import okhttp3.Call;
  */
 public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.MusicItemHolder> {
 
-    private List<Music> mData;
+    private List<Music> mData = new ArrayList<>();
     private Context mContext;
 
     private SparseBooleanArray mCheckStates;
@@ -115,11 +116,8 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
     }
 
     public void setData(List<Music> data) {
-        if (this.mData == data) {
-            return;
-        }
-
-        this.mData = data;
+        mData.clear();
+        mData.addAll(data);
         if (mAvatarUrlCache == null) {
             mAvatarUrlCache = new HashMap<>(data.size());
         }
@@ -251,12 +249,12 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
 
     @Override
     public void onViewRecycled(MusicItemHolder holder) {
+        super.onViewRecycled(holder);
         if (holder.call != null) {
             holder.call.cancel();
         }
         ImageLoader.getInstance()
                 .cancelDisplayTask(holder.ivPicture);
-        super.onViewRecycled(holder);
     }
 
     private void displayAvatar(final MusicItemHolder holder, int position) {
@@ -313,7 +311,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
 
     @Override
     public int getItemCount() {
-        return mData == null ? 0 : mData.size();
+        return  mData.size();
     }
 
     public class MusicItemHolder extends RecyclerView.ViewHolder {

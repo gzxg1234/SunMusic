@@ -24,7 +24,6 @@ import com.nineoldandroids.animation.ArgbEvaluator;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.sanron.music.R;
 import com.sanron.music.activities.MainActivity;
-import com.sanron.music.common.T;
 import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.fragments.base.BaseFragment;
@@ -440,7 +439,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
                     if (PlayerUtil.getQueue().size() > 0) {
                         PlayerUtil.play(0);
                     } else {
-                        T.show("播放列表为空");
+                        ViewTool.show("播放列表为空");
                     }
                     return;
                 }

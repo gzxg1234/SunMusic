@@ -3,6 +3,7 @@ package com.sanron.music.view;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.NestedScrollingChildHelper;
 import android.support.v4.widget.ListViewCompat;
 import android.support.v4.widget.Space;
 import android.util.AttributeSet;
@@ -57,8 +58,8 @@ public class DDPullListView extends ListView {
 
     private String mNormalLabel = "加载更多";
     private String mReleaseLabel = "松开加载";
-    private String mLoaddingLabel = "正在加载";
-    private String mNomoreLabel = "没有更多";
+    private String mLoadingLabel = "正在加载";
+    private String mNoMoreLabel = "没有更多";
     private String mEmptyLabel = "没有数据";
 
     private int mState = STATE_NORMAL;
@@ -80,9 +81,10 @@ public class DDPullListView extends ListView {
     private boolean mReadyPullDown;
     private boolean mReadyPullUp;
 
+    private NestedScrollingChildHelper mNestedScrollingChildHelper;
     private OnPullDownListener mOnPullDownListener;
     private OnScrollListener mOnScrollListener;
-    private OnLoadListener mOnLoadListener;
+    private OnLoadMoreListener mOnLoadMoreListener;
 
 
     /**
@@ -141,8 +143,17 @@ public class DDPullListView extends ListView {
         }
     };
 
+    public DDPullListView(Context context) {
+        this(context, null);
+    }
+
     public DDPullListView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
+    }
+
+    public DDPullListView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        mNestedScrollingChildHelper = new NestedScrollingChildHelper(this);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         initHeader();
         initFooter();
@@ -152,7 +163,7 @@ public class DDPullListView extends ListView {
 
     private void initHeader() {
         mPullHeader = new Space(getContext());
-        AbsListView.LayoutParams lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+        LayoutParams lp = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         mPullHeader.setLayoutParams(lp);
         addHeaderView(mPullHeader);
@@ -184,7 +195,9 @@ public class DDPullListView extends ListView {
         mStateLabel.setText(mEmptyLabel);
         mStateLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX, defaultTextSize);
         LinearLayout.LayoutParams lpText = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lpText.setMargins(20, 0, 0, 0);
+        final int txtMarginLeft = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8,
+                getResources().getDisplayMetrics());
+        lpText.setMargins(txtMarginLeft, 0, 0, 0);
         mStateLabel.setLayoutParams(lpText);
 
         footerContent.addView(mLoadIcon);
@@ -196,7 +209,7 @@ public class DDPullListView extends ListView {
         mPullFooter.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mOnLoadListener != null
+                if (mOnLoadMoreListener != null
                         && mState == STATE_NORMAL
                         && mHasMore) {
                     changePullUpState(STATE_LOADING);
@@ -220,12 +233,12 @@ public class DDPullListView extends ListView {
         this.mEmptyLabel = emptyLabel;
     }
 
-    public String getNomoreLabel() {
-        return mNomoreLabel;
+    public String getNoMoreLabel() {
+        return mNoMoreLabel;
     }
 
-    public void setNomoreLabel(String nomoreLabel) {
-        this.mNomoreLabel = nomoreLabel;
+    public void setNoMoreLabel(String noMoreLabel) {
+        this.mNoMoreLabel = noMoreLabel;
     }
 
 
@@ -245,12 +258,12 @@ public class DDPullListView extends ListView {
         this.mNormalLabel = mNormalLabel;
     }
 
-    public String getLoaddingLabel() {
-        return mLoaddingLabel;
+    public String getLoadingLabel() {
+        return mLoadingLabel;
     }
 
-    public void setLoaddingLabel(String loaddingLabel) {
-        this.mLoaddingLabel = loaddingLabel;
+    public void setLoadingLabel(String loadingLabel) {
+        this.mLoadingLabel = loadingLabel;
     }
 
     public int getmState() {
@@ -294,7 +307,7 @@ public class DDPullListView extends ListView {
         }
     }
 
-    public Space getmPullHeader() {
+    public Space getPullHeader() {
         return mPullHeader;
     }
 
@@ -307,16 +320,8 @@ public class DDPullListView extends ListView {
     }
 
     public void setHasMore(boolean hasMore) {
-        if (this.mHasMore == hasMore) {
-            return;
-        }
-
         this.mHasMore = hasMore;
-        if (!hasMore) {
-            mStateLabel.setText(mNomoreLabel);
-        } else {
-            mStateLabel.setText(mNormalLabel);
-        }
+        changePullUpState(STATE_NORMAL);
     }
 
     private boolean isNoData() {
@@ -512,8 +517,7 @@ public class DDPullListView extends ListView {
                     if (deltaY < 0
                             && paddingBottom < maxPaddingBottom) {
                         //上滑
-                        deltaY *= (1 - paddingBottom
-                                / (float) maxPaddingBottom);
+                        deltaY *= (1 - paddingBottom / (float) maxPaddingBottom);
                         int newPaddingBottom = (int) (paddingBottom - Math.ceil(deltaY));
                         newPaddingBottom = Math.min(newPaddingBottom, maxPaddingBottom);
                         int paddingBottomDiff = paddingBottom - newPaddingBottom;
@@ -601,13 +605,13 @@ public class DDPullListView extends ListView {
         void onPullDown(int pullOffset);
     }
 
-    public interface OnLoadListener {
-        void onLoad();
+    public interface OnLoadMoreListener {
+        void onLoadMore();
     }
 
 
-    public void setOnLoadListener(OnLoadListener onLoadListener) {
-        this.mOnLoadListener = onLoadListener;
+    public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
+        this.mOnLoadMoreListener = onLoadMoreListener;
     }
 
     private void changePullUpState(int state) {
@@ -616,9 +620,9 @@ public class DDPullListView extends ListView {
             case STATE_LOADING: {
                 mLoadIcon.setAnimation(mRotateAnimation);
                 mRotateAnimation.start();
-                mStateLabel.setText(mLoaddingLabel);
-                if (mOnLoadListener != null) {
-                    mOnLoadListener.onLoad();
+                mStateLabel.setText(mLoadingLabel);
+                if (mOnLoadMoreListener != null) {
+                    mOnLoadMoreListener.onLoadMore();
                 }
             }
             break;
@@ -628,7 +632,7 @@ public class DDPullListView extends ListView {
                 if (isNoData()) {
                     mStateLabel.setText(mEmptyLabel);
                 } else if (!mHasMore) {
-                    mStateLabel.setText(mNomoreLabel);
+                    mStateLabel.setText(mNoMoreLabel);
                 } else {
                     mStateLabel.setText(mNormalLabel);
                 }
@@ -658,4 +662,6 @@ public class DDPullListView extends ListView {
         }
         changePullUpState(STATE_NORMAL);
     }
+
+
 }

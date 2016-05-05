@@ -35,7 +35,7 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-18.
  */
-public class SingerInfoFragment extends PullFragment implements DDPullListView.OnLoadListener, IPlayer.OnPlayStateChangeListener, RadioGroup.OnCheckedChangeListener {
+public class SingerInfoFragment extends PullFragment implements DDPullListView.OnLoadMoreListener, IPlayer.OnPlayStateChangeListener, RadioGroup.OnCheckedChangeListener {
 
     private String mArtistId;
     private ImageView mIvSingerAvatar;
@@ -90,7 +90,7 @@ public class SingerInfoFragment extends PullFragment implements DDPullListView.O
         };
         mAlbumAdapter = new AlbumItemAdapter();
         mPullListView.setAdapter(mSongAdapter);
-        mPullListView.setOnLoadListener(this);
+        mPullListView.setOnLoadMoreListener(this);
         mRadioGroup.setOnCheckedChangeListener(this);
         mIvSingerAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -208,7 +208,7 @@ public class SingerInfoFragment extends PullFragment implements DDPullListView.O
     }
 
     @Override
-    public void onLoad() {
+    public void onLoadMore() {
         switch (mRadioGroup.getCheckedRadioButtonId()) {
             case R.id.rb_singer_song: {
                 loadSongs();

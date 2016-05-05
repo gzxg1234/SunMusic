@@ -24,7 +24,6 @@ import com.sanron.music.R;
 import com.sanron.music.common.AudioTool;
 import com.sanron.music.common.MusicScanner;
 import com.sanron.music.common.MyLog;
-import com.sanron.music.common.T;
 import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.task.UpdateLocalMusicTask;
@@ -223,7 +222,7 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                 String text = ((TextView) view).getText().toString();
                 if (TEXT_START_SCAN.equals(text)) {
                     if (mMusicScanner.isScanning()) {
-                        T.show("正在扫描，请稍后操作");
+                        ViewTool.show("正在扫描，请稍后操作");
                     } else {
                         MyLog.d(TAG, "开始扫描");
                         mMusicScanner.scan(listener, Environment.getExternalStorageDirectory().getAbsolutePath());

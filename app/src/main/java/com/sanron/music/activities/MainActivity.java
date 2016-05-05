@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -21,28 +22,28 @@ import com.sanron.music.AppContext;
 import com.sanron.music.R;
 import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.bean.PlayList;
-import com.sanron.music.fragments.web.AlbumInfoFragment;
-import com.sanron.music.fragments.web.BillboardInfoFragment;
-import com.sanron.music.service.PlayerUtil;
-import com.sanron.music.fragments.PagerFragment;
+import com.sanron.music.fragments.NavigationHeaderFrag;
 import com.sanron.music.fragments.NowPlayingFragment;
+import com.sanron.music.fragments.PagerFragment;
 import com.sanron.music.fragments.pagermymusic.AlbumFragment;
 import com.sanron.music.fragments.pagermymusic.ArtistFragment;
 import com.sanron.music.fragments.pagermymusic.ListMusicFragment;
 import com.sanron.music.fragments.pagermymusic.LocalMusicFragment;
-import com.sanron.music.fragments.NavigationHeaderFrag;
 import com.sanron.music.fragments.pagermymusic.PlayListFragment;
 import com.sanron.music.fragments.pagermymusic.RecentPlayFragment;
-import com.sanron.music.fragments.web.AllTagFragment;
 import com.sanron.music.fragments.pagerwebmusic.BillboardFragment;
-import com.sanron.music.fragments.pagerwebmusic.GedanFragment;
 import com.sanron.music.fragments.pagerwebmusic.RadioFragment;
 import com.sanron.music.fragments.pagerwebmusic.RecommendFragment;
 import com.sanron.music.fragments.pagerwebmusic.SingerFragment;
+import com.sanron.music.fragments.pagerwebmusic.SongListFragment;
+import com.sanron.music.fragments.web.AlbumInfoFragment;
+import com.sanron.music.fragments.web.AllTagFragment;
+import com.sanron.music.fragments.web.BillboardInfoFragment;
 import com.sanron.music.fragments.web.SingerInfoFragment;
 import com.sanron.music.fragments.web.SingerListFragment;
 import com.sanron.music.fragments.web.SongListInfoFragment;
 import com.sanron.music.fragments.web.TagInfoFragment;
+import com.sanron.music.service.PlayerUtil;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.HashSet;
@@ -54,7 +55,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private AppBarLayout mAppBar;
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
-    private FragmentManager mFm;
+    private FragmentManager mFragmentManager;
     private MaterialMenuDrawable mMaterialMenu;
     private SlidingUpPanelLayout mSlidingUpPanelLayout;
     private NowPlayingFragment mNowPlayingFragment;
@@ -95,7 +96,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         mPlayerReadyCallbacks = new HashSet<>();
         mBackPressedHandlers = new HashSet<>();
-        mFm = getSupportFragmentManager();
+        mFragmentManager = getSupportFragmentManager();
 
         setSupportActionBar(mToolbar);
         mMaterialMenu = new MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN);
@@ -120,10 +121,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         });
 
 
-        mNowPlayingFragment = (NowPlayingFragment) mFm.findFragmentByTag(NowPlayingFragment.class.getName());
+        mNowPlayingFragment = (NowPlayingFragment) mFragmentManager.findFragmentByTag(NowPlayingFragment.class.getName());
         if (mNowPlayingFragment == null) {
             mNowPlayingFragment = new NowPlayingFragment();
-            mFm.beginTransaction()
+            mFragmentManager.beginTransaction()
                     .add(R.id.player_frag_container, mNowPlayingFragment, NowPlayingFragment.class.getName())
                     .commit();
         }
@@ -175,10 +176,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void setUpHeader() {
         View navigationHeader = mNavigationView.getHeaderView(0);
         ViewTool.setViewFitsStatusBar(navigationHeader);
-        NavigationHeaderFrag headerFrag = (NavigationHeaderFrag) mFm.findFragmentByTag(NavigationHeaderFrag.class.getName());
+        NavigationHeaderFrag headerFrag = (NavigationHeaderFrag) mFragmentManager.findFragmentByTag(NavigationHeaderFrag.class.getName());
         if (headerFrag == null) {
             headerFrag = new NavigationHeaderFrag();
-            mFm.beginTransaction()
+            mFragmentManager.beginTransaction()
                     .add(headerFrag, NavigationHeaderFrag.class.getName())
                     .commit();
         }
@@ -207,11 +208,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         addFragmentToFront(SongListInfoFragment.newInstance(listId));
     }
 
-    public void showAlbumSongs(String albumId){
+    public void showAlbumSongs(String albumId) {
         addFragmentToFront(AlbumInfoFragment.newInstance(albumId));
     }
 
-    public void showBillboardInfo(int type){
+    public void showBillboardInfo(int type) {
         addFragmentToFront(BillboardInfoFragment.newInstance(type));
     }
 
@@ -232,7 +233,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     private void addFragmentToFront(Fragment fragment) {
-        mFm.beginTransaction()
+        mFragmentManager.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_right,
                         R.anim.slide_out_right,
                         R.anim.slide_in_right,
@@ -268,17 +269,17 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             return;
         }
 
-        FragmentTransaction ft = mFm.beginTransaction();
+        FragmentTransaction ft = mFragmentManager.beginTransaction();
         for (int i = 0; i < PAGERS.length; i++) {
             if (i != pos) {
-                Fragment fragment = mFm.findFragmentByTag(PAGERS[i]);
+                Fragment fragment = mFragmentManager.findFragmentByTag(PAGERS[i]);
                 if (fragment != null) {
                     ft.hide(fragment);
                 }
             }
         }
 
-        Fragment toFragment = mFm.findFragmentByTag(PAGERS[pos]);
+        Fragment toFragment = mFragmentManager.findFragmentByTag(PAGERS[pos]);
         if (toFragment == null) {
             //未添加,则添加
             switch (pos) {
@@ -298,7 +299,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     String[] fragments = new String[]{RecommendFragment.class.getName(),
                             SingerFragment.class.getName(),
                             BillboardFragment.class.getName(),
-                            GedanFragment.class.getName(),
+                            SongListFragment.class.getName(),
                             RadioFragment.class.getName()};
                     toFragment = PagerFragment.newInstance(titles, fragments);
                 }
@@ -312,6 +313,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         curPagerPosition = pos;
         mToolbar.setTitle(PAGER_TITLES[curPagerPosition]);
         ft.commit();
+        supportInvalidateOptionsMenu();
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_main_option_menu, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     /**
@@ -319,7 +328,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      */
     public void showPlayListSongs(PlayList playList) {
         ListMusicFragment listMusicFragment = ListMusicFragment.newInstance(playList);
-        mFm.beginTransaction()
+        mFragmentManager.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_top,
                         R.anim.slide_out_bottom,
                         R.anim.slide_in_top,
@@ -334,7 +343,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     public void dismissPlayListSongs() {
-        if (mFm.popBackStackImmediate(ListMusicFragment.class.getName(),
+        if (mFragmentManager.popBackStackImmediate(ListMusicFragment.class.getName(),
                 FragmentManager.POP_BACK_STACK_INCLUSIVE)) {
             mToolbar.setTitle("我的音乐");
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
@@ -424,22 +433,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         invalidateOptionsMenu();
         return true;
     }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        switch (currentFragmentTag) {
-//            case TAG_WEBMUSIC: {
-//                getMenuInflater().inflate(R.menu.option_menu_webmusicfrag, menu);
-//            }
-//            break;
-//            case TAG_MYMUSIC: {
-//                getMenuInflater().inflate(R.menu.option_menu_mymusicfrag, menu);
-//            }
-//            break;
-//
-//        }
-//        return true;
-//    }
 
 
     /**

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground">
+
+    <RelativeLayout
+        android:id="@+id/ratio_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/iv_picture"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            tools:src="@mipmap/default_song_pic"/>
+
+        <ImageView
+            android:id="@+id/iv_play"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignBottom="@+id/iv_picture"
+            android:layout_alignRight="@+id/iv_picture"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="8dp"
+            android:scaleType="fitXY"
+            android:src="@mipmap/ic_play_circle_outline_white_36dp"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ratio_layout"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/textColorPrimary"
+        android:textSize="12dp"
+        tools:text="无法冷却的老情歌"/>
+
+    <TextView
+        android:id="@+id/tv_tag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_title"
+        android:layout_marginTop="2dp"
+        android:textColor="@color/textColorSecondary"
+        android:textSize="12dp"
+        tools:text="老歌，情歌，心情，流行"/>
+
+</RelativeLayout>

@@ -44,6 +44,7 @@ public class PagerFragment extends BaseFragment {
         }
     }
 
+
     @Override
     public void setEnterTransition(Object transition) {
         super.setEnterTransition(transition);

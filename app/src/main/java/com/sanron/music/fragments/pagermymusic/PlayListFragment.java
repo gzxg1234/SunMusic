@@ -22,7 +22,7 @@ import android.widget.TextView;
 
 import com.sanron.music.R;
 import com.sanron.music.adapter.PlayListItemAdapter;
-import com.sanron.music.common.T;
+import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.db.bean.PlayList;
@@ -138,7 +138,7 @@ public class PlayListFragment extends BaseDataFragment implements PlayListItemAd
             @Override
             protected void onPostExecute(List<Music> musics) {
                 if (musics.size() == 0) {
-                    T.show("列表暂时没有歌曲");
+                    ViewTool.show("列表暂时没有歌曲");
                 } else {
                     PlayerUtil.clearQueue();
                     PlayerUtil.enqueue(musics);
@@ -151,7 +151,7 @@ public class PlayListFragment extends BaseDataFragment implements PlayListItemAd
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        menu.add(ALTERNATIVE_GROUP_ID, MENU_NEW_LIST, Menu.NONE, "新建列表");
+        menu.add(R.id.alternative_group, MENU_NEW_LIST, Menu.NONE, "新建列表");
     }
 
     @Override
@@ -194,12 +194,12 @@ public class PlayListFragment extends BaseDataFragment implements PlayListItemAd
                     protected void onPostExecute(Integer result) {
                         switch (result) {
                             case FAILED: {
-                                T.show("修改失败");
+                                ViewTool.show("修改失败");
                                 dlg.dismiss();
                             }
                             break;
                             case SUCCESS: {
-                                T.show("修改成功");
+                                ViewTool.show("修改成功");
                                 dlg.dismiss();
                             }
                             break;
@@ -235,13 +235,13 @@ public class PlayListFragment extends BaseDataFragment implements PlayListItemAd
 
                         switch (result) {
                             case FAILED: {
-                                T.show("新建列表失败");
+                                ViewTool.show("新建列表失败");
                                 dlg.dismiss();
                             }
                             break;
 
                             case SUCCESS: {
-                                T.show("新建列表成功");
+                                ViewTool.show("新建列表成功");
                                 dlg.dismiss();
                             }
                             break;
@@ -298,9 +298,9 @@ public class PlayListFragment extends BaseDataFragment implements PlayListItemAd
         @Override
         public void onDeleteFinish(int deleteCount) {
             if (deleteCount == 0) {
-                T.show("删除失败");
+                ViewTool.show("删除失败");
             } else {
-                T.show("删除歌单成功");
+                ViewTool.show("删除歌单成功");
             }
         }
     }

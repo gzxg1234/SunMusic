@@ -20,12 +20,11 @@ public abstract class PullFragment extends SlideWebFragment implements SlideBack
     protected View mViewInfo;
     protected View mViewOperator;
     protected View mTopBoard;
-    public static final String TAG = PullFragment.class.getSimpleName();
 
     private DDPullListView.OnPullDownListener pullListener = new DDPullListView.OnPullDownListener() {
         @Override
         public void onPullDown(int pullOffset) {
-            int headerHeight = mPullListView.getmPullHeader().getHeight() + pullOffset;
+            int headerHeight = mPullListView.getPullHeader().getHeight() + pullOffset;
             updateBoardHeight(mTopBoard.getHeight() + pullOffset);
             ViewHelper.setTranslationY(mViewInfo,
                     -mViewInfo.getHeight() + headerHeight - mViewOperator.getHeight());
@@ -49,7 +48,7 @@ public abstract class PullFragment extends SlideWebFragment implements SlideBack
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             if (visibleItemCount > 0
                     &&
-                    mPullListView.getmPullHeader().getHeight() == mPullListView.getNormalHeaderHeight()) {
+                    mPullListView.getPullHeader().getHeight() == mPullListView.getNormalHeaderHeight()) {
                 int scrollY;
                 int topBarHeight = mTopBar.getHeight();
                 int normalHeaderHeight = mPullListView.getNormalHeaderHeight();

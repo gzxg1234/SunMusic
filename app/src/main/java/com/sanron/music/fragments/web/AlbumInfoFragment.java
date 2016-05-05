@@ -12,7 +12,7 @@ import com.sanron.music.adapter.SongItemAdapter;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.AlbumSongs;
-import com.sanron.music.common.T;
+import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
 import com.sanron.music.service.IPlayer;
@@ -118,7 +118,7 @@ public class AlbumInfoFragment extends CommonSongPullFragment implements View.On
 
             case R.id.ibtn_favorite: {
                 if (mIsCollected) {
-                    T.show("已收藏过此歌单");
+                    ViewTool.show("已收藏过此歌单");
                 } else {
                     String pic = mData.albumInfo.pic300;
                     if (TextUtils.isEmpty(pic)) {
@@ -136,14 +136,14 @@ public class AlbumInfoFragment extends CommonSongPullFragment implements View.On
                             switch (result) {
 
                                 case SUCCESS: {
-                                    T.show("收藏成功");
+                                    ViewTool.show("收藏成功");
                                     mIsCollected = true;
                                     mIbtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
                                 }
                                 break;
 
                                 case FAILED: {
-                                    T.show("收藏失败");
+                                    ViewTool.show("收藏失败");
                                 }
                                 break;
                             }

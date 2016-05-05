@@ -74,9 +74,9 @@ public class TagInfoFragment extends PullFragment implements IPlayer.OnPlayState
         mTvTagName.setText(mTag);
         mPullListView.setAdapter(mAdapter);
         mTvPlay.setOnClickListener(this);
-        mPullListView.setOnLoadListener(new DDPullListView.OnLoadListener() {
+        mPullListView.setOnLoadMoreListener(new DDPullListView.OnLoadMoreListener() {
             @Override
-            public void onLoad() {
+            public void onLoadMore() {
                 loadData();
             }
         });

@@ -2,11 +2,7 @@ package com.sanron.music.fragments.pagermymusic;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
-import com.sanron.music.R;
 import com.sanron.music.db.DataProvider;
 import com.sanron.music.fragments.base.LazyLoadFragment;
 
@@ -19,9 +15,7 @@ import java.util.Observer;
 public abstract class BaseDataFragment extends LazyLoadFragment implements Observer {
 
 
-    public static final int ALTERNATIVE_GROUP_ID = 1;
     private String[] mObserveTables;
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -29,7 +23,6 @@ public abstract class BaseDataFragment extends LazyLoadFragment implements Obser
         setHasOptionsMenu(true);
         DataProvider.instance().addObserver(this);
     }
-
 
     protected void setObserveTable(String... table) {
         mObserveTables = table;
@@ -39,23 +32,6 @@ public abstract class BaseDataFragment extends LazyLoadFragment implements Obser
     public void onDestroy() {
         super.onDestroy();
         DataProvider.instance().deleteObserver(this);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.option_refresh: {
-                loadData();
-            }
-            break;
-        }
-        return true;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        menu.removeGroup(ALTERNATIVE_GROUP_ID);
     }
 
     @Override

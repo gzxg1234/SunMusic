@@ -13,11 +13,15 @@ import java.text.ParseException;
 public class ExampleUnitTest {
     @Test
     public void testApi() throws Exception {
-        System.out.println(BMA.Billboard.billSongList(1,0,10));
+        System.out.println(BMA.GeDan.geDanByTag("日语",1,20));
+
+        System.out.println(BMA.GeDan.geDanCategory());
+        System.out.println(BMA.GeDan.geDan(1, 20));
+        System.out.println(BMA.Billboard.billSongList(1, 0, 10));
         System.out.println(BMA.Billboard.billCategory());
         System.out.println(BMA.Album.albumInfo("257122561"));
         System.out.println(BMA.Artist.artistInfo("1746"));
-        System.out.println(BMA.Artist.artistAlbums("1746",0,10));
+        System.out.println(BMA.Artist.artistAlbums("1746", 0, 10));
         System.out.println(BMA.Artist.artistSongList("1746", 0, 100));
         System.out.println(BMA.Artist.hotArtist(0, 100));
         System.out.println(BMA.Tag.allTag());

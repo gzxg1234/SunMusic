@@ -20,7 +20,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.common.T;
 import com.sanron.music.common.ViewTool;
 
 import java.io.File;
@@ -122,7 +121,7 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
             case R.id.btn_ok: {
                 List<File> selects = mDirAdapter.getSelectFiles();
                 if (selects.size() == 0) {
-                    T.show("您还未选择文件夹");
+                    ViewTool.show("您还未选择文件夹");
                     return;
                 }
 

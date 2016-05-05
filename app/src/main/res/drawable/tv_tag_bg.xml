@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
+
     <item android:color="@color/textColorPrimaryInverse" android:state_pressed="true">
         <shape>
-            <size android:height="40dp" />
-            <stroke android:width="1dp" android:color="@color/textColorPrimaryInverse" />
-            <solid android:color="@color/colorAccent" />
+            <size android:height="40dp"/>
+            <stroke android:width="1dp" android:color="@color/textColorPrimaryInverse"/>
+            <solid android:color="@color/colorAccent"/>
         </shape>
     </item>
-
-    <item android:color="@color/textColorSecondary" android:state_pressed="false">
+    <item android:color="@color/colorAccent" android:state_selected="true">
         <shape>
-            <size android:height="40dp" />
-            <stroke android:width="1dp" android:color="@color/textColorSecondary" />
+            <size android:height="40dp"/>
+            <stroke android:width="1dp" android:color="@color/colorAccent"/>
         </shape>
     </item>
-
+    
+    <item android:color="@color/textColorSecondary">
+        <shape>
+            <size android:height="40dp"/>
+            <stroke android:width="1dp" android:color="@color/textColorSecondary"/>
+        </shape>
+    </item>
 </selector>

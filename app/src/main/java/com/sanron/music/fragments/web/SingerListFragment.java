@@ -35,7 +35,7 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-19.
  */
-public class SingerListFragment extends SlideWebFragment implements DDPullListView.OnLoadListener {
+public class SingerListFragment extends SlideWebFragment implements DDPullListView.OnLoadMoreListener {
 
     private int area;
     private int sex;
@@ -44,11 +44,12 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
     private View viewSort;
     private DDPullListView mListView;
     private SingerAdapter mAdapter;
-    public static final int LIMIT = 30;
 
     public static final String ARG_TITLE = "title";
     public static final String ARG_AREA = "area";
     public static final String ARG_SEX = "sex";
+
+    public static final int LOAD_LIMIT = 30;
 
     public static final String[] ABC = new String[28];
 
@@ -97,11 +98,11 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
         viewSort.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new SelectSortWindow(getActivity())
+                new SelectLetterWindow(getActivity())
                         .showAtLocation(getView(), Gravity.BOTTOM, 0, 0);
             }
         });
-        mListView.setOnLoadListener(this);
+        mListView.setOnLoadMoreListener(this);
     }
 
     @Override
@@ -110,12 +111,12 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
     }
 
     @Override
-    public void onLoad() {
+    public void onLoadMore() {
         loadMore(false);
     }
 
     private void loadMore(final boolean first) {
-        Call call = MusicApi.singerList(mAdapter.getCount(), LIMIT, area, sex, 1, ABC[abcIndex], new JsonCallback<SingerList>() {
+        Call call = MusicApi.singerList(mAdapter.getCount(), LOAD_LIMIT, area, sex, 1, ABC[abcIndex], new JsonCallback<SingerList>() {
             @Override
             public void onSuccess(SingerList singerList) {
                 if (singerList != null) {
@@ -180,8 +181,7 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
                         .inflate(R.layout.list_common_item, parent, false);
                 ImageView ivMenu = (ImageView) convertView.findViewById(R.id.iv_menu);
                 ivMenu.setImageResource(R.mipmap.ic_chevron_right_black_90_24dp);
-                TextView text2 = (TextView) convertView.findViewById(R.id.tv_text2);
-                text2.setVisibility(View.GONE);
+                convertView.findViewById(R.id.tv_text2).setVisibility(View.GONE);
 
                 holder = new SingerHolder();
                 holder.ivPicture = (ImageView) convertView.findViewById(R.id.iv_picture);
@@ -212,15 +212,15 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
         }
     }
 
-    public class SelectSortWindow extends ScrimPopupWindow {
+    public class SelectLetterWindow extends ScrimPopupWindow {
 
         private Context mContext;
 
-        public SelectSortWindow(Activity activity) {
+        public SelectLetterWindow(Activity activity) {
             super(activity);
             mContext = activity;
             View root = LayoutInflater.from(mContext)
-                    .inflate(R.layout.window_select_sort, null);
+                    .inflate(R.layout.window_select_singer_letter, null);
             setContentView(root);
             setOutsideTouchable(true);
             setFocusable(true);
@@ -231,7 +231,7 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
 
             GridView gv = (GridView) root.findViewById(R.id.grid_view);
             Button btnCancel = (Button) root.findViewById(R.id.btn_cancel);
-            gv.setAdapter(new SortAdapter());
+            gv.setAdapter(new LetterAdapter());
             btnCancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -240,7 +240,7 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
             });
         }
 
-        private class SortAdapter extends BaseAdapter {
+        private class LetterAdapter extends BaseAdapter {
 
             @Override
             public int getCount() {
