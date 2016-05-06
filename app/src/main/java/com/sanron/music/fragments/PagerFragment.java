@@ -24,14 +24,20 @@ public class PagerFragment extends BaseFragment {
     private LocalPagerAdapter mAdapter;
     private String[] mTitles;
     private String[] mFragments;
+    public static final String ARG_TITLES = "titles";
+    public static final String ARG_FRAGMENTS = "fragments";
 
     public static PagerFragment newInstance(String[] titles, String[] fragments) {
         Bundle args = new Bundle();
-        args.putStringArray("titles", titles);
-        args.putStringArray("fragments", fragments);
+        args.putStringArray(ARG_TITLES, titles);
+        args.putStringArray(ARG_FRAGMENTS, fragments);
         PagerFragment pagerFragment = new PagerFragment();
         pagerFragment.setArguments(args);
         return pagerFragment;
+    }
+
+    public void setCurrentItem(int position) {
+        mViewPager.setCurrentItem(position);
     }
 
     @Override
@@ -39,11 +45,10 @@ public class PagerFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         if (args != null) {
-            mTitles = args.getStringArray("titles");
-            mFragments = args.getStringArray("fragments");
+            mTitles = args.getStringArray(ARG_TITLES);
+            mFragments = args.getStringArray(ARG_FRAGMENTS);
         }
     }
-
 
     @Override
     public void setEnterTransition(Object transition) {

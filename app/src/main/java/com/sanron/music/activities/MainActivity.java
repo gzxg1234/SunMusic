@@ -39,6 +39,7 @@ import com.sanron.music.fragments.pagerwebmusic.SongListFragment;
 import com.sanron.music.fragments.web.AlbumInfoFragment;
 import com.sanron.music.fragments.web.AllTagFragment;
 import com.sanron.music.fragments.web.BillboardInfoFragment;
+import com.sanron.music.fragments.web.OfficialSongListInfoFragment;
 import com.sanron.music.fragments.web.SingerInfoFragment;
 import com.sanron.music.fragments.web.SingerListFragment;
 import com.sanron.music.fragments.web.SongListInfoFragment;
@@ -208,6 +209,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         addFragmentToFront(SongListInfoFragment.newInstance(listId));
     }
 
+    public void showOfficialSongList(String code) {
+        addFragmentToFront(OfficialSongListInfoFragment.newInstance(code));
+    }
+
     public void showAlbumSongs(String albumId) {
         addFragmentToFront(AlbumInfoFragment.newInstance(albumId));
     }
@@ -230,6 +235,16 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     public void showSingerInfo(String artistId) {
         addFragmentToFront(SingerInfoFragment.newInstance(artistId));
+    }
+
+    //切换到歌单页
+    public void setPagerItemToSongList() {
+        if (curPagerPosition == 1) {
+            PagerFragment pagerFragment = (PagerFragment) mFragmentManager.findFragmentByTag(PAGERS[1]);
+            if (pagerFragment != null) {
+                pagerFragment.setCurrentItem(3);
+            }
+        }
     }
 
     private void addFragmentToFront(Fragment fragment) {
@@ -436,7 +451,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
 
     /**
-     * 绑定上服务监听
+     * 绑定服务监听
      */
     public interface PlayerReadyCallback {
         void onPlayerReady();

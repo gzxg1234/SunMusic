@@ -229,6 +229,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         }
 
         //加载图片
+        holder.ivPicture.setImageResource(R.mipmap.default_small_song_pic);
         holder.ivPicture.setTag(null);
         if (mIsFirstBindView) {
             displayAvatar(holder, position);
@@ -243,7 +244,6 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
                 }
             }
             holder.ivPicture.setTag(new Object());
-            holder.ivPicture.setImageResource(R.mipmap.default_small_song_pic);
         }
     }
 
@@ -294,14 +294,11 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
 
                         @Override
                         public void onFailure(Exception e) {
-                            holder.ivPicture.setImageResource(R.mipmap.default_small_song_pic);
                         }
                     });
         } else if (!avatar.isEmpty()) {
             ImageLoader.getInstance()
                     .displayImage(avatar, holder.ivPicture);
-        } else {
-            holder.ivPicture.setImageResource(R.mipmap.default_small_song_pic);
         }
     }
 
@@ -311,7 +308,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
 
     @Override
     public int getItemCount() {
-        return  mData.size();
+        return mData.size();
     }
 
     public class MusicItemHolder extends RecyclerView.ViewHolder {

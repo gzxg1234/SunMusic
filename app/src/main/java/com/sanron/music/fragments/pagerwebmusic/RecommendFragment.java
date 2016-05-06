@@ -68,6 +68,7 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
     private HotTagAdapter mHotTagAdapter;
 
     //热门歌单
+    private TextView tvMoreSongList;
     private GridView mGvHotSongList;
     private HotSongListAdapter mHotSongListAdapter;
 
@@ -110,13 +111,14 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
         mGvHotTag = $(R.id.gv_hot_tag);
         mGvHotSongList = $(R.id.gv_hot_song_list);
         mLvRecmdSong = $(R.id.lv_recmd_song);
+        tvMoreSongList = $(R.id.tv_more_song_list);
 
         mPagerFocusPic.setAdapter(mFocusPicAdapter);
         mPageIndicator.setViewPager(mPagerFocusPic);
         mGvHotTag.setAdapter(mHotTagAdapter);
         mGvHotSongList.setAdapter(mHotSongListAdapter);
         mLvRecmdSong.setAdapter(mRecmdSongAdapter);
-
+        tvMoreSongList.setOnClickListener(this);
     }
 
     @Override
@@ -214,6 +216,10 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.tv_more_song_list: {
+                getMainActivity().setPagerItemToSongList();
+            }
+            break;
         }
     }
 

@@ -26,7 +26,6 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.sanron.music.AppContext;
 import com.sanron.music.AppManager;
@@ -42,10 +41,8 @@ import com.sanron.music.db.bean.Music;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import okhttp3.Call;
 
@@ -57,23 +54,9 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
     public static final String TAG = PlayerService.class.getSimpleName();
     public static final int FOREGROUND_ID = 0x88;
 
-    public static final String NOTIFY_ACTION = "com.sanron.music.PLAYBACK";
-    public static final String EXTRA_CMD = "CMD";
-    public static final String CMD_BACK_APP = "back_app";
-    public static final String CMD_PREVIOUS = "previous";
-    public static final String CMD_PLAY_PAUSE = "play_pause";
-    public static final String CMD_NEXT = "next";
-    public static final String CMD_LYRIC = "lyric";
-    public static final String CMD_CLOSE = "close_app";
-
-    public static final int WHAT_PLAY_ERROR = 1;
-    public static final int WHAT_BUFFER_TIMEOUT = 2;
-
-
     private PowerManager.WakeLock mWakeLock;
 
     private NotificationCompat.Builder mNotificationBuilder;
-
 
     private AudioManager mAudioManager;
 
@@ -83,6 +66,8 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
     private boolean mIsLossAudioFocus;
 
+    public static final int WHAT_PLAY_ERROR = 1;
+    public static final int WHAT_BUFFER_TIMEOUT = 2;
 
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -101,6 +86,15 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             }
         }
     };
+
+    public static final String NOTIFY_ACTION = "com.sanron.music.PLAYBACK";
+    public static final String EXTRA_CMD = "CMD";
+    public static final String CMD_BACK_APP = "back_app";
+    public static final String CMD_PREVIOUS = "previous";
+    public static final String CMD_PLAY_PAUSE = "play_pause";
+    public static final String CMD_NEXT = "next";
+    public static final String CMD_LYRIC = "lyric";
+    public static final String CMD_CLOSE = "close_app";
 
     private BroadcastReceiver cmdReceiver = new BroadcastReceiver() {
         @Override
@@ -346,9 +340,9 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
          */
         private Call mFileLinkCall;
         private Call mSearchPicCall;
-        private Set<OnLoadedPictureListener> mOnLoadedPictureListeners;
-        private Set<OnBufferListener> mOnBufferListeners;
-        private Set<OnPlayStateChangeListener> mOnPlayStateChangeListeners;
+        private List<OnLoadedPictureListener> mOnLoadedPictureListeners;
+        private List<OnBufferListener> mOnBufferListeners;
+        private List<OnPlayStateChangeListener> mOnPlayStateChangeListeners;
         private MediaPlayer mMediaPlayer;
 
         /**
@@ -357,9 +351,9 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         public static final int BUFFER_TIMEOUT = 30 * 1000;
 
         public Player() {
-            mOnBufferListeners = new HashSet<>();
-            mOnPlayStateChangeListeners = new HashSet<>();
-            mOnLoadedPictureListeners = new HashSet<>();
+            mOnBufferListeners = new ArrayList<>();
+            mOnPlayStateChangeListeners = new ArrayList<>();
+            mOnLoadedPictureListeners = new ArrayList<>();
             mQueue = new ArrayList<>();
             mCurrentIndex = -1;
         }
@@ -429,6 +423,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         public void play(int position) {
             handler.removeMessages(WHAT_PLAY_ERROR);
             handler.removeMessages(WHAT_BUFFER_TIMEOUT);
+            setCurMusicPic(null);
             if (mFileLinkCall != null) {
                 mFileLinkCall.cancel();
             }
@@ -748,20 +743,12 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                                                     setCurMusicPic(loadedImage);
                                                 }
                                             }
-
-                                            @Override
-                                            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                                                if (requestIndex == getCurrentIndex()) {
-                                                    setCurMusicPic(null);
-                                                }
-                                            }
                                         });
                             }
                         }
 
                         @Override
                         public void onFailure(Exception e) {
-                            setCurMusicPic(null);
                         }
                     });
         }

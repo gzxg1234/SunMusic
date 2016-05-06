@@ -1,6 +1,5 @@
 package com.sanron.music.fragments.web;
 
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -13,8 +12,6 @@ import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.SongList;
 import com.sanron.music.common.ViewTool;
-import com.sanron.music.db.DBHelper;
-import com.sanron.music.db.DataProvider;
 import com.sanron.music.task.AddCollectPlayListTask;
 
 import okhttp3.Call;
@@ -24,11 +21,13 @@ import okhttp3.Call;
  */
 public class SongListInfoFragment extends CommonSongPullFragment implements View.OnClickListener {
 
-    public static final String ARG_LIST_ID = "list_id";
 
     private String mListId;
     private SongList mData;
     protected boolean mIsCollected;
+
+    public static final String LIST_ID_PREFIX = "1";
+    public static final String ARG_LIST_ID = "list_id";
 
     public static SongListInfoFragment newInstance(String songListId) {
         SongListInfoFragment fragment = new SongListInfoFragment();
@@ -86,14 +85,10 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
         if (data == null) {
             return;
         }
-        String pic = data.picW700;
-        if (TextUtils.isEmpty(pic)) {
-            pic = data.pic500;
-            if (TextUtils.isEmpty(pic)) {
-                pic = data.pic500;
-            }
+
+        if (!TextUtils.isEmpty(data.pic500)) {
+            ImageLoader.getInstance().displayImage(data.pic500, mIvPicture);
         }
-        ImageLoader.getInstance().displayImage(pic, mIvPicture);
         mTvText2.setText(data.tag);
         mTvText1.setText(data.title);
         if (data.songs != null) {
@@ -101,12 +96,11 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
         }
         mAdapter.setData(data.songs);
         setTitle(data.title);
-        mIsCollected = checkIsCollected("1" + mListId);
+        mIsCollected = checkIsCollected(LIST_ID_PREFIX + mListId);
         if (mIsCollected) {
             mIbtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
         }
     }
-
 
     @Override
     public void onClick(View v) {
@@ -129,7 +123,7 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
                     }
                     new AddCollectPlayListTask(mData.songs,
                             mData.title,
-                            "1" + mData.listId,
+                            LIST_ID_PREFIX + mData.listId,
                             pic) {
                         @Override
                         protected void onPostExecute(Integer result) {
@@ -160,14 +154,5 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
         }
     }
 
-    protected boolean checkIsCollected(String listId) {
-        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.List.TABLE);
-        Cursor c = access.query(new String[]{DBHelper.ID},
-                DBHelper.List.LIST_ID + "=?",
-                new String[]{listId});
-        boolean result = c.moveToFirst();
-        access.close();
-        return result;
-    }
 
 }

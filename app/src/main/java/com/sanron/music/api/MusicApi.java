@@ -357,16 +357,16 @@ public class MusicApi {
     /**
      * 官方歌单
      *
-     * @param page     页码，从0开始
-     * @param pageSize 每页数量
+     * @param pn       偏移量
+     * @param rn       每页数量
      * @param callback
      * @return
      */
-    public static Call officialSongList(int page, int pageSize, JsonCallback<OfficialSongListData> callback) {
+    public static Call officialSongList(int pn, int rn, JsonCallback<OfficialSongListData> callback) {
         Map<String, Object> params = new HashMap<>();
         params.put("method", "baidu.ting.diy.getOfficialDiyList");
-        params.put("pn", page);
-        params.put("rn", pageSize);
+        params.put("pn", pn);
+        params.put("rn", rn);
         params.put("type", 1);
         return ApiHttpClient.get(url(params), 6 * 3600, callback);
     }

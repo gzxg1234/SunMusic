@@ -14,9 +14,9 @@ public class OfficialSongListData {
     @JSONField(name = "havemore")
     public int havemore;
     @JSONField(name = "albumList")
-    public List<AlbumList> albumLists;
+    public List<SongList> songLists;
 
-    public static class AlbumList {
+    public static class SongList {
         @JSONField(name = "name")
         public String name;
         @JSONField(name = "createTime")

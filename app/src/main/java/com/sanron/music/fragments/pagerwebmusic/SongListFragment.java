@@ -21,6 +21,7 @@ import com.sanron.music.R;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.OfficialSongListData;
+import com.sanron.music.api.bean.OfficialSongListSongs;
 import com.sanron.music.api.bean.Song;
 import com.sanron.music.api.bean.SongList;
 import com.sanron.music.api.bean.SongListCategory;
@@ -44,9 +45,10 @@ public class SongListFragment extends LazyLoadFragment implements DDPullListView
 
     private DDPullListView mListView;
     private SongListAdapter mAdapter;
+    private TextView tvCurrentTag;
     private String currentTag = "全部";
     private int page = 0;
-    public static final int PAGE_SIZE = 20;
+    public static final int PAGE_SIZE = 30;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,6 +70,30 @@ public class SongListFragment extends LazyLoadFragment implements DDPullListView
         mListView.setClipChildren(false);
         mListView.setSelector(new ColorDrawable(Color.TRANSPARENT));
         mListView.setClipToPadding(false);
+        View header = LayoutInflater.from(getContext())
+                .inflate(R.layout.songlist_title, null);
+        tvCurrentTag = (TextView) header.findViewById(R.id.tv_text);
+        tvCurrentTag.setText(currentTag);
+        header.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MusicApi.songListCategory(new JsonCallback<SongListCategory>() {
+                    @Override
+                    public void onSuccess(SongListCategory songListCategory) {
+                        if (songListCategory != null) {
+                            new SelectCategoryWindow(getActivity(), songListCategory.content)
+                                    .showAtLocation(SongListFragment.this.getView(), Gravity.BOTTOM, 0, 0);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        ViewTool.show("请求失败");
+                    }
+                });
+            }
+        });
+        mListView.addHeaderView(header);
         return mListView;
     }
 
@@ -87,6 +113,7 @@ public class SongListFragment extends LazyLoadFragment implements DDPullListView
         }
 
         currentTag = tag;
+        tvCurrentTag.setText(currentTag);
         mAdapter.setData(null);
         page = 0;
         mListView.load();
@@ -98,17 +125,17 @@ public class SongListFragment extends LazyLoadFragment implements DDPullListView
             MusicApi.songList(page + 1, PAGE_SIZE, new JsonCallback<SongListData>() {
                 @Override
                 public void onSuccess(SongListData songListData) {
+                    mListView.onLoadCompleted();
                     if (songListData != null) {
-                        mListView.onLoadCompleted();
                         mListView.setHasMore(songListData.havemore == 1);
-                        List<SongList[]> data = new ArrayList<>();
+                        List<SongListEntity[]> data = new ArrayList<>();
                         for (int i = 0; i < songListData.songLists.size(); i += 2) {
-                            SongList[] songListArray = new SongList[2];
-                            songListArray[0] = songListData.songLists.get(i);
+                            SongListEntity[] entities = new SongListEntity[2];
+                            entities[0] = songListToEntity(songListData.songLists.get(i));
                             if (i + 1 < songListData.songLists.size()) {
-                                songListArray[1] = songListData.songLists.get(i + 1);
+                                entities[1] = songListToEntity(songListData.songLists.get(i + 1));
                             }
-                            data.add(songListArray);
+                            data.add(entities);
                         }
                         mAdapter.addData(data);
                         page++;
@@ -121,12 +148,32 @@ public class SongListFragment extends LazyLoadFragment implements DDPullListView
                 }
             });
         } else if (currentTag.equals("音乐专题")) {
-            MusicApi.officialSongList(page, PAGE_SIZE, new JsonCallback<OfficialSongListData>() {
+            MusicApi.officialSongList(page * PAGE_SIZE, PAGE_SIZE, new JsonCallback<OfficialSongListData>() {
                 @Override
                 public void onSuccess(OfficialSongListData officialSongListData) {
                     mListView.onLoadCompleted();
-                    if(officialSongListData!=null){
-
+                    if (officialSongListData != null) {
+                        List<SongListEntity[]> data = new ArrayList<>();
+                        for (int i = 0; i < officialSongListData.songLists.size(); i += 2) {
+                            SongListEntity[] entities = new SongListEntity[2];
+                            entities[0] = officialSongListToEntity(officialSongListData.songLists.get(i));
+                            if (i + 1 < officialSongListData.songLists.size()) {
+                                entities[1] = officialSongListToEntity(officialSongListData.songLists.get(i + 1));
+                            }
+                            data.add(entities);
+                        }
+                        mAdapter.addData(data);
+//                        返回hasmore数据有误，用total总数判断
+//                        mListView.setHasMore(officialSongListData.havemore == 1);
+                        try {
+                            System.out.println(mAdapter.getCount()*2);
+                            System.out.println(officialSongListData.total);
+                            mListView.setHasMore(mAdapter.getCount() * 2
+                                    < Integer.valueOf(officialSongListData.total));
+                        } catch (NumberFormatException e) {
+                            mListView.setHasMore(false);
+                        }
+                        page++;
                     }
                 }
 
@@ -143,14 +190,14 @@ public class SongListFragment extends LazyLoadFragment implements DDPullListView
                     if (tagSongListData != null
                             && tagSongListData.songLists != null) {
                         mListView.setHasMore(tagSongListData.havemore == 1);
-                        List<SongList[]> data = new ArrayList<>();
+                        List<SongListEntity[]> data = new ArrayList<>();
                         for (int i = 0; i < tagSongListData.songLists.size(); i += 2) {
-                            SongList[] songListArray = new SongList[2];
-                            songListArray[0] = tagSongListData.songLists.get(i);
+                            SongListEntity[] entities = new SongListEntity[2];
+                            entities[0] = songListToEntity(tagSongListData.songLists.get(i));
                             if (i + 1 < tagSongListData.songLists.size()) {
-                                songListArray[1] = tagSongListData.songLists.get(i + 1);
+                                entities[1] = songListToEntity(tagSongListData.songLists.get(i + 1));
                             }
-                            data.add(songListArray);
+                            data.add(entities);
                         }
                         mAdapter.addData(data);
                         page++;
@@ -165,14 +212,40 @@ public class SongListFragment extends LazyLoadFragment implements DDPullListView
         }
     }
 
+    private SongListEntity songListToEntity(SongList songList) {
+        SongListEntity entity = new SongListEntity();
+        entity.id = songList.listId;
+        entity.text1 = songList.title;
+        entity.text2 = songList.tag;
+        entity.pic = songList.pic300;
+        entity.type = SongListEntity.NORMAL;
+        return entity;
+    }
+
+    private SongListEntity officialSongListToEntity(OfficialSongListData.SongList songList) {
+        SongListEntity entity = new SongListEntity();
+        entity.id = songList.code;
+        entity.text1 = songList.name;
+        entity.text2 = songList.desc;
+        entity.pic = songList.pic;
+        entity.type = SongListEntity.OFFICIAL;
+        return entity;
+    }
+
+    static class SongListEntity {
+        String text1;
+        String text2;
+        String id;
+        String pic;
+        int type;
+        static final int NORMAL = 1;
+        static final int OFFICIAL = 2;
+    }
 
     private class SongListAdapter extends BaseAdapter {
-        private List<SongList[]> mData = new ArrayList<>();
+        private List<SongListEntity[]> mData = new ArrayList<>();
 
-        private static final int TYPE_HEADER = 0;
-        private static final int TYPE_ITEM = 1;
-
-        public void setData(List<SongList[]> data) {
+        public void setData(List<SongListEntity[]> data) {
             mData.clear();
             if (data != null) {
                 mData.addAll(data);
@@ -180,7 +253,7 @@ public class SongListFragment extends LazyLoadFragment implements DDPullListView
             notifyDataSetChanged();
         }
 
-        public void addData(List<SongList[]> data) {
+        public void addData(List<SongListEntity[]> data) {
             if (data != null) {
                 mData.addAll(data);
                 notifyDataSetChanged();
@@ -189,7 +262,7 @@ public class SongListFragment extends LazyLoadFragment implements DDPullListView
 
         @Override
         public int getCount() {
-            return 1 + mData.size();
+            return mData.size();
         }
 
         @Override
@@ -204,65 +277,40 @@ public class SongListFragment extends LazyLoadFragment implements DDPullListView
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            final SongListEntity[] item = mData.get(position);
+            ItemHolder holder;
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext())
+                        .inflate(R.layout.list_songlist_item, parent, false);
+                holder = new ItemHolder(convertView);
+                convertView.setTag(holder);
+            } else {
+                holder = (ItemHolder) convertView.getTag();
+            }
 
-            if (getItemViewType(position) == TYPE_HEADER) {
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(getContext())
-                            .inflate(R.layout.songlist_title, parent, false);
-                }
-                TextView text = (TextView) convertView.findViewById(R.id.tv_text);
-                text.setText(currentTag);
-                convertView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        MusicApi.songListCategory(new JsonCallback<SongListCategory>() {
-                            @Override
-                            public void onSuccess(SongListCategory songListCategory) {
-                                if (songListCategory != null) {
-                                    new SelectCategoryWindow(getActivity(), songListCategory.content)
-                                            .showAtLocation(SongListFragment.this.getView(), Gravity.BOTTOM, 0, 0);
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Exception e) {
-                                ViewTool.show("请求失败");
-                            }
-                        });
-                    }
-                });
-            } else if (getItemViewType(position) == TYPE_ITEM) {
-                final SongList[] item = mData.get(position - 1);
-                ItemHolder holder;
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(getContext())
-                            .inflate(R.layout.list_songlist_item, parent, false);
-                    holder = new ItemHolder(convertView);
-                    convertView.setTag(holder);
+            for (int i = 0; i < item.length; i++) {
+                final SongListEntity listEntity = item[i];
+                if (item[i] == null) {
+                    holder.view[i].setVisibility(View.INVISIBLE);
+                    continue;
                 } else {
-                    holder = (ItemHolder) convertView.getTag();
+                    holder.view[i].setVisibility(View.VISIBLE);
                 }
 
-                for (int i = 0; i < item.length; i++) {
-                    if (item[i] == null) {
-                        holder.view[i].setVisibility(View.INVISIBLE);
-                        continue;
-                    } else {
-                        holder.view[i].setVisibility(View.VISIBLE);
-                    }
+                holder.tvText1[i].setText(listEntity.text1);
+                holder.tvText2[i].setText(listEntity.text2);
+                holder.ivPicture[i].setImageBitmap(null);
+                ImageLoader.getInstance()
+                        .cancelDisplayTask(holder.ivPicture[i]);
+                ImageLoader.getInstance()
+                        .displayImage(listEntity.pic, holder.ivPicture[i]);
 
-                    holder.tvTitle[i].setText(item[i].title);
-                    holder.tvTag[i].setText(item[i].tag);
-                    holder.ivPicture[i].setImageBitmap(null);
-                    ImageLoader.getInstance()
-                            .cancelDisplayTask(holder.ivPicture[i]);
-                    ImageLoader.getInstance()
-                            .displayImage(item[i].pic300, holder.ivPicture[i]);
-                    final String listId = item[i].listId;
+                if (listEntity.type == SongListEntity.NORMAL) {
+                    //正常的歌单
                     holder.ivPlay[i].setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            MusicApi.songListInfo(listId, new JsonCallback<SongList>() {
+                            MusicApi.songListInfo(listEntity.id, new JsonCallback<SongList>() {
                                 @Override
                                 public void onFailure(Exception e) {
                                     ViewTool.show("网络错误");
@@ -287,47 +335,65 @@ public class SongListFragment extends LazyLoadFragment implements DDPullListView
                     holder.view[i].setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            getMainActivity().showSongList(listId);
+                            getMainActivity().showSongList(listEntity.id);
+                        }
+                    });
+                } else if (listEntity.type == SongListEntity.OFFICIAL) {
+                    //官方歌单
+                    holder.ivPlay[i].setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            MusicApi.officialSongListSongs(listEntity.id, new JsonCallback<OfficialSongListSongs>() {
+                                @Override
+                                public void onFailure(Exception e) {
+                                    ViewTool.show("网络错误");
+                                }
+
+                                @Override
+                                public void onSuccess(OfficialSongListSongs data) {
+                                    if (data != null
+                                            && data.songs != null) {
+                                        List<Music> musics = new LinkedList<>();
+                                        for (Song song : data.songs) {
+                                            musics.add(song.toMusic());
+                                        }
+                                        PlayerUtil.clearQueue();
+                                        PlayerUtil.enqueue(musics);
+                                        PlayerUtil.play(0);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    holder.view[i].setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            getMainActivity().showOfficialSongList(listEntity.id);
                         }
                     });
                 }
-
             }
             return convertView;
         }
 
-        @Override
-        public int getViewTypeCount() {
-            return 2;
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            if (position == 0) {
-                return TYPE_HEADER;
-            } else {
-                return TYPE_ITEM;
-            }
-        }
-
         class ItemHolder {
             View[] view = new View[2];
-            TextView[] tvTitle = new TextView[2];
-            TextView[] tvTag = new TextView[2];
+            TextView[] tvText1 = new TextView[2];
+            TextView[] tvText2 = new TextView[2];
             ImageView[] ivPicture = new ImageView[2];
             ImageView[] ivPlay = new ImageView[2];
 
             public ItemHolder(View itemView) {
                 view[0] = ((ViewGroup) itemView).getChildAt(0);
                 ivPicture[0] = (ImageView) view[0].findViewById(R.id.iv_picture);
-                tvTitle[0] = (TextView) view[0].findViewById(R.id.tv_title);
-                tvTag[0] = (TextView) view[0].findViewById(R.id.tv_tag);
+                tvText1[0] = (TextView) view[0].findViewById(R.id.tv_text1);
+                tvText2[0] = (TextView) view[0].findViewById(R.id.tv_text2);
                 ivPlay[0] = (ImageView) view[0].findViewById(R.id.iv_play);
 
                 view[1] = ((ViewGroup) itemView).getChildAt(1);
                 ivPicture[1] = (ImageView) view[1].findViewById(R.id.iv_picture);
-                tvTitle[1] = (TextView) view[1].findViewById(R.id.tv_title);
-                tvTag[1] = (TextView) view[1].findViewById(R.id.tv_tag);
+                tvText1[1] = (TextView) view[1].findViewById(R.id.tv_text1);
+                tvText2[1] = (TextView) view[1].findViewById(R.id.tv_text2);
                 ivPlay[1] = (ImageView) view[1].findViewById(R.id.iv_play);
             }
         }

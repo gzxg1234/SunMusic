@@ -2,7 +2,6 @@ package com.sanron.music.fragments.web;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.view.View;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -10,29 +9,33 @@ import com.sanron.music.R;
 import com.sanron.music.adapter.SongItemAdapter;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
-import com.sanron.music.api.bean.AlbumSongs;
+import com.sanron.music.api.bean.OfficialSongListSongs;
+import com.sanron.music.api.bean.Song;
 import com.sanron.music.common.ViewTool;
-import com.sanron.music.service.IPlayer;
 import com.sanron.music.task.AddCollectPlayListTask;
+
+import java.util.Iterator;
+import java.util.List;
 
 import okhttp3.Call;
 
 /**
- * Created by sanron on 16-4-23.
+ * Created by sanron on 16-4-1.
  */
-public class AlbumInfoFragment extends CommonSongPullFragment implements View.OnClickListener, IPlayer.OnPlayStateChangeListener {
+public class OfficialSongListInfoFragment extends CommonSongPullFragment implements View.OnClickListener {
 
-    private String mAlbumId;
-    private AlbumSongs mData;
-    private boolean mIsCollected;
+    public static final String ARG_CODE = "code";
 
-    public static final String LIST_ID_PREFIX = "2";
-    public static final String ARG_ALBUM_ID = "album_id";
+    private String mCode;
+    private OfficialSongListSongs mData;
+    protected boolean mIsCollected;
 
-    public static AlbumInfoFragment newInstance(String albumId) {
-        AlbumInfoFragment fragment = new AlbumInfoFragment();
+    public static final String LIST_ID_PREFIX = "3";
+
+    public static OfficialSongListInfoFragment newInstance(String songListId) {
+        OfficialSongListInfoFragment fragment = new OfficialSongListInfoFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(ARG_ALBUM_ID, albumId);
+        bundle.putString(ARG_CODE, songListId);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -42,7 +45,7 @@ public class AlbumInfoFragment extends CommonSongPullFragment implements View.On
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         if (args != null) {
-            mAlbumId = args.getString(ARG_ALBUM_ID);
+            mCode = args.getString(ARG_CODE);
         }
     }
 
@@ -52,50 +55,68 @@ public class AlbumInfoFragment extends CommonSongPullFragment implements View.On
     }
 
     @Override
-    protected void loadData() {
-        Call call = MusicApi.albumSongs(mAlbumId, new JsonCallback<AlbumSongs>() {
-            @Override
-            public void onSuccess(AlbumSongs albumSongs) {
-                updateUI(albumSongs);
-                hideLoadingView();
-            }
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
+        mIbtnDownload.setOnClickListener(this);
+        mIbtnShare.setOnClickListener(this);
+        mIbtnFavorite.setOnClickListener(this);
+        mPullListView.setHasMore(false);
+    }
+
+
+    @Override
+    protected void loadData() {
+        Call call = MusicApi.officialSongListSongs(mCode, new JsonCallback<OfficialSongListSongs>() {
             @Override
             public void onFailure(Exception e) {
                 showLoadFailedView();
+            }
+
+            @Override
+            public void onSuccess(OfficialSongListSongs data) {
+                updateUI(data);
+                hideLoadingView();
             }
         });
         addCall(call);
     }
 
-    private void updateUI(AlbumSongs data) {
+    private void updateUI(OfficialSongListSongs data) {
         this.mData = data;
         if (data == null) {
             return;
         }
-
-        String pic = data.albumInfo.picS1000;
-        if (TextUtils.isEmpty(pic)) {
-            pic = data.albumInfo.picW700;
-            if (TextUtils.isEmpty(pic)) {
-                pic = data.albumInfo.picS500;
-            }
-        }
+        String pic = data.pic;
         ImageLoader.getInstance().displayImage(pic, mIvPicture);
-
-        setTitle(data.albumInfo.title);
-        mTvText1.setText(data.albumInfo.title);
-        mTvText2.setText(data.albumInfo.author);
+        mTvText1.setText(data.name);
+        mTvText2.setText("创建时间:" + data.createTime);
         if (data.songs != null) {
+            filterInvalidSong(data.songs);
             mTvSongNum.setText("共" + data.songs.size() + "首歌");
         }
         mAdapter.setData(data.songs);
-        mIsCollected = checkIsCollected(LIST_ID_PREFIX + mAlbumId);
+        setTitle(data.name);
+        mIsCollected = checkIsCollected(LIST_ID_PREFIX + mCode);
         if (mIsCollected) {
             mIbtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
         }
     }
 
+    /**
+     * 过滤掉无效歌曲数据
+     *
+     * @param songs
+     */
+    private void filterInvalidSong(List<Song> songs) {
+        Iterator<Song> iterator = songs.iterator();
+        while (iterator.hasNext()) {
+            Song song = iterator.next();
+            if ("0".equals(song.songId)) {
+                iterator.remove();
+            }
+        }
+    }
 
     @Override
     public void onClick(View v) {
@@ -109,17 +130,10 @@ public class AlbumInfoFragment extends CommonSongPullFragment implements View.On
                 if (mIsCollected) {
                     ViewTool.show("已收藏过此歌单");
                 } else {
-                    String pic = mData.albumInfo.pic300;
-                    if (TextUtils.isEmpty(pic)) {
-                        pic = mData.albumInfo.picRadio;
-                        if (TextUtils.isEmpty(pic)) {
-                            pic = mData.albumInfo.picS180;
-                        }
-                    }
                     new AddCollectPlayListTask(mData.songs,
-                            mData.albumInfo.title,
-                            LIST_ID_PREFIX + mData.albumInfo.albumId,
-                            pic) {
+                            mData.name,
+                            LIST_ID_PREFIX + mData.code,
+                            mData.pic) {
                         @Override
                         protected void onPostExecute(Integer result) {
                             switch (result) {

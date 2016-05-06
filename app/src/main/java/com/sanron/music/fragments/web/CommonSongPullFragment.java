@@ -1,5 +1,6 @@
 package com.sanron.music.fragments.web;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -12,6 +13,8 @@ import android.widget.TextView;
 
 import com.sanron.music.R;
 import com.sanron.music.adapter.SongItemAdapter;
+import com.sanron.music.db.DBHelper;
+import com.sanron.music.db.DataProvider;
 import com.sanron.music.fragments.base.PullFragment;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.service.PlayerUtil;
@@ -89,5 +92,15 @@ public abstract class CommonSongPullFragment extends PullFragment implements IPl
                 || state == IPlayer.STATE_STOP) {
             mAdapter.notifyDataSetChanged();
         }
+    }
+
+    protected boolean checkIsCollected(String listId) {
+        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.List.TABLE);
+        Cursor c = access.query(new String[]{DBHelper.ID},
+                DBHelper.List.LIST_ID + "=?",
+                new String[]{listId});
+        boolean result = c.moveToFirst();
+        access.close();
+        return result;
     }
 }

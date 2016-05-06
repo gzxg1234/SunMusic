@@ -64,7 +64,9 @@ public class SongItemAdapter extends BaseAdapter {
 
     public void setData(List<? extends Song> data) {
         mData.clear();
-        mData.addAll(data);
+        if (data != null) {
+            mData.addAll(data);
+        }
         notifyDataSetChanged();
     }
 
@@ -72,8 +74,10 @@ public class SongItemAdapter extends BaseAdapter {
         return mData;
     }
 
-    public void addData(List<? extends Song> songs) {
-        mData.addAll(songs);
+    public void addData(List<? extends Song> data) {
+        if (data != null) {
+            mData.addAll(data);
+        }
         notifyDataSetChanged();
     }
 

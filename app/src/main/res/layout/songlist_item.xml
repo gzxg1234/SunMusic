@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground">
+    android:background="?attr/selectableItemBackground"
+    android:orientation="vertical">
 
     <RelativeLayout
-        android:id="@+id/ratio_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -32,23 +32,23 @@
     </RelativeLayout>
 
     <TextView
-        android:id="@+id/tv_title"
+        android:id="@+id/tv_text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/ratio_layout"
         android:layout_marginTop="4dp"
         android:textColor="@color/textColorPrimary"
         android:textSize="12dp"
+        android:maxLines="2"
         tools:text="无法冷却的老情歌"/>
 
     <TextView
-        android:id="@+id/tv_tag"
+        android:id="@+id/tv_text2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tv_title"
         android:layout_marginTop="2dp"
         android:textColor="@color/textColorSecondary"
         android:textSize="12dp"
+        android:maxLines="2"
         tools:text="老歌，情歌，心情，流行"/>
 
-</RelativeLayout>
+</LinearLayout>
