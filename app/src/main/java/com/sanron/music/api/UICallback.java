@@ -19,7 +19,8 @@ public abstract class UICallback<T> implements Callback {
 
     @Override
     public void onFailure(Call call, final IOException e) {
-        if (!"Canceled".equals(e.getMessage())) {
+        if (!call.isCanceled()) {
+            //请求被取消则不发送失败消息
             sendFailure(e);
         }
     }

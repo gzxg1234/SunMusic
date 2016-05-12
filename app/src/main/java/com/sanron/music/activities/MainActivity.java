@@ -47,8 +47,8 @@ import com.sanron.music.fragments.web.TagInfoFragment;
 import com.sanron.music.service.PlayerUtil;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceConnection {
@@ -62,8 +62,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private NowPlayingFragment mNowPlayingFragment;
     private NavigationView mNavigationView;
 
-    private Set<PlayerReadyCallback> mPlayerReadyCallbacks;
-    private Set<BackPressedHandler> mBackPressedHandlers;
+    private List<PlayerReadyCallback> mPlayerReadyCallbacks;
+    private List<BackPressedHandler> mBackPressedHandlers;
 
     private boolean mIsShowingPlayListSongsFrag = false;//是否在显示列表歌曲fragment
 
@@ -95,8 +95,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         ViewTool.setViewFitsStatusBar(mAppBar);
 
-        mPlayerReadyCallbacks = new HashSet<>();
-        mBackPressedHandlers = new HashSet<>();
+        mPlayerReadyCallbacks = new ArrayList<>();
+        mBackPressedHandlers = new ArrayList<>();
         mFragmentManager = getSupportFragmentManager();
 
         setSupportActionBar(mToolbar);
@@ -162,10 +162,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-                    mSlidingUpPanelLayout.setTouchEnabled(true);
                     mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                 } else if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                    mSlidingUpPanelLayout.setTouchEnabled(false);
                     mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                 }
             }

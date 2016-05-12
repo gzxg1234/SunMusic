@@ -56,5 +56,4 @@ public abstract class BaseFragment extends Fragment implements MainActivity.Back
     @Override
     public void onPlayerReady() {
     }
-
 }

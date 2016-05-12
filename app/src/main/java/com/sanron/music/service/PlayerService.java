@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.sanron.music.AppContext;
 import com.sanron.music.AppManager;
@@ -66,26 +67,6 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
 
     private boolean mIsLossAudioFocus;
 
-    public static final int WHAT_PLAY_ERROR = 1;
-    public static final int WHAT_BUFFER_TIMEOUT = 2;
-
-    private Handler handler = new Handler(Looper.getMainLooper()) {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case WHAT_PLAY_ERROR: {
-                    mPlayer.next();
-                }
-                break;
-
-                case WHAT_BUFFER_TIMEOUT: {
-                    mPlayer.next();
-                    ViewTool.show("缓冲超时,自动播放下一曲");
-                }
-                break;
-            }
-        }
-    };
 
     public static final String NOTIFY_ACTION = "com.sanron.music.PLAYBACK";
     public static final String EXTRA_CMD = "CMD";
@@ -345,10 +326,27 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         private List<OnPlayStateChangeListener> mOnPlayStateChangeListeners;
         private MediaPlayer mMediaPlayer;
 
-        /**
-         * 超时时间
-         */
+        public static final int WHAT_PLAY_ERROR = 1;
+        public static final int WHAT_BUFFER_TIMEOUT = 2;
         public static final int BUFFER_TIMEOUT = 30 * 1000;
+
+        private Handler mHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case WHAT_PLAY_ERROR: {
+                        next();
+                    }
+                    break;
+
+                    case WHAT_BUFFER_TIMEOUT: {
+                        next();
+                        ViewTool.show("缓冲超时,自动播放下一曲");
+                    }
+                    break;
+                }
+            }
+        };
 
         public Player() {
             mOnBufferListeners = new ArrayList<>();
@@ -421,18 +419,18 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
          */
         @Override
         public void play(int position) {
-            handler.removeMessages(WHAT_PLAY_ERROR);
-            handler.removeMessages(WHAT_BUFFER_TIMEOUT);
-            setCurMusicPic(null);
+            if (mMediaPlayer == null) {
+                initMediaPlayer();
+            }
             if (mFileLinkCall != null) {
                 mFileLinkCall.cancel();
             }
             if (mSearchPicCall != null) {
                 mSearchPicCall.cancel();
             }
-            if (mMediaPlayer == null) {
-                initMediaPlayer();
-            }
+            mHandler.removeMessages(WHAT_PLAY_ERROR);
+            sendBufferingEnd();
+            mMediaPlayer.stop();
             mMediaPlayer.reset();
 
             mCurrentIndex = position;
@@ -442,6 +440,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             String dataPath = music.getData();
             if (TextUtils.isEmpty(dataPath)) {
                 //网络歌曲
+                sendBufferingStart();
                 playWebMusic(music.getSongId());
             } else {
                 //检查文件是否存在
@@ -476,7 +475,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         private void sendPlayError(final String errorMsg) {
             mState = STATE_STOP;
             ViewTool.show(errorMsg + ",3s后播放下一曲");
-            handler.sendEmptyMessageDelayed(WHAT_PLAY_ERROR, 3000);
+            mHandler.sendEmptyMessageDelayed(WHAT_PLAY_ERROR, 3000);
         }
 
 
@@ -709,6 +708,7 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             changeState(STATE_PREPARED);
             mp.start();
             changeState(STATE_PLAYING);
+            sendBufferingEnd();
 
             //加载音乐图片
             Music music = mQueue.get(mCurrentIndex);
@@ -743,12 +743,22 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                                                     setCurMusicPic(loadedImage);
                                                 }
                                             }
+
+                                            @Override
+                                            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                                                if (requestIndex == getCurrentIndex()) {
+                                                    setCurMusicPic(null);
+                                                }
+                                            }
                                         });
+                            } else {
+                                setCurMusicPic(null);
                             }
                         }
 
                         @Override
                         public void onFailure(Exception e) {
+                            setCurMusicPic(null);
                         }
                     });
         }
@@ -770,6 +780,23 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
             }
         }
 
+        private void sendBufferingStart() {
+            //缓冲开始，发送一个延时消息，超时则到下一曲
+            mHandler.sendEmptyMessageDelayed(WHAT_BUFFER_TIMEOUT, BUFFER_TIMEOUT);
+            for (OnBufferListener listener : mOnBufferListeners) {
+                listener.onBufferStart();
+            }
+        }
+
+        private void sendBufferingEnd() {
+            if (mHandler.hasMessages(WHAT_BUFFER_TIMEOUT)) {
+                mHandler.removeMessages(WHAT_BUFFER_TIMEOUT);
+                for (OnBufferListener listener : mOnBufferListeners) {
+                    listener.onBufferEnd();
+                }
+            }
+        }
+
         void release() {
             changeState(STATE_STOP);
             if (mMediaPlayer != null) {
@@ -782,20 +809,12 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         public boolean onInfo(MediaPlayer mp, int what, int extra) {
             switch (what) {
                 case MediaPlayer.MEDIA_INFO_BUFFERING_START: {
-                    //缓冲开始，发送一个延时消息，超时则到下一曲
-                    handler.sendEmptyMessageDelayed(WHAT_BUFFER_TIMEOUT, BUFFER_TIMEOUT);
-                    for (OnBufferListener listener : mOnBufferListeners) {
-                        listener.onBufferStart();
-                    }
+                    sendBufferingStart();
                 }
                 break;
 
                 case MediaPlayer.MEDIA_INFO_BUFFERING_END: {
-                    //缓冲结束，取消上次缓冲发送的延时消息
-                    handler.removeMessages(WHAT_BUFFER_TIMEOUT);
-                    for (OnBufferListener listener : mOnBufferListeners) {
-                        listener.onBufferEnd();
-                    }
+                    sendBufferingEnd();
                 }
                 break;
             }

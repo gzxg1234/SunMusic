@@ -43,7 +43,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
     private int mCheckedItemCount;
     private boolean mIsMultiMode = false;
 
-    private int mPlayingPosition;
+    private int mPlayingPosition = -1;
     private boolean mIsFirstBindView = true;
     private MemoryCache mMemoryCache;
 

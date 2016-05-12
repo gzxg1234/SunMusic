@@ -6,13 +6,13 @@
     <!-- 底端的显示当前播放歌曲的面板-->
 
     <include
-        layout="@layout/layout_big_player"
+        layout="@layout/now_playing_big"
         android:id="@+id/big_player"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
     <include
-        layout="@layout/layout_small_player"
+        layout="@layout/now_playing_small"
         android:id="@+id/small_player"
         />
 

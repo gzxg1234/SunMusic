@@ -10,7 +10,7 @@
         android:id="@+id/iv_album_pic"
         android:layout_width="@dimen/notification_big_picture_size"
         android:layout_height="@dimen/notification_big_picture_size"
-        android:scaleType="centerCrop"
+        android:scaleType="fitCenter"
         android:src="@mipmap/default_song_pic"/>
 
     <LinearLayout
