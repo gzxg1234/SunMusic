@@ -130,7 +130,6 @@ public class Song {
                 + " picUrl:" + picBig;
     }
 
-
     public Music toMusic() {
         Music music = new Music();
         music.setTitle(title);

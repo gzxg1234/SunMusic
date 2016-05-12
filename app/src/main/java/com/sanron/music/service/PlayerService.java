@@ -423,7 +423,6 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
         public void play(int position) {
             handler.removeMessages(WHAT_PLAY_ERROR);
             handler.removeMessages(WHAT_BUFFER_TIMEOUT);
-            setCurMusicPic(null);
             if (mFileLinkCall != null) {
                 mFileLinkCall.cancel();
             }
@@ -744,11 +743,14 @@ public class PlayerService extends Service implements AudioManager.OnAudioFocusC
                                                 }
                                             }
                                         });
+                            } else {
+                                setCurMusicPic(null);
                             }
                         }
 
                         @Override
                         public void onFailure(Exception e) {
+                            setCurMusicPic(null);
                         }
                     });
         }

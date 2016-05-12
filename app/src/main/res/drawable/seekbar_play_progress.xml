@@ -3,11 +3,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@android:id/background">
+        <shape>
+            <solid android:color="#77FFFFFF"/>
+        </shape>
+    </item>
+
+    <item
         android:id="@android:id/secondaryProgress">
         <clip>
             <shape>
-                <size android:height="2dp"/>
-                <solid android:color="#FFFFFF" />
+                <solid android:color="#CCFFFFFF"/>
             </shape>
         </clip>
     </item>
@@ -16,8 +22,7 @@
         android:id="@android:id/progress">
         <clip>
             <shape>
-                <size android:height="2dp"/>
-                <solid android:color="@color/colorAccent" />
+                <solid android:color="@color/colorAccent"/>
             </shape>
         </clip>
     </item>

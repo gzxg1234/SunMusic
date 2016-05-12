@@ -103,7 +103,8 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
                     mAdapter.notifyItemChanged(position);
                 } else {
                     int playingPos = mAdapter.getPlayingPosition();
-                    if (position == playingPos) {
+                    if (playingPos != -1
+                            && position == playingPos) {
                         PlayerUtil.togglePlayPause();
                         return;
                     }

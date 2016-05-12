@@ -1,44 +1,52 @@
 package com.sanron.music.fragments;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
-import android.support.v7.graphics.Palette;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
-import com.nineoldandroids.animation.ArgbEvaluator;
-import com.nineoldandroids.animation.ObjectAnimator;
 import com.sanron.music.R;
-import com.sanron.music.activities.MainActivity;
+import com.sanron.music.common.FastBlur;
 import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.fragments.base.BaseFragment;
 import com.sanron.music.service.IPlayer;
 import com.sanron.music.service.PlayerUtil;
 import com.sanron.music.view.ShowPlayQueueWindow;
+import com.viewpagerindicator.PageIndicator;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 播放界面
  * Created by Administrator on 2016/3/5.
  */
-public class NowPlayingFragment extends BaseFragment implements View.OnClickListener, View.OnTouchListener, IPlayer.OnPlayStateChangeListener, IPlayer.OnBufferListener, IPlayer.OnLoadedPictureListener {
+public class NowPlayingFragment extends BaseFragment implements View.OnClickListener, IPlayer.OnPlayStateChangeListener, IPlayer.OnBufferListener, IPlayer.OnLoadedPictureListener, SeekBar.OnSeekBarChangeListener {
 
     private ViewGroup mSmallPlayer;
     private ProgressBar mSplayProgress;
@@ -47,34 +55,36 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
     private TextView mStvArtist;
     private ImageButton mSibtnPlayPause;
     private ImageButton mSibtnNext;
-
+    private ImageView mIvBlurBackground;
     private ViewGroup mBigPlayer;
-    private ViewGroup mPlayerTopBar;
-    private LinearLayout mLl1;
-    private ObjectAnimator mColorAnim1;
-    private LinearLayout mLl2;
-    private ObjectAnimator mColorAnim2;
-    private ProgressBar mPlayProgress;
-    private ImageView mIvSongPicture;
+    private ViewGroup mTopBar;
     private TextView mTvTitle;
     private TextView mTvArtist;
+    private SeekBar mPlayProgress;
     private TextView mTvPlayPosition;
     private TextView mTvDuration;
-    private ImageButton mIbtnBack;
-    private ImageButton mIbtnChangeMode;
-    private ImageButton mIbtnRewind;
-    private ImageButton mIbtnPlayPause;
-    private ImageButton mIbtnForward;
-    private ImageButton mIbtnPlayQuque;
+    private View mViewBack;
+    private ImageView mIvChangeMode;
+    private ImageView mIvPrevious;
+    private FloatingActionButton mFabPlayPause;
+    private ImageView mIvNext;
+    private ImageView mIvPlayQueue;
     private ShowPlayQueueWindow mShowPlayQueueWindow;
 
+    private ViewPager mViewPager;
+    private PageIndicator mPageIndicator;
+    private List<View> mPagerViews;
+    private ViewSwitcher mViewSwitcher;
+    private ListView mLvSimilarInfo;
+    private View mPictureView;
+    private ImageView mIvDownload;
+    private ImageView mIvFavorite;
+    private ImageView mIvSongPicture;
+    private View mLyricView;
     /**
      * 提示播放模式
      */
     private Toast mModeToast;
-    private FastLocateThread mThreadRewind;
-    private FastLocateThread mThreadForward;
-
 
     //刷新播放进度进程
     private UpdateProgressThread mUpdateProgressThread;
@@ -83,7 +93,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_player, null);
+        return inflater.inflate(R.layout.now_playing, null);
     }
 
     @Override
@@ -96,40 +106,67 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
         mStvArtist = $(R.id.s_tv_artist);
         mSibtnPlayPause = $(R.id.s_ibtn_play_pause);
         mSibtnNext = $(R.id.s_ibtn_next);
-        mLl1 = $(R.id.ll_1);
-        mLl2 = $(R.id.ll_2);
+
         mBigPlayer = $(R.id.big_player);
-        mPlayerTopBar = $(R.id.top_bar);
-        mIvSongPicture = $(R.id.iv_music_picture);
-        mTvTitle = $(R.id.tv_queue_item_title);
-        mTvArtist = $(R.id.tv_text2);
+        mTopBar = $(R.id.top_bar);
+//        mIvBlurBackground = $(R.id.iv_blur_background);
+        mTvTitle = $(R.id.tv_music_title);
+        mTvArtist = $(R.id.tv_music_artist);
         mTvDuration = $(R.id.tv_music_duration);
         mTvPlayPosition = $(R.id.tv_music_progress);
-        mIbtnBack = $(R.id.view_back);
-        mIbtnChangeMode = $(R.id.ibtn_play_mode);
-        mIbtnRewind = $(R.id.ibtn_rewind);
-        mIbtnPlayPause = $(R.id.ibtn_play_pause);
-        mIbtnForward = $(R.id.ibtn_forward);
-        mIbtnPlayQuque = $(R.id.ibtn_play_quque);
-        mPlayProgress = $(R.id.progress_play);
+        mViewBack = $(R.id.view_back);
+        mViewPager = $(R.id.viewpager);
+        mIvChangeMode = $(R.id.iv_play_mode);
+        mIvPrevious = $(R.id.iv_previous);
+        mFabPlayPause = $(R.id.fab_toggle_play);
+        mIvNext = $(R.id.iv_next);
+        mIvPlayQueue = $(R.id.iv_play_queue);
+        mPlayProgress = $(R.id.seek_play_position);
+        mPageIndicator = $(R.id.page_indicator);
+        mViewSwitcher = $(R.id.vs_blur_background);
 
+        mPlayProgress.setOnSeekBarChangeListener(this);
         mSibtnPlayPause.setOnClickListener(this);
         mSibtnNext.setOnClickListener(this);
-        mIbtnChangeMode.setOnClickListener(this);
-        mIbtnRewind.setOnClickListener(this);
-        mIbtnPlayPause.setOnClickListener(this);
-        mIbtnForward.setOnClickListener(this);
-        mIbtnPlayQuque.setOnClickListener(this);
-        mIbtnBack.setOnClickListener(this);
+        mIvChangeMode.setOnClickListener(this);
+        mIvPrevious.setOnClickListener(this);
+        mFabPlayPause.setOnClickListener(this);
+        mIvNext.setOnClickListener(this);
+        mIvPlayQueue.setOnClickListener(this);
+        mViewBack.setOnClickListener(this);
 
         mUpdateProgressThread = new UpdateProgressThread();
-        ViewTool.setViewFitsStatusBar(mPlayerTopBar);
+        ViewTool.setViewFitsStatusBar(mTopBar);
+        setUpViewPager();
+        for (int i = 0; i < mViewSwitcher.getChildCount(); i++) {
+            //设置颜色滤镜，调暗色调
+            ((ImageView) mViewSwitcher.getChildAt(i)).setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
+        }
 
         if (savedInstanceState != null) {
             mSmallPlayer.setVisibility(savedInstanceState.getInt("smallPlayerVisibility", View.VISIBLE));
             mBigPlayer.setVisibility(savedInstanceState.getInt("bigPlayerVisibility", View.VISIBLE));
         }
+    }
 
+    private void setUpViewPager() {
+        mPagerViews = new ArrayList<>();
+
+        mLvSimilarInfo = new ListView(getContext());
+        mPagerViews.add(mLvSimilarInfo);
+
+        mPictureView = LayoutInflater.from(getContext())
+                .inflate(R.layout.now_playing_picture, null);
+        mIvFavorite = (ImageView) mPictureView.findViewById(R.id.iv_favorite);
+        mIvDownload = (ImageView) mPictureView.findViewById(R.id.iv_download);
+        mIvSongPicture = (ImageView) mPictureView.findViewById(R.id.iv_song_picture);
+        mPagerViews.add(mPictureView);
+
+        mLyricView = new View(getContext());
+        mPagerViews.add(mLyricView);
+
+        mViewPager.setAdapter(new LocalPagerAdapter());
+        mPageIndicator.setViewPager(mViewPager);
     }
 
     @Override
@@ -159,15 +196,13 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
 
         if (state == IPlayer.STATE_PLAYING) {
             mSibtnPlayPause.setImageResource(R.mipmap.ic_pause_black_36dp);
-            mIbtnPlayPause.setImageResource(R.mipmap.ic_pause_white_24dp);
+            mFabPlayPause.setImageResource(R.mipmap.ic_pause_white_24dp);
         } else {
             mUpdateProgressThread.pause();
         }
 
         setModeIcon(PlayerUtil.getPlayMode());
         onLoadedPicture(PlayerUtil.getCurMusicPic());
-        mIbtnRewind.setOnTouchListener(this);
-        mIbtnForward.setOnTouchListener(this);
     }
 
     @Override
@@ -180,21 +215,21 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
                 setSongDuration(0);
                 setPlayProgress(0);
                 mSibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_black_36dp);
-                mIbtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_white_24dp);
+                mFabPlayPause.setImageResource(R.mipmap.ic_play_arrow_white_24dp);
             }
             break;
 
             case IPlayer.STATE_PAUSE: {
                 mUpdateProgressThread.pause();
                 mSibtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_black_36dp);
-                mIbtnPlayPause.setImageResource(R.mipmap.ic_play_arrow_white_24dp);
+                mFabPlayPause.setImageResource(R.mipmap.ic_play_arrow_white_24dp);
             }
             break;
 
             case IPlayer.STATE_PLAYING: {
-                mUpdateProgressThread.running();
+                mUpdateProgressThread.carryOn();
                 mSibtnPlayPause.setImageResource(R.mipmap.ic_pause_black_36dp);
-                mIbtnPlayPause.setImageResource(R.mipmap.ic_pause_white_24dp);
+                mFabPlayPause.setImageResource(R.mipmap.ic_pause_white_24dp);
             }
             break;
 
@@ -241,80 +276,49 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
     }
 
     @Override
-    public void onLoadedPicture(Bitmap img) {
+    public void onLoadedPicture(final Bitmap img) {
         if (img == null) {
             mSivSongPicture.setImageResource(R.mipmap.default_song_pic);
             mIvSongPicture.setImageResource(R.mipmap.default_song_pic);
+            setBlurBackground(null);
         } else {
             mSivSongPicture.setImageBitmap(img);
             mIvSongPicture.setImageBitmap(img);
+            new AsyncTask<Bitmap, Void, Bitmap>() {
+
+                @Override
+                protected Bitmap doInBackground(Bitmap... params) {
+                    return FastBlur.doBlur(params[0], 100, false);
+                }
+
+                @Override
+                protected void onPostExecute(Bitmap bitmap) {
+                    setBlurBackground(bitmap);
+                }
+            }.execute(img);
         }
-        Bitmap bmp = ((BitmapDrawable) mIvSongPicture.getDrawable()).getBitmap();
-        Palette.generateAsync(bmp, new Palette.PaletteAsyncListener() {
-            @Override
-            public void onGenerated(Palette palette) {
-                int oldColor1 = ((ColorDrawable) mLl1.getBackground()).getColor();
-                int oldColor2 = ((ColorDrawable) mLl2.getBackground()).getColor();
-                int newColor1 = palette.getDarkVibrantColor(0xFF000000);
-                int newColor2 = palette.getDarkMutedColor(0xFF000000);
-                animBackgroundColor(oldColor1, newColor1, oldColor2, newColor2);
-            }
-        });
     }
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        boolean handled = false;
-        switch (v.getId()) {
-            case R.id.ibtn_rewind: {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN: {
-                        mThreadRewind = new FastLocateThread(FastLocateThread.REWIND);
-                        mThreadRewind.start();
-                    }
-                    break;
-
-                    case MotionEvent.ACTION_CANCEL:
-                    case MotionEvent.ACTION_UP: {
-                        mThreadRewind.stopRun();
-                        if (mThreadRewind.isLocating()) {
-                            handled = true;
-                            v.setPressed(false);
-                        }
-                    }
-                    break;
-                }
-            }
-            break;
-
-            case R.id.ibtn_forward: {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN: {
-                        mThreadForward = new FastLocateThread(FastLocateThread.FORWARD);
-                        mThreadForward.start();
-                    }
-                    break;
-
-                    case MotionEvent.ACTION_CANCEL:
-                    case MotionEvent.ACTION_UP: {
-                        mThreadForward.stopRun();
-                        if (mThreadForward.isLocating()) {
-                            handled = true;
-                            v.setPressed(false);
-                        }
-                    }
-                    break;
-                }
-            }
-            break;
+    private void setBlurBackground(Bitmap bitmap) {
+        Drawable drawable;
+        if (bitmap == null) {
+            drawable = new ColorDrawable(0x88000000);
+        } else {
+            drawable = new BitmapDrawable(getResources(), bitmap);
         }
-        return handled;
+        if (mViewSwitcher.getDisplayedChild() == 0) {
+            ((ImageView) mViewSwitcher.getChildAt(1)).setImageDrawable(drawable);
+            mViewSwitcher.showNext();
+        } else {
+            ((ImageView) mViewSwitcher.getChildAt(0)).setImageDrawable(drawable);
+            mViewSwitcher.showPrevious();
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mUpdateProgressThread.running();
+        mUpdateProgressThread.carryOn();
         mUpdateProgressThread.end();
         PlayerUtil.removePlayStateChangeListener(this);
         PlayerUtil.removeBufferListener(this);
@@ -324,31 +328,6 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
         }
     }
 
-
-    private void animBackgroundColor(int oldColor1, int newColor1, int oldColor2, int newColor2) {
-        if (mColorAnim1 != null
-                && mColorAnim1.isRunning()) {
-            mColorAnim1.cancel();
-        }
-        if (mColorAnim2 != null
-                && mColorAnim2.isRunning()) {
-            mColorAnim2.cancel();
-        }
-        mColorAnim1 = ObjectAnimator.ofObject(mLl1,
-                "backgroundColor",
-                new ArgbEvaluator(),
-                oldColor1,
-                newColor1);
-        mColorAnim2 = ObjectAnimator.ofObject(mLl2,
-                "backgroundColor",
-                new ArgbEvaluator(),
-                oldColor2,
-                newColor2);
-        mColorAnim1.setDuration(1000);
-        mColorAnim2.setDuration(1000);
-        mColorAnim1.start();
-        mColorAnim2.start();
-    }
 
     private void setTitleText(String title) {
         mStvTitle.setText(title);
@@ -374,14 +353,13 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
     private void setSongDuration(int duration) {
         mPlayProgress.setMax(duration);
         mSplayProgress.setMax(duration);
-        mTvDuration.setText("/" + formatTime(duration));
+        mTvDuration.setText(formatTime(duration));
     }
 
     private String formatTime(int millis) {
         SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
         return sdf.format(new Date(millis));
     }
-
 
     private void setModeIcon(int mode) {
         int iconId = 0;
@@ -396,14 +374,14 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
                 iconId = R.mipmap.ic_shuffle_white_24dp;
                 break;
         }
-        mIbtnChangeMode.setImageResource(iconId);
+        mIvChangeMode.setImageResource(iconId);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
 
-            case R.id.ibtn_play_mode: {
+            case R.id.iv_play_mode: {
                 int newMode = (PlayerUtil.getPlayMode() + 1) % 3;
                 PlayerUtil.setPlayMode(newMode);
                 String msg = "";
@@ -428,13 +406,13 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
             }
             break;
 
-            case R.id.ibtn_rewind: {
+            case R.id.iv_previous: {
                 PlayerUtil.previous();
             }
             break;
 
             case R.id.s_ibtn_play_pause:
-            case R.id.ibtn_play_pause: {
+            case R.id.fab_toggle_play: {
                 if (PlayerUtil.getState() == IPlayer.STATE_STOP) {
                     if (PlayerUtil.getQueue().size() > 0) {
                         PlayerUtil.play(0);
@@ -448,21 +426,19 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
             break;
 
             case R.id.s_ibtn_next:
-            case R.id.ibtn_forward: {
+            case R.id.iv_next: {
                 PlayerUtil.next();
             }
             break;
 
-            case R.id.ibtn_play_quque: {
+            case R.id.iv_play_queue: {
                 mShowPlayQueueWindow = new ShowPlayQueueWindow(getActivity());
                 mShowPlayQueueWindow.showAtLocation(getView(), Gravity.BOTTOM, 0, 0);
             }
             break;
 
             case R.id.view_back: {
-                if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).collapseSlidingPanel();
-                }
+                getMainActivity().collapseSlidingPanel();
             }
             break;
         }
@@ -480,6 +456,26 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
         outState.putInt("bigPlayerVisibility", mBigPlayer.getVisibility());
     }
 
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        mUpdateProgressThread.pause();
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        mUpdateProgressThread.carryOn();
+        if (seekBar.getProgress() < seekBar.getSecondaryProgress()) {
+            PlayerUtil.seekTo(seekBar.getProgress());
+        } else {
+            seekBar.setProgress(PlayerUtil.getProgress());
+        }
+    }
+
     private class UpdateProgressThread extends Thread {
 
         private int period = 100;
@@ -491,7 +487,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
             pause = true;
         }
 
-        public void running() {
+        public void carryOn() {
             if (pause) {
                 synchronized (lock) {
                     lock.notify();
@@ -529,59 +525,29 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
         }
     }
 
-    public class FastLocateThread extends Thread {
 
-        public static final int MIN_TIME = 1000;
-        private volatile boolean running = true;
-        private boolean isLocating = false;
-        private int speed;
-        public static final int REWIND = 1;//快退
-        public static final int FORWARD = 2;//快进
+    private class LocalPagerAdapter extends PagerAdapter {
 
-        public FastLocateThread(int type) {
-            if (type == REWIND) {
-                speed = -4000;
-            } else if (type == FORWARD) {
-                speed = 4000;
-            }
-        }
-
-        public void stopRun() {
-            running = false;
-        }
-
-        public boolean isLocating() {
-            return isLocating;
+        @Override
+        public int getCount() {
+            return mPagerViews.size();
         }
 
         @Override
-        public void run() {
-            SystemClock.sleep(MIN_TIME);
-            isLocating = true;
-            if (!running) {
-                return;
-            }
-            mUpdateProgressThread.pause();
-            while (running) {
-                int pos = PlayerUtil.getProgress() + speed;
-                pos = Math.min(mPlayProgress.getSecondaryProgress(), Math.max(0, pos));
-                final int postPos = pos;
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        setPlayProgress(postPos);
-                    }
-                });
-                if (speed < 0) {
-                    speed -= 1000;
-                } else {
-                    speed += 1000;
-                }
-                PlayerUtil.seekTo(pos);
-                SystemClock.sleep(500);
-            }
-            mUpdateProgressThread.running();
+        public boolean isViewFromObject(View view, Object object) {
+            return view == object;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            View view = mPagerViews.get(position);
+            container.addView(view);
+            return view;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            container.removeView(mPagerViews.get(position));
         }
     }
-
 }

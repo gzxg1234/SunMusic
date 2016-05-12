@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation_header"
     android:layout_width="match_parent"
     android:layout_height="240dp"
     android:background="@mipmap/bg_navigation_header"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    android:id="@+id/navigation_header"
     android:paddingLeft="40dp">
 
-    <de.hdodenhof.circleimageview.CircleImageView
+    <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/civ_music_pic"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_marginBottom="24dp"
-        android:src="@mipmap/default_small_song_pic" />
+        android:src="@mipmap/default_small_song_pic"
+        app:riv_oval="true"/>
 
     <TextView
         android:id="@+id/tv_music_title"
@@ -23,7 +26,7 @@
         android:maxLines="2"
         android:text="@string/app_name"
         android:textColor="@color/textColorPrimaryInverse"
-        android:textSize="16dp" />
+        android:textSize="16dp"/>
 
     <TextView
         android:id="@+id/tv_music_artist"
@@ -33,5 +36,5 @@
         android:singleLine="true"
         android:text=""
         android:textColor="@color/textColorPrimaryInverse"
-        android:textSize="14dp" />
+        android:textSize="14dp"/>
 </LinearLayout>

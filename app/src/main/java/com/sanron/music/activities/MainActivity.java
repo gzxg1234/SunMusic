@@ -162,10 +162,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-                    mSlidingUpPanelLayout.setTouchEnabled(true);
                     mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                 } else if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                    mSlidingUpPanelLayout.setTouchEnabled(false);
                     mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                 }
             }
