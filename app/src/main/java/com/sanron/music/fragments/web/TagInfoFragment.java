@@ -10,14 +10,14 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.adapter.SongItemAdapter;
+import com.sanron.music.adapter.SongAdapter;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.fragments.base.PullFragment;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.Song;
 import com.sanron.music.api.bean.TagSongs;
-import com.sanron.music.service.IPlayer;
+import com.sanron.music.playback.Player;
 import com.sanron.music.service.PlayerUtil;
 import com.sanron.music.view.DDPullListView;
 
@@ -30,13 +30,13 @@ import okhttp3.Call;
  * 分类歌曲
  * Created by sanron on 16-4-12.
  */
-public class TagInfoFragment extends PullFragment implements IPlayer.OnPlayStateChangeListener, View.OnClickListener {
+public class TagInfoFragment extends PullFragment implements Player.OnPlayStateChangeListener, View.OnClickListener {
 
     private String mTag;
     private TextView mTvPlay;
     private ImageButton mIbtnDownload;
     private TextView mTvTagName;
-    private SongItemAdapter mAdapter;
+    private SongAdapter mAdapter;
     public static final int LOAD_LIMIT = 50;
 
     public static TagInfoFragment newInstance(String tag) {
@@ -50,7 +50,7 @@ public class TagInfoFragment extends PullFragment implements IPlayer.OnPlayState
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAdapter = new SongItemAdapter(getContext());
+        mAdapter = new SongAdapter(getContext());
         Bundle args = getArguments();
         if (args != null) {
             mTag = args.getString("tag");
@@ -117,7 +117,7 @@ public class TagInfoFragment extends PullFragment implements IPlayer.OnPlayState
                 if (data != null
                         && data.taginfo != null) {
                     mAdapter.addData(data.taginfo.songs);
-                    onPlayStateChange(IPlayer.STATE_PREPARING);
+                    onPlayStateChange(Player.STATE_PREPARING);
                     if (data.taginfo.havemore == 0) {
                         mPullListView.setHasMore(false);
                     }
@@ -142,8 +142,8 @@ public class TagInfoFragment extends PullFragment implements IPlayer.OnPlayState
 
     @Override
     public void onPlayStateChange(int state) {
-        if (state == IPlayer.STATE_PREPARING
-                || state == IPlayer.STATE_STOP) {
+        if (state == Player.STATE_PREPARING
+                || state == Player.STATE_STOP) {
             mAdapter.notifyDataSetChanged();
         }
     }

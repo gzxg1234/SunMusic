@@ -34,7 +34,7 @@ import okhttp3.Call;
 /**
  * 音乐适配
  */
-public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.MusicItemHolder> {
+public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicItemHolder> {
 
     private List<Music> mData = new ArrayList<>();
     private Context mContext;
@@ -77,7 +77,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemAdapter.Musi
         }
     };
 
-    public MusicItemAdapter(Context context) {
+    public MusicAdapter(Context context) {
         this.mContext = context;
         mMemoryCache = ImageLoader.getInstance()
                 .getMemoryCache();

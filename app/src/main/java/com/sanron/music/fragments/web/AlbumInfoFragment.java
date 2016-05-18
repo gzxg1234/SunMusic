@@ -7,12 +7,12 @@ import android.view.View;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
-import com.sanron.music.adapter.SongItemAdapter;
+import com.sanron.music.adapter.SongAdapter;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.AlbumSongs;
 import com.sanron.music.common.ViewTool;
-import com.sanron.music.service.IPlayer;
+import com.sanron.music.playback.Player;
 import com.sanron.music.task.AddCollectPlayListTask;
 
 import okhttp3.Call;
@@ -20,7 +20,7 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-23.
  */
-public class AlbumInfoFragment extends CommonSongPullFragment implements View.OnClickListener, IPlayer.OnPlayStateChangeListener {
+public class AlbumInfoFragment extends CommonSongPullFragment implements View.OnClickListener, Player.OnPlayStateChangeListener {
 
     private String mAlbumId;
     private AlbumSongs mData;
@@ -47,8 +47,8 @@ public class AlbumInfoFragment extends CommonSongPullFragment implements View.On
     }
 
     @Override
-    protected SongItemAdapter createAdapter() {
-        return new SongItemAdapter(getContext());
+    protected SongAdapter createAdapter() {
+        return new SongAdapter(getContext());
     }
 
     @Override

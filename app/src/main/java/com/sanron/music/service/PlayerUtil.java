@@ -4,14 +4,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
-import android.net.ConnectivityManager;
 import android.os.IBinder;
-import android.text.TextUtils;
 
-import com.sanron.music.AppContext;
 import com.sanron.music.db.bean.Music;
-import com.sanron.music.api.bean.SongUrlInfo;
+import com.sanron.music.playback.Player;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +17,7 @@ import java.util.Map;
  * Created by sanron on 16-4-18.
  */
 public class PlayerUtil {
-    private static IPlayer sPlayer;
+    private static Player sPlayer;
     private static Map<Context, ServiceBinder> sBinders = new HashMap<>();
 
     public static boolean bindService(Context context, ServiceConnection callback) {
@@ -56,7 +52,7 @@ public class PlayerUtil {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (sPlayer == null) {
-                sPlayer = (IPlayer) service;
+                sPlayer = (Player) service;
             }
             if (callback != null) {
                 callback.onServiceConnected(name, service);
@@ -125,13 +121,6 @@ public class PlayerUtil {
         return null;
     }
 
-    public static Bitmap getCurMusicPic() {
-        if (sPlayer != null) {
-            return sPlayer.getCurMusicPic();
-        }
-        return null;
-    }
-
     public static void togglePlayPause() {
         if (sPlayer != null) {
             sPlayer.togglePlayPause();
@@ -154,7 +143,7 @@ public class PlayerUtil {
         if (sPlayer != null) {
             return sPlayer.getState();
         }
-        return IPlayer.STATE_STOP;
+        return Player.STATE_STOP;
     }
 
     public static void setPlayMode(int mode) {
@@ -167,57 +156,65 @@ public class PlayerUtil {
         if (sPlayer != null) {
             return sPlayer.getPlayMode();
         }
-        return IPlayer.MODE_IN_TURN;
+        return Player.MODE_IN_TURN;
     }
 
-    public static void addPlayStateChangeListener(IPlayer.OnPlayStateChangeListener listener) {
+    public static void addPlayStateChangeListener(Player.OnPlayStateChangeListener listener) {
         if (sPlayer != null) {
             sPlayer.addPlayStateChangeListener(listener);
         }
     }
 
-    public static void removePlayStateChangeListener(IPlayer.OnPlayStateChangeListener listener) {
+    public static void removePlayStateChangeListener(Player.OnPlayStateChangeListener listener) {
         if (sPlayer != null) {
             sPlayer.removePlayStateChangeListener(listener);
         }
     }
 
-    public static void addOnBufferListener(IPlayer.OnBufferListener listener) {
+    public static void addOnBufferListener(Player.OnBufferListener listener) {
         if (sPlayer != null) {
             sPlayer.addOnBufferListener(listener);
         }
     }
 
-    public static void removeBufferListener(IPlayer.OnBufferListener listener) {
+    public static void addOnCompletedListener(Player.OnCompletedListener listener) {
+        if (sPlayer != null) {
+            sPlayer.addOnCompletedListener(listener);
+        }
+    }
+
+    public static void removeOnCompletedListener(Player.OnCompletedListener listener) {
+        if (sPlayer != null) {
+            sPlayer.removeOnCompletedListener(listener);
+        }
+    }
+
+
+    public static void removeBufferListener(Player.OnBufferListener listener) {
         if (sPlayer != null) {
             sPlayer.removeBufferListener(listener);
         }
     }
 
-    public static void addOnLoadedPictureListener(IPlayer.OnLoadedPictureListener listener) {
+    public static boolean isPlaying() {
         if (sPlayer != null) {
-            sPlayer.addOnLoadedPictureListener(listener);
+            return sPlayer.isPlaying();
         }
-    }
-
-    public static void removeOnLoadedPictureListener(IPlayer.OnLoadedPictureListener listener) {
-        if (sPlayer != null) {
-            sPlayer.removeOnLoadedPictureListener(listener);
-        }
+        return false;
     }
 
     public static int getProgress() {
         if (sPlayer != null) {
             return sPlayer.getProgress();
         }
-        return -1;
+        return 0;
     }
 
     public static int getDuration() {
         if (sPlayer != null) {
             return sPlayer.getDuration();
         }
-        return -1;
+        return 0;
     }
 
     public static void seekTo(int position) {
@@ -226,49 +223,5 @@ public class PlayerUtil {
         }
     }
 
-    /**
-     * 根据网络选择合适的音质歌曲文件
-     *
-     * @param context
-     * @param files
-     * @return
-     */
-    public static SongUrlInfo.SongUrl.Url selectFileUrl(Context context, List<SongUrlInfo.SongUrl.Url> files) {
-        SongUrlInfo.SongUrl.Url result = null;
-        if (files != null
-                && files.size() > 0) {
-            SongUrlInfo.SongUrl.Url minBitrateFile = null;
-            SongUrlInfo.SongUrl.Url maxBitrateFile = null;
-            int minBitrate = Integer.MAX_VALUE;
-            int maxBitrate = 0;
-            for (SongUrlInfo.SongUrl.Url url : files) {
-                String fileUrl = url.fileLink;
-                int fileBitrate = url.fileBitrate;
-                if (TextUtils.isEmpty(fileUrl)) {
-                    continue;
-                }
-
-                if (fileBitrate < minBitrate) {
-                    minBitrateFile = url;
-                    minBitrate = fileBitrate;
-                }
-
-                if (fileBitrate > maxBitrate) {
-                    maxBitrateFile = url;
-                    maxBitrate = fileBitrate;
-                }
-            }
-
-            int netType = ((AppContext) context.getApplicationContext()).checkNet();
-            if (netType == ConnectivityManager.TYPE_MOBILE) {
-                //移动网络选择最低音质
-                result = minBitrateFile;
-            } else if (netType == ConnectivityManager.TYPE_WIFI) {
-                //WIFI网络选择最高音质
-                result = maxBitrateFile;
-            }
-        }
-        return result;
-    }
 
 }

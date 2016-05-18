@@ -15,7 +15,7 @@ import com.sanron.music.db.bean.Music;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.LrcPicData;
-import com.sanron.music.service.IPlayer;
+import com.sanron.music.playback.Player;
 import com.sanron.music.service.PlayerUtil;
 
 import java.util.List;
@@ -26,7 +26,7 @@ import okhttp3.Call;
  * 管理导航头部
  * Created by sanron on 16-4-18.
  */
-public class NavigationHeaderFrag extends Fragment implements IPlayer.OnPlayStateChangeListener, MainActivity.PlayerReadyCallback {
+public class NavigationHeaderFrag extends Fragment implements Player.OnPlayStateChangeListener, MainActivity.PlayerReadyCallback {
 
     private View mHeader;
     private ImageView mIvMusicPic;
@@ -44,11 +44,11 @@ public class NavigationHeaderFrag extends Fragment implements IPlayer.OnPlayStat
     @Override
     public void onPlayerReady() {
         PlayerUtil.addPlayStateChangeListener(this);
-        if (PlayerUtil.getState() != IPlayer.STATE_STOP) {
-            onPlayStateChange(IPlayer.STATE_PREPARING);
+        if (PlayerUtil.getState() != Player.STATE_STOP) {
+            onPlayStateChange(Player.STATE_PREPARING);
         }
-        if (PlayerUtil.getState() >= IPlayer.STATE_PREPARED) {
-            onPlayStateChange(IPlayer.STATE_PREPARED);
+        if (PlayerUtil.getState() >= Player.STATE_PREPARED) {
+            onPlayStateChange(Player.STATE_PREPARED);
         }
     }
 
@@ -62,13 +62,13 @@ public class NavigationHeaderFrag extends Fragment implements IPlayer.OnPlayStat
     @Override
     public void onPlayStateChange(int state) {
         switch (state) {
-            case IPlayer.STATE_STOP: {
+            case Player.STATE_STOP: {
                 mTvMusicTitle.setText("叮咚音乐");
                 mTvMusicArtist.setText("");
             }
             break;
 
-            case IPlayer.STATE_PREPARING: {
+            case Player.STATE_PREPARING: {
                 Music music = PlayerUtil.getCurrentMusic();
                 mTvMusicTitle.setText(music.getTitle());
                 String artist = music.getArtist();
@@ -79,7 +79,7 @@ public class NavigationHeaderFrag extends Fragment implements IPlayer.OnPlayStat
             }
             break;
 
-            case IPlayer.STATE_PREPARED: {
+            case Player.STATE_PREPARED: {
                 mIvMusicPic.setImageResource(R.mipmap.default_small_song_pic);
                 Music music = PlayerUtil.getCurrentMusic();
                 final int currentIndex = PlayerUtil.getCurrentIndex();

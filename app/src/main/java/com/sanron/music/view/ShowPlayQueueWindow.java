@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.sanron.music.R;
 import com.sanron.music.db.bean.Music;
-import com.sanron.music.service.IPlayer;
+import com.sanron.music.playback.Player;
 import com.sanron.music.service.PlayerUtil;
 
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * 播放队列窗口
  */
-public class ShowPlayQueueWindow extends ScrimPopupWindow implements IPlayer.OnPlayStateChangeListener, View.OnClickListener {
+public class ShowPlayQueueWindow extends ScrimPopupWindow implements Player.OnPlayStateChangeListener, View.OnClickListener {
 
     private List<Music> mQueue;
     private Context context;
@@ -75,7 +75,7 @@ public class ShowPlayQueueWindow extends ScrimPopupWindow implements IPlayer.OnP
 
     @Override
     public void onPlayStateChange(int state) {
-        if (state == IPlayer.STATE_PREPARING) {
+        if (state == Player.STATE_PREPARING) {
             mAdapter.notifyDataSetChanged();
             mLvQueue.scrollToPosition(PlayerUtil.getCurrentIndex());
         }

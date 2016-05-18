@@ -6,12 +6,12 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.sanron.music.adapter.RankSongItemAdapter;
-import com.sanron.music.adapter.SongItemAdapter;
+import com.sanron.music.adapter.RankSongAdapter;
+import com.sanron.music.adapter.SongAdapter;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.BillSongList;
-import com.sanron.music.service.IPlayer;
+import com.sanron.music.playback.Player;
 import com.sanron.music.view.DDPullListView;
 
 import okhttp3.Call;
@@ -19,7 +19,7 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-24.
  */
-public class BillboardInfoFragment extends CommonSongPullFragment implements View.OnClickListener, DDPullListView.OnLoadMoreListener, IPlayer.OnPlayStateChangeListener {
+public class BillboardInfoFragment extends CommonSongPullFragment implements View.OnClickListener, DDPullListView.OnLoadMoreListener, Player.OnPlayStateChangeListener {
 
     private int mBillType;
 
@@ -44,8 +44,8 @@ public class BillboardInfoFragment extends CommonSongPullFragment implements Vie
     }
 
     @Override
-    protected SongItemAdapter createAdapter() {
-        return new RankSongItemAdapter(getContext());
+    protected SongAdapter createAdapter() {
+        return new RankSongAdapter(getContext());
     }
 
     @Override

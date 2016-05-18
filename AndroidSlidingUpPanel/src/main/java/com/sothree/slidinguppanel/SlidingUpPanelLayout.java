@@ -11,11 +11,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.support.v4.view.MotionEventCompat;
-import android.support.v4.view.OnApplyWindowInsetsListener;
 import android.support.v4.view.ViewCompat;
-import android.support.v4.view.WindowInsetsCompat;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -514,6 +511,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
      * Provides an on click for the portion of the main view that is dimmed. The listener is not
      * triggered if the panel is in a collapsed or a hidden position. If the on click listener is
      * not provided, the clicks on the dimmed area are passed through to the main layout.
+     *
      * @param listener
      */
     public void setFadeOnClickListener(View.OnClickListener listener) {
@@ -537,7 +535,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
             mDragView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!isEnabled() || !isTouchEnabled()) return;
+                    if (!isEnabled() || !isTouchEnabled() || !isSlideViewClickable()) return;
                     if (mSlideState != PanelState.EXPANDED && mSlideState != PanelState.ANCHORED) {
                         if (mAnchorPoint < 1.0f) {
                             setPanelState(PanelState.ANCHORED);
@@ -549,8 +547,18 @@ public class SlidingUpPanelLayout extends ViewGroup {
                     }
                 }
             });
-            ;
         }
+    }
+
+    //modified,增加是否可点击展开或收缩
+    private boolean mIsSlideViewClickable = true;
+
+    public boolean isSlideViewClickable() {
+        return mIsSlideViewClickable && mSlideableView != null && mSlideState != PanelState.HIDDEN;
+    }
+
+    public void setSlideViewClickable(boolean slideViewClickable) {
+        mIsSlideViewClickable = slideViewClickable;
     }
 
     /**
@@ -575,6 +583,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
 
     /**
      * Sets the current scrollable view helper. See ScrollableViewHelper description for details.
+     *
      * @param helper
      */
     public void setScrollableViewHelper(ScrollableViewHelper helper) {
@@ -873,7 +882,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         // If the scrollable view is handling touch, never intercept
         if (mIsScrollableViewHandlingTouch || !isTouchEnabled()) {
-//            mDragHelper.abort();
+            mDragHelper.abort();
             return false;
         }
 
@@ -942,6 +951,9 @@ public class SlidingUpPanelLayout extends ViewGroup {
         final int action = MotionEventCompat.getActionMasked(ev);
 
         if (!isEnabled() || !isTouchEnabled() || (mIsUnableToDrag && action != MotionEvent.ACTION_DOWN)) {
+//            modified,这行代码会导致SlideableView未完全展开或收缩
+//            发生情况比如在快速滑动SlideableView使其收缩，但是收缩未完成时，快速点击触摸MainView
+//            此时SlideableView会停在半空中
 //            mDragHelper.abort();
             return super.dispatchTouchEvent(ev);
         }

@@ -12,17 +12,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.adapter.SongItemAdapter;
+import com.sanron.music.adapter.SongAdapter;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
 import com.sanron.music.fragments.base.PullFragment;
-import com.sanron.music.service.IPlayer;
+import com.sanron.music.playback.Player;
 import com.sanron.music.service.PlayerUtil;
 
 /**
  * Created by sanron on 16-4-24.
  */
-public abstract class CommonSongPullFragment extends PullFragment implements IPlayer.OnPlayStateChangeListener {
+public abstract class CommonSongPullFragment extends PullFragment implements Player.OnPlayStateChangeListener {
 
 
     protected ImageView mIvPicture;
@@ -32,7 +32,7 @@ public abstract class CommonSongPullFragment extends PullFragment implements IPl
     protected ImageButton mIbtnFavorite;
     protected ImageButton mIbtnDownload;
     protected ImageButton mIbtnShare;
-    protected SongItemAdapter mAdapter;
+    protected SongAdapter mAdapter;
 
     @Nullable
     @Override
@@ -46,7 +46,7 @@ public abstract class CommonSongPullFragment extends PullFragment implements IPl
         mAdapter = createAdapter();
     }
 
-    protected abstract SongItemAdapter createAdapter();
+    protected abstract SongAdapter createAdapter();
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -88,8 +88,8 @@ public abstract class CommonSongPullFragment extends PullFragment implements IPl
 
     @Override
     public void onPlayStateChange(int state) {
-        if (state == IPlayer.STATE_PREPARING
-                || state == IPlayer.STATE_STOP) {
+        if (state == Player.STATE_PREPARING
+                || state == Player.STATE_STOP) {
             mAdapter.notifyDataSetChanged();
         }
     }

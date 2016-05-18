@@ -27,7 +27,7 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:scaleType="fitCenter"
-            tools:src="@mipmap/default_song_pic"/>
+            android:src="@mipmap/default_song_pic"/>
 
         <LinearLayout
             android:layout_width="0dp"

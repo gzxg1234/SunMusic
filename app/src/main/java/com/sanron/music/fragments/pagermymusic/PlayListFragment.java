@@ -21,7 +21,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.adapter.PlayListItemAdapter;
+import com.sanron.music.adapter.PlayListAdapter;
 import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.bean.Music;
@@ -39,17 +39,17 @@ import java.util.List;
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class PlayListFragment extends BaseDataFragment implements PlayListItemAdapter.OnItemClickListener, PlayListItemAdapter.OnItemMenuClickListener {
+public class PlayListFragment extends BaseDataFragment implements PlayListAdapter.OnItemClickListener, PlayListAdapter.OnItemMenuClickListener {
 
 
     public static final int MENU_NEW_LIST = 1;
 
     private RecyclerView mRecyclerView;
-    private PlayListItemAdapter mAdapter;
+    private PlayListAdapter mAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        mAdapter = new PlayListItemAdapter(getContext());
+        mAdapter = new PlayListAdapter(getContext());
         setObserveTable(DBHelper.List.TABLE, DBHelper.ListMember.TABLE);
         super.onCreate(savedInstanceState);
     }

@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SongItemAdapter extends BaseAdapter {
+public class SongAdapter extends BaseAdapter {
 
     private Context mContext;
     private List<Song> mData = new ArrayList<>();
@@ -34,7 +34,7 @@ public class SongItemAdapter extends BaseAdapter {
     private int mNormalTitleTextColor;//正常title颜色
     private int mNormalArtistTextColor;//正常artist颜色
 
-    public SongItemAdapter(Context context) {
+    public SongAdapter(Context context) {
         this.mContext = context;
         Resources resources = context.getResources();
         mPlayingTextColor = resources.getColor(R.color.colorAccent);

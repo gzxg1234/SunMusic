@@ -1,6 +1,4 @@
-package com.sanron.music.service;
-
-import android.graphics.Bitmap;
+package com.sanron.music.playback;
 
 import com.sanron.music.db.bean.Music;
 
@@ -9,7 +7,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/3/5.
  */
-public interface IPlayer {
+public interface Player {
 
     int MODE_IN_TURN = 0;//顺讯播放
     int MODE_RANDOM = 1;//随机播放
@@ -17,9 +15,10 @@ public interface IPlayer {
 
     int STATE_STOP = 0;//停止状态
     int STATE_PREPARING = 1;//准备资源中
-    int STATE_PREPARED = 2;//准备完毕
-    int STATE_PLAYING = 3;//播放中
-    int STATE_PAUSE = 4;//暂停
+    int STATE_PREPARED = 3;//准备资源完成
+    int STATE_PLAYING = 4;//播放中
+    int STATE_PAUSE = 5;//暂停
+    int STATE_ERROR = 6;//错误
 
     List<Music> getQueue();
 
@@ -35,11 +34,11 @@ public interface IPlayer {
 
     Music getCurrentMusic();
 
-    Bitmap getCurMusicPic();
-
     void togglePlayPause();
 
     void next();
+
+    boolean isPlaying();
 
     void previous();
 
@@ -57,9 +56,9 @@ public interface IPlayer {
 
     void removeBufferListener(OnBufferListener onBufferListener);
 
-    void addOnLoadedPictureListener(OnLoadedPictureListener onLoadedPictureListener);
+    void addOnCompletedListener(OnCompletedListener onCompletedListener);
 
-    void removeOnLoadedPictureListener(OnLoadedPictureListener onLoadedPictureListener);
+    void removeOnCompletedListener(OnCompletedListener onCompletedListener);
 
     int getProgress();
 
@@ -71,8 +70,8 @@ public interface IPlayer {
         void onPlayStateChange(int state);
     }
 
-    interface OnLoadedPictureListener {
-        void onLoadedPicture(Bitmap img);
+    interface OnCompletedListener {
+        void onCompleted();
     }
 
     interface OnBufferListener {

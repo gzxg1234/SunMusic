@@ -6,7 +6,7 @@ import android.view.View;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
-import com.sanron.music.adapter.SongItemAdapter;
+import com.sanron.music.adapter.SongAdapter;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.OfficialSongListSongs;
@@ -50,8 +50,8 @@ public class OfficialSongListInfoFragment extends CommonSongPullFragment impleme
     }
 
     @Override
-    protected SongItemAdapter createAdapter() {
-        return new SongItemAdapter(getContext());
+    protected SongAdapter createAdapter() {
+        return new SongAdapter(getContext());
     }
 
     @Override

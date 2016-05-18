@@ -1,1 +1,1 @@
-include ':app', ':AndroidSlidingUpPanel', ':Android-Universal-Image-Loader', ':ViewPagerIndicator'
+include ':app', ':AndroidSlidingUpPanel', ':Android-Universal-Image-Loader', ':ViewPagerIndicator', ':LyricView'

@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
-import com.sanron.music.adapter.SongItemAdapter;
+import com.sanron.music.adapter.SongAdapter;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.Album;
@@ -23,7 +23,7 @@ import com.sanron.music.api.bean.SingerAlbums;
 import com.sanron.music.api.bean.SingerSongs;
 import com.sanron.music.api.bean.Song;
 import com.sanron.music.fragments.base.PullFragment;
-import com.sanron.music.service.IPlayer;
+import com.sanron.music.playback.Player;
 import com.sanron.music.service.PlayerUtil;
 import com.sanron.music.view.DDPullListView;
 import com.sanron.music.view.SingerDetailDialog;
@@ -35,7 +35,7 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-18.
  */
-public class SingerInfoFragment extends PullFragment implements DDPullListView.OnLoadMoreListener, IPlayer.OnPlayStateChangeListener, RadioGroup.OnCheckedChangeListener {
+public class SingerInfoFragment extends PullFragment implements DDPullListView.OnLoadMoreListener, Player.OnPlayStateChangeListener, RadioGroup.OnCheckedChangeListener {
 
     private String mArtistId;
     private ImageView mIvSingerAvatar;
@@ -43,7 +43,7 @@ public class SingerInfoFragment extends PullFragment implements DDPullListView.O
     private TextView mTvSingerCountry;
     private RadioGroup mRadioGroup;
     private Singer mSinger;
-    private SongItemAdapter mSongAdapter;
+    private SongAdapter mSongAdapter;
     private AlbumItemAdapter mAlbumAdapter;
     private boolean mHasMoreSong = true;
     private boolean mHasMoreAlbum = true;
@@ -82,7 +82,7 @@ public class SingerInfoFragment extends PullFragment implements DDPullListView.O
         mTvSingerName = $(R.id.tv_singer_name);
         mIvSingerAvatar = (ImageView) mTopBoard;
 
-        mSongAdapter = new SongItemAdapter(getContext()) {
+        mSongAdapter = new SongAdapter(getContext()) {
             @Override
             protected String onBindText2(Song song) {
                 return song.albumTitle;
@@ -224,8 +224,8 @@ public class SingerInfoFragment extends PullFragment implements DDPullListView.O
 
     @Override
     public void onPlayStateChange(int state) {
-        if (state == IPlayer.STATE_PREPARING
-                || state == IPlayer.STATE_STOP) {
+        if (state == Player.STATE_PREPARING
+                || state == Player.STATE_STOP) {
             mSongAdapter.notifyDataSetChanged();
         }
     }

@@ -7,10 +7,10 @@ import android.view.ViewGroup;
 /**
  * Created by sanron on 16-4-24.
  */
-public class RankSongItemAdapter extends SongItemAdapter {
+public class RankSongAdapter extends SongAdapter {
 
 
-    public RankSongItemAdapter(Context context) {
+    public RankSongAdapter(Context context) {
         super(context);
         setShowPicture(true);
     }

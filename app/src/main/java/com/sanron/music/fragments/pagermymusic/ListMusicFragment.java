@@ -23,12 +23,12 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.sanron.music.R;
-import com.sanron.music.adapter.MusicItemAdapter;
+import com.sanron.music.adapter.MusicAdapter;
 import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.db.bean.PlayList;
-import com.sanron.music.service.IPlayer;
+import com.sanron.music.playback.Player;
 import com.sanron.music.service.PlayerUtil;
 import com.sanron.music.task.DeleteTask;
 import com.sanron.music.task.QueryListMemberDataTask;
@@ -42,10 +42,10 @@ import java.util.Observer;
 /**
  * Created by sanron on 16-3-28.
  */
-public class ListMusicFragment extends BaseDataFragment implements Observer, CompoundButton.OnCheckedChangeListener, IPlayer.OnPlayStateChangeListener {
+public class ListMusicFragment extends BaseDataFragment implements Observer, CompoundButton.OnCheckedChangeListener, Player.OnPlayStateChangeListener {
 
 
-    protected MusicItemAdapter mAdapter;
+    protected MusicAdapter mAdapter;
     protected LinearLayout mCheckBar;
     protected RecyclerView mLvData;
     protected PopupWindow mMusicOperator;
@@ -76,7 +76,7 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
         }
         setObserveTable(DBHelper.ListMember.TABLE);
 
-        mAdapter = new MusicItemAdapter(getContext());
+        mAdapter = new MusicAdapter(getContext());
         super.onCreate(savedInstanceState);
     }
 
@@ -95,7 +95,7 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
 
         initWindow();
         mAdapter.setFirstBindView(true);
-        mAdapter.setOnItemClickListener(new MusicItemAdapter.OnItemClickListener() {
+        mAdapter.setOnItemClickListener(new MusicAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
                 if (mAdapter.isMultiMode()) {
@@ -114,7 +114,7 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
                 }
             }
         });
-        mAdapter.setOnItemLongClickListener(new MusicItemAdapter.OnItemLongClickListener() {
+        mAdapter.setOnItemLongClickListener(new MusicAdapter.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(View itemView, int position) {
                 if (mAdapter.isMultiMode()) {
@@ -125,7 +125,7 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
                 return true;
             }
         });
-        mAdapter.setOnItemCheckedListener(new MusicItemAdapter.OnItemCheckedListener() {
+        mAdapter.setOnItemCheckedListener(new MusicAdapter.OnItemCheckedListener() {
             @Override
             public void onItemChecked(int position, boolean isChecked) {
                 mTvCheckedNum.setText("已选中" + mAdapter.getCheckedItemCount() + "项");
@@ -136,7 +136,7 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
                 }
             }
         });
-        mAdapter.setOnItemMenuClickListener(new MusicItemAdapter.OnItemMenuClickListener() {
+        mAdapter.setOnItemMenuClickListener(new MusicAdapter.OnItemMenuClickListener() {
             @Override
             public void onItemMenuClick(View view, int position) {
                 showMusicMenu(view, position);
@@ -192,7 +192,7 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
             @Override
             protected void onPostExecute(List<Music> musics) {
                 mAdapter.setData(musics);
-                onPlayStateChange(IPlayer.STATE_PREPARING);
+                onPlayStateChange(Player.STATE_PREPARING);
             }
         }.execute();
     }
@@ -209,8 +209,8 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
 
     @Override
     public void onPlayStateChange(int state) {
-        if (state == IPlayer.STATE_PREPARING
-                || state == IPlayer.STATE_STOP) {
+        if (state == Player.STATE_PREPARING
+                || state == Player.STATE_STOP) {
             mAdapter.notifyDataSetChanged();
         }
     }

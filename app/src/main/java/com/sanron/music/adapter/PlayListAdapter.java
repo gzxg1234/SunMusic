@@ -19,14 +19,14 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class PlayListItemAdapter extends RecyclerView.Adapter {
+public class PlayListAdapter extends RecyclerView.Adapter {
     private List<PlayList> mData = new ArrayList<>();
     private List<Object> mItems = new ArrayList<>();
     private Context mContext;
     private OnItemClickListener mOnItemClickListener;
     private OnItemMenuClickListener mOnItemMenuClickListener;
 
-    public PlayListItemAdapter(Context context) {
+    public PlayListAdapter(Context context) {
         this.mContext = context;
     }
 
