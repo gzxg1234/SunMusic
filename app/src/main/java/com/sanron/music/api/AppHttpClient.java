@@ -21,7 +21,7 @@ import okhttp3.Response;
 /**
  * Created by sanron on 16-3-18.
  */
-public class ApiHttpClient {
+public class AppHttpClient {
 
     private static OkHttpClient sHttpClient;
 

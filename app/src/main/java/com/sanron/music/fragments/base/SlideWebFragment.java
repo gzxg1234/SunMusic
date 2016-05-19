@@ -35,7 +35,7 @@ public abstract class SlideWebFragment extends BaseFragment implements SlideBack
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mTopBar = $(R.id.top_bar);
-        mTvTitle = $(R.id.tv_queue_item_title);
+        mTvTitle = $(R.id.tv_title);
         mSlideBackLayout = $(R.id.slide_back_layout);
         mViewBack = $(R.id.view_back);
         mViewLoading = $(R.id.layout_loading);
@@ -51,7 +51,6 @@ public abstract class SlideWebFragment extends BaseFragment implements SlideBack
             }
         });
     }
-
 
     protected void setTitle(String title) {
         mTvTitle.setText(title);

@@ -49,7 +49,7 @@
                     android:src="@mipmap/ic_arrow_back_white_24dp"/>
 
                 <TextView
-                    android:id="@+id/tv_queue_item_title"
+                    android:id="@+id/tv_title"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"

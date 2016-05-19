@@ -37,6 +37,7 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
     private int mMode = MODE_IN_TURN;
     private int mCurrentIndex;
     private int mState = STATE_STOP;
+    private boolean mPlayWhenReady = true;
     private boolean mLossFocusWhenPlaying;
     private Call mFileLinkCall;
     private List<OnCompletedListener> mOnCompletedListeners;
@@ -237,23 +238,19 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
     }
 
     private void changeState(int newState) {
-        if (mState != newState) {
-            mState = newState;
-            for (OnPlayStateChangeListener onPlayStateChangeListener : mOnPlayStateChangeListeners) {
-                onPlayStateChangeListener.onPlayStateChange(mState);
-            }
+        mState = newState;
+        for (OnPlayStateChangeListener onPlayStateChangeListener : mOnPlayStateChangeListeners) {
+            onPlayStateChangeListener.onPlayStateChange(mState);
         }
     }
 
     public void resume() {
-        if (mMediaPlayer != null) {
-            getAudioFocus();
-            if (mAudioFocus != NO_FOCUS) {
-                mMediaPlayer.start();
-            }
+        if (mMediaPlayer != null && mAudioFocus != NO_FOCUS) {
+            mMediaPlayer.start();
         }
         changeState(STATE_PLAYING);
     }
+
 
     public void pause() {
         if (mMediaPlayer != null) {
@@ -435,10 +432,18 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
         return true;
     }
 
+    public boolean isPlayWhenReady() {
+        return mPlayWhenReady;
+    }
+
+    public void setPlayWhenReady(boolean playWhenReady) {
+        mPlayWhenReady = playWhenReady;
+    }
+
     @Override
     public void onPrepared(MediaPlayer mp) {
         changeState(STATE_PREPARED);
-        if (mState != STATE_PAUSE && mAudioFocus != NO_FOCUS) {
+        if (mPlayWhenReady && mState != STATE_PAUSE && mAudioFocus != NO_FOCUS) {
             mp.start();
             changeState(STATE_PLAYING);
         }

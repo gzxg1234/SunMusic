@@ -32,15 +32,16 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageSize;
+import com.nostra13.universalimageloader.core.assist.ViewScaleType;
+import com.nostra13.universalimageloader.core.imageaware.NonViewAware;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.sanron.lyricview.model.Lyric;
 import com.sanron.lyricview.view.LyricView;
 import com.sanron.music.R;
-import com.sanron.music.api.ApiHttpClient;
-import com.sanron.music.api.JsonCallback;
-import com.sanron.music.api.MusicApi;
+import com.sanron.music.api.AppHttpClient;
+import com.sanron.music.api.LrcPicProvider;
 import com.sanron.music.api.StringCallback;
-import com.sanron.music.api.bean.LrcPicData;
 import com.sanron.music.common.FastBlur;
 import com.sanron.music.common.ViewTool;
 import com.sanron.music.db.bean.Music;
@@ -62,7 +63,7 @@ import java.util.TimerTask;
  * 播放界面
  * Created by Administrator on 2016/3/5.
  */
-public class NowPlayingFragment extends BaseFragment implements View.OnClickListener, Player.OnPlayStateChangeListener, Player.OnBufferListener, SeekBar.OnSeekBarChangeListener {
+public class NowPlayingFragment extends BaseFragment implements View.OnClickListener, Player.OnPlayStateChangeListener, Player.OnBufferListener, SeekBar.OnSeekBarChangeListener, LrcPicProvider.OnLrcPicChangeCallback {
 
     private ViewGroup mSmallPlayer;
     private ProgressBar mSplayProgress;
@@ -103,6 +104,8 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
     private View mPagerView3;
     private LyricView mLyricView;
     private View mLyricSetting;
+
+    private NonViewAware mNonViewAware;
     /**
      * 提示播放模式
      */
@@ -117,6 +120,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
     public static final int WHAT_RESET_SONG_PICTURE = 1;
     public static final int WHAT_UPDATE_PROGRESS = 2;
     public static final int WHAT_UPDATE_LYRIC = 3;
+
 
     private static class UIHandler extends Handler {
         private WeakReference<NowPlayingFragment> mReference;
@@ -244,6 +248,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
     private void setupPlayState() {
         PlayerUtil.addPlayStateChangeListener(this);
         PlayerUtil.addOnBufferListener(this);
+        LrcPicProvider.get().addOnLrcPicChangeCallback(this);
 
         startUpdateTask();
         Music music = PlayerUtil.getCurrentMusic();
@@ -251,7 +256,6 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
             setTitleText(music.getTitle());
             setArtistText(music.getArtist());
         }
-
         setPlayProgress(PlayerUtil.getProgress());
         setSongDuration(PlayerUtil.getDuration());
         if (PlayerUtil.isPlaying()) {
@@ -314,7 +318,6 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
                 if (music == null) {
                     return;
                 }
-                String artist = music.getArtist();
                 setSongDuration(PlayerUtil.getDuration());
                 setPlayProgress(PlayerUtil.getProgress());
                 if (TextUtils.isEmpty(music.getData())) {
@@ -322,68 +325,46 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
                 } else {
                     mPlayProgress.setSecondaryProgress(PlayerUtil.getDuration());
                 }
-
-                MusicApi.searchLrcPic(music.getTitle(),
-                        "<unknown>".equals(artist) ? "" : artist,
-                        2,
-                        new JsonCallback<LrcPicData>() {
-                            final int requestIndex = PlayerUtil.getCurrentIndex();
-
-                            @Override
-                            public void onSuccess(LrcPicData data) {
-                                List<LrcPicData.LrcPic> lrcPics = data.lrcPics;
-                                String pic = null;
-                                String lyric = null;
-                                if (lrcPics != null) {
-                                    for (LrcPicData.LrcPic lrcPic : lrcPics) {
-
-                                        if (TextUtils.isEmpty(pic)) {
-                                            pic = lrcPic.pic1000x1000;
-                                            if (TextUtils.isEmpty(pic)) {
-                                                pic = lrcPic.pic500x500;
-                                            }
-                                        }
-
-                                        if (TextUtils.isEmpty(lyric)) {
-                                            lyric = lrcPic.lrc;
-                                        }
-
-                                    }
-                                }
-                                if (!TextUtils.isEmpty(lyric)) {
-                                    ApiHttpClient.get(lyric, new StringCallback() {
-                                        @Override
-                                        public void onSuccess(String s) {
-                                            mLyricView.setLyric(Lyric.read(s));
-                                        }
-
-                                        @Override
-                                        public void onFailure(Exception e) {
-                                        }
-                                    });
-                                }
-
-                                if (!TextUtils.isEmpty(pic)) {
-                                    ImageLoader.getInstance()
-                                            .loadImage(pic, new SimpleImageLoadingListener() {
-                                                @Override
-                                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                                                    if (requestIndex == PlayerUtil.getCurrentIndex()) {
-                                                        //加载了图片取消设置默认图片的消息
-                                                        mHandler.removeMessages(WHAT_RESET_SONG_PICTURE);
-                                                        setSongPicture(loadedImage);
-                                                    }
-                                                }
-                                            });
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Exception e) {
-                            }
-                        });
             }
             break;
+        }
+    }
+
+    @Override
+    public void onLrcPicChange() {
+        if (mNonViewAware != null) {
+            ImageLoader.getInstance().cancelDisplayTask(mNonViewAware);
+        }
+        String songPicture = LrcPicProvider.get().getSongPictureLink();
+        if (!TextUtils.isEmpty(songPicture)) {
+            mNonViewAware = new NonViewAware(
+                    new ImageSize(mIvSongPicture.getWidth(), mIvSongPicture.getHeight()),
+                    ViewScaleType.CROP);
+            ImageLoader
+                    .getInstance()
+                    .displayImage(songPicture, mNonViewAware, new SimpleImageLoadingListener() {
+                        @Override
+                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                            mHandler.removeMessages(WHAT_RESET_SONG_PICTURE);
+                            setSongPicture(loadedImage);
+                        }
+                    });
+
+        }
+
+        String lyricLink = LrcPicProvider.get().getLyricLink();
+        if (!TextUtils.isEmpty(lyricLink)) {
+            AppHttpClient.get(lyricLink, new StringCallback() {
+                @Override
+                public void onSuccess(String s) {
+                    mLyricView.setLyric(Lyric.read(s));
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+
+                }
+            });
         }
     }
 
@@ -458,6 +439,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
         stopUpdatkTask();
         PlayerUtil.removePlayStateChangeListener(this);
         PlayerUtil.removeBufferListener(this);
+        LrcPicProvider.get().removeOnLrcPicChangeCallback(this);
         if (mShowPlayQueueWindow != null && mShowPlayQueueWindow.isShowing()) {
             mShowPlayQueueWindow.dismiss();
         }

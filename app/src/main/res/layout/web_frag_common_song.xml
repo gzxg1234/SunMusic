@@ -128,5 +128,4 @@
 
     <include layout="@layout/layout_top_bar"/>
 
-
 </com.sanron.music.view.SlideBackLayout>

@@ -46,7 +46,7 @@ public class ShowPlayQueueWindow extends ScrimPopupWindow implements Player.OnPl
         setAnimationStyle(R.style.MyWindowAnim);
         setContentView(mContentView);
 
-        mTvTitle = (TextView) mContentView.findViewById(R.id.tv_queue_item_title);
+        mTvTitle = (TextView) mContentView.findViewById(R.id.tv_title);
         mIbtnRemoveAll = (ImageButton) mContentView.findViewById(R.id.ibtn_remove_all);
         mLvQueue = (RecyclerView) mContentView.findViewById(R.id.lv_queue_music);
 
@@ -156,7 +156,7 @@ public class ShowPlayQueueWindow extends ScrimPopupWindow implements Player.OnPl
             public QueueItemHolder(View itemView) {
                 super(itemView);
                 sign = itemView.findViewById(R.id.playing_sign);
-                tvTitle = (TextView) itemView.findViewById(R.id.tv_queue_item_title);
+                tvTitle = (TextView) itemView.findViewById(R.id.tv_title);
                 tvArtist = (TextView) itemView.findViewById(R.id.tv_queue_item_artist);
                 ibtnRemove = (ImageButton) itemView.findViewById(R.id.ibtn_remove);
                 itemView.setOnClickListener(new View.OnClickListener() {
