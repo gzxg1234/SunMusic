@@ -35,7 +35,7 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
     private Context mContext;
     private List<Music> mQueue;
     private int mMode = MODE_IN_TURN;
-    private int mCurrentIndex;
+    private int mCurrentPosition;
     private int mState = STATE_STOP;
     private boolean mPlayWhenReady = true;
     private boolean mLossFocusWhenPlaying;
@@ -52,7 +52,7 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
     public static final float DUCK_VOLUME = 0.1f;
 
     public static final int HAS_FOCUS = 1;//有焦点
-    public static final int NO_FOCUS = 2;//没焦点且不可小声音
+    public static final int NO_FOCUS = 2;//没焦点
     public static final int NO_FOCUS_CAN_DUCK = 3;//没焦点但是可以降低声音
 
     public static final int WHAT_PLAY_ERROR = 1;
@@ -83,7 +83,7 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
         mOnCompletedListeners = new ArrayList<>();
         mOnPlayStateChangeListeners = new ArrayList<>();
         mQueue = new ArrayList<>();
-        mCurrentIndex = -1;
+        mCurrentPosition = -1;
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DDMusic");
@@ -121,16 +121,16 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
         if (mQueue.size() == 0) {
             //移除后，队列空了
             clearQueue();
-        } else if (position < mCurrentIndex) {
+        } else if (position < mCurrentPosition) {
             //更正currentindex
-            mCurrentIndex--;
-        } else if (position == mCurrentIndex) {
+            mCurrentPosition--;
+        } else if (position == mCurrentPosition) {
             //当移除的歌曲正在播放时
-            if (mCurrentIndex == mQueue.size()) {
+            if (mCurrentPosition == mQueue.size()) {
                 //刚好播放最后一首歌，又需要移除他,将播放第一首歌曲
-                mCurrentIndex = 0;
+                mCurrentPosition = 0;
             }
-            play(mCurrentIndex);
+            play(mCurrentPosition);
         }
     }
 
@@ -141,7 +141,7 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
         }
 
         mQueue.clear();
-        mCurrentIndex = -1;
+        mCurrentPosition = -1;
         mMediaPlayer.reset();
         changeState(STATE_STOP);
     }
@@ -160,10 +160,9 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
         }
         mHandler.removeMessages(WHAT_PLAY_ERROR);
         sendBufferingEnd();
-        mMediaPlayer.reset();
 
-        mCurrentIndex = position;
-        Music music = mQueue.get(mCurrentIndex);
+        mCurrentPosition = position;
+        Music music = mQueue.get(mCurrentPosition);
         changeState(STATE_PREPARING);
         String dataPath = music.getData();
         if (TextUtils.isEmpty(dataPath)) {
@@ -183,15 +182,11 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
 
     private void prepare(Uri uri) {
         try {
+            mMediaPlayer.reset();
             mMediaPlayer.setDataSource(mContext, uri);
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mMediaPlayer.prepareAsync();
         } catch (IllegalStateException e) {
-            // 当一曲歌曲在执行了prepareAsync异步准备资源中,
-            // 此时点击播放下一曲会reset就会出此异常
-            // 如果设置标记，比如在prepare时禁止播放下一曲可以避免此异常
-            // 但如果是播放网络歌曲，网络状态差，异步准备会花费较多时间,用户等待时间就较长
-            //
             MyLog.w(TAG, "IllegalState");
         } catch (IOException e) {
             e.printStackTrace();
@@ -206,7 +201,9 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
     }
 
     private void playWebMusic(final String songid) {
+        final String title = getCurrentMusic().getTitle();
         mFileLinkCall = MusicApi.songLink(songid, new JsonCallback<SongUrlInfo>() {
+
             @Override
             public void onFailure(Exception e) {
                 sendPlayError("网络请求失败");
@@ -218,23 +215,24 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
                 if (url == null) {
                     sendPlayError("此歌曲暂无网络资源");
                 } else {
+                    System.out.println("----:" + title);
+                    System.out.println("----:" + url.fileLink);
                     prepare(Uri.parse(url.fileLink));
                 }
             }
         });
     }
 
-    @Override
-    public int getCurrentIndex() {
-        return mCurrentIndex;
+    public int getCurrentPosition() {
+        return mCurrentPosition;
     }
 
     @Override
     public Music getCurrentMusic() {
-        if (mCurrentIndex == -1) {
+        if (mCurrentPosition == -1) {
             return null;
         }
-        return mQueue.get(mCurrentIndex);
+        return mQueue.get(mCurrentPosition);
     }
 
     private void changeState(int newState) {
@@ -245,7 +243,7 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
     }
 
     public void resume() {
-        if (mMediaPlayer != null && mAudioFocus != NO_FOCUS) {
+        if (mMediaPlayer != null) {
             mMediaPlayer.start();
         }
         changeState(STATE_PLAYING);
@@ -274,7 +272,7 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
         if (mQueue.size() == 0) {
             return;
         }
-        play((mCurrentIndex + 1) % mQueue.size());
+        play((mCurrentPosition + 1) % mQueue.size());
     }
 
     @Override
@@ -282,9 +280,9 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
         if (mQueue.size() == 0) {
             return;
         }
-        int lastIndex = mCurrentIndex;
-        if (mCurrentIndex > 0) {
-            lastIndex = mCurrentIndex - 1;
+        int lastIndex = mCurrentPosition;
+        if (mCurrentPosition > 0) {
+            lastIndex = mCurrentPosition - 1;
         }
         play(lastIndex);
     }
@@ -365,7 +363,7 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
 
     @Override
     public void seekTo(int msec) {
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+        if (mMediaPlayer != null && isPrepared()) {
             mMediaPlayer.seekTo(msec);
         }
     }
@@ -406,7 +404,6 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
                 //media服务失效，初始化meidaplayer
                 MyLog.e(TAG, "MediaPlayer died");
                 release();
-                initMediaPlayer();
             }
         }
 
@@ -541,10 +538,10 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
             break;
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK: {
-                mAudioFocus = NO_FOCUS_CAN_DUCK;
                 if (mMediaPlayer != null) {
                     mMediaPlayer.setVolume(DUCK_VOLUME, DUCK_VOLUME);
                 }
+                mAudioFocus = NO_FOCUS_CAN_DUCK;
             }
             break;
 

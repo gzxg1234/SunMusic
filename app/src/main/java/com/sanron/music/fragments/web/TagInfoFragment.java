@@ -2,21 +2,19 @@ package com.sanron.music.fragments.web;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.sanron.music.R;
 import com.sanron.music.adapter.SongAdapter;
-import com.sanron.music.db.bean.Music;
-import com.sanron.music.fragments.base.PullFragment;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.Song;
 import com.sanron.music.api.bean.TagSongs;
+import com.sanron.music.db.bean.Music;
+import com.sanron.music.fragments.base.PullFragment;
 import com.sanron.music.playback.Player;
 import com.sanron.music.service.PlayerUtil;
 import com.sanron.music.view.DDPullListView;
@@ -24,6 +22,7 @@ import com.sanron.music.view.DDPullListView;
 import java.util.LinkedList;
 import java.util.List;
 
+import butterknife.BindView;
 import okhttp3.Call;
 
 /**
@@ -32,17 +31,22 @@ import okhttp3.Call;
  */
 public class TagInfoFragment extends PullFragment implements Player.OnPlayStateChangeListener, View.OnClickListener {
 
+    @BindView(R.id.tv_play)
+    TextView mTvPlay;
+    @BindView(R.id.ibtn_download)
+    ImageButton mIbtnDownload;
+    @BindView(R.id.tv_tag_name)
+    TextView mTvTagName;
+
     private String mTag;
-    private TextView mTvPlay;
-    private ImageButton mIbtnDownload;
-    private TextView mTvTagName;
     private SongAdapter mAdapter;
     public static final int LOAD_LIMIT = 50;
+    public static final String ARG_TAG = "tag";
 
     public static TagInfoFragment newInstance(String tag) {
         TagInfoFragment fragment = new TagInfoFragment();
         Bundle args = new Bundle();
-        args.putString("tag", tag);
+        args.putString(ARG_TAG, tag);
         fragment.setArguments(args);
         return fragment;
     }
@@ -53,22 +57,18 @@ public class TagInfoFragment extends PullFragment implements Player.OnPlayStateC
         mAdapter = new SongAdapter(getContext());
         Bundle args = getArguments();
         if (args != null) {
-            mTag = args.getString("tag");
+            mTag = args.getString(ARG_TAG);
         }
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.web_frag_tag_song, container, false);
+    public int getViewResId() {
+        return R.layout.web_frag_tag_song;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mTvPlay = $(R.id.tv_play);
-        mIbtnDownload = $(R.id.ibtn_download);
-        mTvTagName = $(R.id.tv_tag_name);
 
         setTitle(mTag);
         mTvTagName.setText(mTag);

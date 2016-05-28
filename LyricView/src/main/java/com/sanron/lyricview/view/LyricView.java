@@ -32,9 +32,8 @@ public class LyricView extends View {
     private Lyric mLyric;
     private int mCurrentSentenceIndex = 1;
 
-    private static final int DEFAULT_NORMAL_TEXT_SIZE = 12;//sp
+    private static final int DEFAULT_TEXT_SIZE = 14;//sp
     private static final int DEFAULT_NORMAL_TEXT_COLOR = 0x88FFFFFF;
-    private static final int DEFAULT_CURRENT_TEXT_SIZE = 14;//sp
     private static final int DEFAULT_CURRENT_TEXT_COLOR = 0xFFFFFFFF;
     private static final int DEFAULT_SENTENCE_MARGIN = 10;//dp
 
@@ -52,15 +51,15 @@ public class LyricView extends View {
         TypedArray ta = getResources().obtainAttributes(attrs, R.styleable.LyricView);
         mCurrentPaint = new Paint();
         mCurrentPaint.setAntiAlias(true);
-        mCurrentPaint.setTextSize(ta.getDimension(R.styleable.LyricView_currentTextSize,
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, DEFAULT_CURRENT_TEXT_SIZE, getResources().getDisplayMetrics())));
+        mCurrentPaint.setTextSize(ta.getDimension(R.styleable.LyricView_textSize,
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TEXT_SIZE, getResources().getDisplayMetrics())));
         mCurrentPaint.setColor(ta.getColor(R.styleable.LyricView_currentTextColor, DEFAULT_CURRENT_TEXT_COLOR));
         mCurrentPaint.setTextAlign(Paint.Align.CENTER);
 
         mNormalPaint = new Paint();
         mNormalPaint.setAntiAlias(true);
         mNormalPaint.setTextSize(ta.getDimension(R.styleable.LyricView_textSize,
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, DEFAULT_NORMAL_TEXT_SIZE, getResources().getDisplayMetrics())));
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TEXT_SIZE, getResources().getDisplayMetrics())));
         mNormalPaint.setColor(ta.getColor(R.styleable.LyricView_textColor, DEFAULT_NORMAL_TEXT_COLOR));
         mNormalPaint.setTextAlign(Paint.Align.CENTER);
 
@@ -176,8 +175,8 @@ public class LyricView extends View {
             }
         }
 
-        int i = 0;
         int offsetY = textHeight + mSentenceMargin;
+        int i = 0;
         while (i++ < line) {
             //一行一行画
             int end = Math.min(startIndex + lineLength, sentence.length());

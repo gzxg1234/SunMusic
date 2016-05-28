@@ -7,18 +7,23 @@ import com.sanron.music.api.bean.LrcPicData;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import okhttp3.Call;
+
 /**
  * Created by sanron on 16-5-19.
  */
 public class LrcPicProvider {
 
-    private static volatile LrcPicProvider sInstance;
+    private String search;
     private LrcPicData mLrcPicData;
     private String mSongPictureLink;
     private String mArtistPictureLink;
     private String mLyricLink;
+    private Call mCall;
 
     private List<OnLrcPicChangeCallback> mCallbacks;
+
+    private static volatile LrcPicProvider sInstance;
 
     public static LrcPicProvider get() {
         if (sInstance == null) {
@@ -35,14 +40,24 @@ public class LrcPicProvider {
         mCallbacks = new CopyOnWriteArrayList<>();
     }
 
-    public void search(String word, String artist) {
+    public void search(final String word, final String artist) {
+        if (mCall != null) {
+            mCall.cancel();
+        }
         mLrcPicData = null;
         mSongPictureLink = null;
         mArtistPictureLink = null;
         mLyricLink = null;
-        MusicApi.searchLrcPic(word, artist, 2, new JsonCallback<LrcPicData>() {
+        search = word + "$" + artist;
+        mCall = MusicApi.searchLrcPic(word, artist, 2, new JsonCallback<LrcPicData>() {
+            final String requestSearch = word + "$" + artist;
+
             @Override
             public void onSuccess(LrcPicData data) {
+                if (!search.equals(requestSearch)) {
+                    return;
+                }
+
                 mLrcPicData = data;
                 List<LrcPicData.LrcPic> lrcPics = data.lrcPics;
                 if (lrcPics != null) {

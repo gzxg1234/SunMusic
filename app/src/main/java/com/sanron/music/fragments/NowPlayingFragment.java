@@ -59,51 +59,81 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import okhttp3.Request;
+
 /**
  * 播放界面
  * Created by Administrator on 2016/3/5.
  */
 public class NowPlayingFragment extends BaseFragment implements View.OnClickListener, Player.OnPlayStateChangeListener, Player.OnBufferListener, SeekBar.OnSeekBarChangeListener, LrcPicProvider.OnLrcPicChangeCallback {
 
-    private ViewGroup mSmallPlayer;
-    private ProgressBar mSplayProgress;
-    private ImageView mSivSongPicture;
-    private TextView mStvTitle;
-    private TextView mStvArtist;
-    private ImageButton mSibtnTogglePlay;
-    private ImageButton mSibtnNext;
-    private ImageView mIvBlurBackground;
-    private ViewGroup mBigPlayer;
-    private ViewGroup mTopBar;
-    private TextView mTvTitle;
-    private TextView mTvArtist;
-    private SeekBar mPlayProgress;
-    private TextView mTvPlayPosition;
-    private TextView mTvDuration;
-    private View mViewBack;
-    private ImageView mIvChangeMode;
-    private ImageView mIvPrevious;
-    private FloatingActionButton mFabTogglePlay;
-    private ImageView mIvNext;
-    private ImageView mIvPlayQueue;
-    private ShowPlayQueueWindow mShowPlayQueueWindow;
+    @BindView(R.id.small_player)
+    ViewGroup mSmallPlayer;
+    @BindView(R.id.s_play_progress)
+    ProgressBar mSplayProgress;
+    @BindView(R.id.s_iv_song_pic)
+    ImageView mSivSongPicture;
+    @BindView(R.id.s_tv_title)
+    TextView mStvTitle;
+    @BindView(R.id.s_tv_artist)
+    TextView mStvArtist;
+    @BindView(R.id.s_ibtn_play_pause)
+    ImageButton mSibtnTogglePlay;
+    @BindView(R.id.s_ibtn_next)
+    ImageButton mSibtnNext;
 
-    private TextView mBufferingHint;
-    private ViewPager mViewPager;
-    private PageIndicator mPageIndicator;
+    @BindView(R.id.big_player)
+    ViewGroup mBigPlayer;
+    @BindView(R.id.top_bar)
+    ViewGroup mTopBar;
+    @BindView(R.id.tv_music_title)
+    TextView mTvTitle;
+    @BindView(R.id.tv_music_artist)
+    TextView mTvArtist;
+    @BindView(R.id.seek_play_progress)
+    SeekBar mPlayProgress;
+    @BindView(R.id.tv_music_progress)
+    TextView mTvPlayPosition;
+    @BindView(R.id.tv_music_duration)
+    TextView mTvDuration;
+    @BindView(R.id.view_back)
+    View mViewBack;
+    @BindView(R.id.iv_play_mode)
+    ImageView mIvChangeMode;
+    @BindView(R.id.iv_previous)
+    ImageView mIvPrevious;
+    @BindView(R.id.fab_toggle_play)
+    FloatingActionButton mFabTogglePlay;
+    @BindView(R.id.iv_next)
+    ImageView mIvNext;
+    @BindView(R.id.iv_play_queue)
+    ImageView mIvPlayQueue;
+
+    @BindView(R.id.tv_buffering_hint)
+    TextView mBufferingHint;
+    @BindView(R.id.viewpager)
+    ViewPager mViewPager;
+    @BindView(R.id.page_indicator)
+    PageIndicator mPageIndicator;
+    @BindView(R.id.vs_blur_background)
+    ViewSwitcher mViewSwitcher;
+
+    ShowPlayQueueWindow mShowPlayQueueWindow;
+
     private List<View> mPagerViews;
-    private ViewSwitcher mViewSwitcher;
     //1
-    private ListView mLvSimilarInfo;
+    ListView mLvSimilarInfo;
     //2
-    private View mPagerView2;
-    private ImageView mIvDownload;
-    private ImageView mIvFavorite;
-    private ImageView mIvSongPicture;
+    View mPagerView2;
+    ImageView mIvDownload;
+    ImageView mIvFavorite;
+    ImageView mIvSongPicture;
     //3
-    private View mPagerView3;
-    private LyricView mLyricView;
-    private View mLyricSetting;
+    View mPagerView3;
+    LyricView mLyricView;
+    View mLyricSetting;
 
     private NonViewAware mNonViewAware;
     /**
@@ -154,41 +184,14 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
         }
     }
 
-    @Nullable
     @Override
-
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.now_playing, null);
+    public int getViewResId() {
+        return R.layout.now_playing;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mSmallPlayer = $(R.id.small_player);
-        mSplayProgress = $(R.id.s_play_progress);
-        mSivSongPicture = $(R.id.s_iv_song_pic);
-        mStvTitle = $(R.id.s_tv_title);
-        mStvArtist = $(R.id.s_tv_artist);
-        mSibtnTogglePlay = $(R.id.s_ibtn_play_pause);
-        mSibtnNext = $(R.id.s_ibtn_next);
-
-        mBigPlayer = $(R.id.big_player);
-        mTopBar = $(R.id.top_bar);
-        mTvTitle = $(R.id.tv_music_title);
-        mTvArtist = $(R.id.tv_music_artist);
-        mTvDuration = $(R.id.tv_music_duration);
-        mTvPlayPosition = $(R.id.tv_music_progress);
-        mViewBack = $(R.id.view_back);
-        mViewPager = $(R.id.viewpager);
-        mIvChangeMode = $(R.id.iv_play_mode);
-        mIvPrevious = $(R.id.iv_previous);
-        mFabTogglePlay = $(R.id.fab_toggle_play);
-        mIvNext = $(R.id.iv_next);
-        mIvPlayQueue = $(R.id.iv_play_queue);
-        mPlayProgress = $(R.id.seek_play_position);
-        mPageIndicator = $(R.id.page_indicator);
-        mViewSwitcher = $(R.id.vs_blur_background);
-        mBufferingHint = $(R.id.tv_buffering_hint);
 
         mPlayProgress.setOnSeekBarChangeListener(this);
         mSibtnTogglePlay.setOnClickListener(this);
@@ -221,16 +224,17 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
 
         mPagerView2 = LayoutInflater.from(getContext())
                 .inflate(R.layout.now_playing_picture, null);
-        mIvFavorite = (ImageView) mPagerView2.findViewById(R.id.iv_favorite);
-        mIvDownload = (ImageView) mPagerView2.findViewById(R.id.iv_download);
-        mIvSongPicture = (ImageView) mPagerView2.findViewById(R.id.iv_song_picture);
+        mIvFavorite = ButterKnife.findById(mPagerView2, R.id.iv_favorite);
+        mIvDownload = ButterKnife.findById(mPagerView2, R.id.iv_download);
+        mIvSongPicture = ButterKnife.findById(mPagerView2, R.id.iv_song_picture);
+        mIvFavorite.setOnClickListener(this);
         mPagerViews.add(mPagerView2);
 
         mPagerView3 = LayoutInflater.from(getContext())
                 .inflate(R.layout.now_playing_lyric, null);
-        mLyricView = (LyricView) mPagerView3.findViewById(R.id.lyric_view);
+        mLyricView = ButterKnife.findById(mPagerView3, R.id.lyric_view);
         mLyricView.setEmptyTip(getString(R.string.app_name));
-        mLyricSetting = mPagerView3.findViewById(R.id.lyric_setting);
+        mLyricSetting = ButterKnife.findById(mPagerView3, R.id.lyric_setting);
         mPagerViews.add(mPagerView3);
 
         mViewPager.setAdapter(new LocalPagerAdapter());
@@ -262,17 +266,18 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
             mSibtnTogglePlay.setImageResource(R.mipmap.ic_pause_black_36dp);
             mFabTogglePlay.setImageResource(R.mipmap.ic_pause_white_24dp);
         } else {
-            stopUpdatkTask();
+            stopUpdateTask();
         }
 
         setModeIcon(PlayerUtil.getPlayMode());
+        onLrcPicChange();
     }
 
     @Override
     public void onPlayStateChange(int state) {
         switch (state) {
             case Player.STATE_STOP: {
-                stopUpdatkTask();
+                stopUpdateTask();
                 setTitleText(getContext().getString(R.string.app_name));
                 setArtistText("");
                 setSongDuration(0);
@@ -283,7 +288,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
             break;
 
             case Player.STATE_PAUSE: {
-                stopUpdatkTask();
+                stopUpdateTask();
                 mSibtnTogglePlay.setImageResource(R.mipmap.ic_play_arrow_black_36dp);
                 mFabTogglePlay.setImageResource(R.mipmap.ic_play_arrow_white_24dp);
             }
@@ -310,6 +315,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
                 setPlayProgress(0);
                 mLyricView.setLyric(null);
                 mPlayProgress.setSecondaryProgress(0);
+
             }
             break;
 
@@ -354,7 +360,8 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
 
         String lyricLink = LrcPicProvider.get().getLyricLink();
         if (!TextUtils.isEmpty(lyricLink)) {
-            AppHttpClient.get(lyricLink, new StringCallback() {
+            Request request = new Request.Builder().url(lyricLink).get().build();
+            AppHttpClient.get(request, new StringCallback() {
                 @Override
                 public void onSuccess(String s) {
                     mLyricView.setLyric(Lyric.read(s));
@@ -370,9 +377,9 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
 
     @Override
     public void onBufferingUpdate(int bufferedPosition) {
-        if (bufferedPosition > mPlayProgress.getSecondaryProgress()) {
-            mPlayProgress.setSecondaryProgress(bufferedPosition);
-        }
+//        if (bufferedPosition > mPlayProgress.getSecondaryProgress()) {
+        mPlayProgress.setSecondaryProgress(bufferedPosition);
+//        }
     }
 
     @Override
@@ -436,7 +443,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        stopUpdatkTask();
+        stopUpdateTask();
         PlayerUtil.removePlayStateChangeListener(this);
         PlayerUtil.removeBufferListener(this);
         LrcPicProvider.get().removeOnLrcPicChangeCallback(this);
@@ -560,6 +567,11 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
                 getMainActivity().collapseSlidingPanel();
             }
             break;
+
+            case R.id.iv_favorite: {
+
+            }
+            break;
         }
     }
 
@@ -581,18 +593,21 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-        stopUpdatkTask();
+        stopUpdateTask();
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        startUpdateTask();
-        if (seekBar.getProgress() <= seekBar.getSecondaryProgress()) {
-            PlayerUtil.seekTo(seekBar.getProgress());
-            mLyricView.setCurrentTime(seekBar.getProgress());
-        } else {
-            seekBar.setProgress(PlayerUtil.getProgress());
+        if (PlayerUtil.isPlaying()) {
+            startUpdateTask();
         }
+        PlayerUtil.seekTo(seekBar.getProgress());
+//        if (seekBar.getProgress() <= seekBar.getSecondaryProgress()) {
+//            PlayerUtil.seekTo(seekBar.getProgress());
+//            mLyricView.setCurrentTime(seekBar.getProgress());
+//        } else {
+//            seekBar.setProgress(PlayerUtil.getProgress());
+//        }
     }
 
     private void startUpdateLyric() {
@@ -628,7 +643,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
         startUpdateLyric();
     }
 
-    private void stopUpdatkTask() {
+    private void stopUpdateTask() {
         stopUpdateLyric();
         stopUpdatkProgress();
     }

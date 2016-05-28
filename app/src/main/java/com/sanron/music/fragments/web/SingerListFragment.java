@@ -14,22 +14,24 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
-import com.sanron.music.common.ViewTool;
-import com.sanron.music.fragments.base.SlideWebFragment;
+import com.sanron.music.adapter.CommonItemViewHolder;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
 import com.sanron.music.api.bean.Singer;
 import com.sanron.music.api.bean.SingerList;
+import com.sanron.music.common.ViewTool;
+import com.sanron.music.fragments.base.SlideWebFragment;
 import com.sanron.music.view.DDPullListView;
 import com.sanron.music.view.ScrimPopupWindow;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Call;
 
 /**
@@ -37,12 +39,15 @@ import okhttp3.Call;
  */
 public class SingerListFragment extends SlideWebFragment implements DDPullListView.OnLoadMoreListener {
 
+    @BindView(R.id.view_sort)
+    View viewSort;
+    @BindView(R.id.pull_list_view)
+    DDPullListView mListView;
+
     private int area;
     private int sex;
     private int abcIndex;
     private String title;
-    private View viewSort;
-    private DDPullListView mListView;
     private SingerAdapter mAdapter;
 
     public static final String ARG_TITLE = "title";
@@ -82,17 +87,14 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
         mAdapter = new SingerAdapter();
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.web_frag_singer_list, container, false);
+    public int getViewResId() {
+        return R.layout.web_frag_singer_list;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mListView = $(R.id.pull_list_view);
-        viewSort = $(R.id.view_sort);
         setTitle(title);
         mListView.setAdapter(mAdapter);
         viewSort.setOnClickListener(new View.OnClickListener() {
@@ -175,20 +177,19 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            SingerHolder holder;
+            CommonItemViewHolder holder = null;
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext())
                         .inflate(R.layout.list_common_item, parent, false);
-                ImageView ivMenu = (ImageView) convertView.findViewById(R.id.iv_menu);
-                ivMenu.setImageResource(R.mipmap.ic_chevron_right_black_90_24dp);
-                convertView.findViewById(R.id.tv_text2).setVisibility(View.GONE);
-
-                holder = new SingerHolder();
-                holder.ivPicture = (ImageView) convertView.findViewById(R.id.iv_picture);
-                holder.tvName = (TextView) convertView.findViewById(R.id.tv_text1);
-                convertView.setTag(holder);
             } else {
-                holder = (SingerHolder) convertView.getTag();
+                holder = (CommonItemViewHolder) convertView.getTag();
+            }
+
+            if (holder == null) {
+                holder = new CommonItemViewHolder(convertView);
+                holder.ivMenu.setImageResource(R.mipmap.ic_chevron_right_black_90_24dp);
+                holder.tvText2.setVisibility(View.GONE);
+                convertView.setTag(holder);
             }
             //取消之前的加载任务
             ImageLoader.getInstance()
@@ -196,8 +197,8 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
             holder.ivPicture.setImageBitmap(null);
             ImageLoader.getInstance()
                     .displayImage(mData.get(position).avatarMiddle, holder.ivPicture);
-            holder.tvName.setText(mData.get(position).name);
-            convertView.setOnClickListener(new View.OnClickListener() {
+            holder.tvText1.setText(mData.get(position).name);
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     getMainActivity().showSingerInfo(mData.get(position).artistId);
@@ -206,10 +207,6 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
             return convertView;
         }
 
-        class SingerHolder {
-            ImageView ivPicture;
-            TextView tvName;
-        }
     }
 
     public class SelectLetterWindow extends ScrimPopupWindow {
@@ -229,8 +226,8 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
             setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
             setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
 
-            GridView gv = (GridView) root.findViewById(R.id.grid_view);
-            Button btnCancel = (Button) root.findViewById(R.id.btn_cancel);
+            GridView gv = ButterKnife.findById(root, R.id.grid_view);
+            Button btnCancel = ButterKnife.findById(root, R.id.btn_cancel);
             gv.setAdapter(new LetterAdapter());
             btnCancel.setOnClickListener(new View.OnClickListener() {
                 @Override

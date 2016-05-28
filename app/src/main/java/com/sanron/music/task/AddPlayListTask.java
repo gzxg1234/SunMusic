@@ -21,7 +21,7 @@ public abstract class AddPlayListTask extends AsyncTask<String, Void, Integer> {
     protected Integer doInBackground(String... params) {
         int result = FAILED;
         String listName = params[0];
-        DataProvider.Access listAccess = DataProvider.instance().getAccess(DBHelper.List.TABLE);
+        DataProvider.Access listAccess = DataProvider.get().newAccess(DBHelper.List.TABLE);
 
         //检查是否重名
         Cursor cursor = listAccess.query(new String[]{DBHelper.ID},

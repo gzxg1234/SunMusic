@@ -158,7 +158,7 @@ public class PlayerNotificationManager extends BroadcastReceiver {
             break;
         }
 
-        if (mDDPlayer.getCurrentIndex() != -1) {
+        if (mDDPlayer.getCurrentPosition() != -1) {
             Music music = mDDPlayer.getCurrentMusic();
             String artist = music.getArtist();
             artist = artist.equals("<unknown>") ? "未知歌手" : artist;

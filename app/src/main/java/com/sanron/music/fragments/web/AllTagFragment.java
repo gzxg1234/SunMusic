@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.BindView;
 import okhttp3.Call;
 
 /**
@@ -36,7 +37,8 @@ import okhttp3.Call;
  */
 public class AllTagFragment extends SlideWebFragment {
 
-    private ListView mLvTags;
+    @BindView(R.id.lv_tags)
+    ListView mLvTags;
     private CategoryAdapter mAdapter;
     private AllTag mData;
     private HotTagData mHotTagData;
@@ -45,17 +47,14 @@ public class AllTagFragment extends SlideWebFragment {
         return new AllTagFragment();
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.web_frag_all_tag, container, false);
+    public int getViewResId() {
+        return R.layout.web_frag_all_tag;
     }
-
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mLvTags = $(R.id.lv_tags);
         setTitle("歌曲分类");
         mTopBar.setBackgroundColor(Color.BLACK);
         mAdapter = new CategoryAdapter();

@@ -27,8 +27,11 @@ import com.sanron.music.api.bean.TagSongs;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.CacheControl;
 import okhttp3.Call;
+import okhttp3.Request;
 
 
 /**
@@ -49,7 +52,7 @@ public class MusicApi {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.plaza.getFocusPic");
         params.put("num", num);
-        return AppHttpClient.get(url(params), 600, jsonCallback);
+        return AppHttpClient.get(createRequest(params, 600, 0), jsonCallback);
     }
 
     /**
@@ -62,7 +65,7 @@ public class MusicApi {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.song.getEditorRecommend");
         params.put("num", num);
-        return AppHttpClient.get(url(params), 600, jsonCallback);
+        return AppHttpClient.get(createRequest(params, 600, 0), jsonCallback);
     }
 
     /**
@@ -75,7 +78,7 @@ public class MusicApi {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.diy.getHotGeDanAndOfficial");
         params.put("num", num);
-        return AppHttpClient.get(url(params), 600, jsonCallback);
+        return AppHttpClient.get(createRequest(params, 600, 0), jsonCallback);
     }
 
     /**
@@ -88,7 +91,7 @@ public class MusicApi {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.tag.getHotTag");
         params.put("nums", num);
-        return AppHttpClient.get(url(params), 21600, jsonCallback);
+        return AppHttpClient.get(createRequest(params, 21600, 0), jsonCallback);
     }
 
     /**
@@ -99,7 +102,7 @@ public class MusicApi {
     public static Call allTag(JsonCallback<AllTag> jsonCallback) {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.tag.getAllTag");
-        return AppHttpClient.get(url(params), 21600, jsonCallback);
+        return AppHttpClient.get(createRequest(params, 21600, 0), jsonCallback);
     }
 
     /**
@@ -116,7 +119,7 @@ public class MusicApi {
         params.put("tagname", tagName);
         params.put("limit", limit);
         params.put("offset", offset);
-        return AppHttpClient.get(url(params), 21600, jsonCallback);
+        return AppHttpClient.get(createRequest(params, 21600, 0), jsonCallback);
     }
 
     /**
@@ -129,7 +132,7 @@ public class MusicApi {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("method", "baidu.ting.diy.gedanInfo");
         params.put("listid", listId);
-        return AppHttpClient.get(url(params), 3600, jsonCallback);
+        return AppHttpClient.get(createRequest(params, 3600, 0), jsonCallback);
     }
 
     /**
@@ -148,7 +151,7 @@ public class MusicApi {
         params.put("songid", songid);
         params.put("ts", ts);
         params.put("e", e);
-        return AppHttpClient.get(url(params), 60, callback);
+        return AppHttpClient.get(createRequest(params, 60, 0), callback);
     }
 
     /**
@@ -172,8 +175,8 @@ public class MusicApi {
         params.put("ts", ts);
         params.put("type", type);
         params.put("e", e);
-        return AppHttpClient.get(url(params), 600,
-                sIsNetAvailable ? 0 : Integer.MAX_VALUE, callback);
+        return AppHttpClient.get(createRequest(params, 600,
+                sIsNetAvailable ? 0 : Integer.MAX_VALUE), callback);
     }
 
     /**
@@ -199,7 +202,7 @@ public class MusicApi {
         if (!TextUtils.isEmpty(abc)) {
             params.put("abc", abc);
         }
-        return AppHttpClient.get(url(params), 6 * 3600, callback);
+        return AppHttpClient.get(createRequest(params, 6 * 3600, 0), callback);
     }
 
     /**
@@ -224,7 +227,7 @@ public class MusicApi {
         HashMap<String, Object> params = new HashMap<>();
         params.put("method", "baidu.ting.artist.getinfo");
         params.put("artistid", artistId);
-        return AppHttpClient.get(url(params), 2 * 3600, callback);
+        return AppHttpClient.get(createRequest(params, 2 * 3600, 0), callback);
     }
 
     /**
@@ -243,7 +246,7 @@ public class MusicApi {
         params.put("offset", offset);
         params.put("limits", limits);
         params.put("order", 1);//按时间排序
-        return AppHttpClient.get(url(params), 2 * 3600, callback);
+        return AppHttpClient.get(createRequest(params, 2 * 3600, 0), callback);
     }
 
     /**
@@ -261,7 +264,7 @@ public class MusicApi {
         params.put("artistid", artistId);
         params.put("offset", offset);
         params.put("limits", limits);
-        return AppHttpClient.get(url(params), 2 * 3600, callback);
+        return AppHttpClient.get(createRequest(params, 2 * 3600, 0), callback);
     }
 
     /**
@@ -275,7 +278,7 @@ public class MusicApi {
         Map<String, Object> params = new HashMap<>();
         params.put("method", "baidu.ting.album.getAlbumInfo");
         params.put("album_id", albumId);
-        return AppHttpClient.get(url(params), 6 * 3600, callback);
+        return AppHttpClient.get(createRequest(params, 6 * 3600, 0), callback);
     }
 
     /**
@@ -288,7 +291,7 @@ public class MusicApi {
         Map<String, Object> params = new HashMap<>();
         params.put("method", "baidu.ting.billboard.billCategory");
         params.put("kflag", 1);
-        return AppHttpClient.get(url(params), 12 * 3600, callback);
+        return AppHttpClient.get(createRequest(params, 12 * 3600, 0), callback);
     }
 
     /**
@@ -306,7 +309,7 @@ public class MusicApi {
         params.put("type", type);
         params.put("offset", offset);
 //        params.put("fields", "song_id,title,author,album_title,pic_big,pic_small,havehigh,all_rate,charge,has_mv_mobile");
-        return AppHttpClient.get(url(params), 12 * 3600, callback);
+        return AppHttpClient.get(createRequest(params, 12 * 3600, 0), callback);
     }
 
     /**
@@ -322,7 +325,7 @@ public class MusicApi {
         params.put("method", "baidu.ting.diy.gedan");
         params.put("page_size", pageSize);
         params.put("page_no", pageNo);
-        return AppHttpClient.get(url(params), 2 * 3600, callback);
+        return AppHttpClient.get(createRequest(params, 2 * 3600, 0), callback);
     }
 
     /**
@@ -334,7 +337,7 @@ public class MusicApi {
     public static Call songListCategory(JsonCallback<SongListCategory> callback) {
         Map<String, Object> params = new HashMap<>();
         params.put("method", "baidu.ting.diy.gedanCategory");
-        return AppHttpClient.get(url(params), 24 * 3600, callback);
+        return AppHttpClient.get(createRequest(params, 24 * 3600, 0), callback);
     }
 
     /**
@@ -351,7 +354,7 @@ public class MusicApi {
         params.put("page_no", page);
         params.put("page_size", pageSize);
         params.put("query", tag);
-        return AppHttpClient.get(url(params), 2 * 3600, callback);
+        return AppHttpClient.get(createRequest(params, 2 * 3600, 0), callback);
     }
 
     /**
@@ -368,7 +371,7 @@ public class MusicApi {
         params.put("pn", pn);
         params.put("rn", rn);
         params.put("type", 1);
-        return AppHttpClient.get(url(params), 6 * 3600, callback);
+        return AppHttpClient.get(createRequest(params, 6 * 3600, 0), callback);
     }
 
     /**
@@ -381,17 +384,26 @@ public class MusicApi {
         Map<String, Object> params = new HashMap<>();
         params.put("method", "baidu.ting.diy.getSongFromOfficalList");
         params.put("code", code);
-        return AppHttpClient.get(url(params), 2 * 3600, callback);
+        return AppHttpClient.get(createRequest(params, 2 * 3600, 0), callback);
     }
 
-    private static String url(Map<String, Object> params) {
-        StringBuffer sb = new StringBuffer(BASE);
+    private static Request createRequest(Map<String, Object> params, int maxAge, int maxStale) {
+        StringBuilder sb = new StringBuilder(BASE);
         Set<String> keys = params.keySet();
         for (String name : keys) {
             String value = String.valueOf(params.get(name));
             sb.append("&").append(name).append("=").append(value);
         }
-        return sb.toString();
+        CacheControl.Builder cacheControl = new CacheControl.Builder();
+        if (maxAge != 0) {
+            cacheControl.maxAge(maxAge, TimeUnit.SECONDS);
+        }
+        if (maxStale != 0) {
+            cacheControl.maxStale(maxStale, TimeUnit.SECONDS);
+        }
+        return new Request.Builder()
+                .url(sb.toString())
+                .cacheControl(cacheControl.build())
+                .build();
     }
-
 }

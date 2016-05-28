@@ -16,6 +16,7 @@ import com.sanron.music.view.SlideBackLayout;
 import java.util.LinkedList;
 import java.util.List;
 
+import butterknife.BindView;
 import okhttp3.Call;
 
 /**
@@ -23,23 +24,24 @@ import okhttp3.Call;
  */
 public abstract class SlideWebFragment extends BaseFragment implements SlideBackLayout.SlideBackCallback {
 
-    private List<Call> mCalls;
-    private SlideBackLayout mSlideBackLayout;
+    @BindView(R.id.slide_back_layout)
+    protected SlideBackLayout mSlideBackLayout;
+    @BindView(R.id.top_bar)
     protected View mTopBar;
+    @BindView(R.id.tv_title)
     protected TextView mTvTitle;
-    private View mViewBack;
-    private View mViewLoading;
-    private View mViewLoadFailed;
+    @BindView(R.id.view_back)
+    protected View mViewBack;
+    @BindView(R.id.layout_loading)
+    protected View mViewLoading;
+    @BindView(R.id.layout_load_failed)
+    protected View mViewLoadFailed;
+
+    private List<Call> mCalls;
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mTopBar = $(R.id.top_bar);
-        mTvTitle = $(R.id.tv_title);
-        mSlideBackLayout = $(R.id.slide_back_layout);
-        mViewBack = $(R.id.view_back);
-        mViewLoading = $(R.id.layout_loading);
-        mViewLoadFailed = $(R.id.layout_load_failed);
         ViewTool.setViewFitsStatusBar(mTopBar);
 
         mSlideBackLayout.setSlideBackCallback(this);

@@ -19,15 +19,15 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-24.
  */
-public class BillboardInfoFragment extends CommonSongPullFragment implements View.OnClickListener, DDPullListView.OnLoadMoreListener, Player.OnPlayStateChangeListener {
+public class BillboardSongsFragment extends CommonSongPullFragment implements View.OnClickListener, DDPullListView.OnLoadMoreListener, Player.OnPlayStateChangeListener {
 
     private int mBillType;
 
     public static final String ARG_TYPE = "type";
 //    public static final int LOAD_LIMIT = 50;
 
-    public static BillboardInfoFragment newInstance(int type) {
-        BillboardInfoFragment fragment = new BillboardInfoFragment();
+    public static BillboardSongsFragment newInstance(int type) {
+        BillboardSongsFragment fragment = new BillboardSongsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_TYPE, type);
         fragment.setArguments(args);

@@ -3,12 +3,16 @@ package com.sanron.music.fragments.base;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.sanron.music.R;
 import com.sanron.music.activities.MainActivity;
+
+import butterknife.ButterKnife;
 
 /**
  * Created by Administrator on 2016/3/5.
@@ -20,6 +24,22 @@ public abstract class BaseFragment extends Fragment implements MainActivity.Back
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+    }
+
+    public int getViewResId() {
+        return 0;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View root = null;
+        int resId = getViewResId();
+        if (resId != 0) {
+            root = inflater.inflate(resId, container, false);
+            ButterKnife.bind(this, root);
+        }
+        return root;
     }
 
     @Override
@@ -38,10 +58,6 @@ public abstract class BaseFragment extends Fragment implements MainActivity.Back
     public void onDestroyView() {
         super.onDestroyView();
         getMainActivity().removePlayerReadyCallback(this);
-    }
-
-    public <T extends View> T $(int id) {
-        return (T) getView().findViewById(id);
     }
 
     @Override

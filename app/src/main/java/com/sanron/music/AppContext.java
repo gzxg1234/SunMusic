@@ -41,7 +41,7 @@ public class AppContext extends Application {
         super.onCreate();
         LeakCanary.install(this);
         ViewTool.init(this);
-        DataProvider.instance().init(this);
+        DataProvider.get().init(this);
         registerReceiver(netChangeReceiver,
                 new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
     }
@@ -57,6 +57,16 @@ public class AppContext extends Application {
         }
     }
 
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        switch (level) {
+            case TRIM_MEMORY_UI_HIDDEN: {
+                ImageLoader.getInstance().clearMemoryCache();
+            }
+            break;
+        }
+    }
 
     public void closeApp() {
         AppManager.instance().finishAllActivity();

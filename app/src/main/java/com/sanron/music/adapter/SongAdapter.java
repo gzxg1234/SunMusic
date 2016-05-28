@@ -11,8 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
@@ -107,13 +105,17 @@ public class SongAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         Song song = mData.get(position);
-        SongItemHolder holder = null;
+        CommonItemViewHolder holder = null;
         if (convertView == null) {
             convertView = LayoutInflater.from(mContext).inflate(R.layout.list_common_item, parent, false);
-            holder = new SongItemHolder(convertView);
-            convertView.setTag(holder);
         } else {
-            holder = (SongItemHolder) convertView.getTag();
+            holder = (CommonItemViewHolder) convertView.getTag();
+        }
+
+        if (holder == null) {
+            holder = new CommonItemViewHolder(convertView);
+            holder.ivMenu.setImageResource(R.mipmap.ic_more_vert_black_24dp);
+            convertView.setTag(holder);
         }
 
         if (mIsShowPicture) {
@@ -171,18 +173,4 @@ public class SongAdapter extends BaseAdapter {
         return convertView;
     }
 
-    protected class SongItemHolder {
-        TextView tvText1;
-        TextView tvText2;
-        ImageView ivMenu;
-        ImageView ivPicture;
-
-        public SongItemHolder(View itemView) {
-            ivPicture = (ImageView) itemView.findViewById(R.id.iv_picture);
-            tvText1 = (TextView) itemView.findViewById(R.id.tv_text1);
-            tvText2 = (TextView) itemView.findViewById(R.id.tv_text2);
-            ivMenu = (ImageView) itemView.findViewById(R.id.iv_menu);
-            ivMenu.setImageResource(R.mipmap.ic_more_vert_black_24dp);
-        }
-    }
 }

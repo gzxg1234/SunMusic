@@ -50,20 +50,14 @@ public class Music {
     private int duration;
 
     /**
-     * 歌曲id(网络歌曲)
+     * 歌曲网络id
      */
     private String songId;
 
     /**
      * 比特率
      */
-    private Integer bitrate;
-
-    /**
-     * 歌词
-     */
-    private String lyric;
-
+    private int bitrate;
 
     public long getModifiedDate() {
         return modifiedDate;
@@ -89,11 +83,11 @@ public class Music {
         this.duration = duration;
     }
 
-    public Integer getBitrate() {
+    public int getBitrate() {
         return bitrate;
     }
 
-    public void setBitrate(Integer bitrate) {
+    public void setBitrate(int bitrate) {
         this.bitrate = bitrate;
     }
 
@@ -154,16 +148,6 @@ public class Music {
         this.songId = songId;
     }
 
-
-    public String getLyric() {
-        return lyric;
-    }
-
-    public void setLyric(String lyric) {
-        this.lyric = lyric;
-    }
-
-
     public ContentValues toContentValues() {
         ContentValues values = new ContentValues();
         values.put(DBHelper.Music.SONG_ID, songId);
@@ -176,7 +160,6 @@ public class Music {
         values.put(DBHelper.Music.TITLE, title);
         values.put(DBHelper.Music.TITLE_KEY, titleKey);
         values.put(DBHelper.Music.DISPLAY, displayName);
-        values.put(DBHelper.Music.LYRIC, lyric);
         return values;
     }
 
@@ -192,7 +175,6 @@ public class Music {
         music.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.Music.TITLE)));
         music.setTitleKey(cursor.getString(cursor.getColumnIndex(DBHelper.Music.TITLE_KEY)));
         music.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.Music.DISPLAY)));
-        music.setLyric(cursor.getString(cursor.getColumnIndex(DBHelper.Music.LYRIC)));
         return music;
     }
 

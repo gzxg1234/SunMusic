@@ -33,7 +33,9 @@ public class StartActivity extends BaseActivity {
         checkExternalStorage();
         initImageLoader();
         gotoMainActivity();
+
     }
+
 
     private void gotoMainActivity() {
         Intent intent = new Intent(StartActivity.this, MainActivity.class);

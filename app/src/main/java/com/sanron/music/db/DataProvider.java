@@ -17,7 +17,7 @@ public class DataProvider extends Observable {
     private SQLiteDatabase mDatabase;
     private volatile static DataProvider mInstance;
 
-    public static DataProvider instance() {
+    public static DataProvider get() {
         if (mInstance == null) {
             synchronized (DataProvider.class) {
                 if (mInstance == null) {
@@ -138,7 +138,7 @@ public class DataProvider extends Observable {
         mDatabase.endTransaction();
     }
 
-    public Access getAccess(String table) {
+    public Access newAccess(String table) {
         return new Access(table);
     }
 }

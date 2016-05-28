@@ -37,7 +37,7 @@ public class DeleteTask extends AsyncTask<Void, Void, Integer> {
 
     @Override
     protected Integer doInBackground(Void... params) {
-        access = DataProvider.instance().getAccess(table);
+        access = DataProvider.get().newAccess(table);
         return access.delete(where, whereArgs);
     }
 

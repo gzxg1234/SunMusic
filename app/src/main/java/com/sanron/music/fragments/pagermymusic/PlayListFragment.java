@@ -9,12 +9,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,6 +33,9 @@ import com.sanron.music.task.UpdateListNameTask;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 /**
  * Created by Administrator on 2015/12/21.
@@ -42,9 +43,10 @@ import java.util.List;
 public class PlayListFragment extends BaseDataFragment implements PlayListAdapter.OnItemClickListener, PlayListAdapter.OnItemMenuClickListener {
 
 
-    public static final int MENU_NEW_LIST = 1;
+    @BindView(R.id.recycler_view)
+    RecyclerView mRecyclerView;
 
-    private RecyclerView mRecyclerView;
+    public static final int MENU_NEW_LIST = 1;
     private PlayListAdapter mAdapter;
 
     @Override
@@ -54,15 +56,13 @@ public class PlayListFragment extends BaseDataFragment implements PlayListAdapte
         super.onCreate(savedInstanceState);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.layout_recycler_view, null);
+    public int getViewResId() {
+        return R.layout.layout_recycler_view;
     }
 
     @Override
     public void initView(View view, @Nullable Bundle savedInstanceState) {
-        mRecyclerView = (RecyclerView) view;
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setAdapter(mAdapter);
@@ -306,19 +306,20 @@ public class PlayListFragment extends BaseDataFragment implements PlayListAdapte
     }
 
     public static class ListNameInputDialog extends Dialog {
-        private EditText etInput;
-        private Button btnOk;
-        private Button btnCancel;
-        private TextView tvTitle;
+        @BindView(R.id.et_input)
+        EditText etInput;
+        @BindView(R.id.btn_ok)
+        Button btnOk;
+        @BindView(R.id.btn_cancel)
+        Button btnCancel;
+        @BindView(R.id.tv_dlg_title)
+        TextView tvTitle;
 
         public ListNameInputDialog(Context context) {
             super(context, android.support.v7.appcompat.R.style.Theme_AppCompat_Light_Dialog);
             getWindow().requestFeature(Window.FEATURE_NO_TITLE);
             setContentView(R.layout.dlg_input_listname);
-            tvTitle = (TextView) findViewById(R.id.tv_dlg_title);
-            etInput = (EditText) findViewById(R.id.et_input);
-            btnOk = (Button) findViewById(R.id.btn_ok);
-            btnCancel = (Button) findViewById(R.id.btn_cancel);
+            ButterKnife.bind(this);
             btnCancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

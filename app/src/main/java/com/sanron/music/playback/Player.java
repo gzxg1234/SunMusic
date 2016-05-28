@@ -30,7 +30,7 @@ public interface Player {
 
     void play(int position);
 
-    int getCurrentIndex();
+    int getCurrentPosition();
 
     Music getCurrentMusic();
 

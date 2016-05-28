@@ -26,9 +26,9 @@ public class DeleteLocalMusicTask extends AsyncTask<Void, Void, Integer> {
 
     @Override
     protected Integer doInBackground(Void... params) {
-        DataProvider.Access listMemberAccess = DataProvider.instance().getAccess(DBHelper.ListMember.TABLE);
-        DataProvider.Access musicAccess = DataProvider.instance().getAccess(DBHelper.Music.TABLE);
-        DataProvider.instance().beginTransaction();
+        DataProvider.Access listMemberAccess = DataProvider.get().newAccess(DBHelper.ListMember.TABLE);
+        DataProvider.Access musicAccess = DataProvider.get().newAccess(DBHelper.Music.TABLE);
+        DataProvider.get().beginTransaction();
         int deleteNum = 0;
         for (Music music : mDeleteMusics) {
             //查找是否有播放列表中引用本地歌曲
@@ -48,8 +48,8 @@ public class DeleteLocalMusicTask extends AsyncTask<Void, Void, Integer> {
             deleteNum += listMemberAccess.delete(DBHelper.ListMember.MUSIC_ID + "=" + music.getId()
                     + " and " + DBHelper.ListMember.LIST_ID + "=" + DBHelper.List.TYPE_LOCAL_ID);
         }
-        DataProvider.instance().setTransactionSuccessful();
-        DataProvider.instance().endTransaction();
+        DataProvider.get().setTransactionSuccessful();
+        DataProvider.get().endTransaction();
         listMemberAccess.close();
         musicAccess.close();
         return deleteNum;

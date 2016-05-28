@@ -30,10 +30,10 @@ public class UpdateLocalMusicTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         if (musics != null) {
-            DataProvider.Access musicAccess = DataProvider.instance().getAccess(DBHelper.Music.TABLE);
-            DataProvider.Access listAccess = DataProvider.instance().getAccess(DBHelper.List.TABLE);
-            DataProvider.Access listMemberAccess = DataProvider.instance().getAccess(DBHelper.ListMember.TABLE);
-            DataProvider.instance().beginTransaction();
+            DataProvider.Access musicAccess = DataProvider.get().newAccess(DBHelper.Music.TABLE);
+            DataProvider.Access listAccess = DataProvider.get().newAccess(DBHelper.List.TABLE);
+            DataProvider.Access listMemberAccess = DataProvider.get().newAccess(DBHelper.ListMember.TABLE);
+            DataProvider.get().beginTransaction();
 
             //插入数据
             List<Long> ids = new LinkedList<>();
@@ -79,8 +79,8 @@ public class UpdateLocalMusicTask extends AsyncTask<Void, Void, Void> {
                 }
             }
 
-            DataProvider.instance().setTransactionSuccessful();
-            DataProvider.instance().endTransaction();
+            DataProvider.get().setTransactionSuccessful();
+            DataProvider.get().endTransaction();
             musicAccess.close();
             listAccess.close();
             listMemberAccess.close();

@@ -109,7 +109,7 @@ public class PlayerUtil {
 
     public static int getCurrentIndex() {
         if (sPlayer != null) {
-            return sPlayer.getCurrentIndex();
+            return sPlayer.getCurrentPosition();
         }
         return -1;
     }

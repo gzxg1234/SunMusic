@@ -21,16 +21,20 @@ import com.sanron.music.api.bean.BillCategoryData;
 import com.sanron.music.fragments.base.LazyLoadFragment;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.BindViews;
+import butterknife.ButterKnife;
 
 /**
  * Created by Administrator on 2016/3/10.
  */
 public class BillboardFragment extends LazyLoadFragment {
 
+    @BindView(R.id.recycler_view)
+    RecyclerView mRecyclerView;
 
-    private RecyclerView mRecyclerView;
     private BillCategoryAdapter mAdapter;
 
     @Override
@@ -39,16 +43,13 @@ public class BillboardFragment extends LazyLoadFragment {
         mAdapter = new BillCategoryAdapter();
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.layout_recycler_view, container, false);
+    public int getViewResId() {
+        return R.layout.layout_recycler_view;
     }
 
     @Override
     protected void initView(View view, Bundle savedInstanceState) {
-        super.initView(view, savedInstanceState);
-        mRecyclerView = (RecyclerView) getView();
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setAdapter(mAdapter);
@@ -78,7 +79,7 @@ public class BillboardFragment extends LazyLoadFragment {
         });
     }
 
-    private class BillCategoryAdapter extends RecyclerView.Adapter<BillCategoryAdapter.BillCategoryHolder> {
+    public class BillCategoryAdapter extends RecyclerView.Adapter<BillCategoryAdapter.BillCategoryHolder> {
 
         private List<BillCategoryData.BillCategory> mData = new ArrayList<>();
         private final int[] TOP_TEXT_COLORS = new int[]{
@@ -134,21 +135,16 @@ public class BillboardFragment extends LazyLoadFragment {
         }
 
         class BillCategoryHolder extends RecyclerView.ViewHolder {
+            @BindView(R.id.tv_billcategory)
             TextView tvBillCategory;
+            @BindView(R.id.iv_picture)
             ImageView ivPicture;
+            @BindViews({R.id.tv_top1, R.id.tv_top2, R.id.tv_top3})
             List<TextView> tvTops;
 
             public BillCategoryHolder(View itemView) {
                 super(itemView);
-                tvBillCategory = (TextView) itemView.findViewById(R.id.tv_billcategory);
-                ivPicture = (ImageView) itemView.findViewById(R.id.iv_picture);
-                tvTops = new LinkedList<>();
-                TextView tvTop1 = (TextView) itemView.findViewById(R.id.tv_top1);
-                TextView tvTop2 = (TextView) itemView.findViewById(R.id.tv_top2);
-                TextView tvTop3 = (TextView) itemView.findViewById(R.id.tv_top3);
-                tvTops.add(tvTop1);
-                tvTops.add(tvTop2);
-                tvTops.add(tvTop3);
+                ButterKnife.bind(this, itemView);
             }
         }
     }

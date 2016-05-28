@@ -20,7 +20,7 @@ import okhttp3.Call;
 /**
  * Created by sanron on 16-4-23.
  */
-public class AlbumInfoFragment extends CommonSongPullFragment implements View.OnClickListener, Player.OnPlayStateChangeListener {
+public class AlbumSongsFragment extends CommonSongPullFragment implements View.OnClickListener, Player.OnPlayStateChangeListener {
 
     private String mAlbumId;
     private AlbumSongs mData;
@@ -29,8 +29,8 @@ public class AlbumInfoFragment extends CommonSongPullFragment implements View.On
     public static final String LIST_ID_PREFIX = "2";
     public static final String ARG_ALBUM_ID = "album_id";
 
-    public static AlbumInfoFragment newInstance(String albumId) {
-        AlbumInfoFragment fragment = new AlbumInfoFragment();
+    public static AlbumSongsFragment newInstance(String albumId) {
+        AlbumSongsFragment fragment = new AlbumSongsFragment();
         Bundle bundle = new Bundle();
         bundle.putString(ARG_ALBUM_ID, albumId);
         fragment.setArguments(bundle);
@@ -56,6 +56,7 @@ public class AlbumInfoFragment extends CommonSongPullFragment implements View.On
         Call call = MusicApi.albumSongs(mAlbumId, new JsonCallback<AlbumSongs>() {
             @Override
             public void onSuccess(AlbumSongs albumSongs) {
+                mPullListView.setHasMore(false);
                 updateUI(albumSongs);
                 hideLoadingView();
             }

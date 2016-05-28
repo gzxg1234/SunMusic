@@ -33,7 +33,6 @@ public class DBHelper extends SQLiteOpenHelper {
         public static final String DURATION = "duration";
         public static final String SONG_ID = "song_id";
         public static final String BITRATE = "bitrate";
-        public static final String LYRIC = "lyric";
     }
 
 
@@ -73,6 +72,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         public static final int TYPE_LOCAL_ID = 1;
         public static final int TYPE_RECENT_ID = 2;
+        public static final int TYPE_FAVORITE_ID = 3;
     }
 
     public static class ListMember {
@@ -82,6 +82,7 @@ public class DBHelper extends SQLiteOpenHelper {
         public static final String TABLE = "list_member_datas";
         public static final String MUSIC_ID = "music_id";
         public static final String LIST_ID = "list_id";
+        public static final String ADD_TIME = "add_time";
     }
 
     public static class LyricCache {
@@ -119,7 +120,6 @@ public class DBHelper extends SQLiteOpenHelper {
         columnTypes.put(Music.DURATION, "integer");
         columnTypes.put(Music.SONG_ID, "text");
         columnTypes.put(Music.BITRATE, "integer");
-        columnTypes.put(Music.LYRIC, "text");
         String sql = buildCreateSql(Music.TABLE, columnTypes);
         db.execSQL(sql);
         String index1 = createIndexSql("path_index", Music.TABLE, Music.DATA);
@@ -158,8 +158,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 "values(" + List.TYPE_LOCAL_ID + "," + List.TYPE_LOCAL + ",'本地音乐')";
         String sql2 = "insert into " + List.TABLE + "(" + DBHelper.ID + "," + List.TYPE + "," + List.TITLE + ") " +
                 "values(" + List.TYPE_RECENT_ID + "," + List.TYPE_RECENT + ",'最近播放')";
-        String sql3 = "insert into " + List.TABLE + "(" + List.TYPE + "," + List.TITLE + ") " +
-                "values(" + List.TYPE_FAVORITE + ",'我喜欢')";
+        String sql3 = "insert into " + List.TABLE + "(" + DBHelper.ID + "," + List.TYPE + "," + List.TITLE + ") " +
+                "values(" + List.TYPE_FAVORITE_ID + "," + List.TYPE_FAVORITE + ",'我喜欢')";
         db.execSQL(sql);
         db.execSQL(sql1);
         db.execSQL(sql2);
@@ -170,6 +170,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Map<String, String> columnTypes = new LinkedHashMap<>();
         columnTypes.put(ListMember.LIST_ID, "integer");
         columnTypes.put(ListMember.MUSIC_ID, "integer");
+        columnTypes.put(ListMember.ADD_TIME, "integer");
         String sql = buildCreateSql(ListMember.TABLE, columnTypes);
         db.execSQL(sql);
     }

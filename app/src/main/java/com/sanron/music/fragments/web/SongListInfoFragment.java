@@ -54,13 +54,11 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         mIbtnDownload.setOnClickListener(this);
         mIbtnShare.setOnClickListener(this);
         mIbtnFavorite.setOnClickListener(this);
         mPullListView.setHasMore(false);
     }
-
 
     @Override
     protected void loadData() {
@@ -89,8 +87,8 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
         if (!TextUtils.isEmpty(data.pic500)) {
             ImageLoader.getInstance().displayImage(data.pic500, mIvPicture);
         }
-        mTvText2.setText(data.tag);
         mTvText1.setText(data.title);
+        mTvText2.setText(data.tag);
         if (data.songs != null) {
             mTvSongNum.setText("共" + data.songs.size() + "首歌");
         }
@@ -153,6 +151,5 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
             break;
         }
     }
-
 
 }

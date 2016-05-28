@@ -49,6 +49,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import butterknife.BindView;
+
 /**
  * Created by Administrator on 2016/3/10.
  */
@@ -59,22 +61,28 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
      */
 
     //轮播
-    private ViewPager mPagerFocusPic;
-    private CirclePageIndicator mPageIndicator;
-    private FocusPicAdapter mFocusPicAdapter;
+    @BindView(R.id.pager_focus_pic)
+    ViewPager mPagerFocusPic;
+    @BindView(R.id.page_indicator)
+    CirclePageIndicator mPageIndicator;
+    FocusPicAdapter mFocusPicAdapter;
 
     //分类
-    private GridView mGvHotTag;
-    private HotTagAdapter mHotTagAdapter;
+    @BindView(R.id.gv_hot_tag)
+    GridView mGvHotTag;
+    HotTagAdapter mHotTagAdapter;
 
     //热门歌单
-    private TextView tvMoreSongList;
-    private GridView mGvHotSongList;
-    private HotSongListAdapter mHotSongListAdapter;
+    @BindView(R.id.tv_more_song_list)
+    TextView tvMoreSongList;
+    @BindView(R.id.gv_hot_song_list)
+    GridView mGvHotSongList;
+    HotSongListAdapter mHotSongListAdapter;
 
     //推荐歌曲
-    private ListView mLvRecmdSong;
-    private RecmdSongAdapter mRecmdSongAdapter;
+    @BindView(R.id.lv_recmd_song)
+    ListView mLvRecmdSong;
+    RecmdSongAdapter mRecmdSongAdapter;
 
     private DisplayImageOptions mDisplayImageOptions;
 
@@ -96,23 +104,13 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
         mRecmdSongAdapter = new RecmdSongAdapter();
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.web_frag_recmd, container, false);
+    public int getViewResId() {
+        return R.layout.web_frag_recmd;
     }
 
     @Override
     protected void initView(View view, Bundle savedInstanceState) {
-        super.initView(view, savedInstanceState);
-        //轮播
-        mPagerFocusPic = $(R.id.pager_focus_pic);
-        mPageIndicator = $(R.id.page_indicator);
-        mGvHotTag = $(R.id.gv_hot_tag);
-        mGvHotSongList = $(R.id.gv_hot_song_list);
-        mLvRecmdSong = $(R.id.lv_recmd_song);
-        tvMoreSongList = $(R.id.tv_more_song_list);
-
         mPagerFocusPic.setAdapter(mFocusPicAdapter);
         mPageIndicator.setViewPager(mPagerFocusPic);
         mGvHotTag.setAdapter(mHotTagAdapter);
@@ -291,9 +289,10 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
             }
             return convertView;
         }
+
     }
 
-    private class HotSongListAdapter extends BaseAdapter {
+    public class HotSongListAdapter extends BaseAdapter {
         private List<SongList> mData = new ArrayList<>();
 
         public void setData(List<SongList> data) {
@@ -340,12 +339,14 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
             }
             return convertView;
         }
+
+
     }
 
     /**
      * 热门分类
      */
-    private class HotTagAdapter extends BaseAdapter {
+    public class HotTagAdapter extends BaseAdapter {
         private List<Tag> mData = new ArrayList<>();
         public final int[] ICONS = new int[]{
                 R.mipmap.ic_classify_img01,
@@ -377,7 +378,7 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            TextView tvTag = null;
+            TextView tvTag;
             if (convertView == null) {
                 RatioLayout ratioLayout = new RatioLayout(getContext(), null);
                 ratioLayout.setType(RatioLayout.TYPE_HEIGHT);

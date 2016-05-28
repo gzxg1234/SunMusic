@@ -16,14 +16,19 @@ import okhttp3.Response;
 
 public abstract class JsonCallback<T> extends UICallback<T> {
 
+    Class<T> clazz;
+
+    public JsonCallback() {
+        Type superClass = this.getClass().getGenericSuperclass();
+        clazz = (Class<T>) ((ParameterizedType) superClass).getActualTypeArguments()[0];
+    }
+
     @Override
     protected T parser(Response response) throws IOException {
         T data = null;
         String json = null;
         try {
             json = response.body().string();
-            Type superClass = this.getClass().getGenericSuperclass();
-            Class<T> clazz = (Class<T>) ((ParameterizedType) superClass).getActualTypeArguments()[0];
             data = JSON.parseObject(json, clazz);
         } catch (JSONException e) {
             MyLog.d("MusicApi", "error json:" + json);

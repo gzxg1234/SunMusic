@@ -8,7 +8,7 @@ import android.view.View;
 /**
  * Created by sanron on 16-3-21.
  */
-public class ParentViewPager extends ViewPager{
+public class ParentViewPager extends ViewPager {
 
     public ParentViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -16,9 +16,6 @@ public class ParentViewPager extends ViewPager{
 
     @Override
     protected boolean canScroll(View v, boolean checkV, int dx, int x, int y) {
-        if(v!=this && v instanceof ViewPager){
-            return true;
-        }
-        return super.canScroll(v, checkV, dx, x, y);
+        return v != this && v instanceof ViewPager || super.canScroll(v, checkV, dx, x, y);
     }
 }

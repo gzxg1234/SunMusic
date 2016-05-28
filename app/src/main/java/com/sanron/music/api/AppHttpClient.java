@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
-import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Interceptor;
@@ -24,7 +23,6 @@ import okhttp3.Response;
 public class AppHttpClient {
 
     private static OkHttpClient sHttpClient;
-
     public static Interceptor CACHE_CONTROL_INTERCEPTOR = new Interceptor() {
         @Override
         public Response intercept(Chain chain) throws IOException {
@@ -52,31 +50,36 @@ public class AppHttpClient {
         sHttpClient = builder.build();
     }
 
-    public static Call get(String url, Callback callback) {
-        return get(url, 0, callback);
-    }
+//    public static Call get(String url, Callback callback) {
+//        return get(url, 0, callback);
+//    }
+//
+//    public static Call get(String url, int maxAge, Callback callback) {
+//        return get(url, maxAge, 0, callback);
+//    }
+//
+//    public static Call get(String url, int maxAge, int maxStale, final Callback callback) {
+//        CacheControl.Builder cacheControl = new CacheControl.Builder();
+//        if (maxAge != 0) {
+//            cacheControl.maxAge(maxAge, TimeUnit.SECONDS);
+//        }
+//        if (maxStale != 0) {
+//            cacheControl.maxStale(maxStale, TimeUnit.SECONDS);
+//        }
+//        Request request = new Request.Builder()
+//                .url(url)
+//                .cacheControl(cacheControl.build())
+//                .build();
+//        Call call = sHttpClient.newCall(request);
+//        call.enqueue(callback);
+//        return call;
+//    }
 
-    public static Call get(String url, int maxAge, Callback callback) {
-        return get(url, maxAge, 0, callback);
-    }
-
-    public static Call get(String url, int maxAge, int maxStale, final Callback callback) {
-        CacheControl.Builder cacheControl = new CacheControl.Builder();
-        if (maxAge != 0) {
-            cacheControl.maxAge(maxAge, TimeUnit.SECONDS);
-        }
-        if (maxStale != 0) {
-            cacheControl.maxStale(maxStale, TimeUnit.SECONDS);
-        }
-        Request request = new Request.Builder()
-                .url(url)
-                .cacheControl(cacheControl.build())
-                .build();
+    public static Call get(Request request, Callback callback) {
         Call call = sHttpClient.newCall(request);
         call.enqueue(callback);
         return call;
     }
-
 
     public static void cancel(Object tag) {
         if (tag == null) {

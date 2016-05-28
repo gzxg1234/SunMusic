@@ -4,13 +4,11 @@
     <declare-styleable name="LyricView">
         <!-- 歌词文字颜色-->
         <attr name="textColor" format="color"/>
+        <!--歌词文字大小-->
+        <attr name="textSize" format="dimension"/>
         <!-- 当前歌词文字颜色-->
         <attr name="currentTextColor" format="color"/>
         <!--歌词间距-->
         <attr name="sentenceMargin" format="dimension"/>
-        <!--歌词文字大小-->
-        <attr name="textSize" format="dimension"/>
-        <!-- 当前歌词文字大小-->
-        <attr name="currentTextSize" format="dimension"/>
     </declare-styleable>
 </resources>

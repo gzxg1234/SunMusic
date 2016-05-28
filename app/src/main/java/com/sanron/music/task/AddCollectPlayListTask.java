@@ -4,12 +4,13 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.AsyncTask;
 
+import com.sanron.music.api.bean.Song;
 import com.sanron.music.db.DBHelper;
 import com.sanron.music.db.DataProvider;
 import com.sanron.music.db.bean.Music;
 import com.sanron.music.db.bean.PlayList;
-import com.sanron.music.api.bean.Song;
 
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -35,12 +36,12 @@ public class AddCollectPlayListTask extends AsyncTask<Void, Void, Integer> {
 
     @Override
     protected Integer doInBackground(Void... params) {
-        DataProvider.Access listAccess = DataProvider.instance().getAccess(DBHelper.List.TABLE);
-        DataProvider.Access listMemberAccess = DataProvider.instance().getAccess(DBHelper.ListMember.TABLE);
-        DataProvider.Access musicAccess = DataProvider.instance().getAccess(DBHelper.Music.TABLE);
-        DataProvider.instance().beginTransaction();
+        DataProvider.Access listAccess = DataProvider.get().newAccess(DBHelper.List.TABLE);
+        DataProvider.Access listMemberAccess = DataProvider.get().newAccess(DBHelper.ListMember.TABLE);
+        DataProvider.Access musicAccess = DataProvider.get().newAccess(DBHelper.Music.TABLE);
+        DataProvider.get().beginTransaction();
 
-
+        long time = Calendar.getInstance().getTimeInMillis();
         try {
             PlayList playList = new PlayList();
             playList.setIcon(mPic);
@@ -77,18 +78,19 @@ public class AddCollectPlayListTask extends AsyncTask<Void, Void, Integer> {
                 ContentValues values = new ContentValues(2);
                 values.put(DBHelper.ListMember.LIST_ID, listid);
                 values.put(DBHelper.ListMember.MUSIC_ID, musicid);
+                values.put(DBHelper.ListMember.ADD_TIME, time);
                 long insertId = listMemberAccess.insert(null, values);
                 if (insertId == -1) {
                     return FAILED;
                 }
             }
-            DataProvider.instance().setTransactionSuccessful();
+            DataProvider.get().setTransactionSuccessful();
         } catch (Exception e) {
         } finally {
             listAccess.close();
             listMemberAccess.close();
             musicAccess.close();
-            DataProvider.instance().endTransaction();
+            DataProvider.get().endTransaction();
         }
         return SUCCESS;
     }

@@ -3,7 +3,6 @@ package com.sanron.music.activities;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 
 import com.sanron.music.AppManager;
 
@@ -25,7 +24,4 @@ public class BaseActivity extends AppCompatActivity {
         AppManager.instance().removeActivity(this);
     }
 
-    protected <T extends View> T $(int id) {
-        return (T) findViewById(id);
-    }
 }

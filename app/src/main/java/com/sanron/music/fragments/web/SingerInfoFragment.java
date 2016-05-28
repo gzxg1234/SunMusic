@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
+import com.sanron.music.adapter.CommonItemViewHolder;
 import com.sanron.music.adapter.SongAdapter;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
@@ -30,6 +31,7 @@ import com.sanron.music.view.SingerDetailDialog;
 
 import java.util.List;
 
+import butterknife.BindView;
 import okhttp3.Call;
 
 /**
@@ -37,11 +39,16 @@ import okhttp3.Call;
  */
 public class SingerInfoFragment extends PullFragment implements DDPullListView.OnLoadMoreListener, Player.OnPlayStateChangeListener, RadioGroup.OnCheckedChangeListener {
 
+    @BindView(R.id.top_board)
+    ImageView mIvSingerAvatar;
+    @BindView(R.id.tv_singer_name)
+    TextView mTvSingerName;
+    @BindView(R.id.tv_singer_country)
+    TextView mTvSingerCountry;
+    @BindView(R.id.radio_group)
+    RadioGroup mRadioGroup;
+
     private String mArtistId;
-    private ImageView mIvSingerAvatar;
-    private TextView mTvSingerName;
-    private TextView mTvSingerCountry;
-    private RadioGroup mRadioGroup;
     private Singer mSinger;
     private SongAdapter mSongAdapter;
     private AlbumItemAdapter mAlbumAdapter;
@@ -68,20 +75,14 @@ public class SingerInfoFragment extends PullFragment implements DDPullListView.O
         }
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.web_frag_singer_info, container, false);
+    public int getViewResId() {
+        return R.layout.web_frag_singer_info;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mRadioGroup = $(R.id.radio_group);
-        mTvSingerCountry = $(R.id.tv_singer_country);
-        mTvSingerName = $(R.id.tv_singer_name);
-        mIvSingerAvatar = (ImageView) mTopBoard;
-
         mSongAdapter = new SongAdapter(getContext()) {
             @Override
             protected String onBindText2(Song song) {
@@ -287,21 +288,20 @@ public class SingerInfoFragment extends PullFragment implements DDPullListView.O
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            AlbumHolder holder;
+            CommonItemViewHolder holder = null;
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext())
                         .inflate(R.layout.list_common_item, parent, false);
-                holder = new AlbumHolder();
-                convertView.setTag(holder);
-                holder.ivPicture = (ImageView) convertView.findViewById(R.id.iv_picture);
-                holder.tvTitle = (TextView) convertView.findViewById(R.id.tv_text1);
-                holder.tvDate = (TextView) convertView.findViewById(R.id.tv_text2);
-
-                ImageView ivMenu = (ImageView) convertView.findViewById(R.id.iv_menu);
-                ivMenu.setImageResource(R.mipmap.ic_chevron_right_black_90_24dp);
             } else {
-                holder = (AlbumHolder) convertView.getTag();
+                holder = (CommonItemViewHolder) convertView.getTag();
             }
+
+            if (holder == null) {
+                holder = new CommonItemViewHolder(convertView);
+                holder.ivMenu.setImageResource(R.mipmap.ic_chevron_right_black_90_24dp);
+                convertView.setTag(holder);
+            }
+
             final Album album = data.get(position);
             //取消之前的加载任务
             ImageLoader.getInstance()
@@ -309,10 +309,9 @@ public class SingerInfoFragment extends PullFragment implements DDPullListView.O
             holder.ivPicture.setImageBitmap(null);
             ImageLoader.getInstance()
                     .displayImage(album.picS180, holder.ivPicture);
-            holder.tvTitle.setText(album.title);
-            holder.tvDate.setText(album.publishtime);
-
-            convertView.setOnClickListener(new View.OnClickListener() {
+            holder.tvText1.setText(album.title);
+            holder.tvText2.setText(album.publishtime);
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     getMainActivity().showAlbumSongs(album.albumId);
@@ -321,10 +320,5 @@ public class SingerInfoFragment extends PullFragment implements DDPullListView.O
             return convertView;
         }
 
-        class AlbumHolder {
-            ImageView ivPicture;
-            TextView tvTitle;
-            TextView tvDate;
-        }
     }
 }

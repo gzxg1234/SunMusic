@@ -39,21 +39,29 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Observer;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by sanron on 16-3-28.
  */
 public class ListMusicFragment extends BaseDataFragment implements Observer, CompoundButton.OnCheckedChangeListener, Player.OnPlayStateChangeListener {
 
 
+    @BindView(R.id.ll_multi_mode_bar)
+    LinearLayout mCheckBar;
+    @BindView(R.id.lv_data)
+    RecyclerView mLvData;
+    @BindView(R.id.tv_checked_num)
+    TextView mTvCheckedNum;
+    @BindView(R.id.cb_checked_all)
+    CheckBox mCbCheckedAll;
+
+    PopupWindow mMusicOperator;
+    View mOpAddToList;
+    View mOpAddToQueue;
+    View mOpDelete;
     protected MusicAdapter mAdapter;
-    protected LinearLayout mCheckBar;
-    protected RecyclerView mLvData;
-    protected PopupWindow mMusicOperator;
-    protected View mOpAddToList;
-    protected View mOpAddToQueue;
-    protected View mOpDelete;
-    protected TextView mTvCheckedNum;
-    protected CheckBox mCbCheckedAll;
     private PlayList mPlayList;
 
     public static final String TAG = ListMusicFragment.class.getSimpleName();
@@ -80,19 +88,13 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
         super.onCreate(savedInstanceState);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.layout_list_music, container, false);
+    public int getViewResId() {
+        return R.layout.layout_list_music;
     }
 
     @Override
     public void initView(View view, Bundle savedInstanceState) {
-        mLvData = $(R.id.lv_data);
-        mCheckBar = $(R.id.ll_multi_mode_bar);
-        mTvCheckedNum = $(R.id.tv_checked_num);
-        mCbCheckedAll = $(R.id.cb_checked_all);
-
         initWindow();
         mAdapter.setFirstBindView(true);
         mAdapter.setOnItemClickListener(new MusicAdapter.OnItemClickListener() {
@@ -248,10 +250,10 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
 
     private void initWindow() {
         mMusicOperator = new PopupWindow(getContext());
-        ViewGroup content = (ViewGroup) LayoutInflater.from(getContext()).inflate(R.layout.window_music_operator, null);
-        mOpDelete = content.findViewById(R.id.btn_delete);
-        mOpAddToQueue = content.findViewById(R.id.btn_add_to_queue);
-        mOpAddToList = content.findViewById(R.id.btn_add_to_list);
+        View content = LayoutInflater.from(getContext()).inflate(R.layout.window_music_operator, null);
+        mOpDelete = ButterKnife.findById(content, R.id.btn_delete);
+        mOpAddToQueue = ButterKnife.findById(content, R.id.btn_add_to_queue);
+        mOpAddToList = ButterKnife.findById(content, R.id.btn_add_to_list);
         mMusicOperator.setContentView(content);
         mMusicOperator.setBackgroundDrawable(new ColorDrawable(0));
         mMusicOperator.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);

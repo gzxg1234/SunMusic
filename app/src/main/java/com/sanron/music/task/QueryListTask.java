@@ -18,8 +18,8 @@ public class QueryListTask extends AsyncTask<Void, Void, List<PlayList>> {
     @Override
     protected List<PlayList> doInBackground(Void... params) {
         List<PlayList> playLists = new LinkedList<>();
-        DataProvider.Access listAccess = DataProvider.instance().getAccess(DBHelper.List.TABLE);
-        DataProvider.Access listMemberAccess = DataProvider.instance().getAccess(DBHelper.ListMember.TABLE);
+        DataProvider.Access listAccess = DataProvider.get().newAccess(DBHelper.List.TABLE);
+        DataProvider.Access listMemberAccess = DataProvider.get().newAccess(DBHelper.ListMember.TABLE);
 
         Cursor c1 = listAccess.query(null,
                 DBHelper.List.TYPE + "=" + DBHelper.List.TYPE_FAVORITE

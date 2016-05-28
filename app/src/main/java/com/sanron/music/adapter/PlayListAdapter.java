@@ -6,7 +6,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -92,8 +91,9 @@ public class PlayListAdapter extends RecyclerView.Adapter {
 
             case TYPE_ITEM: {
                 View view = LayoutInflater.from(mContext).inflate(R.layout.list_common_item, parent, false);
-                holder = new ListItemHolder(view);
-                ((ListItemHolder) holder).ivMenu.setImageResource(R.mipmap.ic_more_vert_black_24dp);
+                CommonItemViewHolder commonHolder = new CommonItemViewHolder(view);
+                commonHolder.ivMenu.setImageResource(R.mipmap.ic_more_vert_black_24dp);
+                holder = commonHolder;
             }
             break;
         }
@@ -101,10 +101,9 @@ public class PlayListAdapter extends RecyclerView.Adapter {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        int holderType = getItemViewType(position);
-        if (holderType == TYPE_ITEM) {
-            ListItemHolder itemHolder = (ListItemHolder) holder;
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+        if (holder instanceof CommonItemViewHolder) {
+            CommonItemViewHolder itemHolder = (CommonItemViewHolder) holder;
             PlayList playList = (PlayList) mItems.get(position);
             if (playList.getType() == DBHelper.List.TYPE_FAVORITE) {
                 itemHolder.ivPicture.setImageResource(R.mipmap.ic_favorite_list);
@@ -114,9 +113,25 @@ public class PlayListAdapter extends RecyclerView.Adapter {
                 ImageLoader.getInstance().displayImage(playList.getIcon(),
                         itemHolder.ivPicture);
             }
-            itemHolder.tvName.setText(playList.getTitle());
-            itemHolder.tvMusicNum.setText(playList.getSongNum() + "首");
-        } else if (holderType == TYPE_GROUP_ITEM) {
+            itemHolder.tvText1.setText(playList.getTitle());
+            itemHolder.tvText2.setText(playList.getSongNum() + "首");
+            itemHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mOnItemClickListener != null) {
+                        mOnItemClickListener.onItemClick(v, position);
+                    }
+                }
+            });
+            itemHolder.ivMenu.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mOnItemMenuClickListener != null) {
+                        mOnItemMenuClickListener.onItemMenuClick(v, position);
+                    }
+                }
+            });
+        } else if (holder instanceof GroupHolder) {
             GroupHolder groupHolder = (GroupHolder) holder;
             groupHolder.tvText.setText((String) mItems.get(position));
         }
@@ -137,37 +152,6 @@ public class PlayListAdapter extends RecyclerView.Adapter {
         public GroupHolder(View itemView) {
             super(itemView);
             tvText = (TextView) itemView;
-        }
-    }
-
-    class ListItemHolder extends RecyclerView.ViewHolder {
-        ImageView ivPicture;
-        TextView tvName;
-        TextView tvMusicNum;
-        ImageView ivMenu;
-
-        public ListItemHolder(final View itemView) {
-            super(itemView);
-            ivPicture = (ImageView) itemView.findViewById(R.id.iv_picture);
-            tvMusicNum = (TextView) itemView.findViewById(R.id.tv_text2);
-            tvName = (TextView) itemView.findViewById(R.id.tv_text1);
-            ivMenu = (ImageView) itemView.findViewById(R.id.iv_menu);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mOnItemClickListener != null) {
-                        mOnItemClickListener.onItemClick(itemView, getAdapterPosition());
-                    }
-                }
-            });
-            ivMenu.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mOnItemMenuClickListener != null) {
-                        mOnItemMenuClickListener.onItemMenuClick(ivMenu, getAdapterPosition());
-                    }
-                }
-            });
         }
     }
 

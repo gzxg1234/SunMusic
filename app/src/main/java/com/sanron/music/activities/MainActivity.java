@@ -32,13 +32,12 @@ import com.sanron.music.fragments.pagermymusic.LocalMusicFragment;
 import com.sanron.music.fragments.pagermymusic.PlayListFragment;
 import com.sanron.music.fragments.pagermymusic.RecentPlayFragment;
 import com.sanron.music.fragments.pagerwebmusic.BillboardFragment;
-import com.sanron.music.fragments.pagerwebmusic.RadioFragment;
 import com.sanron.music.fragments.pagerwebmusic.RecommendFragment;
 import com.sanron.music.fragments.pagerwebmusic.SingerFragment;
 import com.sanron.music.fragments.pagerwebmusic.SongListFragment;
-import com.sanron.music.fragments.web.AlbumInfoFragment;
+import com.sanron.music.fragments.web.AlbumSongsFragment;
 import com.sanron.music.fragments.web.AllTagFragment;
-import com.sanron.music.fragments.web.BillboardInfoFragment;
+import com.sanron.music.fragments.web.BillboardSongsFragment;
 import com.sanron.music.fragments.web.OfficialSongListInfoFragment;
 import com.sanron.music.fragments.web.SingerInfoFragment;
 import com.sanron.music.fragments.web.SingerListFragment;
@@ -50,17 +49,25 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceConnection {
 
-    private AppBarLayout mAppBar;
-    private Toolbar mToolbar;
-    private DrawerLayout mDrawerLayout;
+    @BindView(R.id.app_bar)
+    AppBarLayout mAppBar;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.sliding_panel)
+    SlidingUpPanelLayout mSlidingUpPanelLayout;
+    @BindView(R.id.navigation_view)
+    NavigationView mNavigationView;
+    @BindView(R.id.drawer_layout)
+    DrawerLayout mDrawerLayout;
     private FragmentManager mFragmentManager;
     private MaterialMenuDrawable mMaterialMenu;
-    private SlidingUpPanelLayout mSlidingUpPanelLayout;
     private NowPlayingFragment mNowPlayingFragment;
-    private NavigationView mNavigationView;
 
     private List<PlayerReadyCallback> mPlayerReadyCallbacks;
     private List<BackPressedHandler> mBackPressedHandlers;
@@ -83,16 +90,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
         init(savedInstanceState);
     }
 
     private void init(Bundle savedInstanceState) {
-        mSlidingUpPanelLayout = $(R.id.sliding_panel);
-        mNavigationView = $(R.id.navigation_view);
-        mDrawerLayout = $(R.id.drawer_layout);
-        mToolbar = $(R.id.toolbar);
-        mAppBar = $(R.id.app_bar);
-
         ViewTool.setViewFitsStatusBar(mAppBar);
 
         mPlayerReadyCallbacks = new ArrayList<>();
@@ -214,11 +216,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     public void showAlbumSongs(String albumId) {
-        addFragmentToFront(AlbumInfoFragment.newInstance(albumId));
+        addFragmentToFront(AlbumSongsFragment.newInstance(albumId));
     }
 
     public void showBillboardInfo(int type) {
-        addFragmentToFront(BillboardInfoFragment.newInstance(type));
+        addFragmentToFront(BillboardSongsFragment.newInstance(type));
     }
 
     public void showSingerList(String title, int area, int sex) {
@@ -310,12 +312,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 break;
 
                 case 1: {
-                    String[] titles = new String[]{"推荐", "歌手", "排行", "歌单", "电台"};
+                    String[] titles = new String[]{"推荐", "歌手", "排行", "歌单"};
                     String[] fragments = new String[]{RecommendFragment.class.getName(),
                             SingerFragment.class.getName(),
                             BillboardFragment.class.getName(),
-                            SongListFragment.class.getName(),
-                            RadioFragment.class.getName()};
+                            SongListFragment.class.getName()};
                     toFragment = PagerFragment.newInstance(titles, fragments);
                 }
                 break;

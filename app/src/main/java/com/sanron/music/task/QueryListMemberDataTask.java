@@ -21,8 +21,8 @@ public class QueryListMemberDataTask extends AsyncTask<Void, Void, List<Music>> 
     @Override
     protected List<Music> doInBackground(Void... params) {
         List<Music> musics = new LinkedList<>();
-        DataProvider.Access listMemberAccess = DataProvider.instance().getAccess(DBHelper.ListMember.TABLE);
-        DataProvider.Access musicAccess = DataProvider.instance().getAccess(DBHelper.Music.TABLE);
+        DataProvider.Access listMemberAccess = DataProvider.get().newAccess(DBHelper.ListMember.TABLE);
+        DataProvider.Access musicAccess = DataProvider.get().newAccess(DBHelper.Music.TABLE);
         Cursor c1 = listMemberAccess.query(new String[]{DBHelper.ListMember.MUSIC_ID},
                 DBHelper.ListMember.LIST_ID + "=" + mListId, null);
         StringBuilder sb = new StringBuilder();

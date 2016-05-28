@@ -29,19 +29,30 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by sanron on 16-3-22.
  */
 public class ScanDiyActivity extends BaseActivity implements View.OnClickListener {
 
-    private AppBarLayout mAppBar;
-    private Toolbar mToolbar;
-    private ListView mLvFileExplore;
-    private TextView mTvCurDir;
-    private View mViewBack;
+    @BindView(R.id.app_bar)
+    AppBarLayout mAppBar;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.lv_file_explore)
+    ListView mLvFileExplore;
+    @BindView(R.id.tv_cur_directory)
+    TextView mTvCurDir;
+    @BindView(R.id.ll_directory_back)
+    View mViewBack;
+    @BindView(R.id.btn_ok)
+    Button mBtnOk;
+    @BindView(R.id.cb_select_all)
+    CheckBox mCbSelectAll;
+
     private DirAdapter mDirAdapter;
-    private Button mBtnOk;
-    private CheckBox mCbSelectAll;
     private File mCurDir;
     private File mStorageDir;
 
@@ -51,18 +62,10 @@ public class ScanDiyActivity extends BaseActivity implements View.OnClickListene
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_diy);
-
-        mDirAdapter = new DirAdapter(this);
-        mCbSelectAll = $(R.id.cb_select_all);
-        mBtnOk = $(R.id.btn_ok);
-        mToolbar = $(R.id.toolbar);
-        mLvFileExplore = $(R.id.lv_file_explore);
-        mViewBack = $(R.id.ll_directory_back);
-        mTvCurDir = $(R.id.tv_cur_directory);
-        mAppBar = $(R.id.app_bar);
+        ButterKnife.bind(this);
 
         ViewTool.setViewFitsStatusBar(mAppBar);
-
+        mDirAdapter = new DirAdapter(this);
         mLvFileExplore.setAdapter(mDirAdapter);
 
         mViewBack.setOnClickListener(this);

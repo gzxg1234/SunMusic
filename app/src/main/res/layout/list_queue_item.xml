@@ -39,7 +39,7 @@
             tools:text="Love Yourself" />
 
         <TextView
-            android:id="@+id/tv_queue_item_artist"
+            android:id="@+id/tv_artist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tv_title"

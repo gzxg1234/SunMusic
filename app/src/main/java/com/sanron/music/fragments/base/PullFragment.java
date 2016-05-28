@@ -11,14 +11,20 @@ import com.sanron.music.R;
 import com.sanron.music.view.DDPullListView;
 import com.sanron.music.view.SlideBackLayout;
 
+import butterknife.BindView;
+
 /**
  * Created by sanron on 16-3-30.
  */
 public abstract class PullFragment extends SlideWebFragment implements SlideBackLayout.SlideBackCallback {
 
+    @BindView(R.id.pull_list_view)
     protected DDPullListView mPullListView;
+    @BindView(R.id.info)
     protected View mViewInfo;
+    @BindView(R.id.operator)
     protected View mViewOperator;
+    @BindView(R.id.top_board)
     protected View mTopBoard;
 
     private DDPullListView.OnPullDownListener pullListener = new DDPullListView.OnPullDownListener() {
@@ -81,12 +87,7 @@ public abstract class PullFragment extends SlideWebFragment implements SlideBack
     @Override
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mViewInfo = $(R.id.info);
-        mTopBoard = $(R.id.top_board);
-        mPullListView = $(R.id.pull_list_view);
-        mViewOperator = $(R.id.operator);
         mPullListView.setOnPullDownListener(pullListener);
         mPullListView.setOnScrollListener(onScrollListener);
     }
-
 }

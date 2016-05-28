@@ -24,7 +24,7 @@ public abstract class UpdateListNameTask extends AsyncTask<Void, Void, Integer> 
 
     @Override
     protected Integer doInBackground(Void... params) {
-        DataProvider.Access listAccess = DataProvider.instance().getAccess(DBHelper.List.TABLE);
+        DataProvider.Access listAccess = DataProvider.get().newAccess(DBHelper.List.TABLE);
         int result = FAILED;
         //检查列表名是否已存在
         Cursor cursor = listAccess.query(new String[]{DBHelper.ID},

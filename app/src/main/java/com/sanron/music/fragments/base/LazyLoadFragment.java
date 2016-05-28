@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 
 /**
+ * 懒加载fragment,用在viewpager中
  * Created by sanron on 16-4-18.
  */
 public abstract class LazyLoadFragment extends BaseFragment {

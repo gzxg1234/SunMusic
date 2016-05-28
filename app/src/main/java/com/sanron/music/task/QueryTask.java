@@ -69,7 +69,7 @@ public class QueryTask extends AsyncTask<Void, Void, Cursor> {
 
     @Override
     protected Cursor doInBackground(Void... params) {
-        access = DataProvider.instance().getAccess(table);
+        access = DataProvider.get().newAccess(table);
         return access.query(columns,
                         selection,
                         selectionArgs,

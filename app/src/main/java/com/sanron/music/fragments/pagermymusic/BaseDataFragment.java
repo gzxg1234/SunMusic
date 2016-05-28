@@ -21,7 +21,7 @@ public abstract class BaseDataFragment extends LazyLoadFragment implements Obser
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        DataProvider.instance().addObserver(this);
+        DataProvider.get().addObserver(this);
     }
 
     protected void setObserveTable(String... table) {
@@ -31,7 +31,7 @@ public abstract class BaseDataFragment extends LazyLoadFragment implements Obser
     @Override
     public void onDestroy() {
         super.onDestroy();
-        DataProvider.instance().deleteObserver(this);
+        DataProvider.get().deleteObserver(this);
     }
 
     @Override

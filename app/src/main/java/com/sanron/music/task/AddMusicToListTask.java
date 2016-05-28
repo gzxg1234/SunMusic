@@ -25,8 +25,8 @@ public abstract class AddMusicToListTask extends AsyncTask<Void, Void, Integer> 
 
     @Override
     protected Integer doInBackground(Void... params) {
-        DataProvider.Access access = DataProvider.instance().getAccess(DBHelper.ListMember.TABLE);
-        DataProvider.instance().beginTransaction();
+        DataProvider.Access access = DataProvider.get().newAccess(DBHelper.ListMember.TABLE);
+        DataProvider.get().beginTransaction();
         int insertNum = 0;//添加成功数量
         ContentValues values = new ContentValues(2);
         for (int i = 0; i < mAddMusics.size(); i++) {
@@ -45,8 +45,8 @@ public abstract class AddMusicToListTask extends AsyncTask<Void, Void, Integer> 
                 }
             }
         }
-        DataProvider.instance().setTransactionSuccessful();
-        DataProvider.instance().endTransaction();
+        DataProvider.get().setTransactionSuccessful();
+        DataProvider.get().endTransaction();
         access.close();
         return insertNum;
     }

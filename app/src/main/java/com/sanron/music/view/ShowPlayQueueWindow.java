@@ -19,6 +19,9 @@ import com.sanron.music.service.PlayerUtil;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * 播放队列窗口
  */
@@ -114,7 +117,7 @@ public class ShowPlayQueueWindow extends ScrimPopupWindow implements Player.OnPl
         }
 
         @Override
-        public void onBindViewHolder(QueueItemHolder holder, final int position) {
+        public void onBindViewHolder(final QueueItemHolder holder, final int position) {
             Music music = getItem(position);
 
             if (position == PlayerUtil.getCurrentIndex()) {
@@ -131,6 +134,17 @@ public class ShowPlayQueueWindow extends ScrimPopupWindow implements Player.OnPl
             String artist = music.getArtist();
             artist = artist == null || artist.equals("<unknown>") ? "未知歌手" : artist;
             holder.tvArtist.setText(artist);
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int adapterPos = holder.getAdapterPosition();
+                    if (PlayerUtil.getCurrentIndex() == adapterPos) {
+                        PlayerUtil.togglePlayPause();
+                        return;
+                    }
+                    PlayerUtil.play(adapterPos);
+                }
+            });
             holder.ibtnRemove.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -148,28 +162,18 @@ public class ShowPlayQueueWindow extends ScrimPopupWindow implements Player.OnPl
         }
 
         class QueueItemHolder extends RecyclerView.ViewHolder {
+            @BindView(R.id.playing_sign)
             View sign;
+            @BindView(R.id.tv_title)
             TextView tvTitle;
+            @BindView(R.id.tv_artist)
             TextView tvArtist;
+            @BindView(R.id.ibtn_remove)
             ImageButton ibtnRemove;
 
             public QueueItemHolder(View itemView) {
                 super(itemView);
-                sign = itemView.findViewById(R.id.playing_sign);
-                tvTitle = (TextView) itemView.findViewById(R.id.tv_title);
-                tvArtist = (TextView) itemView.findViewById(R.id.tv_queue_item_artist);
-                ibtnRemove = (ImageButton) itemView.findViewById(R.id.ibtn_remove);
-                itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        int adapterPos = getAdapterPosition();
-                        if (PlayerUtil.getCurrentIndex() == adapterPos) {
-                            PlayerUtil.togglePlayPause();
-                            return;
-                        }
-                        PlayerUtil.play(adapterPos);
-                    }
-                });
+                ButterKnife.bind(this, itemView);
             }
         }
     }

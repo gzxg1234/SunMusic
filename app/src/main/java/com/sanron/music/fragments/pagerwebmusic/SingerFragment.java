@@ -1,7 +1,6 @@
 package com.sanron.music.fragments.pagerwebmusic;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,8 +14,10 @@ import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.music.R;
+import com.sanron.music.adapter.CommonItemViewHolder;
 import com.sanron.music.api.JsonCallback;
 import com.sanron.music.api.MusicApi;
+import com.sanron.music.api.bean.Singer;
 import com.sanron.music.api.bean.SingerList;
 import com.sanron.music.common.ViewTool;
 import com.sanron.music.fragments.base.LazyLoadFragment;
@@ -25,12 +26,15 @@ import com.viewpagerindicator.CirclePageIndicator;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+
 /**
  * Created by Administrator on 2016/3/10.
  */
 public class SingerFragment extends LazyLoadFragment {
 
-    private RecyclerView mRecyclerView;
+    @BindView(R.id.recycler_view)
+    RecyclerView mRecyclerView;
     private SingerList mHotSingerData;
     public static final int HOT_SINGER_NUM = 12;
     public static final String[] CLASSES = new String[]{
@@ -57,16 +61,9 @@ public class SingerFragment extends LazyLoadFragment {
             0
     };
 
-
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.layout_recycler_view, container, false);
+    public int getViewResId() {
+        return R.layout.layout_recycler_view;
     }
 
     @Override
@@ -193,9 +190,9 @@ public class SingerFragment extends LazyLoadFragment {
 
         public static final int TYPE_HEADER = 0;
         public static final int TYPE_CLASS = 1;
-        private List<com.sanron.music.api.bean.Singer> mData = new ArrayList<>();
+        private List<Singer> mData = new ArrayList<>();
 
-        public void setHotSinger(List<com.sanron.music.api.bean.Singer> hotSingers) {
+        public void setHotSinger(List<Singer> hotSingers) {
             mData.clear();
             mData.addAll(hotSingers);
             notifyItemChanged(0);
@@ -210,20 +207,35 @@ public class SingerFragment extends LazyLoadFragment {
             } else {
                 View view = LayoutInflater.from(getContext())
                         .inflate(R.layout.list_common_item, parent, false);
-                return new SingerClassHolder(view);
+                CommonItemViewHolder holder = new CommonItemViewHolder(view);
+                holder.tvText1.setTextColor(getResources().getColor(R.color.textColorSecondary));
+                holder.tvText2.setVisibility(View.GONE);
+                holder.ivPicture.setVisibility(View.GONE);
+                holder.ivMenu.setImageResource(R.mipmap.ic_chevron_right_black_90_24dp);
+                return holder;
             }
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
             if (holder instanceof HotSingerHolder) {
                 HotSingerHolder hotSingerHolder = (HotSingerHolder) holder;
                 HotSingerPagerAdapter hotSingerPagerAdapter = new HotSingerPagerAdapter();
                 hotSingerPagerAdapter.setData(mData);
                 hotSingerHolder.pagerHot.setAdapter(hotSingerPagerAdapter);
                 hotSingerHolder.indicator.setViewPager(hotSingerHolder.pagerHot);
-            } else if (holder instanceof SingerClassHolder) {
-                ((SingerClassHolder) holder).tvSingerClass.setText(CLASSES[position - 1]);
+            } else if (holder instanceof CommonItemViewHolder) {
+                ((CommonItemViewHolder) holder).tvText1.setText(CLASSES[position - 1]);
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int i = position - 1;
+                        int area = AREAS[i];
+                        int sex = SEXS[i];
+                        String title = CLASSES[i];
+                        getMainActivity().showSingerList(title, area, sex);
+                    }
+                });
             }
         }
 
@@ -254,30 +266,6 @@ public class SingerFragment extends LazyLoadFragment {
                 super(itemView);
                 pagerHot = (ViewPager) itemView.findViewById(R.id.pager_hot_singer);
                 indicator = (CirclePageIndicator) itemView.findViewById(R.id.page_indicator);
-            }
-        }
-
-        class SingerClassHolder extends RecyclerView.ViewHolder {
-            private TextView tvSingerClass;
-
-            public SingerClassHolder(View itemView) {
-                super(itemView);
-                tvSingerClass = (TextView) itemView.findViewById(R.id.tv_text1);
-                tvSingerClass.setTextColor(getResources().getColor(R.color.textColorSecondary));
-                itemView.findViewById(R.id.tv_text2).setVisibility(View.GONE);
-                itemView.findViewById(R.id.iv_picture).setVisibility(View.GONE);
-                ((ImageView) itemView.findViewById(R.id.iv_menu))
-                        .setImageResource(R.mipmap.ic_chevron_right_black_90_24dp);
-                itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        int i = getAdapterPosition() - 1;
-                        int area = AREAS[i];
-                        int sex = SEXS[i];
-                        String title = CLASSES[i];
-                        getMainActivity().showSingerList(title, area, sex);
-                    }
-                });
             }
         }
     }

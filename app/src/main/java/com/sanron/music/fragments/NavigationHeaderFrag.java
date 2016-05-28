@@ -14,6 +14,8 @@ import com.sanron.music.db.bean.Music;
 import com.sanron.music.playback.Player;
 import com.sanron.music.service.PlayerUtil;
 
+import butterknife.ButterKnife;
+
 /**
  * 管理导航头部
  * Created by sanron on 16-4-18.
@@ -27,9 +29,9 @@ public class NavigationHeaderFrag extends Fragment implements Player.OnPlayState
 
     public void setHeader(View header) {
         this.mHeader = header;
-        mIvMusicPic = (ImageView) header.findViewById(R.id.civ_music_pic);
-        mTvMusicTitle = (TextView) header.findViewById(R.id.tv_music_title);
-        mTvMusicArtist = (TextView) header.findViewById(R.id.tv_music_artist);
+        mIvMusicPic = ButterKnife.findById(header, R.id.civ_music_pic);
+        mTvMusicTitle = ButterKnife.findById(header, R.id.tv_music_title);
+        mTvMusicArtist = ButterKnife.findById(header, R.id.tv_music_artist);
     }
 
     @Override

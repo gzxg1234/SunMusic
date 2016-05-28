@@ -7,20 +7,23 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.sanron.music.R;
 import com.sanron.music.fragments.base.BaseFragment;
+
+import butterknife.BindView;
 
 /**
  * Created by Administrator on 2015/12/15.
  */
 public class PagerFragment extends BaseFragment {
 
-    private TabLayout mTabLayout;
-    private ViewPager mViewPager;
+    @BindView(R.id.tab_layout)
+    TabLayout mTabLayout;
+    @BindView(R.id.viewpager)
+    ViewPager mViewPager;
+
     private LocalPagerAdapter mAdapter;
     private String[] mTitles;
     private String[] mFragments;
@@ -55,18 +58,15 @@ public class PagerFragment extends BaseFragment {
         super.setEnterTransition(transition);
     }
 
-    @Nullable
+
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_pager, container, false);
+    public int getViewResId() {
+        return R.layout.frag_pager;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mViewPager = $(R.id.viewpager);
-        mTabLayout = $(R.id.tab_layout);
         mAdapter = new LocalPagerAdapter(getChildFragmentManager());
         mViewPager.setAdapter(mAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
