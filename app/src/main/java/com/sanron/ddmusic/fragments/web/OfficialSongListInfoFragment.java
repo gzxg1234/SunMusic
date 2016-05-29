@@ -130,7 +130,7 @@ public class OfficialSongListInfoFragment extends CommonSongPullFragment impleme
                 if (mIsCollected) {
                     ViewTool.show("已收藏过此歌单");
                 } else {
-                    new AddCollectListTask(mData.songs,
+                    new AddCollectListTask(getContext(),mData.songs,
                             mData.name,
                             LIST_ID_PREFIX + mData.code,
                             mData.pic) {

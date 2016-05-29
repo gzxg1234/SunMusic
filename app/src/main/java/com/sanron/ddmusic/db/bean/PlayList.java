@@ -3,7 +3,8 @@ package com.sanron.ddmusic.db.bean;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import com.sanron.ddmusic.db.DBHelper;
+import com.sanron.ddmusic.db.BaseHelper;
+import com.sanron.ddmusic.db.PlayListHelper;
 
 import java.io.Serializable;
 
@@ -13,6 +14,15 @@ import java.io.Serializable;
  */
 public class PlayList implements Serializable {
 
+    public static final int TYPE_LOCAL = 1;//本地音乐
+    public static final int TYPE_RECENT = 2;//最近播放
+    public static final int TYPE_FAVORITE = 3;//我喜欢
+    public static final int TYPE_USER = 4;//用户自建
+    public static final int TYPE_COLLECTION = 5;//收藏歌单
+
+    public static final long TYPE_LOCAL_ID = 1;
+    public static final long TYPE_RECENT_ID = 2;
+    public static final long TYPE_FAVORITE_ID = 3;
 
     private long id;
 
@@ -92,22 +102,22 @@ public class PlayList implements Serializable {
 
     public static PlayList fromCursor(Cursor cursor) {
         PlayList playList = new PlayList();
-        playList.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
-        playList.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.List.TITLE)));
-        playList.setIcon(cursor.getString(cursor.getColumnIndex(DBHelper.List.ICON)));
-        playList.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.List.TYPE)));
-        playList.setListId(cursor.getString(cursor.getColumnIndex(DBHelper.List.LIST_ID)));
-        playList.setAddTime(cursor.getInt(cursor.getColumnIndex(DBHelper.List.ADD_TIME)));
+        playList.setId(cursor.getLong(cursor.getColumnIndex(BaseHelper.ID)));
+        playList.setTitle(cursor.getString(cursor.getColumnIndex(PlayListHelper.Columns.TITLE)));
+        playList.setIcon(cursor.getString(cursor.getColumnIndex(PlayListHelper.Columns.ICON)));
+        playList.setType(cursor.getInt(cursor.getColumnIndex(PlayListHelper.Columns.TYPE)));
+        playList.setListId(cursor.getString(cursor.getColumnIndex(PlayListHelper.Columns.LIST_ID)));
+        playList.setAddTime(cursor.getInt(cursor.getColumnIndex(PlayListHelper.Columns.ADD_TIME)));
         return playList;
     }
 
     public ContentValues toContentValues() {
         ContentValues values = new ContentValues();
-        values.put(DBHelper.List.TYPE, type);
-        values.put(DBHelper.List.TITLE, title);
-        values.put(DBHelper.List.ICON, icon);
-        values.put(DBHelper.List.LIST_ID, listId);
-        values.put(DBHelper.List.ADD_TIME, addTime);
+        values.put(PlayListHelper.Columns.TYPE, type);
+        values.put(PlayListHelper.Columns.TITLE, title);
+        values.put(PlayListHelper.Columns.ICON, icon);
+        values.put(PlayListHelper.Columns.LIST_ID, listId);
+        values.put(PlayListHelper.Columns.ADD_TIME, addTime);
         return values;
     }
 }

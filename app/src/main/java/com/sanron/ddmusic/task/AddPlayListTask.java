@@ -1,49 +1,53 @@
 package com.sanron.ddmusic.task;
 
-import android.content.ContentValues;
-import android.database.Cursor;
+import android.content.Context;
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 
-import com.sanron.ddmusic.db.DBHelper;
-import com.sanron.ddmusic.db.DataProvider;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.PlayListHelper;
+import com.sanron.ddmusic.db.bean.PlayList;
 
 /**
  * 新建列表
  * Created by Administrator on 2015/12/24.
  */
-public abstract class AddPlayListTask extends AsyncTask<String, Void, Integer> {
+public abstract class AddPlayListTask extends AsyncTask<Void, Void, Integer> {
 
     public static final int EXISTS = -1;
     public static final int FAILED = 0;
     public static final int SUCCESS = 1;
 
-    @Override
-    protected Integer doInBackground(String... params) {
-        int result = FAILED;
-        String listName = params[0];
-        DataProvider.Access listAccess = DataProvider.get().newAccess(DBHelper.List.TABLE);
+    private Context mContext;
+    private String mName;
 
+    public AddPlayListTask(Context context, String name) {
+        mContext = context.getApplicationContext();
+        mName = name;
+    }
+
+    @Override
+    protected Integer doInBackground(Void... params) {
+        int result = FAILED;
+        SQLiteDatabase db = AppDB.get(mContext).getWritableDatabase();
         //检查是否重名
-        Cursor cursor = listAccess.query(new String[]{DBHelper.ID},
-                DBHelper.List.TITLE + "=? and " + DBHelper.List.TYPE + "=?",
-                new String[]{listName, String.valueOf(DBHelper.List.TYPE_USER)});
-        boolean isExists = cursor.moveToFirst();
-        cursor.close();
+        boolean isExists = PlayListHelper.isExistByName(db, mName);
         if (isExists) {
             result = EXISTS;
         } else {
-
-            ContentValues values = new ContentValues(2);
-            values.put(DBHelper.List.TITLE, listName);
-            values.put(DBHelper.List.TYPE, DBHelper.List.TYPE_USER);
-            //插入
-            values.put(DBHelper.List.TYPE, DBHelper.List.TYPE_USER);
-            values.put(DBHelper.List.ADD_TIME, System.currentTimeMillis());
-            if (listAccess.insert(null, values) != -1) {
+            PlayList playList = new PlayList();
+            playList.setType(PlayList.TYPE_USER);
+            playList.setTitle(mName);
+            playList.setAddTime(System.currentTimeMillis());
+            long id = PlayListHelper.addPlaylist(db, playList);
+            if (id != -1) {
                 result = SUCCESS;
+                LocalBroadcastManager.getInstance(mContext)
+                        .sendBroadcast(new Intent("PlayListUpdate"));
             }
         }
-        listAccess.close();
         return result;
     }
 

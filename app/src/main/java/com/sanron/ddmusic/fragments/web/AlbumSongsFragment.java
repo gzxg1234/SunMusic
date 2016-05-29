@@ -117,7 +117,8 @@ public class AlbumSongsFragment extends CommonSongPullFragment implements View.O
                             pic = mData.albumInfo.picS180;
                         }
                     }
-                    new AddCollectListTask(mData.songs,
+                    new AddCollectListTask(getContext(),
+                            mData.songs,
                             mData.albumInfo.title,
                             LIST_ID_PREFIX + mData.albumInfo.albumId,
                             pic) {

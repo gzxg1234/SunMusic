@@ -1,6 +1,6 @@
 package com.sanron.ddmusic.fragments.web;
 
-import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -11,8 +11,8 @@ import android.widget.TextView;
 
 import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.adapter.SongAdapter;
-import com.sanron.ddmusic.db.DBHelper;
-import com.sanron.ddmusic.db.DataProvider;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.PlayListHelper;
 import com.sanron.ddmusic.fragments.base.PullFragment;
 import com.sanron.ddmusic.playback.Player;
 import com.sanron.ddmusic.service.PlayUtil;
@@ -90,12 +90,7 @@ public abstract class CommonSongPullFragment extends PullFragment implements Pla
     }
 
     protected boolean checkIsCollected(String listId) {
-        DataProvider.Access access = DataProvider.get().newAccess(DBHelper.List.TABLE);
-        Cursor c = access.query(new String[]{DBHelper.ID},
-                DBHelper.List.LIST_ID + "=?",
-                new String[]{listId});
-        boolean result = c.moveToFirst();
-        access.close();
-        return result;
+        SQLiteDatabase db = AppDB.get(getContext()).getWritableDatabase();
+        return PlayListHelper.isExistByListId(db, listId);
     }
 }

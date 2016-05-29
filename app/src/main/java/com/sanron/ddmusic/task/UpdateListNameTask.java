@@ -1,11 +1,13 @@
 package com.sanron.ddmusic.task;
 
-import android.content.ContentValues;
-import android.database.Cursor;
+import android.content.Context;
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 
-import com.sanron.ddmusic.db.DBHelper;
-import com.sanron.ddmusic.db.DataProvider;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.PlayListHelper;
 import com.sanron.ddmusic.db.bean.PlayList;
 
 /**
@@ -16,34 +18,33 @@ public abstract class UpdateListNameTask extends AsyncTask<Void, Void, Integer> 
     public static final int EXISTS = -1;
     public static final int FAILED = 0;
     public static final int SUCCESS = 1;
+
+    private Context mContext;
     private PlayList updatePlayList;
 
-    public UpdateListNameTask(PlayList playList) {
-        this.updatePlayList = playList;
+    public UpdateListNameTask(Context context, PlayList playList) {
+        mContext = context.getApplicationContext();
+        updatePlayList = playList;
     }
 
     @Override
     protected Integer doInBackground(Void... params) {
-        DataProvider.Access listAccess = DataProvider.get().newAccess(DBHelper.List.TABLE);
         int result = FAILED;
+        SQLiteDatabase db = AppDB.get(mContext).getWritableDatabase();
         //检查列表名是否已存在
-        Cursor cursor = listAccess.query(new String[]{DBHelper.ID},
-                DBHelper.List.TITLE + "=? and " + DBHelper.List.TYPE + "=?",
-                new String[]{updatePlayList.getTitle(), String.valueOf(DBHelper.List.TYPE_USER)});
-        if (cursor.moveToFirst()) {
+        boolean isExistName = PlayListHelper.isExistByName(db, updatePlayList.getTitle());
+        if (isExistName) {
             //列表名已存在
             result = EXISTS;
         } else {
-            ContentValues values = new ContentValues(1);
-            values.put(DBHelper.List.TITLE, updatePlayList.getTitle());
-            int num = listAccess.update(values,
-                    DBHelper.ID + "=?",
-                    String.valueOf(updatePlayList.getId()));
+            int num = PlayListHelper.updateName(db, updatePlayList.getId(), updatePlayList.getTitle());
             if (num > 0) {
                 result = SUCCESS;
+                LocalBroadcastManager.getInstance(mContext)
+                        .sendBroadcast(new Intent("PlayListUpdate"));
             }
         }
-        listAccess.close();
+
         return result;
     }
 }

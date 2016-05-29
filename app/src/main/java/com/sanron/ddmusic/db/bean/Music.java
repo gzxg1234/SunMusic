@@ -3,13 +3,16 @@ package com.sanron.ddmusic.db.bean;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import com.sanron.ddmusic.db.DBHelper;
+import com.sanron.ddmusic.db.BaseHelper;
+import com.sanron.ddmusic.db.MusicHelper;
 
 /**
  * Created by Administrator on 2015/12/19.
  */
 public class Music {
 
+    public static final int TYPE_LOCAL = 0;
+    public static final int TYPE_WEB = 1;
 
     private long id;
 
@@ -160,33 +163,33 @@ public class Music {
 
     public ContentValues toContentValues() {
         ContentValues values = new ContentValues();
-        values.put(DBHelper.Music.SONG_ID, songId);
-        values.put(DBHelper.Music.BITRATE, bitrate);
-        values.put(DBHelper.Music.ALBUM, album);
-        values.put(DBHelper.Music.DATE_MODIFIED, modifiedDate);
-        values.put(DBHelper.Music.ARTIST, artist);
-        values.put(DBHelper.Music.DATA, data);
-        values.put(DBHelper.Music.DURATION, duration);
-        values.put(DBHelper.Music.TITLE, title);
-        values.put(DBHelper.Music.TITLE_KEY, titleKey);
-        values.put(DBHelper.Music.DISPLAY, displayName);
-        values.put(DBHelper.Music.TYPE, type);
+        values.put(MusicHelper.Columns.SONG_ID, songId);
+        values.put(MusicHelper.Columns.BITRATE, bitrate);
+        values.put(MusicHelper.Columns.ALBUM, album);
+        values.put(MusicHelper.Columns.DATE_MODIFIED, modifiedDate);
+        values.put(MusicHelper.Columns.ARTIST, artist);
+        values.put(MusicHelper.Columns.DATA, data);
+        values.put(MusicHelper.Columns.DURATION, duration);
+        values.put(MusicHelper.Columns.TITLE, title);
+        values.put(MusicHelper.Columns.TITLE_KEY, titleKey);
+        values.put(MusicHelper.Columns.DISPLAY, displayName);
+        values.put(MusicHelper.Columns.TYPE, type);
         return values;
     }
 
     public static Music fromCursor(Cursor cursor) {
         Music music = new Music();
-        music.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
-        music.setSongId(cursor.getString(cursor.getColumnIndex(DBHelper.Music.SONG_ID)));
-        music.setBitrate(cursor.getInt(cursor.getColumnIndex(DBHelper.Music.BITRATE)));
-        music.setAlbum(cursor.getString(cursor.getColumnIndex(DBHelper.Music.ALBUM)));
-        music.setArtist(cursor.getString(cursor.getColumnIndex(DBHelper.Music.ARTIST)));
-        music.setData(cursor.getString(cursor.getColumnIndex(DBHelper.Music.DATA)));
-        music.setDuration(cursor.getInt(cursor.getColumnIndex(DBHelper.Music.DURATION)));
-        music.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.Music.TITLE)));
-        music.setTitleKey(cursor.getString(cursor.getColumnIndex(DBHelper.Music.TITLE_KEY)));
-        music.setDisplayName(cursor.getString(cursor.getColumnIndex(DBHelper.Music.DISPLAY)));
-        music.setType(cursor.getInt(cursor.getColumnIndex(DBHelper.Music.TYPE)));
+        music.setId(cursor.getLong(cursor.getColumnIndex(BaseHelper.ID)));
+        music.setSongId(cursor.getString(cursor.getColumnIndex(MusicHelper.Columns.SONG_ID)));
+        music.setBitrate(cursor.getInt(cursor.getColumnIndex(MusicHelper.Columns.BITRATE)));
+        music.setAlbum(cursor.getString(cursor.getColumnIndex(MusicHelper.Columns.ALBUM)));
+        music.setArtist(cursor.getString(cursor.getColumnIndex(MusicHelper.Columns.ARTIST)));
+        music.setData(cursor.getString(cursor.getColumnIndex(MusicHelper.Columns.DATA)));
+        music.setDuration(cursor.getInt(cursor.getColumnIndex(MusicHelper.Columns.DURATION)));
+        music.setTitle(cursor.getString(cursor.getColumnIndex(MusicHelper.Columns.TITLE)));
+        music.setTitleKey(cursor.getString(cursor.getColumnIndex(MusicHelper.Columns.TITLE_KEY)));
+        music.setDisplayName(cursor.getString(cursor.getColumnIndex(MusicHelper.Columns.DISPLAY)));
+        music.setType(cursor.getInt(cursor.getColumnIndex(MusicHelper.Columns.TYPE)));
         return music;
     }
 

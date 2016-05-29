@@ -53,7 +53,7 @@ public class AddSongToListWindow extends ScrimPopupWindow {
         this.mPlayLists.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                new AddMusicToListTask(playLists.get(position), musics) {
+                new AddMusicToListTask(activity, playLists.get(position), musics) {
                     private ProgressDialog progressDialog;
 
                     @Override

@@ -1,10 +1,16 @@
 package com.sanron.ddmusic.fragments.pagermymusic;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -21,16 +27,16 @@ import android.widget.TextView;
 import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.adapter.PlayListAdapter;
 import com.sanron.ddmusic.common.ViewTool;
-import com.sanron.ddmusic.db.DBHelper;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.ListMemberHelper;
+import com.sanron.ddmusic.db.PlayListHelper;
 import com.sanron.ddmusic.db.bean.Music;
 import com.sanron.ddmusic.db.bean.PlayList;
 import com.sanron.ddmusic.service.PlayUtil;
 import com.sanron.ddmusic.task.AddPlayListTask;
-import com.sanron.ddmusic.task.DeleteTask;
-import com.sanron.ddmusic.task.QueryListMemberDataTask;
-import com.sanron.ddmusic.task.QueryListTask;
 import com.sanron.ddmusic.task.UpdateListNameTask;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -48,12 +54,31 @@ public class PlayListFragment extends BaseDataFragment implements PlayListAdapte
 
     public static final int MENU_NEW_LIST = 1;
     private PlayListAdapter mAdapter;
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            loadData();
+        }
+    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         mAdapter = new PlayListAdapter(getContext());
-        setObserveTable(DBHelper.List.TABLE, DBHelper.ListMember.TABLE);
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        LocalBroadcastManager.getInstance(getContext())
+                .registerReceiver(mReceiver, new IntentFilter("PlayListUpdate"));
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        LocalBroadcastManager.getInstance(getContext())
+                .unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -72,10 +97,23 @@ public class PlayListFragment extends BaseDataFragment implements PlayListAdapte
 
     @Override
     public void loadData() {
-        new QueryListTask() {
+        new AsyncTask<Void, Void, List<PlayList>>() {
             @Override
             protected void onPostExecute(List<PlayList> playLists) {
                 mAdapter.setData(playLists);
+            }
+
+            @Override
+            protected List<PlayList> doInBackground(Void... params) {
+                SQLiteDatabase db = AppDB.get(getContext()).getWritableDatabase();
+                List<PlayList> playLists = new ArrayList<>();
+                playLists.addAll(PlayListHelper.getListByType(db, PlayList.TYPE_COLLECTION));
+                playLists.addAll(PlayListHelper.getListByType(db, PlayList.TYPE_FAVORITE));
+                playLists.addAll(PlayListHelper.getListByType(db, PlayList.TYPE_USER));
+                for (PlayList playList : playLists) {
+                    playList.setSongNum(ListMemberHelper.getMusicCountByListid(db, playList.getId()));
+                }
+                return playLists;
             }
         }.execute();
     }
@@ -92,11 +130,11 @@ public class PlayListFragment extends BaseDataFragment implements PlayListAdapte
         Menu menu = popupMenu.getMenu();
         popupMenu.getMenuInflater().inflate(R.menu.popup_menu_playlist, menu);
         int type = ((PlayList) mAdapter.getItem(position)).getType();
-        if (type == DBHelper.List.TYPE_FAVORITE) {
+        if (type == PlayList.TYPE_FAVORITE) {
             //不是用户创建的列表，不能重命名和删除
             menu.removeItem(R.id.menu_delete_list);
             menu.removeItem(R.id.menu_rename_list);
-        } else if (type == DBHelper.List.TYPE_COLLECTION) {
+        } else if (type == PlayList.TYPE_COLLECTION) {
             menu.removeItem(R.id.menu_rename_list);
         }
 
@@ -134,18 +172,15 @@ public class PlayListFragment extends BaseDataFragment implements PlayListAdapte
      * 播放列表歌曲
      */
     private void playListMusics(final PlayList playList) {
-        new QueryListMemberDataTask(playList.getId()) {
-            @Override
-            protected void onPostExecute(List<Music> musics) {
-                if (musics.size() == 0) {
-                    ViewTool.show("列表暂时没有歌曲");
-                } else {
-                    PlayUtil.clearQueue();
-                    PlayUtil.enqueue(musics);
-                    PlayUtil.play(0);
-                }
-            }
-        }.execute();
+        SQLiteDatabase db = AppDB.get(getContext()).getWritableDatabase();
+        List<Music> musics = ListMemberHelper.getMusicsByListId(db, playList.getId());
+        if (musics.size() == 0) {
+            ViewTool.show("列表暂时没有歌曲");
+        } else {
+            PlayUtil.clearQueue();
+            PlayUtil.enqueue(musics);
+            PlayUtil.play(0);
+        }
     }
 
     @Override
@@ -189,7 +224,7 @@ public class PlayListFragment extends BaseDataFragment implements PlayListAdapte
                 PlayList update = new PlayList();
                 update.setTitle(input);
                 update.setId(playList.getId());
-                new UpdateListNameTask(update) {
+                new UpdateListNameTask(getContext(), update) {
                     @Override
                     protected void onPostExecute(Integer result) {
                         switch (result) {
@@ -229,7 +264,7 @@ public class PlayListFragment extends BaseDataFragment implements PlayListAdapte
                     return;
                 }
 
-                new AddPlayListTask() {
+                new AddPlayListTask(getContext(), dlg.getInput()) {
                     @Override
                     protected void onPostExecute(Integer result) {
 
@@ -252,7 +287,7 @@ public class PlayListFragment extends BaseDataFragment implements PlayListAdapte
                             break;
                         }
                     }
-                }.execute(dlg.getInput());
+                }.execute();
             }
         });
         dlg.show();
@@ -261,7 +296,7 @@ public class PlayListFragment extends BaseDataFragment implements PlayListAdapte
     /**
      * 删除确认对话框
      */
-    public class DeleteConfirmDialog extends AlertDialog.Builder implements DialogInterface.OnClickListener, DeleteTask.DeleteCallback {
+    public class DeleteConfirmDialog extends AlertDialog.Builder implements DialogInterface.OnClickListener {
         private PlayList playList;
 
         public DeleteConfirmDialog(Context context, PlayList playList) {
@@ -281,26 +316,15 @@ public class PlayListFragment extends BaseDataFragment implements PlayListAdapte
                 }
                 break;
                 case DialogInterface.BUTTON_POSITIVE: {
-                    new DeleteTask()
-                            .table(DBHelper.List.TABLE)
-                            .where(DBHelper.ID + "=" + playList.getId())
-                            .execute(this);
-                    dialog.dismiss();
+                    SQLiteDatabase db = AppDB.get(getContext()).getWritableDatabase();
+                    if (PlayListHelper.deleteById(db, playList.getId()) > 0) {
+                        ViewTool.show("删除歌单成功");
+                        loadData();
+                    } else {
+                        ViewTool.show("删除失败");
+                    }
                 }
                 break;
-            }
-        }
-
-        @Override
-        public void onPreDelete() {
-        }
-
-        @Override
-        public void onDeleteFinish(int deleteCount) {
-            if (deleteCount == 0) {
-                ViewTool.show("删除失败");
-            } else {
-                ViewTool.show("删除歌单成功");
             }
         }
     }

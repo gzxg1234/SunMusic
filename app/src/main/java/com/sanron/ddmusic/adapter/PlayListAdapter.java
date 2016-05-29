@@ -11,7 +11,6 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.common.ViewTool;
-import com.sanron.ddmusic.db.DBHelper;
 import com.sanron.ddmusic.db.bean.PlayList;
 
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ public class PlayListAdapter extends RecyclerView.Adapter {
         List<PlayList> selfList = new LinkedList<>();
         List<PlayList> onlineList = new LinkedList<>();
         for (PlayList playList : data) {
-            if (playList.getType() == DBHelper.List.TYPE_COLLECTION) {
+            if (playList.getType() == PlayList.TYPE_COLLECTION) {
                 onlineList.add(playList);
             } else {
                 selfList.add(playList);
@@ -105,9 +104,9 @@ public class PlayListAdapter extends RecyclerView.Adapter {
         if (holder instanceof CommonItemViewHolder) {
             CommonItemViewHolder itemHolder = (CommonItemViewHolder) holder;
             PlayList playList = (PlayList) mItems.get(position);
-            if (playList.getType() == DBHelper.List.TYPE_FAVORITE) {
+            if (playList.getType() ==PlayList.TYPE_FAVORITE) {
                 itemHolder.ivPicture.setImageResource(R.mipmap.ic_favorite_list);
-            } else if (playList.getType() == DBHelper.List.TYPE_USER) {
+            } else if (playList.getType() ==PlayList.TYPE_USER) {
                 itemHolder.ivPicture.setImageResource(R.mipmap.icon_normal_list);
             } else {
                 ImageLoader.getInstance().displayImage(playList.getIcon(),

@@ -42,7 +42,6 @@ import com.sanron.ddmusic.api.LrcPicProvider;
 import com.sanron.ddmusic.api.StringCallback;
 import com.sanron.ddmusic.common.FastBlur;
 import com.sanron.ddmusic.common.ViewTool;
-import com.sanron.ddmusic.db.DBHelper;
 import com.sanron.ddmusic.db.bean.Music;
 import com.sanron.ddmusic.fragments.base.BaseFragment;
 import com.sanron.ddmusic.playback.Player;
@@ -259,19 +258,25 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
         PlayUtil.addOnBufferListener(this);
         LrcPicProvider.get().addOnLrcPicChangeCallback(this);
 
-        startUpdateTask();
         Music music = PlayUtil.getCurrentMusic();
         if (music != null) {
             setTitleText(music.getTitle());
             setArtistText(music.getArtist());
         }
+
         setPlayProgress(PlayUtil.getProgress());
         setSongDuration(PlayUtil.getDuration());
         if (PlayUtil.isPlaying()) {
-            mSibtnTogglePlay.setImageResource(R.mipmap.ic_pause_black_36dp);
-            mFabTogglePlay.setImageResource(R.mipmap.ic_pause_white_24dp);
+            setIsPlaying(true);
+            //是否收藏过
+            new CheckFavoriteTask(getContext(), music) {
+                @Override
+                protected void onPostExecute(Boolean isFavorite) {
+                    setIsFavorite(isFavorite);
+                }
+            }.execute();
         } else {
-            stopUpdateTask();
+            setIsPlaying(false);
         }
 
         setModeIcon(PlayUtil.getPlayMode());
@@ -282,7 +287,6 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
     public void onPlayStateChange(int state) {
         switch (state) {
             case Player.STATE_IDLE: {
-                stopUpdateTask();
                 setTitleText(getContext().getString(R.string.app_name));
                 setArtistText("");
                 setSongPicture(null);
@@ -294,13 +298,11 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
             break;
 
             case Player.STATE_PAUSE: {
-                stopUpdateTask();
                 setIsPlaying(false);
             }
             break;
 
             case Player.STATE_PLAYING: {
-                startUpdateTask();
                 setIsPlaying(true);
             }
             break;
@@ -321,7 +323,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
                 setIsPlaying(false);
 
                 //是否收藏过
-                new CheckFavoriteTask(music) {
+                new CheckFavoriteTask(getContext(), music) {
                     @Override
                     protected void onPostExecute(Boolean isFavorite) {
                         setIsFavorite(isFavorite);
@@ -337,9 +339,9 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
                 }
                 setSongDuration(PlayUtil.getDuration());
                 setPlayProgress(PlayUtil.getProgress());
-                if (music.getType() == DBHelper.Music.TYPE_LOCAL) {
+                if (music.getType() == Music.TYPE_LOCAL) {
                     mPlayProgress.setSecondaryProgress(PlayUtil.getDuration());
-                } else if (music.getType() == DBHelper.Music.TYPE_WEB) {
+                } else if (music.getType() == Music.TYPE_WEB) {
                     mPlayProgress.setSecondaryProgress(0);
                 }
             }
@@ -349,9 +351,11 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
 
     private void setIsPlaying(boolean playing) {
         if (playing) {
+            startUpdateTask();
             mSibtnTogglePlay.setImageResource(R.mipmap.ic_pause_black_36dp);
             mFabTogglePlay.setImageResource(R.mipmap.ic_pause_white_24dp);
         } else {
+            stopUpdateTask();
             mSibtnTogglePlay.setImageResource(R.mipmap.ic_play_arrow_black_36dp);
             mFabTogglePlay.setImageResource(R.mipmap.ic_play_arrow_white_24dp);
         }
@@ -592,7 +596,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
             case R.id.iv_favorite: {
                 if (mIsFavorite) {
                 } else {
-                    new FavoriteMusicTask(PlayUtil.getCurrentMusic()) {
+                    new FavoriteMusicTask(getContext(), PlayUtil.getCurrentMusic()) {
                         @Override
                         protected void onPostExecute(Boolean aBoolean) {
                             setIsFavorite(aBoolean);

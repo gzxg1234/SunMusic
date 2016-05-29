@@ -4,8 +4,9 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,19 +26,19 @@ import android.widget.TextView;
 import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.adapter.MusicAdapter;
 import com.sanron.ddmusic.common.ViewTool;
-import com.sanron.ddmusic.db.DBHelper;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.ListMemberHelper;
+import com.sanron.ddmusic.db.PlayListHelper;
 import com.sanron.ddmusic.db.bean.Music;
 import com.sanron.ddmusic.db.bean.PlayList;
 import com.sanron.ddmusic.playback.Player;
 import com.sanron.ddmusic.service.PlayUtil;
-import com.sanron.ddmusic.task.DeleteTask;
-import com.sanron.ddmusic.task.QueryListMemberDataTask;
-import com.sanron.ddmusic.task.QueryTask;
 import com.sanron.ddmusic.view.AddSongToListWindow;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,7 +46,7 @@ import butterknife.ButterKnife;
 /**
  * Created by sanron on 16-3-28.
  */
-public class ListMusicFragment extends BaseDataFragment implements Observer, CompoundButton.OnCheckedChangeListener, Player.OnPlayStateChangeListener {
+public class ListMusicFragment extends BaseDataFragment implements CompoundButton.OnCheckedChangeListener, Player.OnPlayStateChangeListener {
 
 
     @BindView(R.id.ll_multi_mode_bar)
@@ -82,7 +83,6 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
         if (arguments != null) {
             mPlayList = (PlayList) getArguments().get(ARG_PLAY_LIST);
         }
-        setObserveTable(DBHelper.ListMember.TABLE);
 
         mAdapter = new MusicAdapter(getContext());
         super.onCreate(savedInstanceState);
@@ -172,12 +172,6 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
     }
 
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-
     /**
      * 删除动作
      */
@@ -190,11 +184,24 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
 
     @Override
     public void loadData() {
-        new QueryListMemberDataTask(mPlayList.getId()) {
+        new AsyncTask<Void, Void, List<Music>>() {
             @Override
             protected void onPostExecute(List<Music> musics) {
                 mAdapter.setData(musics);
                 onPlayStateChange(Player.STATE_PREPARING);
+            }
+
+            @Override
+            protected List<Music> doInBackground(Void... params) {
+                SQLiteDatabase db = AppDB.get(getContext()).getWritableDatabase();
+                List<Music> musics = ListMemberHelper.getMusicsByListId(db, mPlayList.getId());
+                Collections.sort(musics, new Comparator<Music>() {
+                    @Override
+                    public int compare(Music lhs, Music rhs) {
+                        return lhs.getTitleKey().compareTo(rhs.getTitleKey());
+                    }
+                });
+                return musics;
             }
         }.execute();
     }
@@ -294,30 +301,14 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
      * 显示添加歌曲到列表的窗口
      */
     private void showAddToListWindow(List<Music> musics) {
-        final List<Music> checkedMusics = musics;
-        new QueryTask()
-                .table(DBHelper.List.TABLE)
-                .selection(DBHelper.List.TYPE + "=? or " + DBHelper.List.TYPE + "=?")
-                .selectionArgs(DBHelper.List.TYPE_USER + "",
-                        DBHelper.List.TYPE_FAVORITE + "")
-                .execute(new QueryTask.QueryCallback() {
-                    @Override
-                    public void onPreQuery() {
-                    }
-
-                    @Override
-                    public void onQueryFinish(Cursor cursor) {
-                        List<PlayList> playLists = new LinkedList<>();
-                        while (cursor.moveToNext()) {
-                            PlayList playList = PlayList.fromCursor(cursor);
-                            playLists.add(playList);
-                        }
-                        new AddSongToListWindow(getActivity(),
-                                playLists,
-                                checkedMusics)
-                                .show(getView());
-                    }
-                });
+        SQLiteDatabase db = AppDB.get(getContext()).getWritableDatabase();
+        List<PlayList> playLists = new LinkedList<>();
+        playLists.addAll(PlayListHelper.getListByType(db, PlayList.TYPE_USER));
+        playLists.addAll(PlayListHelper.getListByType(db, PlayList.TYPE_FAVORITE));
+        new AddSongToListWindow(getActivity(),
+                playLists,
+                musics)
+                .show(getView());
     }
 
     /**
@@ -351,7 +342,6 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
     protected void endMultiMode() {
         mAdapter.setMultiMode(false);
         mAdapter.notifyDataSetChanged();
-
         mMusicOperator.dismiss();
         mCheckBar.setVisibility(View.GONE);
         mCbCheckedAll.setChecked(false);
@@ -380,7 +370,7 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
     /**
      * 移除歌曲对话框
      */
-    public class RemoveListSongDialogBuilder extends AlertDialog.Builder implements DialogInterface.OnClickListener, DeleteTask.DeleteCallback {
+    public class RemoveListSongDialogBuilder extends AlertDialog.Builder implements DialogInterface.OnClickListener {
         private PlayList mPlayList;
         private List<Music> mRemoveMusics;
         private ProgressDialog mProgressDialog;
@@ -411,41 +401,34 @@ public class ListMusicFragment extends BaseDataFragment implements Observer, Com
                 break;
 
                 case DialogInterface.BUTTON_POSITIVE: {
-                    String in = createIn();
-                    new DeleteTask()
-                            .table(DBHelper.ListMember.TABLE)
-                            .where(DBHelper.ListMember.LIST_ID + "=" + mPlayList.getId()
-                                    + " and " + DBHelper.ListMember.MUSIC_ID + " in(" + in + ")")
-                            .execute(this);
+                    new AsyncTask<Void, Void, Integer>() {
+                        @Override
+                        protected Integer doInBackground(Void... params) {
+                            int deleteNum = 0;
+                            SQLiteDatabase db = AppDB.get(getContext()).getWritableDatabase();
+                            db.beginTransaction();
+                            try {
+                                for (Music music : mRemoveMusics) {
+                                    deleteNum = ListMemberHelper.deleteByMusicId(db, music.getId());
+                                }
+                                db.setTransactionSuccessful();
+                            } catch (Exception e) {
+                                deleteNum = 0;
+                            } finally {
+                                db.endTransaction();
+                            }
+                            return deleteNum;
+                        }
+
+                        @Override
+                        protected void onPostExecute(Integer deleteNum) {
+                            ViewTool.show("移除" + deleteNum + "首歌曲");
+                            loadData();
+                        }
+                    }.execute();
                 }
                 break;
             }
-        }
-
-        private String createIn() {
-            StringBuilder in = new StringBuilder();
-            for (Music music : mRemoveMusics) {
-                in.append(music.getId()).append(",");
-            }
-            if (in.length() > 0) {
-                in.deleteCharAt(in.length() - 1);
-            }
-            return in.toString();
-        }
-
-        @Override
-        public void onPreDelete() {
-            mProgressDialog.show();
-        }
-
-        @Override
-        public void onDeleteFinish(int deleteCount) {
-            if (deleteCount > 0) {
-                ViewTool.show("移除" + deleteCount + "首歌曲");
-            } else {
-                ViewTool.show("移除失败");
-            }
-            mProgressDialog.dismiss();
         }
     }
 }

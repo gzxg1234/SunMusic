@@ -1,12 +1,18 @@
 package com.sanron.ddmusic.task;
 
-import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 
-import com.sanron.ddmusic.db.DBHelper;
-import com.sanron.ddmusic.db.DataProvider;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.BaseHelper;
+import com.sanron.ddmusic.db.ListMemberHelper;
+import com.sanron.ddmusic.db.MusicHelper;
 import com.sanron.ddmusic.db.bean.Music;
+import com.sanron.ddmusic.db.bean.PlayList;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -19,72 +25,71 @@ import java.util.List;
 public class UpdateLocalMusicTask extends AsyncTask<Void, Void, Void> {
 
 
+    private Context mContext;
     private List<Music> musics;
     private boolean isFullScan;
 
-    public UpdateLocalMusicTask(List<Music> musics, boolean isFullScan) {
+    public UpdateLocalMusicTask(Context context, List<Music> musics, boolean isFullScan) {
         this.musics = musics;
         this.isFullScan = isFullScan;
+        mContext = context.getApplicationContext();
     }
 
     @Override
     protected Void doInBackground(Void... params) {
-        if (musics != null) {
-            DataProvider.Access musicAccess = DataProvider.get().newAccess(DBHelper.Music.TABLE);
-            DataProvider.Access listAccess = DataProvider.get().newAccess(DBHelper.List.TABLE);
-            DataProvider.Access listMemberAccess = DataProvider.get().newAccess(DBHelper.ListMember.TABLE);
-            DataProvider.get().beginTransaction();
+        long time = System.currentTimeMillis();
+        SQLiteDatabase db = AppDB.get(mContext).getWritableDatabase();
+        db.beginTransaction();
 
-            //插入数据
-            List<Long> ids = new LinkedList<>();
-            ContentValues values = new ContentValues(2);
-            values.put(DBHelper.ListMember.LIST_ID, DBHelper.List.TYPE_LOCAL_ID);
-            for (Music music : musics) {
-                //检查是否已经存在,对比文件路径和修改时间
-                Cursor c = musicAccess.query(new String[]{DBHelper.ID, DBHelper.Music.DATE_MODIFIED},
-                        DBHelper.Music.DATA + "=?",
-                        new String[]{music.getData()});
-                if (c.moveToFirst()) {
-                    long id = c.getLong(0);
-                    long dateModified = c.getLong(1);
-                    if (music.getModifiedDate() == dateModified) {
-                        ids.add(id);
-                        continue;
-                    }
-                }
-                long id = musicAccess.insert(null, music.toContentValues());
-                ids.add(id);
-            }
-
-            if (isFullScan) {
-                //全盘扫描，更新全部
-                listMemberAccess.delete(DBHelper.ListMember.LIST_ID + "=?",
-                        String.valueOf(DBHelper.List.TYPE_LOCAL_ID));
-
-                Cursor c2 = musicAccess.query(new String[]{DBHelper.ID + "", DBHelper.Music.DATA + ""},
-                        DBHelper.Music.DATA + "!=\"\"", null);
-                while (c2.moveToNext()) {
-                    long musicid = c2.getLong(0);
-                    String dataPath = c2.getString(1);
-                    File file = new File(dataPath);
-                    if (file.exists()) {
-                        values.put(DBHelper.ListMember.MUSIC_ID, musicid);
-                        listMemberAccess.insert(null, values);
-                    }
-                }
-            } else {
-                for (Long id : ids) {
-                    values.put(DBHelper.ListMember.MUSIC_ID, id);
-                    listMemberAccess.insert(null, values);
+        //插入数据
+        List<Long> ids = new LinkedList<>();
+        for (Music music : musics) {
+            //检查是否已经存在,对比文件路径和修改时间
+            Cursor c = db.query(
+                    MusicHelper.Columns.TABLE,
+                    new String[]{BaseHelper.ID, MusicHelper.Columns.DATE_MODIFIED},
+                    MusicHelper.Columns.DATA + "=?",
+                    new String[]{music.getData()}, null, null, null);
+            if (c.moveToFirst()) {
+                long id = c.getLong(0);
+                long dateModified = c.getLong(1);
+                if (music.getModifiedDate() == dateModified) {
+                    ids.add(id);
+                    continue;
                 }
             }
-
-            DataProvider.get().setTransactionSuccessful();
-            DataProvider.get().endTransaction();
-            musicAccess.close();
-            listAccess.close();
-            listMemberAccess.close();
+            c.close();
+            long id = MusicHelper.addMusic(db, music);
+            ids.add(id);
         }
+
+        if (isFullScan) {
+            //全盘扫描，更新全部
+            ListMemberHelper.deleteByListId(db, PlayList.TYPE_LOCAL_ID);
+
+            List<Music> locals = MusicHelper.getMusicByType(db, Music.TYPE_LOCAL);
+            for (Music localMusic : locals) {
+                long musicid = localMusic.getId();
+                String dataPath = localMusic.getData();
+                File file = new File(dataPath);
+                if (file.exists()) {
+                    ListMemberHelper.addMusicToList(db, musicid, PlayList.TYPE_LOCAL_ID, time);
+                }
+            }
+        } else {
+            for (Long id : ids) {
+                if (ListMemberHelper.isExistByMusicIdAndListId(db, PlayList.TYPE_LOCAL_ID, id)) {
+                    continue;
+                }
+                ListMemberHelper.addMusicToList(db, id, PlayList.TYPE_LOCAL_ID, time);
+            }
+        }
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+
+        LocalBroadcastManager.getInstance(mContext)
+                .sendBroadcast(new Intent("LocalMusicUpdate"));
         return null;
     }
 

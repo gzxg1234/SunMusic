@@ -119,7 +119,7 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
                             pic = mData.pic;
                         }
                     }
-                    new AddCollectListTask(mData.songs,
+                    new AddCollectListTask(getContext(), mData.songs,
                             mData.title,
                             LIST_ID_PREFIX + mData.listId,
                             pic) {

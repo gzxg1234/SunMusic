@@ -17,7 +17,6 @@ import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.api.bean.SongUrlInfo;
 import com.sanron.ddmusic.common.MyLog;
 import com.sanron.ddmusic.common.ViewTool;
-import com.sanron.ddmusic.db.DBHelper;
 import com.sanron.ddmusic.db.bean.Music;
 
 import java.io.File;
@@ -165,10 +164,10 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
         mCurrentPosition = position;
         Music music = mQueue.get(mCurrentPosition);
         changeState(STATE_PREPARING);
-        if (music.getType() == DBHelper.Music.TYPE_WEB) {
+        if (music.getType() == Music.TYPE_WEB) {
             sendBufferingStart();
             playWebMusic(music.getSongId());
-        } else if (music.getType() == DBHelper.Music.TYPE_LOCAL) {
+        } else if (music.getType() == Music.TYPE_LOCAL) {
             playLocalMusic(music.getData());
         }
     }

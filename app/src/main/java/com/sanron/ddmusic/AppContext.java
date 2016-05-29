@@ -12,7 +12,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.common.MyLog;
 import com.sanron.ddmusic.common.ViewTool;
-import com.sanron.ddmusic.db.DataProvider;
 import com.sanron.ddmusic.service.DDPlayService;
 import com.squareup.leakcanary.LeakCanary;
 
@@ -41,7 +40,6 @@ public class AppContext extends Application {
         super.onCreate();
         LeakCanary.install(this);
         ViewTool.init(this);
-        DataProvider.get().init(this);
         registerReceiver(netChangeReceiver,
                 new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
     }

@@ -1,15 +1,16 @@
 package com.sanron.ddmusic.task;
 
-import android.content.ContentValues;
-import android.database.Cursor;
+import android.content.Context;
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 
-import com.sanron.ddmusic.db.DBHelper;
-import com.sanron.ddmusic.db.DataProvider;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.ListMemberHelper;
 import com.sanron.ddmusic.db.bean.Music;
 import com.sanron.ddmusic.db.bean.PlayList;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,39 +19,38 @@ import java.util.List;
 public abstract class AddMusicToListTask extends AsyncTask<Void, Void, Integer> {
     private PlayList mPlayList;
     private List<Music> mAddMusics;
+    private Context mContext;
 
-    public AddMusicToListTask(PlayList playList, List<Music> musics) {
-        this.mPlayList = playList;
-        this.mAddMusics = musics;
+    public AddMusicToListTask(Context context, PlayList playList, List<Music> musics) {
+        mPlayList = playList;
+        mAddMusics = musics;
+        mContext = context.getApplicationContext();
     }
 
     @Override
     protected Integer doInBackground(Void... params) {
-        DataProvider.Access access = DataProvider.get().newAccess(DBHelper.ListMember.TABLE);
-        DataProvider.get().beginTransaction();
         int insertNum = 0;//添加成功数量
-        long time = new Date().getTime();
-        ContentValues values = new ContentValues(3);
-        values.put(DBHelper.ListMember.ADD_TIME, time);
+        long time = System.currentTimeMillis();
+        long listid = mPlayList.getId();
+        SQLiteDatabase db = AppDB.get(mContext).getWritableDatabase();
+        db.beginTransaction();
         for (int i = 0; i < mAddMusics.size(); i++) {
             Music music = mAddMusics.get(i);
             //检查是否已经存在于列表中
-            String sql = "select 1 from " + DBHelper.ListMember.TABLE
-                    + " where " + DBHelper.ListMember.LIST_ID + "=?"
-                    + " and " + DBHelper.ListMember.MUSIC_ID + "=?";
-            Cursor cursor = access.rawQuery(sql, String.valueOf(mPlayList.getId()),
-                    String.valueOf(music.getId()));
-            if (!cursor.moveToFirst()) {
-                values.put(DBHelper.ListMember.LIST_ID, mPlayList.getId());
-                values.put(DBHelper.ListMember.MUSIC_ID, music.getId());
-                if (access.insert(null, values) != -1) {
+            boolean isExist = ListMemberHelper.isExistByMusicIdAndListId(db, listid, music.getId());
+            if (!isExist) {
+                long id = ListMemberHelper.addMusicToList(db, music.getId(), listid, time);
+                if (id != -1) {
                     insertNum++;
                 }
             }
         }
-        DataProvider.get().setTransactionSuccessful();
-        DataProvider.get().endTransaction();
-        access.close();
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        if (insertNum > 0) {
+            LocalBroadcastManager.getInstance(mContext)
+                    .sendBroadcast(new Intent("PlayListUpdate"));
+        }
         return insertNum;
     }
 

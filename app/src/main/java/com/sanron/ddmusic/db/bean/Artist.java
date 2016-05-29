@@ -3,7 +3,8 @@ package com.sanron.ddmusic.db.bean;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import com.sanron.ddmusic.db.DBHelper;
+import com.sanron.ddmusic.db.ArtistHelper;
+import com.sanron.ddmusic.db.BaseHelper;
 
 /**
  * Created by Administrator on 2015/12/28.
@@ -45,8 +46,8 @@ public class Artist {
 
     public static Artist fromCursor(Cursor cursor) {
         Artist artist = new Artist();
-        artist.setId(cursor.getLong(cursor.getColumnIndex(DBHelper.ID)));
-        artist.setName(cursor.getString(cursor.getColumnIndex(DBHelper.Artist.NAME)));
+        artist.setId(cursor.getLong(cursor.getColumnIndex(BaseHelper.ID)));
+        artist.setName(cursor.getString(cursor.getColumnIndex(ArtistHelper.Columns.NAME)));
         return artist;
     }
 }

@@ -1,38 +1,62 @@
 package com.sanron.ddmusic.fragments.pagermymusic;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.CompoundButton;
 
 import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.activities.MainActivity;
 import com.sanron.ddmusic.activities.ScanActivity;
 import com.sanron.ddmusic.common.ViewTool;
-import com.sanron.ddmusic.db.DBHelper;
 import com.sanron.ddmusic.db.bean.Music;
 import com.sanron.ddmusic.db.bean.PlayList;
 import com.sanron.ddmusic.task.DeleteLocalMusicTask;
 
 import java.util.List;
-import java.util.Observer;
 
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class LocalMusicFragment extends ListMusicFragment implements MainActivity.BackPressedHandler, Observer, CompoundButton.OnCheckedChangeListener {
+public class LocalMusicFragment extends ListMusicFragment implements MainActivity.BackPressedHandler, CompoundButton.OnCheckedChangeListener {
 
     public static final int MENU_UPDATE_LOCAL_MUSIC = 1;
 
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            loadData();
+        }
+    };
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        LocalBroadcastManager.getInstance(getContext())
+                .registerReceiver(mReceiver, new IntentFilter("LocalMusicUpdate"));
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        LocalBroadcastManager.getInstance(getContext())
+                .unregisterReceiver(mReceiver);
+    }
+
     public LocalMusicFragment() {
         PlayList playList = new PlayList();
-        playList.setId(DBHelper.List.TYPE_LOCAL_ID);
+        playList.setId(PlayList.TYPE_LOCAL_ID);
         Bundle bundle = new Bundle();
         bundle.putSerializable(ARG_PLAY_LIST, playList);
         setArguments(bundle);
@@ -121,7 +145,7 @@ public class LocalMusicFragment extends ListMusicFragment implements MainActivit
                 break;
 
                 case DialogInterface.BUTTON_POSITIVE: {
-                    new DeleteLocalMusicTask(mDeleteMusics, mIsDeleteFile) {
+                    new DeleteLocalMusicTask(getContext(), mDeleteMusics, mIsDeleteFile) {
                         @Override
                         protected void onPreExecute() {
                             mProgressDialog.show();

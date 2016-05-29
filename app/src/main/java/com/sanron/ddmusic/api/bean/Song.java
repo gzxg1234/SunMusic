@@ -1,7 +1,7 @@
 package com.sanron.ddmusic.api.bean;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.sanron.ddmusic.db.DBHelper;
+import com.github.stuxuhai.jpinyin.PinyinHelper;
 import com.sanron.ddmusic.db.bean.Music;
 
 /**
@@ -137,7 +137,7 @@ public class Song {
         music.setArtist(author);
         music.setAlbum(albumTitle);
         music.setSongId(songId);
-        music.setType(DBHelper.Music.TYPE_WEB);
+        music.setType(Music.TYPE_WEB);
         return music;
     }
 }

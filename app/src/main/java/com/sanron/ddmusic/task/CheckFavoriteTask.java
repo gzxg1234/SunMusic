@@ -1,11 +1,14 @@
 package com.sanron.ddmusic.task;
 
-import android.database.Cursor;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
-import com.sanron.ddmusic.db.DBHelper;
-import com.sanron.ddmusic.db.DataProvider;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.ListMemberHelper;
+import com.sanron.ddmusic.db.MusicHelper;
 import com.sanron.ddmusic.db.bean.Music;
+import com.sanron.ddmusic.db.bean.PlayList;
 
 /**
  * Created by sanron on 16-5-29.
@@ -13,34 +16,28 @@ import com.sanron.ddmusic.db.bean.Music;
 public class CheckFavoriteTask extends AsyncTask<Void, Void, Boolean> {
 
     private Music mMusic;
+    private Context mContext;
 
-    public CheckFavoriteTask(Music music) {
+    public CheckFavoriteTask(Context context, Music music) {
+        mContext = context.getApplicationContext();
         mMusic = music;
     }
 
     @Override
     protected Boolean doInBackground(Void... params) {
         Boolean favorite = false;
-        DataProvider.Access listMemeberAccess = DataProvider.get().newAccess(DBHelper.ListMember.TABLE);
-        DataProvider.Access musicAccess = DataProvider.get().newAccess(DBHelper.Music.TABLE);
+        SQLiteDatabase db = AppDB.get(mContext).getWritableDatabase();
         long id = mMusic.getId();
-        if (mMusic.getType() == DBHelper.Music.TYPE_WEB) {
+        if (mMusic.getType() == Music.TYPE_WEB) {
             //网络歌曲,先查在数据库中的id
-            Cursor cursor = musicAccess.query(new String[]{DBHelper.ID},
-                    DBHelper.Music.SONG_ID + "=?",
-                    new String[]{mMusic.getSongId()});
-            if (cursor.moveToFirst()) {
-                id = cursor.getInt(0);
+            Music music = MusicHelper.getMusicBySongId(db, mMusic.getSongId());
+            if (music != null) {
+                id = music.getId();
             }
         }
         if (id != 0) {
-            Cursor c = listMemeberAccess.query(new String[]{DBHelper.ID},
-                    DBHelper.ListMember.MUSIC_ID + "=? and " + DBHelper.ListMember.LIST_ID + "=?",
-                    new String[]{id + "", DBHelper.List.TYPE_FAVORITE_ID + ""});
-            favorite = c.moveToFirst();
+            favorite = ListMemberHelper.isExistByMusicIdAndListId(db, PlayList.TYPE_FAVORITE_ID, id);
         }
-        listMemeberAccess.close();
-        musicAccess.close();
         return favorite;
     }
 }
