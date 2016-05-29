@@ -1,0 +1,97 @@
+package com.sanron.ddmusic.task;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.os.AsyncTask;
+
+import com.sanron.ddmusic.api.bean.Song;
+import com.sanron.ddmusic.db.DBHelper;
+import com.sanron.ddmusic.db.DataProvider;
+import com.sanron.ddmusic.db.bean.Music;
+import com.sanron.ddmusic.db.bean.PlayList;
+
+import java.util.Calendar;
+import java.util.List;
+
+/**
+ * 添加收藏歌单
+ * Created by sanron on 16-4-8.
+ */
+public class AddCollectListTask extends AsyncTask<Void, Void, Integer> {
+
+    public static final int FAILED = 0;
+    public static final int SUCCESS = 1;
+
+    private List<Song> mSongs;
+    private String mTitle;
+    private String mListId;
+    private String mPic;
+
+    public AddCollectListTask(List<Song> songs, String title, String listId, String pic) {
+        mSongs = songs;
+        mTitle = title;
+        mListId = listId;
+        mPic = pic;
+    }
+
+    @Override
+    protected Integer doInBackground(Void... params) {
+        DataProvider.Access listAccess = DataProvider.get().newAccess(DBHelper.List.TABLE);
+        DataProvider.Access listMemberAccess = DataProvider.get().newAccess(DBHelper.ListMember.TABLE);
+        DataProvider.Access musicAccess = DataProvider.get().newAccess(DBHelper.Music.TABLE);
+        DataProvider.get().beginTransaction();
+
+        long time = Calendar.getInstance().getTimeInMillis();
+        try {
+            PlayList playList = new PlayList();
+            playList.setIcon(mPic);
+            playList.setTitle(mTitle);
+            playList.setListId(mListId);
+            playList.setType(DBHelper.List.TYPE_COLLECTION);
+            playList.setAddTime(System.currentTimeMillis());
+
+            //插入歌单信息
+            long listid = listAccess.insert(null, playList.toContentValues());
+            if (listid == -1) {
+                return FAILED;
+            }
+
+            //插入歌单歌曲信息
+            for (Song song : mSongs) {
+                Music music = song.toMusic();
+                String songid = song.songId;
+
+                long musicid;
+                //是否存有歌曲信息
+                Cursor c = musicAccess.query(new String[]{DBHelper.ID},
+                        DBHelper.Music.SONG_ID + "=?",
+                        new String[]{String.valueOf(songid)});
+                if (c.moveToFirst()) {
+                    musicid = c.getLong(0);
+                } else {
+                    musicid = musicAccess.insert(null, music.toContentValues());
+                }
+                if (musicid == -1) {
+                    return FAILED;
+                }
+
+                ContentValues values = new ContentValues(2);
+                values.put(DBHelper.ListMember.LIST_ID, listid);
+                values.put(DBHelper.ListMember.MUSIC_ID, musicid);
+                values.put(DBHelper.ListMember.ADD_TIME, time);
+                long insertId = listMemberAccess.insert(null, values);
+                if (insertId == -1) {
+                    return FAILED;
+                }
+            }
+            DataProvider.get().setTransactionSuccessful();
+        } catch (Exception e) {
+        } finally {
+            listAccess.close();
+            listMemberAccess.close();
+            musicAccess.close();
+            DataProvider.get().endTransaction();
+        }
+        return SUCCESS;
+    }
+}

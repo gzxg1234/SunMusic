@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <com.sanron.music.view.RatioLayout
+        <com.sanron.ddmusic.view.RatioLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:type="height"
@@ -27,7 +27,7 @@
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 tool:src="@mipmap/default_artist_album_pic" />
-        </com.sanron.music.view.RatioLayout>
+        </com.sanron.ddmusic.view.RatioLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"

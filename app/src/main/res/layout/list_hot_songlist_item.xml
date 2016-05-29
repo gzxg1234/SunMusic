@@ -20,7 +20,7 @@
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
-            <com.sanron.music.view.RatioLayout
+            <com.sanron.ddmusic.view.RatioLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 app:ratio="1"
@@ -32,7 +32,7 @@
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
                     android:src="@mipmap/default_artist_album_pic" />
-            </com.sanron.music.view.RatioLayout>
+            </com.sanron.ddmusic.view.RatioLayout>
 
             <TextView
                 android:id="@+id/tv_songlist_title"

@@ -15,7 +15,7 @@
         android:textSize="16dp"
         tools:text="风格" />
 
-    <com.sanron.music.view.NoScrollGridView
+    <com.sanron.ddmusic.view.NoScrollGridView
         android:id="@+id/grid_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

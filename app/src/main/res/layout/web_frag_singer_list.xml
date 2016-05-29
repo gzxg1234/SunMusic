@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.sanron.music.view.SlideBackLayout
+<com.sanron.ddmusic.view.SlideBackLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/slide_back_layout"
@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:background="@android:color/white">
 
-        <com.sanron.music.view.DDPullListView
+        <com.sanron.ddmusic.view.DDPullListView
             android:id="@+id/pull_list_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -19,7 +19,7 @@
             android:divider="@null"
             android:dividerHeight="0dp"
             android:padding="8dp">
-        </com.sanron.music.view.DDPullListView>
+        </com.sanron.ddmusic.view.DDPullListView>
 
         <include
             layout="@layout/layout_load_failed"
@@ -69,4 +69,4 @@
         </FrameLayout>
     </RelativeLayout>
 
-</com.sanron.music.view.SlideBackLayout>
+</com.sanron.ddmusic.view.SlideBackLayout>

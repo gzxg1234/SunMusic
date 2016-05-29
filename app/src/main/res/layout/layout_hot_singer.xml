@@ -15,7 +15,7 @@
         android:text="热门歌手"
         android:textSize="16dp" />
 
-    <com.sanron.music.view.WrapContentPager
+    <com.sanron.ddmusic.view.WrapContentPager
         android:id="@+id/pager_hot_singer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sanron.music">
+    package="com.sanron.ddmusic">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -9,14 +9,14 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name="com.sanron.music.AppContext"
+        android:name="com.sanron.ddmusic.AppContext"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true">
 
         <activity
-            android:name="com.sanron.music.activities.StartActivity"
+            android:name="com.sanron.ddmusic.activities.StartActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,21 +26,21 @@
         </activity>
 
         <activity
-            android:name=".activities.MainActivity"
+            android:name="com.sanron.ddmusic.activities.MainActivity"
             android:screenOrientation="unspecified"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
-            android:name="com.sanron.music.activities.ScanActivity"
+            android:name="com.sanron.ddmusic.activities.ScanActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AnimActivity" />
 
         <activity
-            android:name="com.sanron.music.activities.ScanDiyActivity"
+            android:name="com.sanron.ddmusic.activities.ScanDiyActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AnimActivity" />
 
-        <service android:name="com.sanron.music.service.PlayerService" />
+        <service android:name=".service.DDPlayService" />
     </application>
 
 </manifest>
