@@ -83,7 +83,6 @@ public abstract class PullFragment extends SlideWebFragment implements SlideBack
         }
     };
 
-
     @Override
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);

@@ -25,8 +25,9 @@ import com.sanron.ddmusic.common.AudioTool;
 import com.sanron.ddmusic.common.MusicScanner;
 import com.sanron.ddmusic.common.MyLog;
 import com.sanron.ddmusic.common.ViewTool;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.ResultCallback;
 import com.sanron.ddmusic.db.bean.Music;
-import com.sanron.ddmusic.task.UpdateLocalMusicTask;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -240,18 +241,15 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
                     final ProgressDialog progressDialog = new ProgressDialog(this);
                     progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                     progressDialog.setMessage("正在更新数据，请稍等");
-                    new UpdateLocalMusicTask(this, mScanResult, mIsFullScan) {
-                        @Override
-                        protected void onPreExecute() {
-                            progressDialog.show();
-                        }
-
-                        @Override
-                        protected void onPostExecute(Void aVoid) {
-                            progressDialog.dismiss();
-                            finish();
-                        }
-                    }.execute();
+                    progressDialog.show();
+                    AppDB.get(getApplicationContext()).updateLocalMusic(mScanResult, mIsFullScan,
+                            new ResultCallback<Void>() {
+                                @Override
+                                public void onResult(Void result) {
+                                    progressDialog.dismiss();
+                                    finish();
+                                }
+                            });
                 }
             }
             break;

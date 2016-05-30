@@ -3,6 +3,8 @@ package com.sanron.ddmusic.db;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.github.stuxuhai.jpinyin.PinyinFormat;
+import com.github.stuxuhai.jpinyin.PinyinHelper;
 import com.sanron.ddmusic.db.bean.Music;
 
 import java.util.LinkedHashMap;
@@ -73,7 +75,6 @@ public class MusicHelper {
         return musics;
     }
 
-
     public static int deleteById(SQLiteDatabase db, long id) {
         return db.delete(Columns.TABLE, BaseHelper.ID + "=" + id, null);
     }
@@ -91,6 +92,12 @@ public class MusicHelper {
     }
 
     public static long addMusic(SQLiteDatabase db, Music music) {
+        if (music.getTitleKey() == null) {
+            String title = music.getTitle();
+            String titleKey = (title == null ?
+                    null : PinyinHelper.convertToPinyinString(title, "", PinyinFormat.WITHOUT_TONE));
+            music.setTitleKey(titleKey);
+        }
         return db.insert(Columns.TABLE, null, music.toContentValues());
     }
 

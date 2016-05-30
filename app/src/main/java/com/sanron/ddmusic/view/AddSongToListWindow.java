@@ -15,27 +15,39 @@ import android.widget.ListView;
 
 import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.common.ViewTool;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.ResultCallback;
 import com.sanron.ddmusic.db.bean.Music;
 import com.sanron.ddmusic.db.bean.PlayList;
-import com.sanron.ddmusic.task.AddMusicToListTask;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.OnItemClick;
 
 /**
  * 添加歌曲到列表窗口
  */
 public class AddSongToListWindow extends ScrimPopupWindow {
-    private View mContentView;
-    private ListView mPlayLists;
-    private Button mBtnCancel;
+    View mContentView;
+    @BindView(R.id.list_playlist)
+    ListView mLvPlayLists;
+    @BindView(R.id.btn_cancel)
+    Button mBtnCancel;
+
+    private List<PlayList> mPlayLists;
+    private List<Music> mMusics;
 
     public AddSongToListWindow(final Activity activity, final List<PlayList> playLists, final List<Music> musics) {
         super(activity);
-        this.mContentView = LayoutInflater.from(activity)
+        mMusics = musics;
+        mPlayLists = playLists;
+        mContentView = LayoutInflater.from(activity)
                 .inflate(R.layout.window_add_to_playlist, null);
-        this.mPlayLists = (ListView) mContentView.findViewById(R.id.list_playlist);
-        this.mBtnCancel = (Button) mContentView.findViewById(R.id.btn_cancel);
+        setContentView(mContentView);
         int screenHeight = activity.getResources().getDisplayMetrics().heightPixels;
         setFocusable(true);
         setTouchable(true);
@@ -43,43 +55,35 @@ public class AddSongToListWindow extends ScrimPopupWindow {
         setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
         setHeight(screenHeight / 2);
         setAnimationStyle(R.style.MyWindowAnim);
-        setContentView(mContentView);
+        ButterKnife.bind(this, mContentView);
 
         List<String> playListNames = new ArrayList<>();
-        for (PlayList playList : playLists) {
+        for (PlayList playList : mPlayLists) {
             playListNames.add(playList.getTitle());
         }
-        this.mPlayLists.setAdapter(new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, playListNames));
-        this.mPlayLists.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                new AddMusicToListTask(activity, playLists.get(position), musics) {
-                    private ProgressDialog progressDialog;
+        mLvPlayLists.setAdapter(new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, playListNames));
+    }
 
+    @OnItemClick(R.id.list_playlist)
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        AppDB.get(getActivity()).addMusicToPlaylist(mPlayLists.get(position), mMusics,
+                new ResultCallback<Integer>() {
                     @Override
-                    protected void onPreExecute() {
-                        progressDialog = new ProgressDialog(activity);
-                        progressDialog.setCancelable(false);
-                        progressDialog.show();
-                    }
-
-                    @Override
-                    protected void onPostExecute(Integer addNum) {
-                        String msg = addNum + "首歌曲添加成功,";
+                    public void onResult(Integer result) {
+                        String msg = result + "首歌曲添加成功,";
                         ViewTool.show(msg);
                         AddSongToListWindow.this.dismiss();
                         progressDialog.dismiss();
                     }
-                }.execute();
-            }
-        });
+                });
+    }
 
-        mBtnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+    @OnClick(R.id.btn_cancel)
+    public void onClickCancel() {
+        dismiss();
     }
 
     public void show(View parent) {

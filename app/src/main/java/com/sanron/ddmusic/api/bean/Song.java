@@ -1,7 +1,6 @@
 package com.sanron.ddmusic.api.bean;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.github.stuxuhai.jpinyin.PinyinHelper;
 import com.sanron.ddmusic.db.bean.Music;
 
 /**

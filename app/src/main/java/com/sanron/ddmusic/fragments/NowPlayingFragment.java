@@ -1,5 +1,6 @@
 package com.sanron.ddmusic.fragments;
 
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +19,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,6 +34,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
+import com.nineoldandroids.animation.ArgbEvaluator;
+import com.nineoldandroids.animation.ValueAnimator;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.assist.ViewScaleType;
@@ -42,12 +47,13 @@ import com.sanron.ddmusic.api.LrcPicProvider;
 import com.sanron.ddmusic.api.StringCallback;
 import com.sanron.ddmusic.common.FastBlur;
 import com.sanron.ddmusic.common.ViewTool;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.ResultCallback;
 import com.sanron.ddmusic.db.bean.Music;
+import com.sanron.ddmusic.db.bean.PlayList;
 import com.sanron.ddmusic.fragments.base.BaseFragment;
 import com.sanron.ddmusic.playback.Player;
 import com.sanron.ddmusic.service.PlayUtil;
-import com.sanron.ddmusic.task.CheckFavoriteTask;
-import com.sanron.ddmusic.task.FavoriteMusicTask;
 import com.sanron.ddmusic.view.ShowPlayQueueWindow;
 import com.sanron.lyricview.model.Lyric;
 import com.sanron.lyricview.view.LyricView;
@@ -57,6 +63,7 @@ import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -144,7 +151,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
     /**
      * 提示播放模式
      */
-    private Toast mModeToast;
+    private Toast mToast;
 
     private Timer mTimer = new Timer();
     private TimerTask mUpdateProgressTask = new UpdateProgressTask();
@@ -268,13 +275,12 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
         setSongDuration(PlayUtil.getDuration());
         if (PlayUtil.isPlaying()) {
             setIsPlaying(true);
-            //是否收藏过
-            new CheckFavoriteTask(getContext(), music) {
+            AppDB.get(getContext()).isFavoriteMusic(music, new ResultCallback<Boolean>() {
                 @Override
-                protected void onPostExecute(Boolean isFavorite) {
-                    setIsFavorite(isFavorite);
+                public void onResult(Boolean result) {
+                    setIsFavorite(result);
                 }
-            }.execute();
+            });
         } else {
             setIsPlaying(false);
         }
@@ -322,13 +328,12 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
                 mLyricView.setLyric(null);
                 setIsPlaying(false);
 
-                //是否收藏过
-                new CheckFavoriteTask(getContext(), music) {
+                AppDB.get(getContext()).isFavoriteMusic(music, new ResultCallback<Boolean>() {
                     @Override
-                    protected void onPostExecute(Boolean isFavorite) {
-                        setIsFavorite(isFavorite);
+                    public void onResult(Boolean result) {
+                        setIsFavorite(result);
                     }
-                }.execute();
+                });
             }
             break;
 
@@ -418,6 +423,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
     }
 
     public void setSongPicture(Bitmap img) {
+
         if (img == null) {
             mSivSongPicture.setImageResource(R.mipmap.default_song_pic);
             mIvSongPicture.setImageResource(R.mipmap.default_song_pic);
@@ -526,6 +532,15 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
         mIvChangeMode.setImageResource(iconId);
     }
 
+    private void showToast(String text) {
+        if (mToast != null) {
+            mToast.cancel();
+        }
+        mToast = Toast.makeText(getContext(), text, Toast.LENGTH_SHORT);
+        mToast.setText(text);
+        mToast.show();
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -546,12 +561,7 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
                         msg = "随机播放";
                         break;
                 }
-                if (mModeToast != null) {
-                    mModeToast.cancel();
-                }
-                mModeToast = Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT);
-                mModeToast.setText(msg);
-                mModeToast.show();
+                showToast(msg);
             }
             break;
 
@@ -594,14 +604,33 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
             break;
 
             case R.id.iv_favorite: {
+                Music music = PlayUtil.getCurrentMusic();
+                if (music == null) {
+                    return;
+                }
                 if (mIsFavorite) {
-                } else {
-                    new FavoriteMusicTask(getContext(), PlayUtil.getCurrentMusic()) {
+                    List<Music> musics = new LinkedList<>();
+                    musics.add(music);
+                    AppDB.get(getContext()).deleteMusicFromPlayList(PlayList.TYPE_FAVORITE_ID, musics, new ResultCallback<Integer>() {
                         @Override
-                        protected void onPostExecute(Boolean aBoolean) {
-                            setIsFavorite(aBoolean);
+                        public void onResult(Integer result) {
+                            if (result > 0) {
+                                showToast("取消收藏成功");
+                            }
+                            setIsFavorite(result == 0);
                         }
-                    }.execute();
+                    });
+                } else {
+                    AppDB.get(getContext()).addMusicToFavorite(PlayUtil.getCurrentMusic(),
+                            new ResultCallback<Boolean>() {
+                                @Override
+                                public void onResult(Boolean result) {
+                                    setIsFavorite(result);
+                                    if (result) {
+                                        showToast("收藏成功");
+                                    }
+                                }
+                            });
                 }
             }
             break;

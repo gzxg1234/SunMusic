@@ -11,7 +11,6 @@ import java.util.Map;
 public class ArtistHelper {
 
     public interface Columns {
-
         String TABLE = "artist";
         String NAME = "name";
     }

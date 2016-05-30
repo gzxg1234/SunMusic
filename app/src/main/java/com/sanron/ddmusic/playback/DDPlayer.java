@@ -11,6 +11,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.sanron.ddmusic.api.JsonCallback;
 import com.sanron.ddmusic.api.MusicApi;
@@ -46,6 +47,7 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
     private MediaPlayer mMediaPlayer;
     private AudioManager mAudioManager;
     private PowerManager.WakeLock mWakeLock;
+    private Toast mToast;
 
     private int mAudioFocus = NO_FOCUS;
 
@@ -54,7 +56,6 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
     public static final int HAS_FOCUS = 1;//有焦点
     public static final int NO_FOCUS = 2;//没焦点
     public static final int NO_FOCUS_CAN_DUCK = 3;//没焦点但是可以降低声音
-
     public static final int WHAT_PLAY_ERROR = 1;
     public static final int WHAT_BUFFER_TIMEOUT = 2;
     public static final int BUFFER_TIMEOUT = 30 * 1000;
@@ -188,8 +189,16 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
 
     private void sendPlayError(final String errorMsg) {
         changeState(STATE_ERROR);
-        ViewTool.show(errorMsg + ",3s后播放下一曲");
+        showToast(errorMsg + ",3s后播放下一曲");
         mHandler.sendEmptyMessageDelayed(WHAT_PLAY_ERROR, 3000);
+    }
+
+    private void showToast(String text) {
+        if (mToast != null) {
+            mToast.cancel();
+        }
+        mToast = Toast.makeText(mContext, text, Toast.LENGTH_SHORT);
+        mToast.show();
     }
 
     private void playLocalMusic(String path) {

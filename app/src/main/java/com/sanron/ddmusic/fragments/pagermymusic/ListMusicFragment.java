@@ -1,14 +1,16 @@
 package com.sanron.ddmusic.fragments.pagermymusic;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -27,16 +29,14 @@ import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.adapter.MusicAdapter;
 import com.sanron.ddmusic.common.ViewTool;
 import com.sanron.ddmusic.db.AppDB;
-import com.sanron.ddmusic.db.ListMemberHelper;
 import com.sanron.ddmusic.db.PlayListHelper;
+import com.sanron.ddmusic.db.ResultCallback;
 import com.sanron.ddmusic.db.bean.Music;
 import com.sanron.ddmusic.db.bean.PlayList;
 import com.sanron.ddmusic.playback.Player;
 import com.sanron.ddmusic.service.PlayUtil;
 import com.sanron.ddmusic.view.AddSongToListWindow;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -69,6 +69,16 @@ public class ListMusicFragment extends BaseDataFragment implements CompoundButto
 
     public static final String ARG_PLAY_LIST = "play_list";
 
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long id = intent.getLongExtra("id", 0);
+            if (id == mPlayList.getId()) {
+                loadData();
+            }
+        }
+    };
+
     public static ListMusicFragment newInstance(PlayList list) {
         ListMusicFragment listMusicFragment = new ListMusicFragment();
         Bundle args = new Bundle();
@@ -79,13 +89,15 @@ public class ListMusicFragment extends BaseDataFragment implements CompoundButto
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
         if (arguments != null) {
             mPlayList = (PlayList) getArguments().get(ARG_PLAY_LIST);
         }
-
         mAdapter = new MusicAdapter(getContext());
-        super.onCreate(savedInstanceState);
+        LocalBroadcastManager.getInstance(getContext())
+                .registerReceiver(mReceiver,
+                        new IntentFilter(AppDB.tableChangeAction(PlayListHelper.Columns.TABLE)));
     }
 
     @Override
@@ -171,39 +183,54 @@ public class ListMusicFragment extends BaseDataFragment implements CompoundButto
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(getContext())
+                .unregisterReceiver(mReceiver);
+    }
 
     /**
      * 删除动作
      */
-    protected void onDeleteOperator(List<Music> checkedMusics) {
-
-        new RemoveListSongDialogBuilder(getContext(), mPlayList, checkedMusics)
-                .show();
+    protected void onDeleteOperator(final List<Music> checkedMusics) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(mPlayList.getTitle());
+        if (checkedMusics.size() == 1) {
+            builder.setMessage("移除歌曲 \"" + checkedMusics.get(0).getTitle() + "\"?");
+        } else {
+            builder.setMessage("移除" + checkedMusics.size() + "首歌曲?");
+        }
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                AppDB.get(getContext()).deleteMusicFromPlayList(mPlayList.getId(), checkedMusics,
+                        new ResultCallback<Integer>() {
+                            @Override
+                            public void onResult(Integer result) {
+                                ViewTool.show("移除" + result + "首歌曲");
+                            }
+                        });
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
     }
 
 
     @Override
     public void loadData() {
-        new AsyncTask<Void, Void, List<Music>>() {
+        AppDB.get(getContext()).getPlayListMusics(mPlayList.getId(), new ResultCallback<List<Music>>() {
             @Override
-            protected void onPostExecute(List<Music> musics) {
-                mAdapter.setData(musics);
-                onPlayStateChange(Player.STATE_PREPARING);
+            public void onResult(List<Music> result) {
+                mAdapter.setData(result);
             }
-
-            @Override
-            protected List<Music> doInBackground(Void... params) {
-                SQLiteDatabase db = AppDB.get(getContext()).getWritableDatabase();
-                List<Music> musics = ListMemberHelper.getMusicsByListId(db, mPlayList.getId());
-                Collections.sort(musics, new Comparator<Music>() {
-                    @Override
-                    public int compare(Music lhs, Music rhs) {
-                        return lhs.getTitleKey().compareTo(rhs.getTitleKey());
-                    }
-                });
-                return musics;
-            }
-        }.execute();
+        });
     }
 
     @Override
@@ -366,69 +393,4 @@ public class ListMusicFragment extends BaseDataFragment implements CompoundButto
         }
     }
 
-
-    /**
-     * 移除歌曲对话框
-     */
-    public class RemoveListSongDialogBuilder extends AlertDialog.Builder implements DialogInterface.OnClickListener {
-        private PlayList mPlayList;
-        private List<Music> mRemoveMusics;
-        private ProgressDialog mProgressDialog;
-
-        public RemoveListSongDialogBuilder(Context context, final PlayList playList, List<Music> removeSongs) {
-            super(context);
-            this.mPlayList = playList;
-            this.mRemoveMusics = removeSongs;
-            this.mProgressDialog = new ProgressDialog(context);
-
-            setTitle(playList.getTitle());
-            if (mRemoveMusics.size() == 1) {
-                setMessage("移除歌曲 \"" + mRemoveMusics.get(0).getTitle() + "\"?");
-            } else {
-                setMessage("移除" + mRemoveMusics.size() + "首歌曲?");
-            }
-            setPositiveButton("确定", this);
-            setNegativeButton("取消", this);
-        }
-
-
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            switch (which) {
-                case DialogInterface.BUTTON_NEGATIVE: {
-                    dialog.cancel();
-                }
-                break;
-
-                case DialogInterface.BUTTON_POSITIVE: {
-                    new AsyncTask<Void, Void, Integer>() {
-                        @Override
-                        protected Integer doInBackground(Void... params) {
-                            int deleteNum = 0;
-                            SQLiteDatabase db = AppDB.get(getContext()).getWritableDatabase();
-                            db.beginTransaction();
-                            try {
-                                for (Music music : mRemoveMusics) {
-                                    deleteNum = ListMemberHelper.deleteByMusicId(db, music.getId());
-                                }
-                                db.setTransactionSuccessful();
-                            } catch (Exception e) {
-                                deleteNum = 0;
-                            } finally {
-                                db.endTransaction();
-                            }
-                            return deleteNum;
-                        }
-
-                        @Override
-                        protected void onPostExecute(Integer deleteNum) {
-                            ViewTool.show("移除" + deleteNum + "首歌曲");
-                            loadData();
-                        }
-                    }.execute();
-                }
-                break;
-            }
-        }
-    }
 }

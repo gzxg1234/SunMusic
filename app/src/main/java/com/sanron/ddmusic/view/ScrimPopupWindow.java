@@ -64,5 +64,8 @@ public class ScrimPopupWindow extends PopupWindow {
         valueAnimator.start();
     }
 
+    public Activity getActivity() {
+        return mActivity;
+    }
 }
 

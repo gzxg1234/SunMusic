@@ -12,7 +12,8 @@ import com.sanron.ddmusic.api.JsonCallback;
 import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.api.bean.SongList;
 import com.sanron.ddmusic.common.ViewTool;
-import com.sanron.ddmusic.task.AddCollectListTask;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.ResultCallback;
 
 import okhttp3.Call;
 
@@ -119,28 +120,24 @@ public class SongListInfoFragment extends CommonSongPullFragment implements View
                             pic = mData.pic;
                         }
                     }
-                    new AddCollectListTask(getContext(), mData.songs,
+
+                    AppDB.get(getContext()).addCollectList(
+                            mData.songs,
                             mData.title,
                             LIST_ID_PREFIX + mData.listId,
-                            pic) {
-                        @Override
-                        protected void onPostExecute(Integer result) {
-                            switch (result) {
-
-                                case SUCCESS: {
-                                    ViewTool.show("收藏成功");
-                                    mIsCollected = true;
-                                    mIbtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
+                            pic,
+                            new ResultCallback<Integer>() {
+                                @Override
+                                public void onResult(Integer result) {
+                                    if (result == 1) {
+                                        ViewTool.show("收藏成功");
+                                        mIsCollected = true;
+                                        mIbtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
+                                    } else {
+                                        ViewTool.show("收藏失败");
+                                    }
                                 }
-                                break;
-
-                                case FAILED: {
-                                    ViewTool.show("收藏失败");
-                                }
-                                break;
-                            }
-                        }
-                    }.execute();
+                            });
                 }
             }
             break;

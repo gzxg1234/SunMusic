@@ -1,28 +1,24 @@
 package com.sanron.ddmusic.fragments.pagermymusic;
 
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.CompoundButton;
 
 import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.activities.MainActivity;
 import com.sanron.ddmusic.activities.ScanActivity;
 import com.sanron.ddmusic.common.ViewTool;
+import com.sanron.ddmusic.db.AppDB;
+import com.sanron.ddmusic.db.ResultCallback;
 import com.sanron.ddmusic.db.bean.Music;
 import com.sanron.ddmusic.db.bean.PlayList;
-import com.sanron.ddmusic.task.DeleteLocalMusicTask;
 
 import java.util.List;
 
@@ -32,27 +28,6 @@ import java.util.List;
 public class LocalMusicFragment extends ListMusicFragment implements MainActivity.BackPressedHandler, CompoundButton.OnCheckedChangeListener {
 
     public static final int MENU_UPDATE_LOCAL_MUSIC = 1;
-
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            loadData();
-        }
-    };
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        LocalBroadcastManager.getInstance(getContext())
-                .registerReceiver(mReceiver, new IntentFilter("LocalMusicUpdate"));
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        LocalBroadcastManager.getInstance(getContext())
-                .unregisterReceiver(mReceiver);
-    }
 
     public LocalMusicFragment() {
         PlayList playList = new PlayList();
@@ -71,14 +46,13 @@ public class LocalMusicFragment extends ListMusicFragment implements MainActivit
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
+        if (getMainActivity() == null) {
+            return;
+        }
         if (isVisibleToUser) {
-            if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).addBackPressedHandler(this);
-            }
+            getMainActivity().addBackPressedHandler(this);
         } else {
-            if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).removeBackPressedHandler(this);
-            }
+            getMainActivity().removeBackPressedHandler(this);
             if (isAdded() && mAdapter.isMultiMode()) {
                 endMultiMode();
             }
@@ -145,22 +119,20 @@ public class LocalMusicFragment extends ListMusicFragment implements MainActivit
                 break;
 
                 case DialogInterface.BUTTON_POSITIVE: {
-                    new DeleteLocalMusicTask(getContext(), mDeleteMusics, mIsDeleteFile) {
-                        @Override
-                        protected void onPreExecute() {
-                            mProgressDialog.show();
-                        }
-
-                        @Override
-                        protected void onPostExecute(Integer deleteNum) {
-                            if (deleteNum > 0) {
-                                ViewTool.show("删除" + deleteNum + "首歌曲");
-                            } else {
-                                ViewTool.show("删除失败");
-                            }
-                            mProgressDialog.dismiss();
-                        }
-                    }.execute();
+                    AppDB.get(getContext()).deleteLocalMusic(
+                            mDeleteMusics,
+                            mIsDeleteFile,
+                            new ResultCallback<Integer>() {
+                                @Override
+                                public void onResult(Integer deleteNum) {
+                                    if (deleteNum > 0) {
+                                        ViewTool.show("删除" + deleteNum + "首歌曲");
+                                    } else {
+                                        ViewTool.show("删除失败");
+                                    }
+                                    mProgressDialog.dismiss();
+                                }
+                            });
                 }
                 break;
             }
