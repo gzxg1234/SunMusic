@@ -27,19 +27,21 @@ import butterknife.ButterKnife;
  */
 public class ShowPlayQueueWindow extends ScrimPopupWindow implements Player.OnPlayStateChangeListener, View.OnClickListener {
 
+    View mContentView;
+    @BindView(R.id.tv_title)
+    TextView mTvTitle;
+    @BindView(R.id.ibtn_remove_all)
+    ImageButton mIbtnRemoveAll;
+    @BindView(R.id.lv_queue_music)
+    RecyclerView mLvQueue;
+
     private List<Music> mQueue;
-    private Context context;
-    private View mContentView;
-    private TextView mTvTitle;
-    private ImageButton mIbtnRemoveAll;
-    private RecyclerView mLvQueue;
+    private Context mContext;
     private QueueItemAdapter mAdapter;
 
     public ShowPlayQueueWindow(Activity activity) {
         super(activity);
-        this.context = activity;
-        this.mContentView = LayoutInflater.from(activity).inflate(R.layout.window_queue_music, null);
-        this.mQueue = PlayUtil.getQueue();
+        mContext = activity;
         int screenHeight = activity.getResources().getDisplayMetrics().heightPixels;
         setFocusable(true);
         setTouchable(true);
@@ -47,16 +49,14 @@ public class ShowPlayQueueWindow extends ScrimPopupWindow implements Player.OnPl
         setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
         setHeight(screenHeight / 2);
         setAnimationStyle(R.style.MyWindowAnim);
+        mContentView = LayoutInflater.from(activity).inflate(R.layout.window_queue_music, null);
         setContentView(mContentView);
+        ButterKnife.bind(this, mContentView);
 
-        mTvTitle = (TextView) mContentView.findViewById(R.id.tv_title);
-        mIbtnRemoveAll = (ImageButton) mContentView.findViewById(R.id.ibtn_remove_all);
-        mLvQueue = (RecyclerView) mContentView.findViewById(R.id.lv_queue_music);
-
+        mQueue = PlayUtil.getQueue();
         mTvTitle.setText("播放队列(" + mQueue.size() + ")");
-
         mAdapter = new QueueItemAdapter();
-        mLvQueue.setLayoutManager(new LinearLayoutManager(context));
+        mLvQueue.setLayoutManager(new LinearLayoutManager(mContext));
         mLvQueue.setAdapter(mAdapter);
         mLvQueue.post(new Runnable() {
             @Override
@@ -102,13 +102,13 @@ public class ShowPlayQueueWindow extends ScrimPopupWindow implements Player.OnPl
     public class QueueItemAdapter extends RecyclerView.Adapter<QueueItemAdapter.QueueItemHolder> {
 
 
-        final int DEFAULT_TITLE_COLOR = context.getResources().getColor(R.color.textColorPrimary);
-        final int DEFAULT_ARTIST_COLOR = context.getResources().getColor(R.color.textColorSecondary);
-        final int PLAY_TEXT_COLOR = context.getResources().getColor(R.color.colorAccent);
+        final int DEFAULT_TITLE_COLOR = mContext.getResources().getColor(R.color.textColorPrimary);
+        final int DEFAULT_ARTIST_COLOR = mContext.getResources().getColor(R.color.textColorSecondary);
+        final int PLAY_TEXT_COLOR = mContext.getResources().getColor(R.color.colorAccent);
 
         @Override
         public QueueItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(context).inflate(R.layout.list_queue_item, parent, false);
+            View view = LayoutInflater.from(mContext).inflate(R.layout.list_queue_item, parent, false);
             return new QueueItemHolder(view);
         }
 

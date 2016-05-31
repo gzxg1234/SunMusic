@@ -19,7 +19,7 @@ public abstract class BaseHelper {
     }
 
     public static String createIndexSql(String indexname, String tablename, String column) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         return sb.append("create index ").append(indexname)
                 .append(" on ").append(tablename)
                 .append("(").append(column).append(")")

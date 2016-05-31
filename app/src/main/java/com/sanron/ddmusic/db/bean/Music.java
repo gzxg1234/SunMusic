@@ -6,16 +6,17 @@ import android.database.Cursor;
 import com.sanron.ddmusic.db.BaseHelper;
 import com.sanron.ddmusic.db.MusicHelper;
 
+import java.io.Serializable;
+
 /**
  * Created by Administrator on 2015/12/19.
  */
-public class Music {
+public class Music implements Serializable {
 
     public static final int TYPE_LOCAL = 0;
     public static final int TYPE_WEB = 1;
 
-    private long id;
-
+    private long id = -1;
 
     /**
      * 名称

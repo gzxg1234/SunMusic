@@ -1,4 +1,4 @@
-package com.sanron.ddmusic.api;
+package com.sanron.ddmusic.api.callback;
 
 import java.io.IOException;
 

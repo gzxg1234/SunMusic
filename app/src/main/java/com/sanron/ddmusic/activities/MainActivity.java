@@ -23,18 +23,18 @@ import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.common.ViewTool;
 import com.sanron.ddmusic.db.bean.PlayList;
 import com.sanron.ddmusic.fragments.NavigationHeaderFrag;
-import com.sanron.ddmusic.fragments.NowPlayingFragment;
+import com.sanron.ddmusic.fragments.nowplaying.NowPlayingFragment;
 import com.sanron.ddmusic.fragments.PagerFragment;
-import com.sanron.ddmusic.fragments.pagermymusic.AlbumFragment;
-import com.sanron.ddmusic.fragments.pagermymusic.ArtistFragment;
-import com.sanron.ddmusic.fragments.pagermymusic.ListMusicFragment;
-import com.sanron.ddmusic.fragments.pagermymusic.LocalMusicFragment;
-import com.sanron.ddmusic.fragments.pagermymusic.PlayListFragment;
-import com.sanron.ddmusic.fragments.pagermymusic.RecentPlayFragment;
-import com.sanron.ddmusic.fragments.pagerwebmusic.BillboardFragment;
-import com.sanron.ddmusic.fragments.pagerwebmusic.RecommendFragment;
-import com.sanron.ddmusic.fragments.pagerwebmusic.SingerFragment;
-import com.sanron.ddmusic.fragments.pagerwebmusic.SongListFragment;
+import com.sanron.ddmusic.fragments.mymusic.AlbumFragment;
+import com.sanron.ddmusic.fragments.mymusic.ArtistFragment;
+import com.sanron.ddmusic.fragments.mymusic.ListMusicFragment;
+import com.sanron.ddmusic.fragments.mymusic.LocalMusicFragment;
+import com.sanron.ddmusic.fragments.mymusic.PlayListFragment;
+import com.sanron.ddmusic.fragments.mymusic.RecentPlayFragment;
+import com.sanron.ddmusic.fragments.webmusic.BillboardFragment;
+import com.sanron.ddmusic.fragments.webmusic.RecommendFragment;
+import com.sanron.ddmusic.fragments.webmusic.SingerFragment;
+import com.sanron.ddmusic.fragments.webmusic.SongListFragment;
 import com.sanron.ddmusic.fragments.web.AlbumSongsFragment;
 import com.sanron.ddmusic.fragments.web.AllTagFragment;
 import com.sanron.ddmusic.fragments.web.BillboardSongsFragment;
@@ -84,7 +84,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public static final String[] PAGER_TITLES = new String[]{
             "我的音乐", "音乐库", "下载管理"
     };
-
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -298,7 +297,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         Fragment toFragment = mFragmentManager.findFragmentByTag(PAGERS[pos]);
         if (toFragment == null) {
-            //未添加,则添加
             switch (pos) {
                 case 0: {
                     String[] titles = new String[]{"我的歌单", "最近播放", "本地音乐", "艺术家", "专辑"};

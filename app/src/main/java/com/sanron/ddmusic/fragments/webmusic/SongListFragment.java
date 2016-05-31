@@ -1,4 +1,4 @@
-package com.sanron.ddmusic.fragments.pagerwebmusic;
+package com.sanron.ddmusic.fragments.webmusic;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.ddmusic.R;
-import com.sanron.ddmusic.api.JsonCallback;
+import com.sanron.ddmusic.api.callback.JsonCallback;
 import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.api.bean.OfficialSongListData;
 import com.sanron.ddmusic.api.bean.OfficialSongListSongs;

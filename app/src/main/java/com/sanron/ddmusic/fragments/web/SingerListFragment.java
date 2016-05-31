@@ -19,7 +19,7 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.adapter.CommonItemViewHolder;
-import com.sanron.ddmusic.api.JsonCallback;
+import com.sanron.ddmusic.api.callback.JsonCallback;
 import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.api.bean.Singer;
 import com.sanron.ddmusic.api.bean.SingerList;

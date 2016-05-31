@@ -1,4 +1,4 @@
-package com.sanron.ddmusic.fragments.pagerwebmusic;
+package com.sanron.ddmusic.fragments.webmusic;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.ddmusic.R;
-import com.sanron.ddmusic.api.JsonCallback;
+import com.sanron.ddmusic.api.callback.JsonCallback;
 import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.api.bean.BillCategoryData;
 import com.sanron.ddmusic.fragments.base.LazyLoadFragment;

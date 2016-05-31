@@ -19,9 +19,9 @@ import com.nostra13.universalimageloader.cache.memory.MemoryCache;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 import com.sanron.ddmusic.R;
-import com.sanron.ddmusic.api.JsonCallback;
 import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.api.bean.LrcPicData;
+import com.sanron.ddmusic.api.callback.JsonCallback;
 import com.sanron.ddmusic.db.bean.Music;
 import com.sanron.ddmusic.service.PlayUtil;
 
@@ -256,6 +256,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicItemHol
         ImageLoader.getInstance()
                 .cancelDisplayTask(holder.ivPicture);
     }
+
 
     private void displayAvatar(final MusicItemHolder holder, int position) {
         final Music music = mData.get(position);

@@ -54,6 +54,7 @@ public class AppDB extends SQLiteOpenHelper {
         ArtistHelper.onCreate(db);
         AlbumHelper.onCreate(db);
         ListMemberHelper.onCreate(db);
+        RecentPlayHelper.onCreate(db);
     }
 
     @Override
@@ -63,6 +64,7 @@ public class AppDB extends SQLiteOpenHelper {
         ArtistHelper.onUpgrade(db, oldVersion, newVersion);
         AlbumHelper.onUpgrade(db, oldVersion, newVersion);
         ListMemberHelper.onUpgrade(db, oldVersion, newVersion);
+        RecentPlayHelper.onUpgrade(db, oldVersion, newVersion);
     }
 
     /**
@@ -143,7 +145,7 @@ public class AppDB extends SQLiteOpenHelper {
                 try {
                     for (Music music : musics) {
                         long id = music.getId();
-                        if (id == 0) {
+                        if (id == -1) {
                             //查找数据库中songid对应的数据
                             Music m = MusicHelper.getMusicBySongId(db, music.getSongId());
                             if (m != null) {
@@ -291,7 +293,7 @@ public class AppDB extends SQLiteOpenHelper {
                 Boolean result = false;
                 SQLiteDatabase db = getWritableDatabase();
                 long id = music.getId();
-                if (id == 0) {
+                if (id == -1) {
                     String songid = music.getSongId();
                     Music music = MusicHelper.getMusicBySongId(db, songid);
                     if (music != null) {
@@ -321,13 +323,13 @@ public class AppDB extends SQLiteOpenHelper {
                 db.beginTransaction();
                 try {
                     long id = music.getId();
-                    if (id == 0) {
+                    if (id == -1) {
                         Music m = MusicHelper.getMusicBySongId(db, music.getSongId());
                         if (m != null) {
                             id = m.getId();
                         }
                     }
-                    if (id == 0) {
+                    if (id == -1) {
                         id = MusicHelper.addMusic(db, music);
                     }
                     if (id > 0) {
@@ -483,8 +485,63 @@ public class AppDB extends SQLiteOpenHelper {
         }.execute();
     }
 
+    /**
+     * 添加最近播放
+     */
+    public void addRecentPlay(final Music music, final long time) {
+        new DBAsyncTask<Void>(null) {
+            @Override
+            protected Void run() {
+                SQLiteDatabase db = getWritableDatabase();
+                long musicId = music.getId();
+                if (musicId == -1) {
+                    Music m = MusicHelper.getMusicBySongId(db, music.getSongId());
+                    if (m == null) {
+                        musicId = MusicHelper.addMusic(db, music);
+                    } else {
+                        musicId = m.getId();
+                    }
+                }
+
+                long id = RecentPlayHelper.getIdByMusicId(db, musicId);
+                if (id == -1) {
+                    RecentPlayHelper.add(db, time, musicId);
+                } else {
+                    RecentPlayHelper.updateTime(db, id, time);
+                }
+                int count = RecentPlayHelper.getCount(db);
+                if (count == RecentPlayHelper.MAX_SIZE + 1) {
+                    RecentPlayHelper.deleteFarthest(db);
+                }
+                sendTableUpdate(RecentPlayHelper.Columns.TABLE, 0);
+                return null;
+            }
+        }.execute();
+    }
+
+    public void getRecentPlayList(ResultCallback<List<Music>> callback) {
+        new DBAsyncTask<List<Music>>(callback) {
+
+            @Override
+            protected List<Music> run() {
+                SQLiteDatabase db = getWritableDatabase();
+                String sql = "select * from " + RecentPlayHelper.Columns.TABLE
+                        + " order by " + RecentPlayHelper.Columns.PLAY_TIME + " desc";
+                Cursor cursor = db.rawQuery(sql, null);
+                List<Music> musics = new LinkedList<>();
+                while (cursor.moveToNext()) {
+                    long musicId = cursor.getLong(0);
+                    Music music = MusicHelper.getMusicById(db, musicId);
+                    musics.add(music);
+                }
+                cursor.close();
+                return musics;
+            }
+        }.execute();
+    }
+
     public static String tableChangeAction(String table) {
-        return "com.database." + table + ".update";
+        return "com.ddmusic." + table + ".update";
     }
 
     private void sendTableUpdate(String table, long id) {

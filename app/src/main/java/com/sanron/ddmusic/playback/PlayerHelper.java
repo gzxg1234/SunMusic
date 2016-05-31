@@ -6,6 +6,15 @@ import android.text.TextUtils;
 
 import com.sanron.ddmusic.AppContext;
 import com.sanron.ddmusic.api.bean.SongUrlInfo;
+import com.sanron.ddmusic.db.bean.Music;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.List;
 
 /**
  * Created by sanron on 16-5-18.
@@ -60,4 +69,37 @@ public class PlayerHelper {
         }
         return result;
     }
+
+    public static void savePlayQueue(Context context, List<Music> musics, int playPosition) {
+
+        PlayQueueState playQueueState = new PlayQueueState(musics, playPosition);
+        try {
+            File saveFile = new File(context.getFilesDir(), "play_queue_state");
+            FileOutputStream fos = new FileOutputStream(saveFile);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(playQueueState);
+            oos.close();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static PlayQueueState loadPlayQueueState(Context context) {
+        PlayQueueState playQueueState = null;
+        try {
+            File saveFile = new File(context.getFilesDir(), "play_queue_state");
+            FileInputStream fis = new FileInputStream(saveFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            playQueueState = (PlayQueueState) ois.readObject();
+            ois.close();
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return playQueueState;
+    }
+
 }

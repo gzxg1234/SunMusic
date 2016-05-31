@@ -1,4 +1,4 @@
-package com.sanron.ddmusic.api;
+package com.sanron.ddmusic.api.callback;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;

@@ -7,7 +7,7 @@ import android.view.View;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.adapter.SongAdapter;
-import com.sanron.ddmusic.api.JsonCallback;
+import com.sanron.ddmusic.api.callback.JsonCallback;
 import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.api.bean.OfficialSongListSongs;
 import com.sanron.ddmusic.api.bean.Song;

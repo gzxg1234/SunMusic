@@ -1,4 +1,4 @@
-package com.sanron.ddmusic.fragments.pagermymusic;
+package com.sanron.ddmusic.fragments.mymusic;
 
 import android.app.ProgressDialog;
 import android.content.Context;

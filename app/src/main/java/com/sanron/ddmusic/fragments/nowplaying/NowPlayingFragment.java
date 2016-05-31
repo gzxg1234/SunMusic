@@ -1,6 +1,5 @@
-package com.sanron.ddmusic.fragments;
+package com.sanron.ddmusic.fragments.nowplaying;
 
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,7 +9,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,7 +17,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -34,8 +31,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
-import com.nineoldandroids.animation.ArgbEvaluator;
-import com.nineoldandroids.animation.ValueAnimator;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.assist.ViewScaleType;
@@ -44,7 +39,7 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.api.AppHttpClient;
 import com.sanron.ddmusic.api.LrcPicProvider;
-import com.sanron.ddmusic.api.StringCallback;
+import com.sanron.ddmusic.api.callback.StringCallback;
 import com.sanron.ddmusic.common.FastBlur;
 import com.sanron.ddmusic.common.ViewTool;
 import com.sanron.ddmusic.db.AppDB;

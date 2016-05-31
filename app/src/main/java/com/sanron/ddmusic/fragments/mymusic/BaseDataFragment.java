@@ -1,4 +1,4 @@
-package com.sanron.ddmusic.fragments.pagermymusic;
+package com.sanron.ddmusic.fragments.mymusic;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

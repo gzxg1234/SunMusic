@@ -1,4 +1,4 @@
-package com.sanron.ddmusic.fragments.pagermymusic;
+package com.sanron.ddmusic.fragments.mymusic;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;

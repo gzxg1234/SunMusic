@@ -1,4 +1,4 @@
-package com.sanron.ddmusic.fragments.pagerwebmusic;
+package com.sanron.ddmusic.fragments.webmusic;
 
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ImageSpan;
+import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -29,7 +30,6 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.activities.MainActivity;
-import com.sanron.ddmusic.api.JsonCallback;
 import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.api.bean.FocusPic;
 import com.sanron.ddmusic.api.bean.FocusPicData;
@@ -39,6 +39,7 @@ import com.sanron.ddmusic.api.bean.RecmdSongData;
 import com.sanron.ddmusic.api.bean.Song;
 import com.sanron.ddmusic.api.bean.SongList;
 import com.sanron.ddmusic.api.bean.Tag;
+import com.sanron.ddmusic.api.callback.JsonCallback;
 import com.sanron.ddmusic.db.bean.Music;
 import com.sanron.ddmusic.fragments.base.LazyLoadFragment;
 import com.sanron.ddmusic.service.PlayUtil;
@@ -428,33 +429,9 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
      */
     private class FocusPicAdapter extends PagerAdapter {
         private List<FocusPic> mData = new ArrayList<>();
-        private List<ImageView> mViews = new ArrayList<>();
-        private boolean needUpdate;
 
-        private void createViews() {
-            mViews.clear();
-            for (int i = 0; i < mData.size(); i++) {
-                final FocusPic focusPic = mData.get(i);
-                ImageView view = new ImageView(getContext());
-                ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewPager.LayoutParams.MATCH_PARENT,
-                        ViewPager.LayoutParams.WRAP_CONTENT);
-                view.setLayoutParams(lp);
-                view.setAdjustViewBounds(true);
-                mViews.add(view);
-                view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (focusPic.type == FocusPic.TYPE_SONG_LIST) {
-                            getMainActivity().showSongList(focusPic.code);
-                        } else if (focusPic.type == FocusPic.TYPE_ALBUM) {
-                            getMainActivity().showAlbumSongs(focusPic.code);
-                        }
-                    }
-                });
-                ImageLoader.getInstance()
-                        .displayImage(focusPic.picUrl, view, mDisplayImageOptions);
-            }
-        }
+        private SparseArray<ImageView> mViews = new SparseArray<>();
+        private boolean needUpdate;
 
         public List<FocusPic> getData() {
             return mData;
@@ -462,8 +439,8 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
 
         public void setData(List<FocusPic> data) {
             mData.clear();
+            mViews.clear();
             mData.addAll(data);
-            createViews();
             notifyDataSetChanged();
         }
 
@@ -491,7 +468,28 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            View view = mViews.get(position);
+            ImageView view = mViews.get(position);
+            if (view == null) {
+                final FocusPic focusPic = mData.get(position);
+                view = new ImageView(getContext());
+                ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewPager.LayoutParams.MATCH_PARENT,
+                        ViewPager.LayoutParams.WRAP_CONTENT);
+                view.setLayoutParams(lp);
+                view.setAdjustViewBounds(true);
+                view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (focusPic.type == FocusPic.TYPE_SONG_LIST) {
+                            getMainActivity().showSongList(focusPic.code);
+                        } else if (focusPic.type == FocusPic.TYPE_ALBUM) {
+                            getMainActivity().showAlbumSongs(focusPic.code);
+                        }
+                    }
+                });
+                ImageLoader.getInstance()
+                        .displayImage(focusPic.picUrl, view, mDisplayImageOptions);
+                mViews.put(position, view);
+            }
             container.addView(view);
             return view;
         }

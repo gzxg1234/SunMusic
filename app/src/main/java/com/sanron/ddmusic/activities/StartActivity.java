@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileObserver;
 import android.view.Window;
 
 import com.nostra13.universalimageloader.cache.disc.DiskCache;

@@ -23,6 +23,7 @@ import com.sanron.ddmusic.api.bean.SongListData;
 import com.sanron.ddmusic.api.bean.SongUrlInfo;
 import com.sanron.ddmusic.api.bean.TagSongListData;
 import com.sanron.ddmusic.api.bean.TagSongs;
+import com.sanron.ddmusic.api.callback.JsonCallback;
 
 import java.util.HashMap;
 import java.util.Map;

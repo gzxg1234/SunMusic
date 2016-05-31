@@ -2,13 +2,11 @@ package com.sanron.ddmusic.db;
 
 import android.os.AsyncTask;
 
-import java.lang.ref.WeakReference;
-
 public abstract class DBAsyncTask<T> extends AsyncTask<Void, Void, T> {
-    private WeakReference<ResultCallback<T>> mCallbackRef;
+    private ResultCallback<T> mCallback;
 
     public DBAsyncTask(ResultCallback<T> callback) {
-        mCallbackRef = new WeakReference<>(callback);
+        mCallback = callback;
     }
 
     private DBAsyncTask() {
@@ -23,9 +21,8 @@ public abstract class DBAsyncTask<T> extends AsyncTask<Void, Void, T> {
 
     @Override
     protected void onPostExecute(T t) {
-        ResultCallback<T> callback = mCallbackRef.get();
-        if (callback != null) {
-            callback.onResult(t);
+        if (mCallback != null) {
+            mCallback.onResult(t);
         }
     }
 }

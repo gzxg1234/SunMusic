@@ -1,4 +1,4 @@
-package com.sanron.ddmusic.api;
+package com.sanron.ddmusic.api.callback;
 
 import android.os.Handler;
 import android.os.Looper;

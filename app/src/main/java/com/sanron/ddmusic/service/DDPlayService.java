@@ -39,9 +39,10 @@ public class DDPlayService extends Service implements Player.OnPlayStateChangeLi
         super.onCreate();
         MyLog.i(TAG, "service create");
         mDDPlayer = new DDPlayer(this);
-        mDDPlayer.addPlayStateChangeListener(this);
         mNotificationManager = new PlayNotificationManager(this);
         mNotificationManager.startNotification();
+        mDDPlayer.addPlayStateChangeListener(this);
+        mDDPlayer.loadLastState();
         LrcPicProvider.get().addOnLrcPicChangeCallback(this);
     }
 
@@ -54,10 +55,10 @@ public class DDPlayService extends Service implements Player.OnPlayStateChangeLi
         super.onDestroy();
         MyLog.i(TAG, "service destroy");
         LrcPicProvider.get().removeOnLrcPicChangeCallback(this);
-        mNotificationManager.stopNotification();
         mDDPlayer.removePlayStateChangeListener(this);
         mDDPlayer.release();
         mDDPlayer = null;
+        mNotificationManager.stopNotification();
     }
 
     @Nullable
@@ -85,7 +86,6 @@ public class DDPlayService extends Service implements Player.OnPlayStateChangeLi
             break;
 
             case Player.STATE_PREPARING: {
-                //获取图片更新通知
                 mNotificationManager.updateImage(null);
                 Music music = mDDPlayer.getCurrentMusic();
                 String artist = music.getArtist();
@@ -106,8 +106,7 @@ public class DDPlayService extends Service implements Player.OnPlayStateChangeLi
         if (!TextUtils.isEmpty(songPicture)) {
             mNonViewAware = new NonViewAware(
                     new ImageSize(ViewTool.dpToPx(100), ViewTool.dpToPx(100)), ViewScaleType.CROP);
-            ImageLoader
-                    .getInstance()
+            ImageLoader.getInstance()
                     .displayImage(songPicture, mNonViewAware, new SimpleImageLoadingListener() {
                         @Override
                         public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {

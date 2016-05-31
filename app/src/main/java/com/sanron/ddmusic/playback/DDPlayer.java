@@ -13,11 +13,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.sanron.ddmusic.api.JsonCallback;
 import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.api.bean.SongUrlInfo;
+import com.sanron.ddmusic.api.callback.JsonCallback;
 import com.sanron.ddmusic.common.MyLog;
 import com.sanron.ddmusic.common.ViewTool;
+import com.sanron.ddmusic.db.AppDB;
 import com.sanron.ddmusic.db.bean.Music;
 
 import java.io.File;
@@ -78,6 +79,8 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
         }
     };
 
+    private boolean initPrepare = true;
+
     public DDPlayer(Context context) {
         mContext = context;
         mOnBufferListeners = new ArrayList<>();
@@ -88,6 +91,22 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DDMusic");
+    }
+
+    /**
+     * 加载播放器上次状态
+     */
+    public void loadLastState() {
+        PlayQueueState playQueueState = PlayerHelper.loadPlayQueueState(mContext);
+        if (playQueueState != null) {
+            mQueue = playQueueState.getMusics();
+            mCurrentPosition = playQueueState.getPosition();
+            if (mQueue == null || mQueue.isEmpty()) {
+                initPrepare = false;
+            } else {
+                play(mCurrentPosition);
+            }
+        }
     }
 
     private void initMediaPlayer() {
@@ -111,6 +130,7 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
     @Override
     public void enqueue(List<Music> musics) {
         mQueue.addAll(musics);
+        PlayerHelper.savePlayQueue(mContext, mQueue, mCurrentPosition);
         Log.d(TAG, "enqueue " + musics.size() + " songs");
     }
 
@@ -133,6 +153,7 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
             }
             play(mCurrentPosition);
         }
+        PlayerHelper.savePlayQueue(mContext, mQueue, mCurrentPosition);
     }
 
     @Override
@@ -145,6 +166,7 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
         mCurrentPosition = -1;
         mMediaPlayer.reset();
         changeState(STATE_IDLE);
+        PlayerHelper.savePlayQueue(mContext, mQueue, mCurrentPosition);
     }
 
     /**
@@ -152,16 +174,11 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
      */
     @Override
     public void play(int position) {
-        getAudioFocus();
-        if (mMediaPlayer == null) {
-            initMediaPlayer();
+        if (mQueue.isEmpty() || position > mQueue.size() || position < 0) {
+            return;
         }
-        if (mFileLinkCall != null) {
-            mFileLinkCall.cancel();
-        }
-        mHandler.removeMessages(WHAT_PLAY_ERROR);
-        sendBufferingEnd();
 
+        readyToPlay();
         mCurrentPosition = position;
         Music music = mQueue.get(mCurrentPosition);
         changeState(STATE_PREPARING);
@@ -171,6 +188,21 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
         } else if (music.getType() == Music.TYPE_LOCAL) {
             playLocalMusic(music.getData());
         }
+
+        AppDB.get(mContext).addRecentPlay(music, System.currentTimeMillis());
+        PlayerHelper.savePlayQueue(mContext, mQueue, mCurrentPosition);
+    }
+
+    private void readyToPlay() {
+        getAudioFocus();
+        if (mMediaPlayer == null) {
+            initMediaPlayer();
+        }
+        if (mFileLinkCall != null) {
+            mFileLinkCall.cancel();
+        }
+        mHandler.removeMessages(WHAT_PLAY_ERROR);
+        sendBufferingEnd();
     }
 
     private void prepare(Uri uri) {
@@ -452,11 +484,13 @@ public class DDPlayer extends Binder implements Player, MediaPlayer.OnCompletion
     @Override
     public void onPrepared(MediaPlayer mp) {
         changeState(STATE_PREPARED);
-        if (mPlayWhenReady && mAudioFocus != NO_FOCUS) {
+        sendBufferingEnd();
+        if (initPrepare) {
+            initPrepare = false;
+        } else if (mPlayWhenReady && mAudioFocus != NO_FOCUS) {
             mp.start();
             changeState(STATE_PLAYING);
         }
-        sendBufferingEnd();
     }
 
     @Override

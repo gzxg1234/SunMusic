@@ -3,6 +3,7 @@ package com.sanron.ddmusic.api;
 import android.text.TextUtils;
 
 import com.sanron.ddmusic.api.bean.LrcPicData;
+import com.sanron.ddmusic.api.callback.JsonCallback;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

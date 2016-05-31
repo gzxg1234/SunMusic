@@ -16,7 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sanron.ddmusic.R;
-import com.sanron.ddmusic.api.JsonCallback;
+import com.sanron.ddmusic.api.callback.JsonCallback;
 import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.api.bean.AllTag;
 import com.sanron.ddmusic.api.bean.HotTagData;
