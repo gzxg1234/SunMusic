@@ -429,15 +429,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
             break;
 
-            case R.id.menu_download_manager: {
-
-            }
-            break;
-
-            case R.id.menu_setting: {
-
-            }
-            break;
 
             case R.id.menu_close_app: {
                 ((AppContext) getApplicationContext()).closeApp();
