@@ -40,7 +40,7 @@ import okhttp3.Request;
  */
 public class MusicApi {
 
-    public static final String BASE = "http://tingapi.ting.baidu.com/v1/restserver/ting?from=android&version=5.6.5.6&format=json";
+    public static final String BASE = "http://tingapi.ting.baidu.com/v1/restserver/ting?from=android&version=5.8.0.1&format=json";
     public static boolean sIsNetAvailable = true;
 
     /**
@@ -403,6 +403,7 @@ public class MusicApi {
             cacheControl.maxStale(maxStale, TimeUnit.SECONDS);
         }
         return new Request.Builder()
+                .addHeader("User-Agent", "android_5.8.0.1;baiduyinyue")
                 .url(sb.toString())
                 .cacheControl(cacheControl.build())
                 .build();
