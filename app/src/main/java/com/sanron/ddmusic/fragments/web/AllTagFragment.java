@@ -10,6 +10,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
@@ -170,7 +171,7 @@ public class AllTagFragment extends SlideWebFragment {
             gv.setNumColumns(4);
             gv.setHorizontalSpacing(spacing);
             gv.setVerticalSpacing(spacing);
-            gv.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            gv.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.WRAP_CONTENT));
             gv.setAdapter(new HotTagAdapter());
             return gv;
         }

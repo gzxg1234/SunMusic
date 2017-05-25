@@ -18,7 +18,7 @@ public class NoScrollListView extends ListView {
 
     public NoScrollListView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        setVerticalScrollBarEnabled(false);
+//        setVerticalScrollBarEnabled(false);
     }
 
     @Override

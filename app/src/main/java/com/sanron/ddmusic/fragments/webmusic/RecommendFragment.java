@@ -222,7 +222,6 @@ public class RecommendFragment extends LazyLoadFragment implements View.OnClickL
         }
     }
 
-
     private class RecmdSongAdapter extends BaseAdapter {
         private List<RecmdSongData.Content.RecommendSong> mData = new ArrayList<>();
 
