@@ -99,12 +99,14 @@
                 android:background="@android:color/transparent"
                 android:padding="12dp"
                 android:scaleType="fitXY"
+                android:visibility="gone"
                 android:src="@mipmap/ic_file_download_black_24dp"/>
 
             <ImageButton
                 android:id="@+id/ibtn_share"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:visibility="gone"
                 android:background="@android:color/transparent"
                 android:padding="12dp"
                 android:scaleType="fitXY"

@@ -110,7 +110,9 @@ public class BillboardFragment extends LazyLoadFragment {
             holder.tvBillCategory.setText(billCategory.name);
             if (billCategory.topSongs != null) {
                 for (int i = 0; i < billCategory.topSongs.size() && i < holder.tvTops.size(); i++) {
+                    //创建样式字符串
                     SpannableStringBuilder ss = new SpannableStringBuilder(String.valueOf(i + 1));
+                    //设置第一个字符颜色，即1.2.3的颜色
                     ss.setSpan(new ForegroundColorSpan(TOP_TEXT_COLORS[i]), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     ss.append(" ")
                             .append(billCategory.topSongs.get(i).title)

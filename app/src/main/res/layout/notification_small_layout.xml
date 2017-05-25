@@ -59,6 +59,7 @@
     <ImageButton
         android:id="@+id/ibtn_lrc"
         style="@style/NotificationButton.Small"
+        android:visibility="gone"
         android:src="@mipmap/ic_lyric_open_36dp" />
 
     <ImageButton

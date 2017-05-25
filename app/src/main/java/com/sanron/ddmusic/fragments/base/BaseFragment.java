@@ -36,7 +36,11 @@ public abstract class BaseFragment extends Fragment implements MainActivity.Back
         View root = null;
         int resId = getViewResId();
         if (resId != 0) {
-            root = inflater.inflate(resId, container, false);
+            try{
+                root = inflater.inflate(resId, container, false);
+            }catch (Throwable e){
+                e.printStackTrace();
+            }
             ButterKnife.bind(this, root);
         }
         return root;

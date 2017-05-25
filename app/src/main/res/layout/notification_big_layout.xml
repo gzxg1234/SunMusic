@@ -60,10 +60,12 @@
                 android:padding="16dp"
                 style="@style/NotificationButton.Big"
                 android:src="@mipmap/ic_lyric_open_36dp"
+                android:visibility="gone"
                 android:id="@+id/ibtn_lrc" />
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:visibility="gone"
                 android:layout_weight="1"/>
 
             <ImageButton

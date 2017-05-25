@@ -23,18 +23,12 @@ import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.common.ViewTool;
 import com.sanron.ddmusic.db.bean.PlayList;
 import com.sanron.ddmusic.fragments.NavigationHeaderFrag;
-import com.sanron.ddmusic.fragments.nowplaying.NowPlayingFragment;
 import com.sanron.ddmusic.fragments.PagerFragment;
-import com.sanron.ddmusic.fragments.mymusic.AlbumFragment;
-import com.sanron.ddmusic.fragments.mymusic.ArtistFragment;
 import com.sanron.ddmusic.fragments.mymusic.ListMusicFragment;
 import com.sanron.ddmusic.fragments.mymusic.LocalMusicFragment;
 import com.sanron.ddmusic.fragments.mymusic.PlayListFragment;
 import com.sanron.ddmusic.fragments.mymusic.RecentPlayFragment;
-import com.sanron.ddmusic.fragments.webmusic.BillboardFragment;
-import com.sanron.ddmusic.fragments.webmusic.RecommendFragment;
-import com.sanron.ddmusic.fragments.webmusic.SingerFragment;
-import com.sanron.ddmusic.fragments.webmusic.SongListFragment;
+import com.sanron.ddmusic.fragments.nowplaying.NowPlayingFragment;
 import com.sanron.ddmusic.fragments.web.AlbumSongsFragment;
 import com.sanron.ddmusic.fragments.web.AllTagFragment;
 import com.sanron.ddmusic.fragments.web.BillboardSongsFragment;
@@ -43,6 +37,10 @@ import com.sanron.ddmusic.fragments.web.SingerInfoFragment;
 import com.sanron.ddmusic.fragments.web.SingerListFragment;
 import com.sanron.ddmusic.fragments.web.SongListInfoFragment;
 import com.sanron.ddmusic.fragments.web.TagInfoFragment;
+import com.sanron.ddmusic.fragments.webmusic.BillboardFragment;
+import com.sanron.ddmusic.fragments.webmusic.RecommendFragment;
+import com.sanron.ddmusic.fragments.webmusic.SingerFragment;
+import com.sanron.ddmusic.fragments.webmusic.SongListFragment;
 import com.sanron.ddmusic.service.PlayUtil;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -299,12 +297,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         if (toFragment == null) {
             switch (pos) {
                 case 0: {
-                    String[] titles = new String[]{"我的歌单", "最近播放", "本地音乐", "艺术家", "专辑"};
+                    String[] titles = new String[]{"我的歌单", "最近播放", "本地音乐"};
                     String[] fragments = new String[]{PlayListFragment.class.getName(),
                             RecentPlayFragment.class.getName(),
-                            LocalMusicFragment.class.getName(),
-                            ArtistFragment.class.getName(),
-                            AlbumFragment.class.getName()};
+                            LocalMusicFragment.class.getName()};
                     toFragment = PagerFragment.newInstance(titles, fragments);
                 }
                 break;

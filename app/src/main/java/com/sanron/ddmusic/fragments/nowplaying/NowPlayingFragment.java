@@ -225,8 +225,6 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
     private void setupViewPager() {
         mPagerViews = new ArrayList<>();
 
-        mLvSimilarInfo = new ListView(getContext());
-        mPagerViews.add(mLvSimilarInfo);
 
         mPagerView2 = LayoutInflater.from(getContext())
                 .inflate(R.layout.now_playing_picture, null);
@@ -433,13 +431,14 @@ public class NowPlayingFragment extends BaseFragment implements View.OnClickList
                     //预先降低图片质量，减少内存占用
                     Bitmap src = params[0];
                     Bitmap resizeBmp = Bitmap.createBitmap(src.getWidth() / 2, src.getHeight() / 2,
-                            Bitmap.Config.RGB_565);
+                            Bitmap.Config.ARGB_8888);
                     Canvas canvas = new Canvas(resizeBmp);
                     canvas.drawBitmap(src,
                             new Rect(0, 0, src.getWidth(), src.getHeight()),
                             new Rect(0, 0, resizeBmp.getWidth(), resizeBmp.getHeight()),
                             new Paint());
-                    return FastBlur.doBlur(resizeBmp, 40, true);
+//                    return FastBlur.doBlur(resizeBmp, 40, true);
+                    return FastBlur.blur(getContext(),resizeBmp,25);
                 }
 
                 @Override

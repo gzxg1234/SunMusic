@@ -22,6 +22,7 @@
         android:layout_height="40dp"
         android:layout_gravity="right"
         android:padding="8dp"
+        android:visibility="invisible"
         android:scaleType="fitXY"
         android:src="@mipmap/ic_settings_white_24dp"/>
 </LinearLayout>

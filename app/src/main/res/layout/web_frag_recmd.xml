@@ -84,6 +84,7 @@
                 android:layout_centerVertical="true"
                 android:singleLine="true"
                 android:text="更多"
+                android:visibility="invisible"
                 android:textColor="@color/textColorSecondary"/>
         </RelativeLayout>
 
@@ -118,6 +119,7 @@
                 android:layout_centerVertical="true"
                 android:singleLine="true"
                 android:text="更多"
+                android:visibility="invisible"
                 android:textColor="@color/textColorSecondary"/>
         </RelativeLayout>
 

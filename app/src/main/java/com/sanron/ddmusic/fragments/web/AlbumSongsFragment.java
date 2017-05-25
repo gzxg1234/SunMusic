@@ -3,25 +3,25 @@ package com.sanron.ddmusic.fragments.web;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.view.View;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sanron.ddmusic.R;
 import com.sanron.ddmusic.adapter.SongAdapter;
-import com.sanron.ddmusic.api.callback.JsonCallback;
 import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.api.bean.AlbumSongs;
+import com.sanron.ddmusic.api.callback.JsonCallback;
 import com.sanron.ddmusic.common.ViewTool;
 import com.sanron.ddmusic.db.AppDB;
 import com.sanron.ddmusic.db.ResultCallback;
 import com.sanron.ddmusic.playback.Player;
 
+import butterknife.OnClick;
 import okhttp3.Call;
 
 /**
  * Created by sanron on 16-4-23.
  */
-public class AlbumSongsFragment extends CommonSongPullFragment implements View.OnClickListener, Player.OnPlayStateChangeListener {
+public class AlbumSongsFragment extends CommonSongPullFragment implements Player.OnPlayStateChangeListener {
 
     private String mAlbumId;
     private AlbumSongs mData;
@@ -98,51 +98,35 @@ public class AlbumSongsFragment extends CommonSongPullFragment implements View.O
         }
     }
 
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.ibtn_download: {
-
-            }
-            break;
-
-            case R.id.ibtn_favorite: {
-                if (mIsCollected) {
-                    ViewTool.show("已收藏过此歌单");
-                } else {
-                    String pic = mData.albumInfo.pic300;
-                    if (TextUtils.isEmpty(pic)) {
-                        pic = mData.albumInfo.picRadio;
-                        if (TextUtils.isEmpty(pic)) {
-                            pic = mData.albumInfo.picS180;
-                        }
-                    }
-                    AppDB.get(getContext()).addCollectList(
-                            mData.songs,
-                            mData.albumInfo.title,
-                            LIST_ID_PREFIX + mData.albumInfo.albumId,
-                            pic,
-                            new ResultCallback<Integer>() {
-                                @Override
-                                public void onResult(Integer result) {
-                                    if (result == 1) {
-                                        ViewTool.show("收藏成功");
-                                        mIsCollected = true;
-                                        mIbtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
-                                    } else {
-                                        ViewTool.show("收藏失败");
-                                    }
-                                }
-                            });
+    @OnClick(R.id.ibtn_favorite)
+    public void favorite(){
+        if (mIsCollected) {
+            ViewTool.show("已收藏过此歌单");
+        } else {
+            String pic = mData.albumInfo.pic300;
+            if (TextUtils.isEmpty(pic)) {
+                pic = mData.albumInfo.picRadio;
+                if (TextUtils.isEmpty(pic)) {
+                    pic = mData.albumInfo.picS180;
                 }
             }
-            break;
-
-            case R.id.ibtn_share: {
-
-            }
-            break;
+            AppDB.get(getContext()).addCollectList(
+                    mData.songs,
+                    mData.albumInfo.title,
+                    LIST_ID_PREFIX + mData.albumInfo.albumId,
+                    pic,
+                    new ResultCallback<Integer>() {
+                        @Override
+                        public void onResult(Integer result) {
+                            if (result == 1) {
+                                ViewTool.show("收藏成功");
+                                mIsCollected = true;
+                                mIbtnFavorite.setImageResource(R.mipmap.ic_favorite_black_24dp);
+                            } else {
+                                ViewTool.show("收藏失败");
+                            }
+                        }
+                    });
         }
     }
 

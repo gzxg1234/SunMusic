@@ -58,7 +58,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicItemHol
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             switch (newState) {
                 case RecyclerView.SCROLL_STATE_IDLE: {
-
+                    //停止时，遍历子View获得ViewHolder开始执行加载头像
                     for (int i = 0; i < recyclerView.getChildCount(); i++) {
                         View child = recyclerView.getChildAt(i);
                         MusicItemHolder holder = (MusicItemHolder) recyclerView.getChildViewHolder(child);

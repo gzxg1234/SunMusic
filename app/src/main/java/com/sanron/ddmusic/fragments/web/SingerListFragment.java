@@ -11,6 +11,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
@@ -261,7 +262,7 @@ public class SingerListFragment extends SlideWebFragment implements DDPullListVi
                     textView = new TextView(mContext);
                     final int height = ViewTool.dpToPx(40);
                     textView.setLayoutParams(
-                            new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+                            new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, height));
                     textView.setGravity(Gravity.CENTER);
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
                 }

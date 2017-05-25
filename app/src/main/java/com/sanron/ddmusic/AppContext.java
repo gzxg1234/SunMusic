@@ -13,7 +13,6 @@ import com.sanron.ddmusic.api.MusicApi;
 import com.sanron.ddmusic.common.MyLog;
 import com.sanron.ddmusic.common.ViewTool;
 import com.sanron.ddmusic.service.DDPlayService;
-import com.squareup.leakcanary.LeakCanary;
 
 /**
  * Created by Administrator on 2015/12/25.
@@ -38,7 +37,7 @@ public class AppContext extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        LeakCanary.install(this);
+//        LeakCanary.install(this);
         ViewTool.init(this);
         registerReceiver(netChangeReceiver,
                 new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
