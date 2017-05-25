@@ -114,7 +114,7 @@ public class SongAdapter extends BaseAdapter {
 
         if (holder == null) {
             holder = new CommonItemViewHolder(convertView);
-            holder.ivMenu.setImageResource(R.mipmap.ic_more_vert_black_24dp);
+            holder.ivMenu.setVisibility(View.GONE);
             convertView.setTag(holder);
         }
 

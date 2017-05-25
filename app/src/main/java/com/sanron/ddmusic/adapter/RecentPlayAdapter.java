@@ -62,7 +62,7 @@ public class RecentPlayAdapter extends RecyclerView.Adapter {
                     .inflate(R.layout.list_common_item, parent, false);
             CommonItemViewHolder holder = new CommonItemViewHolder(view);
             holder.ivPicture.setVisibility(View.GONE);
-            holder.ivMenu.setImageResource(R.mipmap.ic_more_vert_black_24dp);
+            holder.ivMenu.setVisibility(View.GONE);
             viewHolder = holder;
         }
         return viewHolder;
