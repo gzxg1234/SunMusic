@@ -36,6 +36,7 @@ import com.sanron.ddmusic.db.bean.PlayList;
 import com.sanron.ddmusic.playback.Player;
 import com.sanron.ddmusic.service.PlayUtil;
 import com.sanron.ddmusic.view.AddSongToListWindow;
+import com.sanron.ddmusic.view.IndexBar;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -57,6 +58,10 @@ public class ListMusicFragment extends BaseDataFragment implements CompoundButto
     TextView mTvCheckedNum;
     @BindView(R.id.cb_checked_all)
     CheckBox mCbCheckedAll;
+    @BindView(R.id.index_bar)
+    IndexBar mIndexBar;
+    @BindView(R.id.tv_index_indicator)
+    TextView mTvIndicator;
 
     PopupWindow mMusicOperator;
     View mOpAddToList;
@@ -163,6 +168,8 @@ public class ListMusicFragment extends BaseDataFragment implements CompoundButto
         mLvData.setLayoutManager(new LinearLayoutManager(getContext(),
                 LinearLayoutManager.VERTICAL, false));
         mLvData.setAdapter(mAdapter);
+        mIndexBar.attach(mLvData);
+        mIndexBar.setIndicator(mTvIndicator);
 
         getMainActivity().addBackPressedHandler(this);
     }

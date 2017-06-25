@@ -24,6 +24,7 @@ import com.sanron.ddmusic.api.bean.LrcPicData;
 import com.sanron.ddmusic.api.callback.JsonCallback;
 import com.sanron.ddmusic.db.bean.Music;
 import com.sanron.ddmusic.service.PlayUtil;
+import com.sanron.ddmusic.view.Indexable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ import okhttp3.Call;
 /**
  * 音乐适配
  */
-public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicItemHolder> {
+public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicItemHolder> implements Indexable{
 
     private List<Music> mData = new ArrayList<>();
     private Context mContext;
@@ -310,6 +311,25 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicItemHol
     @Override
     public int getItemCount() {
         return mData.size();
+    }
+
+    @Override
+    public char getIndexForPosition(int position) {
+        String str = mData.get(position).getTitleKey();
+        if (TextUtils.isEmpty(str)) {
+            return '#';
+        } else {
+            char letter = str.toUpperCase().charAt(0);
+            if (letter < 'A' || letter > 'Z') {
+                return '#';
+            }
+            return letter;
+        }
+    }
+
+    @Override
+    public int getCount() {
+        return mData==null?0:mData.size();
     }
 
     public class MusicItemHolder extends RecyclerView.ViewHolder {

@@ -477,7 +477,7 @@ public class AppDB extends SQLiteOpenHelper {
                 Collections.sort(musics, new Comparator<Music>() {
                     @Override
                     public int compare(Music lhs, Music rhs) {
-                        return lhs.getTitleKey().compareTo(rhs.getTitleKey());
+                        return lhs.getTitleKey().toUpperCase().compareTo(rhs.getTitleKey().toUpperCase());
                     }
                 });
                 return musics;
@@ -529,8 +529,9 @@ public class AppDB extends SQLiteOpenHelper {
                         + " order by " + RecentPlayHelper.Columns.PLAY_TIME + " desc";
                 Cursor cursor = db.rawQuery(sql, null);
                 List<Music> musics = new LinkedList<>();
+                int index =cursor.getColumnIndex(RecentPlayHelper.Columns.MUSIC_ID);
                 while (cursor.moveToNext()) {
-                    long musicId = cursor.getLong(0);
+                    long musicId = cursor.getLong(index);
                     Music music = MusicHelper.getMusicById(db, musicId);
                     musics.add(music);
                 }
