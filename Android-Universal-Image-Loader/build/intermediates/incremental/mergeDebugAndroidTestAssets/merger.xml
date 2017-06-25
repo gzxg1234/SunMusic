@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="debug"><source path="/home/sanron/AndroidProjects/SunMusic/Android-Universal-Image-Loader/build/intermediates/bundles/debug/assets"/></dataSet><dataSet config="main"><source path="/home/sanron/AndroidProjects/SunMusic/Android-Universal-Image-Loader/src/androidTest/assets"/><source path="/home/sanron/AndroidProjects/SunMusic/Android-Universal-Image-Loader/build/generated/assets/shaders/androidTest/debug"/></dataSet></merger>
